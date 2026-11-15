@@ -29,7 +29,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/workout", replace: true });
+    navigate({ to: "/home", replace: true });
   }
 
   return (

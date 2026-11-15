@@ -54,6 +54,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
         </div>
         <h3 className="text-xl font-bold">{t("Förslag på nästa pass", "Suggested next workout")}</h3>
         <p className="text-sm leading-relaxed">{current.insights.recommendation}</p>
+        {current.insights.goalNotes && <p className="rounded-lg border-l-4 border-brand-yellow bg-muted p-3 text-sm leading-relaxed"><strong>{t("Dina mål", "Your goals")}: </strong>{current.insights.goalNotes}</p>}
         <ul className="divide-y divide-border">
           {current.insights.exercises.map((suggestion, index) => {
             const exercise = exercises.find((exercise) => exercise.code === suggestion.code);

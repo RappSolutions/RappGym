@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { BarChart3, BookOpen, Dumbbell, History, LogOut } from "lucide-react";
+import { BarChart3, House, BookOpen, Dumbbell, History, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { LanguagePicker, useLanguage } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 const tabs = [
+  { to: "/home", label: "Hem", icon: House },
   { to: "/workout", label: "Pass", icon: Dumbbell },
   { to: "/exercises", label: "Övningar", icon: BookOpen },
   { to: "/log", label: "Logg", icon: History },
@@ -44,7 +45,7 @@ function AppLayout() {
       </header>
       <Outlet />
       <nav className="app-navigation fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur">
-        <div className="mx-auto grid max-w-2xl grid-cols-4">
+        <div className="mx-auto grid max-w-2xl grid-cols-5">
           {tabs.map(({ to, label, icon: Icon }) => (
             <Link
               key={to}
@@ -53,7 +54,7 @@ function AppLayout() {
               activeProps={{ className: "text-primary" }}
             >
               <Icon className="h-6 w-6" />
-              {t(label, to === "/workout" ? "Workout" : to === "/exercises" ? "Exercises" : to === "/log" ? "Log" : "Statistics")}
+              {t(label, to === "/home" ? "Home" : to === "/workout" ? "Workout" : to === "/exercises" ? "Exercises" : to === "/log" ? "Log" : "Statistics")}
             </Link>
           ))}
         </div>
