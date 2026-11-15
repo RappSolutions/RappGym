@@ -1,6 +1,6 @@
 # Roadmap
-- [ ] Rename app and Lovable project to RappGym
-- [ ] Apply FetchXML Builder / JonasR.app colors and styling, verify desktop and mobile
+- [x] Rename app and Lovable project to RappGym
+- [x] Apply FetchXML Builder / JonasR.app colors and styling, verify desktop and mobile
 - [ ] Publish with the rappgym Lovable URL
 - [x] Gym log app per plan
 - [x] Exercises stored in database, user can add/edit (never hard-coded)
