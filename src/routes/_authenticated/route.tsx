@@ -33,17 +33,17 @@ function AppLayout() {
     navigate({ to: "/auth", replace: true });
   }
   return (
-    <div className="mx-auto min-h-screen max-w-2xl pb-24">
-      <header className="flex items-center justify-between px-4 pt-5 pb-2">
-        <span className="font-display text-xl font-extrabold uppercase tracking-wide">
-          {t("Tränings", "Workout ")}<span className="text-primary">{t("dagbok", "diary")}</span>
+    <div className="app-sheet mx-auto min-h-screen max-w-2xl pb-24">
+      <header className="app-masthead mb-6 flex items-center justify-between gap-3 px-4 py-5">
+        <span className="brand-wordmark font-display text-3xl font-bold">
+          Rapp<span className="text-brand-yellow">Gym</span>
         </span>
-        <div className="flex items-center gap-2"><LanguagePicker /><Button variant="ghost" size="icon" onClick={signOut} aria-label={t("Logga ut", "Sign out")} className="text-muted-foreground">
+        <div className="flex items-center gap-2"><LanguagePicker /><Button variant="ghost" size="icon" onClick={signOut} aria-label={t("Logga ut", "Sign out")} className="text-brand-yellow hover:bg-brand-royal hover:text-brand-yellow">
           <LogOut className="h-5 w-5" />
         </Button></div>
       </header>
       <Outlet />
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur">
+      <nav className="app-navigation fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur">
         <div className="mx-auto grid max-w-2xl grid-cols-4">
           {tabs.map(({ to, label, icon: Icon }) => (
             <Link

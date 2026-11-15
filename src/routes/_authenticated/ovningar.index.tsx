@@ -14,9 +14,9 @@ export const Route = createFileRoute("/_authenticated/ovningar/")({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: "Övningsbank – Träningsdagbok" },
+      { title: "Övningsbank – RappGym" },
       { name: "description", content: "Sök och bläddra bland alla dina övningar." },
-      { property: "og:title", content: "Övningsbank – Träningsdagbok" },
+      { property: "og:title", content: "Övningsbank – RappGym" },
       { property: "og:description", content: "Sök och bläddra bland alla dina övningar." },
     ],
   }),

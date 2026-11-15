@@ -13,9 +13,9 @@ export const Route = createFileRoute("/_authenticated/statistik")({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: "Statistik – Träningsdagbok" },
+      { title: "Statistik – RappGym" },
       { name: "description", content: "Följ vikter och antal set över tid, med statistik per övning, kategori och redskap." },
-      { property: "og:title", content: "Statistik – Träningsdagbok" },
+      { property: "og:title", content: "Statistik – RappGym" },
       { property: "og:description", content: "Följ vikter och antal set över tid, med statistik per övning, kategori och redskap." },
     ],
   }),

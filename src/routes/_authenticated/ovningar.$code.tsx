@@ -17,9 +17,9 @@ export const Route = createFileRoute("/_authenticated/ovningar/$code")({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: `${params.code} – Träningsdagbok` },
+      { title: `${params.code} – RappGym` },
       { name: "description", content: `Instruktioner och historik för övning ${params.code}.` },
-      { property: "og:title", content: `${params.code} – Träningsdagbok` },
+      { property: "og:title", content: `${params.code} – RappGym` },
       { property: "og:description", content: `Instruktioner och historik för övning ${params.code}.` },
     ],
   }),
