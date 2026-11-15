@@ -47,9 +47,9 @@ function AppLayout() {
   return (
     <div className="app-sheet mx-auto min-h-screen max-w-2xl pb-24 md:max-w-4xl">
       <header className="app-masthead mb-6 flex items-center justify-between gap-3 px-4 py-5">
-        <span className="brand-wordmark font-display text-3xl font-bold">
+        <span className="brand-wordmark font-display text-2xl font-bold md:text-3xl">
           Rapp<span className="text-brand-yellow">Gym</span>
-          {page && <span className="ml-2 text-xl font-semibold text-brand-yellow/90">– {page}</span>}
+          {page && <span className="ml-2 text-brand-yellow">– {page}</span>}
         </span>
         <div className="flex items-center gap-2"><LanguagePicker /><Button variant="ghost" size="icon" onClick={signOut} aria-label={t("Logga ut", "Sign out")} className="text-brand-yellow hover:bg-brand-royal hover:text-brand-yellow">
           <LogOut className="h-5 w-5" />
