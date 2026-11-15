@@ -5,6 +5,7 @@
 - [x] Choose gym first; exercises tied to a gym or all gyms, more gyms can be added
 - [ ] Restore Excel repeat counts and verify every imported row
 - [ ] Collapse and expand workouts by date
+- [ ] Collapse and expand exercise categories, collapsed by default
 - [ ] Show original PDF exercise illustrations
 - [ ] Complete Swedish and English language support
 - [ ] Explain physical data location and Dataverse options
