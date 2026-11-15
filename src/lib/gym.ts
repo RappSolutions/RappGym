@@ -62,6 +62,10 @@ export function todayISO() {
   return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 }
 
+export function isWorkoutExpanded(date: string, today: string, overrides: Map<string, boolean>) {
+  return overrides.get(date) ?? date === today;
+}
+
 const CAT_TOKENS = ["cat-1", "cat-2", "cat-3", "cat-4", "cat-5"];
 export function categoryToken(category: string, categories: string[]): string {
   const i = categories.indexOf(category);
