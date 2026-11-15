@@ -36,3 +36,5 @@ use the editor.
 - Store exercise illustrations and localized field values on each database exercise; never use a code-keyed exercise bank in application code, so edits and new exercises remain data-driven.
 - Use the shared language context for Swedish/English UI and browser language persistence; preserve original user notes and exercise fields while storing translations separately.
 - Derive progress charts client-side through the shared progress aggregation module; compare weights per exercise and sum repeat counts per date so unrelated exercises and text loads are never mixed into weight trends.
+
+- Keep app branding in shared global CSS tokens and the shared masthead; all content routes inherit the same visual frame so changes stay consistent across pages.
