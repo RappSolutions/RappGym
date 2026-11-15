@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -9,6 +10,8 @@ import { computeStats, exercisesQuery, formatDate, logQuery, useInvalidateGym } 
 export const Route = createFileRoute("/_authenticated/statistik")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Statistik – Träningsdagbok" },
       { name: "description", content: "Set, pass och reps per kategori och redskap." },
       { property: "og:title", content: "Statistik – Träningsdagbok" },
@@ -21,6 +24,7 @@ export const Route = createFileRoute("/_authenticated/statistik")({
 });
 
 function Bars({ title, data, total }: { title: string; data: Map<string, number>; total: number }) {
+  const { t, language, localize } = useLanguage();
   return (
     <section className="space-y-2 rounded-xl border bg-card p-4">
       <h2 className="text-xl font-bold uppercase">{title}</h2>
@@ -35,11 +39,12 @@ function Bars({ title, data, total }: { title: string; data: Map<string, number>
 }
 
 function StatsPage() {
+  const { t, language, localize } = useLanguage();
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
   const { data: log } = useSuspenseQuery(logQuery);
   const invalidate = useInvalidateGym();
   const [busy, setBusy] = useState(false);
-  const s = computeStats(log, exercises);
+  const s = computeStats(log, exercises.map(localize));
 
   async function importExcel() {
     setBusy(true);
@@ -52,20 +57,20 @@ function StatsPage() {
       toast.error(error.message);
       return;
     }
-    toast.success(`${history.length} set importerade`);
+    toast.success(`${history.length} ${t("rader importerade", "entries imported")}`);
     invalidate();
   }
 
   const kpis = [
-    ["Totalt set", s.totalSets],
-    ["Pass", s.sessions],
-    ["Totalt reps", s.totalReps],
-    ["Senaste pass", s.last ? formatDate(s.last) : "–"],
+    [t("Totalt set", "Total sets"), s.totalSets],
+    [t("Pass", "Workouts"), s.sessions],
+    [t("Totalt reps", "Total reps"), s.totalReps],
+    [t("Senaste pass", "Last workout"), s.last ? formatDate(s.last, language) : "–"],
   ] as const;
 
   return (
     <main className="space-y-4 px-4">
-      <h1 className="text-4xl font-extrabold uppercase">Statistik</h1>
+      <h1 className="text-4xl font-extrabold uppercase">{t("Statistik", "Statistics")}</h1>
       <div className="grid grid-cols-2 gap-2">
         {kpis.map(([l, v]) => (
           <div key={l} className="rounded-xl border bg-card p-4">
@@ -74,12 +79,12 @@ function StatsPage() {
           </div>
         ))}
       </div>
-      {s.totalSets > 0 && <Bars title="Set per kategori" data={s.perCat} total={s.totalSets} />}
-      {s.totalSets > 0 && <Bars title="Set per redskap" data={s.perEq} total={s.totalSets} />}
+      {s.totalSets > 0 && <Bars title={t("Set per kategori", "Sets by category")} data={s.perCat} total={s.totalSets} />}
+      {s.totalSets > 0 && <Bars title={t("Set per redskap", "Sets by equipment")} data={s.perEq} total={s.totalSets} />}
       {log.length === 0 && (
         <div className="space-y-3 rounded-xl border border-dashed p-4">
-          <p className="text-sm text-muted-foreground">Hämta in dina 72 tidigare set från Excel-dagboken (3–14 nov 2026).</p>
-          <Button onClick={importExcel} disabled={busy} className="w-full font-semibold">Importera Excel-historik</Button>
+          <p className="text-sm text-muted-foreground">{t("Hämta in dina 72 tidigare set från Excel-dagboken (3–14 nov 2026).", "Import your 72 previous exercise entries from Excel (3–14 Nov 2026).")}</p>
+          <Button onClick={importExcel} disabled={busy} className="w-full font-semibold">{t("Importera Excel-historik", "Import Excel history")}</Button>
         </div>
       )}
     </main>

@@ -1,0 +1,1 @@
+ALTER TABLE public.exercises ADD COLUMN image_urls jsonb NOT NULL DEFAULT '[]'::jsonb, ADD COLUMN translations jsonb NOT NULL DEFAULT '{}'::jsonb;

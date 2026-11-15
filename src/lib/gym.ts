@@ -68,8 +68,8 @@ export function categoryToken(category: string, categories: string[]): string {
   return CAT_TOKENS[(i < 0 ? 0 : i) % CAT_TOKENS.length] ?? "cat-1";
 }
 
-export function formatDate(iso: string) {
-  return new Date(iso + "T12:00:00").toLocaleDateString("sv-SE", {
+export function formatDate(iso: string, language: "sv" | "en" = "sv") {
+  return new Date(iso + "T12:00:00").toLocaleDateString(language === "en" ? "en-GB" : "sv-SE", {
     weekday: "short",
     day: "numeric",
     month: "short",

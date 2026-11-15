@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Info, MapPin } from "lucide-react";
@@ -14,6 +15,8 @@ export const Route = createFileRoute("/_authenticated/pass")({
   validateSearch: z.object({ cat: z.string().optional() }),
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Dagens pass – Träningsdagbok" },
       { name: "description", content: "Välj kategori och logga dina set." },
       { property: "og:title", content: "Dagens pass – Träningsdagbok" },
@@ -26,6 +29,7 @@ export const Route = createFileRoute("/_authenticated/pass")({
 });
 
 function PassPage() {
+  const { t, language, localize } = useLanguage();
   const { data: allExercises } = useSuspenseQuery(exercisesQuery);
   const { data: gyms } = useSuspenseQuery(gymsQuery);
   const [gymId, setGym] = useSelectedGym();
@@ -41,7 +45,7 @@ function PassPage() {
   const today = todayISO();
   const todayCount = useMemo(() => {
     const m = new Map<string, number>();
-    for (const e of log) if (e.date === today) m.set(e.code, (m.get(e.code) ?? 0) + 1);
+    for (const e of log) if (e.date === today) m.set(e.code, (m.get(e.code) ?? 0) + Math.max(1, e.sets));
     return m;
   }, [log, today]);
   const [open, setOpen] = useState<Exercise | null>(null);
@@ -57,22 +61,22 @@ function PassPage() {
   return (
     <main className="space-y-4 px-4">
       <button onClick={() => setPicking(true)} className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-sm font-medium">
-        <MapPin className="h-4 w-4 text-primary" /> {gym.name} <span className="text-muted-foreground">· byt</span>
+        <MapPin className="h-4 w-4 text-primary" /> {gym.name} <span className="text-muted-foreground">· {t("byt", "change")}</span>
       </button>
       <div>
-        <h1 className="text-4xl font-extrabold uppercase">Dagens pass</h1>
-        <p className="text-sm text-muted-foreground">{todayCount.size ? `${[...todayCount.values()].reduce((a, b) => a + b, 0)} set loggade idag` : "Tryck på en övning för att logga"}</p>
+        <h1 className="text-4xl font-extrabold uppercase">{t("Dagens pass", "Today’s workout")}</h1>
+        <p className="text-sm text-muted-foreground">{todayCount.size ? `${[...todayCount.values()].reduce((a, b) => a + b, 0)} ${t("set loggade idag", "sets logged today")}` : ""}</p>
       </div>
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
         {cats.map((c) => {
-          const t = categoryToken(c, cats);
+          const token = categoryToken(c, cats);
           return (
             <button
               key={c}
               onClick={() => navigate({ search: { cat: c }, replace: true })}
               className={cn(
                 "shrink-0 rounded-full border-2 px-5 py-2 font-display text-lg font-bold uppercase",
-                c === active ? `border-${t} bg-${t} text-primary-foreground` : `border-${t} text-${t}`,
+                c === active ? `border-${token} bg-${token} text-primary-foreground` : `border-${token} text-${token}`,
               )}
             >
               {c}
@@ -90,13 +94,13 @@ function PassPage() {
             token={categoryToken(ex.category, cats)}
             onClick={() => setOpen(ex)}
             action={
-              <Link to="/ovningar/$code" params={{ code: ex.code }} aria-label="Visa instruktioner" className="flex items-center border-l px-3 text-muted-foreground">
+              <Link to="/ovningar/$code" params={{ code: ex.code }} aria-label={t("Visa instruktioner", "View instructions")} className="flex items-center border-l px-3 text-muted-foreground">
                 <Info className="h-5 w-5" />
               </Link>
             }
           />
         ))}
-        {!list.length && <p className="text-muted-foreground">Inga övningar ännu. Lägg till under Övningar.</p>}
+        {!list.length && <p className="text-muted-foreground">{t("Inga övningar ännu. Lägg till under Övningar.", "No exercises yet. Add one under Exercises.")}</p>}
       </div>
       <LogSheet
         exercise={open}

@@ -22,6 +22,13 @@
       "when": 1794762020060,
       "tag": "0002_owner_scope_exercises_gyms",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794763631050,
+      "tag": "0003_exercise_images_translations",
+      "breakpoints": true
     }
   ]
 }

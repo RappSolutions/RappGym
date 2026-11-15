@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { computeStats, lastByCode } from "@/lib/gym";
+import history from "@/data/history.json";
 
 const ex = [
   { code: "PU1", category: "Push", equipment: "Hantel" },
@@ -12,13 +13,25 @@ const log = [
 ] as never[];
 
 describe("stats", () => {
-  it("counts each row as a set and sums reps and sessions like the Excel overview", () => {
+  it("counts repeat sets and multiplies reps by the repeat count", () => {
     const s = computeStats(log, ex);
-    expect(s.totalSets).toBe(3);
-    expect(s.totalReps).toBe(34);
+    expect(s.totalSets).toBe(11);
+    expect(s.totalReps).toBe(126);
     expect(s.sessions).toBe(2);
     expect(s.last).toBe("2026-11-14");
-    expect(s.perCat.get("Push")).toBe(2);
+    expect(s.perCat.get("Push")).toBe(7);
+  });
+  it("PU3 at 15 kg with 12 reps twice counts as 2 sets and 24 reps", () => {
+    const s = computeStats([{ code: "PU3", date: "2026-11-14", sets: 2, reps: 12, load: "15" }] as never[], []);
+    expect(s.totalSets).toBe(2);
+    expect(s.totalReps).toBe(24);
+  });
+  it("preserves Excel repeat counts: 72 rows, 213 sets, 2603 reps and 7 workouts", () => {
+    const s = computeStats(history as never[], []);
+    expect(history).toHaveLength(72);
+    expect(s.totalSets).toBe(213);
+    expect(s.totalReps).toBe(2603);
+    expect(s.sessions).toBe(7);
   });
   it("last entry per exercise is the newest", () => {
     expect(lastByCode(log).get("PU1")?.load).toBe("20");

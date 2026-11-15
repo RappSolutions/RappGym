@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/i18n";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft, Pencil, Plus, Trash2 } from "lucide-react";
@@ -7,12 +8,15 @@ import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 import { Button } from "@/components/ui/button";
 import { ExerciseForm } from "@/components/gym/ExerciseForm";
 import { LogSheet } from "@/components/gym/LogSheet";
+import { ExerciseImages } from "@/components/gym/ExerciseImages";
 import { supabase } from "@/integrations/supabase/client";
 import { categoriesOf, categoryToken, exercisesQuery, formatDate, logQuery, todayISO, useInvalidateGym, type LogEntry, formatSet, doseText } from "@/lib/gym";
 
 export const Route = createFileRoute("/_authenticated/ovningar/$code")({
   head: ({ params }) => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: `${params.code} – Träningsdagbok` },
       { name: "description", content: `Instruktioner och historik för övning ${params.code}.` },
       { property: "og:title", content: `${params.code} – Träningsdagbok` },
@@ -27,6 +31,7 @@ export const Route = createFileRoute("/_authenticated/ovningar/$code")({
 });
 
 function ExercisePage() {
+  const { t, language, localize } = useLanguage();
   const { code } = Route.useParams();
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
   const { data: log } = useSuspenseQuery(logQuery);
@@ -35,16 +40,17 @@ function ExercisePage() {
   const [editing, setEditing] = useState(false);
   const [logging, setLogging] = useState(false);
   const [entry, setEntry] = useState<LogEntry | null>(null);
-  const ex = exercises.find((e) => e.code === code);
-  if (!ex) return <p className="p-4">Övningen finns inte. <Link to="/ovningar" className="underline">Tillbaka</Link></p>;
+  const original = exercises.find((e) => e.code === code);
+  const ex = original ? localize(original) : undefined;
+  if (!ex) return <p className="p-4">{t("Övningen finns inte.", "Exercise not found.")} <Link to="/ovningar" className="underline">{t("Tillbaka", "Back")}</Link></p>;
   const cats = categoriesOf(exercises);
-  const t = categoryToken(ex.category, cats);
+  const token = categoryToken(ex.category, cats);
   const history = log.filter((e) => e.code === code);
   const chart = [...history].reverse().map((e) => ({ d: e.date.slice(5), v: parseFloat(e.load.replace(",", ".")) })).filter((p) => !isNaN(p.v));
 
   async function remove() {
     if (!ex) return;
-    if (!confirm(`Ta bort ${ex.code} ${ex.name}? Loggade set behålls.`)) return;
+    if (!confirm(`${t("Ta bort", "Delete")} ${ex.code} ${ex.name}? ${t("Loggade set behålls.", "Logged sets are kept.")}`)) return;
     const { error } = await supabase.from("exercises").delete().eq("id", ex.id);
     if (error) {
       toast.error(error.message);
@@ -56,19 +62,20 @@ function ExercisePage() {
 
   return (
     <main className="space-y-5 px-4">
-      <Link to="/ovningar" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4" /> Övningar</Link>
+      <Link to="/ovningar" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4" />{t("Övningar", "Exercises")}</Link>
       <div>
-        <div className={`font-display text-lg font-bold uppercase text-${t}`}>{ex.code} · {ex.category}</div>
+        <div className={`font-display text-lg font-bold uppercase text-${token}`}>{ex.code} · {ex.category}</div>
         <h1 className="text-4xl font-extrabold uppercase leading-none">{ex.name}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{[ex.equipment, ex.variant, ex.muscles].filter(Boolean).join(" · ")}</p>
       </div>
       {ex.dose && <div className="rounded-xl bg-secondary p-4 font-display text-2xl font-bold">{doseText(ex.dose)}</div>}
+      <ExerciseImages exercise={ex} />
       {ex.instructions && <p className="leading-relaxed">{ex.instructions}</p>}
-      {ex.focus && <p className={`border-l-4 pl-3 border-${t}`}><b>Fokus:</b> {ex.focus}</p>}
+      {ex.focus && <p className={`border-l-4 pl-3 border-${token}`}><b>{t("Fokus:", "Focus:")}</b> {ex.focus}</p>}
       <div className="flex gap-2">
-        <Button onClick={() => { setEntry(null); setLogging(true); }} className="h-12 flex-1 font-bold uppercase"><Plus className="h-5 w-5" /> Logga set</Button>
-        <Button variant="secondary" className="h-12" onClick={() => setEditing(true)} aria-label="Redigera"><Pencil className="h-5 w-5" /></Button>
-        <Button variant="secondary" className="h-12" onClick={remove} aria-label="Ta bort"><Trash2 className="h-5 w-5" /></Button>
+        <Button onClick={() => { setEntry(null); setLogging(true); }} className="h-12 flex-1 font-bold uppercase"><Plus className="h-5 w-5" />{t("Logga set", "Log sets")}</Button>
+        <Button variant="secondary" className="h-12" onClick={() => setEditing(true)} aria-label={t("Redigera", "Edit")}><Pencil className="h-5 w-5" /></Button>
+        <Button variant="secondary" className="h-12" onClick={remove} aria-label={t("Ta bort", "Delete")}><Trash2 className="h-5 w-5" /></Button>
       </div>
       {chart.length > 1 && (
         <div className="h-48 rounded-xl border bg-card p-2">
@@ -77,22 +84,22 @@ function ExercisePage() {
               <XAxis dataKey="d" stroke="var(--muted-foreground)" fontSize={11} />
               <YAxis stroke="var(--muted-foreground)" fontSize={11} width={30} />
               <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)" }} />
-              <Line dataKey="v" name="Belastning" stroke="var(--primary)" strokeWidth={3} dot />
+              <Line dataKey="v" name={t("Belastning", "Load")} stroke="var(--primary)" strokeWidth={3} dot />
             </LineChart>
           </ResponsiveContainer>
         </div>
       )}
       <section className="space-y-2">
-        <h2 className="text-xl font-bold uppercase">Historik</h2>
-        {!history.length && <p className="text-muted-foreground">Inga loggade set ännu.</p>}
+        <h2 className="text-xl font-bold uppercase">{t("Historik", "History")}</h2>
+        {!history.length && <p className="text-muted-foreground">{t("Inga loggade set ännu.", "No sets logged yet.")}</p>}
         {history.map((e) => (
           <button key={e.id} onClick={() => { setEntry(e); setLogging(true); }} className="flex w-full items-center justify-between rounded-lg border bg-card px-4 py-3 text-left">
-            <span className="text-sm text-muted-foreground">{formatDate(e.date)}</span>
+            <span className="text-sm text-muted-foreground">{formatDate(e.date, language)}</span>
             <span className="font-display text-lg font-bold">{formatSet(e)}</span>
           </button>
         ))}
       </section>
-      <ExerciseForm open={editing} exercise={ex} all={exercises} onClose={(saved) => {
+      <ExerciseForm open={editing} exercise={original ?? null} all={exercises} onClose={(saved) => {
         setEditing(false);
         if (saved && saved.code !== code) navigate({ to: "/ovningar/$code", params: { code: saved.code }, replace: true });
       }} />

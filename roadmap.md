@@ -3,3 +3,9 @@
 - [x] Exercises stored in database, user can add/edit (never hard-coded)
 - [x] Google + Microsoft sign-in
 - [x] Choose gym first; exercises tied to a gym or all gyms, more gyms can be added
+- [x] Restore Excel repeat counts and verify every imported row
+- [x] Collapse and expand workouts by date
+- [x] Collapse and expand exercise categories, collapsed by default
+- [x] Show original PDF exercise illustrations
+- [x] Complete Swedish and English language support
+- [x] Explain physical data location and Dataverse options

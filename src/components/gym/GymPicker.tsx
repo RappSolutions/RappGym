@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/i18n";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Home, MapPin, Plus } from "lucide-react";
@@ -8,6 +9,7 @@ import { useInvalidateGym, type Gym } from "@/lib/gym";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function GymPicker({ gyms, selected, onPick }: { gyms: Gym[]; selected: string | null; onPick: (id: string) => void }) {
+  const { t, language, localize } = useLanguage();
   const qc = useQueryClient();
   const invalidate = useInvalidateGym();
   const [name, setName] = useState("");
@@ -26,7 +28,7 @@ export function GymPicker({ gyms, selected, onPick }: { gyms: Gym[]; selected: s
   }
   return (
     <div className="space-y-3">
-      <h1 className="text-4xl font-extrabold uppercase">Var tränar du?</h1>
+      <h1 className="text-4xl font-extrabold uppercase">{t("Var tränar du?", "Where are you training?")}</h1>
       {gyms.map((g, i) => (
         <button key={g.id} onClick={() => onPick(g.id)}
           className={`flex w-full items-center gap-4 rounded-xl border-2 bg-card p-5 text-left ${g.id === selected ? "border-primary" : "border-border"}`}>
@@ -38,8 +40,8 @@ export function GymPicker({ gyms, selected, onPick }: { gyms: Gym[]; selected: s
         </button>
       ))}
       <form onSubmit={add} className="flex gap-2">
-        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nytt gym, t.ex. SATS City" className="h-12" />
-        <Button type="submit" variant="secondary" className="h-12"><Plus className="h-5 w-5" /> Lägg till</Button>
+        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("Nytt gym, t.ex. SATS City", "New gym, e.g. SATS City")} className="h-12" />
+        <Button type="submit" variant="secondary" className="h-12"><Plus className="h-5 w-5" />{t("Lägg till", "Add")}</Button>
       </form>
     </div>
   );

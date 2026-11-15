@@ -1,3 +1,4 @@
+import { useLanguage, LanguagePicker } from "@/lib/i18n";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -10,6 +11,8 @@ import { lovable } from "@/integrations/lovable/index";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Logga in – Träningsdagbok" },
       { name: "description", content: "Logga in för att se och logga dina pass." },
       { property: "og:title", content: "Logga in – Träningsdagbok" },
@@ -20,6 +23,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
+  const { t, language, localize } = useLanguage();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"in" | "up">("in");
   const [email, setEmail] = useState("");
@@ -42,10 +46,10 @@ function AuthPage() {
         });
         if (error) throw error;
         if (data.session) navigate({ to: "/pass", replace: true });
-        else toast.success("Kolla din e-post och bekräfta kontot.");
+        else toast.success(t("Kolla din e-post och bekräfta kontot.", "Check your email to confirm your account."));
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Något gick fel");
+      toast.error(err instanceof Error ? err.message : t("Något gick fel", "Something went wrong"));
     } finally {
       setBusy(false);
     }
@@ -54,7 +58,7 @@ function AuthPage() {
   async function social(provider: "google" | "microsoft") {
     const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin });
     if (result.error) {
-      toast.error(result.error instanceof Error ? result.error.message : "Inloggningen misslyckades");
+      toast.error(result.error instanceof Error ? result.error.message : t("Inloggningen misslyckades", "Sign-in failed"));
       return;
     }
     if (result.redirected) return;
@@ -64,29 +68,30 @@ function AuthPage() {
   return (
     <main className="flex min-h-screen items-center justify-center px-6">
       <form onSubmit={submit} className="w-full max-w-sm space-y-5 rounded-2xl border bg-card p-6">
-        <h1 className="text-3xl font-extrabold uppercase">{mode === "in" ? "Logga in" : "Skapa konto"}</h1>
+        <LanguagePicker />
+        <h1 className="text-3xl font-extrabold uppercase">{mode === "in" ? t("Logga in", "Sign in") : t("Skapa konto", "Create account")}</h1>
         <button type="button" onClick={() => social("google")} className="google-btn">
           <svg aria-hidden="true" width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09C3.26 21.3 7.31 24 12 24z"/><path fill="#FBBC05" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.98-3.09z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
-          Fortsätt med Google
+          {t("Fortsätt med Google", "Continue with Google")}
         </button>
         <button type="button" onClick={() => social("microsoft")} className="google-btn">
           <svg aria-hidden="true" width="18" height="18" viewBox="0 0 21 21"><rect x="1" y="1" width="9" height="9" fill="#F25022"/><rect x="11" y="1" width="9" height="9" fill="#7FBA00"/><rect x="1" y="11" width="9" height="9" fill="#00A4EF"/><rect x="11" y="11" width="9" height="9" fill="#FFB900"/></svg>
-          Fortsätt med Microsoft
+          {t("Fortsätt med Microsoft", "Continue with Microsoft")}
         </button>
-        <div className="flex items-center gap-3 text-xs text-muted-foreground"><div className="h-px flex-1 bg-border" />eller e-post<div className="h-px flex-1 bg-border" /></div>
+        <div className="flex items-center gap-3 text-xs text-muted-foreground"><div className="h-px flex-1 bg-border" />{t("eller e-post", "or email")}<div className="h-px flex-1 bg-border" /></div>
         <div className="space-y-2">
-          <Label htmlFor="email">E-post</Label>
+          <Label htmlFor="email">{t("E-post", "Email")}</Label>
           <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="h-12" />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="pw">Lösenord</Label>
+          <Label htmlFor="pw">{t("Lösenord", "Password")}</Label>
           <Input id="pw" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="h-12" />
         </div>
         <Button type="submit" disabled={busy} className="h-12 w-full text-base font-semibold">
-          {mode === "in" ? "Logga in" : "Skapa konto"}
+          {mode === "in" ? t("Logga in", "Sign in") : t("Skapa konto", "Create account")}
         </Button>
         <button type="button" className="w-full text-sm text-muted-foreground underline" onClick={() => setMode(mode === "in" ? "up" : "in")}>
-          {mode === "in" ? "Inget konto? Skapa ett" : "Har du konto? Logga in"}
+          {mode === "in" ? t("Inget konto? Skapa ett", "No account? Create one") : t("Har du konto? Logga in", "Already have an account? Sign in")}
         </button>
       </form>
     </main>
