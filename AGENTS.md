@@ -35,3 +35,4 @@ use the editor.
 - Selected gym is stored in localStorage (`src/lib/gym.ts`); exercises with no gym show at every gym.
 - Store exercise illustrations and localized field values on each database exercise; never use a code-keyed exercise bank in application code, so edits and new exercises remain data-driven.
 - Use the shared language context for Swedish/English UI and browser language persistence; preserve original user notes and exercise fields while storing translations separately.
+- Derive progress charts client-side through the shared progress aggregation module; compare weights per exercise and sum repeat counts per date so unrelated exercises and text loads are never mixed into weight trends.
