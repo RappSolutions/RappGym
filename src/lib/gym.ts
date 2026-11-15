@@ -63,9 +63,9 @@ export function todayISO() {
 }
 
 const CAT_TOKENS = ["cat-1", "cat-2", "cat-3", "cat-4", "cat-5"];
-export function categoryToken(category: string, categories: string[]) {
+export function categoryToken(category: string, categories: string[]): string {
   const i = categories.indexOf(category);
-  return CAT_TOKENS[(i < 0 ? 0 : i) % CAT_TOKENS.length];
+  return CAT_TOKENS[(i < 0 ? 0 : i) % CAT_TOKENS.length] ?? "cat-1";
 }
 
 export function formatDate(iso: string) {
@@ -93,4 +93,37 @@ export function computeStats(log: LogEntry[], exercises: Exercise[]) {
     perEq.set(q, (perEq.get(q) ?? 0) + 1);
   }
   return { totalSets, totalReps, sessions, last, perCat, perEq };
+}
+
+export type Gym = Tables<"gyms">;
+
+export const gymsQuery = queryOptions({
+  queryKey: ["gyms"],
+  queryFn: async () => {
+    const { data, error } = await supabase.from("gyms").select("*").order("created_at");
+    if (error) throw error;
+    return data;
+  },
+});
+
+const GYM_KEY = "selected-gym";
+const listeners = new Set<() => void>();
+export function getSelectedGym(): string | null {
+  return typeof window === "undefined" ? null : localStorage.getItem(GYM_KEY);
+}
+export function setSelectedGym(id: string | null) {
+  if (id) localStorage.setItem(GYM_KEY, id);
+  else localStorage.removeItem(GYM_KEY);
+  listeners.forEach((l) => l());
+}
+export function subscribeGym(l: () => void) {
+  listeners.add(l);
+  return () => {
+    listeners.delete(l);
+  };
+}
+
+/** Exercises available at a gym: those linked to it plus those for all gyms (no gym). */
+export function exercisesAtGym(exercises: Exercise[], gymId: string | null) {
+  return exercises.filter((e) => !e.gym_id || e.gym_id === gymId);
 }

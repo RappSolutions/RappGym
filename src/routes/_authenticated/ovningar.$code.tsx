@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_authenticated/ovningar/$code")({
     Promise.all([context.queryClient.ensureQueryData(exercisesQuery), context.queryClient.ensureQueryData(logQuery)]),
   component: ExercisePage,
   notFoundComponent: () => <p className="p-4">Övningen finns inte.</p>,
-  errorComponent: ({ error }) => <p className="p-4">{error.message}</p>,
+  errorComponent: ({ error }) => <p className="p-4">{error instanceof Error ? error.message : String(error)}</p>,
 });
 
 function ExercisePage() {
@@ -47,7 +47,10 @@ function ExercisePage() {
     if (!ex) return;
     if (!confirm(`Ta bort ${ex.code} ${ex.name}? Loggade set behålls.`)) return;
     const { error } = await supabase.from("exercises").delete().eq("id", ex.id);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     invalidate();
     navigate({ to: "/ovningar" });
   }
