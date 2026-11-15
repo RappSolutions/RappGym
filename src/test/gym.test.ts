@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeStats, lastByCode } from "@/lib/gym";
+import { computeStats, lastByCode, isWorkoutExpanded } from "@/lib/gym";
 import history from "@/data/history.json";
 
 const ex = [
@@ -11,6 +11,20 @@ const log = [
   { code: "PL1", date: "2026-11-14", sets: 4, reps: 12, load: "30" },
   { code: "PU1", date: "2026-11-06", sets: 4, reps: 12, load: "15" },
 ] as never[];
+
+describe("workout expansion", () => {
+  it("opens only today's workout by default", () => {
+    const overrides = new Map<string, boolean>();
+    expect(isWorkoutExpanded("2026-11-15", "2026-11-15", overrides)).toBe(true);
+    expect(isWorkoutExpanded("2026-11-14", "2026-11-15", overrides)).toBe(false);
+    expect(isWorkoutExpanded("2026-11-16", "2026-11-15", overrides)).toBe(false);
+  });
+  it("allows opening older workouts and closing today's workout", () => {
+    const overrides = new Map([["2026-11-14", true], ["2026-11-15", false]]);
+    expect(isWorkoutExpanded("2026-11-14", "2026-11-15", overrides)).toBe(true);
+    expect(isWorkoutExpanded("2026-11-15", "2026-11-15", overrides)).toBe(false);
+  });
+});
 
 describe("stats", () => {
   it("counts repeat sets and multiplies reps by the repeat count", () => {
