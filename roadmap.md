@@ -9,3 +9,4 @@
 - [x] Show original PDF exercise illustrations
 - [x] Complete Swedish and English language support
 - [x] Explain physical data location and Dataverse options
+- [x] Add weight and set trends from workout logs and verify the overview

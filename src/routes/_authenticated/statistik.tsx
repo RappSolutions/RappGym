@@ -4,6 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { ProgressOverview } from "@/components/gym/ProgressOverview";
 import { supabase } from "@/integrations/supabase/client";
 import { computeStats, exercisesQuery, formatDate, logQuery, useInvalidateGym } from "@/lib/gym";
 
@@ -13,9 +14,9 @@ export const Route = createFileRoute("/_authenticated/statistik")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { title: "Statistik – Träningsdagbok" },
-      { name: "description", content: "Set, pass och reps per kategori och redskap." },
+      { name: "description", content: "Följ vikter och antal set över tid, med statistik per övning, kategori och redskap." },
       { property: "og:title", content: "Statistik – Träningsdagbok" },
-      { property: "og:description", content: "Set, pass och reps per kategori och redskap." },
+      { property: "og:description", content: "Följ vikter och antal set över tid, med statistik per övning, kategori och redskap." },
     ],
   }),
   loader: ({ context }) =>
@@ -79,6 +80,7 @@ function StatsPage() {
           </div>
         ))}
       </div>
+      {log.length > 0 && <ProgressOverview log={log} exercises={exercises} />}
       {s.totalSets > 0 && <Bars title={t("Set per kategori", "Sets by category")} data={s.perCat} total={s.totalSets} />}
       {s.totalSets > 0 && <Bars title={t("Set per redskap", "Sets by equipment")} data={s.perEq} total={s.totalSets} />}
       {log.length === 0 && (
