@@ -44,9 +44,14 @@ function StatsPage() {
   async function importExcel() {
     setBusy(true);
     const history = (await import("@/data/history.json")).default;
-    const { error } = await supabase.from("log_entries").insert(history);
+    const { error } = await supabase
+      .from("log_entries")
+      .insert(history.map((h) => ({ ...h, gym_id: "00000000-0000-0000-0000-000000000001" })));
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success(`${history.length} set importerade`);
     invalidate();
   }

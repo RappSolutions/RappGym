@@ -26,12 +26,14 @@ export function LogSheet({
   last,
   entry,
   defaultRound,
+  gymId,
   onClose,
 }: {
   exercise: Exercise | null;
-  last?: LogEntry;
+  last?: LogEntry | undefined;
   entry?: LogEntry | null;
   defaultRound?: number;
+  gymId?: string | null;
   onClose: () => void;
 }) {
   const invalidate = useInvalidateGym();
@@ -55,12 +57,15 @@ export function LogSheet({
   async function save() {
     if (!exercise) return;
     setBusy(true);
-    const row = { code: exercise.code, sets: round, load, reps, note: note || null, date };
+    const row = { code: exercise.code, sets: round, load, reps, note: note || null, date, ...(entry ? {} : { gym_id: gymId ?? null }) };
     const { error } = entry
       ? await supabase.from("log_entries").update(row).eq("id", entry.id)
       : await supabase.from("log_entries").insert(row);
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success(`${exercise.code} sparad`);
     invalidate();
     onClose();
@@ -69,7 +74,10 @@ export function LogSheet({
   async function remove() {
     if (!entry) return;
     const { error } = await supabase.from("log_entries").delete().eq("id", entry.id);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     invalidate();
     onClose();
   }

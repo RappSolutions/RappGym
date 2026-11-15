@@ -4,7 +4,7 @@ import type { Exercise, LogEntry } from "@/lib/gym";
 export function ExerciseCard({
   ex, last, doneToday, token, onClick, action,
 }: {
-  ex: Exercise; last?: LogEntry; doneToday?: number; token: string; onClick?: () => void; action?: React.ReactNode;
+  ex: Exercise; last?: LogEntry | undefined; doneToday?: number | undefined; token: string; onClick?: () => void; action?: React.ReactNode;
 }) {
   return (
     <div className={cn("flex items-stretch overflow-hidden rounded-xl border bg-card")}>
