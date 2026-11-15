@@ -77,8 +77,8 @@ function StatsPage() {
           </div>
         ))}
       </div>
-      {s.totalSets > 0 && <Bars title=t("Set per kategori", "Sets by category") data={s.perCat} total={s.totalSets} />}
-      {s.totalSets > 0 && <Bars title=t("Set per redskap", "Sets by equipment") data={s.perEq} total={s.totalSets} />}
+      {s.totalSets > 0 && <Bars title={t("Set per kategori", "Sets by category")} data={s.perCat} total={s.totalSets} />}
+      {s.totalSets > 0 && <Bars title={t("Set per redskap", "Sets by equipment")} data={s.perEq} total={s.totalSets} />}
       {log.length === 0 && (
         <div className="space-y-3 rounded-xl border border-dashed p-4">
           <p className="text-sm text-muted-foreground">{t("Hämta in dina 72 tidigare set från Excel-dagboken (3–14 nov 2026).", "Import your 72 previous exercise entries from Excel (3–14 Nov 2026).")}</p>

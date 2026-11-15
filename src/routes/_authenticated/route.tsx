@@ -2,6 +2,8 @@ import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/
 import { useQueryClient } from "@tanstack/react-query";
 import { BarChart3, BookOpen, Dumbbell, History, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { LanguagePicker, useLanguage } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -21,6 +23,7 @@ const tabs = [
 ] as const;
 
 function AppLayout() {
+  const { t } = useLanguage();
   const qc = useQueryClient();
   const navigate = useNavigate();
   async function signOut() {
@@ -33,11 +36,11 @@ function AppLayout() {
     <div className="mx-auto min-h-screen max-w-2xl pb-24">
       <header className="flex items-center justify-between px-4 pt-5 pb-2">
         <span className="font-display text-xl font-extrabold uppercase tracking-wide">
-          Tränings<span className="text-primary">dagbok</span>
+          {t("Tränings", "Workout ")}<span className="text-primary">{t("dagbok", "diary")}</span>
         </span>
-        <button onClick={signOut} aria-label="Logga ut" className="p-2 text-muted-foreground">
+        <div className="flex items-center gap-2"><LanguagePicker /><Button variant="ghost" size="icon" onClick={signOut} aria-label={t("Logga ut", "Sign out")} className="text-muted-foreground">
           <LogOut className="h-5 w-5" />
-        </button>
+        </Button></div>
       </header>
       <Outlet />
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur">
@@ -50,7 +53,7 @@ function AppLayout() {
               activeProps={{ className: "text-primary" }}
             >
               <Icon className="h-6 w-6" />
-              {label}
+              {t(label, to === "/pass" ? "Workout" : to === "/ovningar" ? "Exercises" : to === "/logg" ? "Log" : "Statistics")}
             </Link>
           ))}
         </div>

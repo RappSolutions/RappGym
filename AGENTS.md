@@ -33,3 +33,5 @@ use the editor.
 - Exercises, categories and gyms come only from the database (exercises/gyms tables), never from code constants — the user edits them in the app.
 - Data is read client-side via the browser client + React Query under the `_authenticated` layout (ssr: false); RLS scopes log entries per user.
 - Selected gym is stored in localStorage (`src/lib/gym.ts`); exercises with no gym show at every gym.
+- Store exercise illustrations and localized field values on each database exercise; never use a code-keyed exercise bank in application code, so edits and new exercises remain data-driven.
+- Use the shared language context for Swedish/English UI and browser language persistence; preserve original user notes and exercise fields while storing translations separately.

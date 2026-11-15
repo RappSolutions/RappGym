@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { todayISO, useInvalidateGym, formatSet, doseText, type Exercise, type LogEntry } from "@/lib/gym";
+import { ExerciseImages } from "./ExerciseImages";
 
 function Stepper({ label, value, onChange }: { label: string; value: number; onChange: (n: number) => void }) {
   return (
@@ -43,6 +44,7 @@ export function LogSheet({
   const [note, setNote] = useState("");
   const [date, setDate] = useState(todayISO());
   const [busy, setBusy] = useState(false);
+  const shown = exercise ? localize(exercise) : null;
 
   useEffect(() => {
     if (!exercise) return;
@@ -96,16 +98,17 @@ export function LogSheet({
   return (
     <Drawer open={!!exercise} onOpenChange={(o) => !o && onClose()}>
       <DrawerContent>
-        <div className="mx-auto w-full max-w-md space-y-4 px-4 pb-8">
+        <div className="mx-auto max-h-[85vh] w-full max-w-md space-y-4 overflow-y-auto px-4 pb-8">
           <DrawerHeader className="px-0">
             <DrawerTitle className="font-display text-2xl uppercase">
-              <span className="text-primary">{exercise?.code}</span> {exercise?.name}
+              <span className="text-primary">{shown?.code}</span> {shown?.name}
             </DrawerTitle>
             <DrawerDescription>
-              {doseText(exercise?.dose)}
+              {doseText(shown?.dose)}
               {last && !entry && ` · ${t("Senast", "Last")}: ${formatSet({ ...last, sets: 1 })}`}
             </DrawerDescription>
           </DrawerHeader>
+          {shown && <ExerciseImages exercise={shown} />}
           <div className="grid grid-cols-2 gap-3">
             <Stepper label={t("Antal set", "Number of sets")} value={round} onChange={setRound} />
             <Stepper label={t("Reps / sek", "Reps / sec")} value={reps} onChange={setReps} />

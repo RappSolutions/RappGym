@@ -8,6 +8,7 @@ import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 import { Button } from "@/components/ui/button";
 import { ExerciseForm } from "@/components/gym/ExerciseForm";
 import { LogSheet } from "@/components/gym/LogSheet";
+import { ExerciseImages } from "@/components/gym/ExerciseImages";
 import { supabase } from "@/integrations/supabase/client";
 import { categoriesOf, categoryToken, exercisesQuery, formatDate, logQuery, todayISO, useInvalidateGym, type LogEntry, formatSet, doseText } from "@/lib/gym";
 
@@ -41,7 +42,7 @@ function ExercisePage() {
   const ex = original ? localize(original) : undefined;
   if (!ex) return <p className="p-4">Övningen finns inte. <Link to="/ovningar" className="underline">{t("Tillbaka", "Back")}</Link></p>;
   const cats = categoriesOf(exercises);
-  const t = categoryToken(ex.category, cats);
+  const token = categoryToken(ex.category, cats);
   const history = log.filter((e) => e.code === code);
   const chart = [...history].reverse().map((e) => ({ d: e.date.slice(5), v: parseFloat(e.load.replace(",", ".")) })).filter((p) => !isNaN(p.v));
 
@@ -59,17 +60,18 @@ function ExercisePage() {
 
   return (
     <main className="space-y-5 px-4">
-      <Link to="/ovningar" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4" /> Övningar</Link>
+      <Link to="/ovningar" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4" />{t("Övningar", "Exercises")}</Link>
       <div>
-        <div className={`font-display text-lg font-bold uppercase text-${t}`}>{ex.code} · {ex.category}</div>
+        <div className={`font-display text-lg font-bold uppercase text-${token}`}>{ex.code} · {ex.category}</div>
         <h1 className="text-4xl font-extrabold uppercase leading-none">{ex.name}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{[ex.equipment, ex.variant, ex.muscles].filter(Boolean).join(" · ")}</p>
       </div>
       {ex.dose && <div className="rounded-xl bg-secondary p-4 font-display text-2xl font-bold">{doseText(ex.dose)}</div>}
+      <ExerciseImages exercise={ex} />
       {ex.instructions && <p className="leading-relaxed">{ex.instructions}</p>}
-      {ex.focus && <p className={`border-l-4 pl-3 border-${t}`}><b>{t("Fokus:", "Focus:")}</b> {ex.focus}</p>}
+      {ex.focus && <p className={`border-l-4 pl-3 border-${token}`}><b>{t("Fokus:", "Focus:")}</b> {ex.focus}</p>}
       <div className="flex gap-2">
-        <Button onClick={() => { setEntry(null); setLogging(true); }} className="h-12 flex-1 font-bold uppercase"><Plus className="h-5 w-5" /> Logga set</Button>
+        <Button onClick={() => { setEntry(null); setLogging(true); }} className="h-12 flex-1 font-bold uppercase"><Plus className="h-5 w-5" />{t("Logga set", "Log sets")}</Button>
         <Button variant="secondary" className="h-12" onClick={() => setEditing(true)} aria-label={t("Redigera", "Edit")}><Pencil className="h-5 w-5" /></Button>
         <Button variant="secondary" className="h-12" onClick={remove} aria-label={t("Ta bort", "Delete")}><Trash2 className="h-5 w-5" /></Button>
       </div>
@@ -80,7 +82,7 @@ function ExercisePage() {
               <XAxis dataKey="d" stroke="var(--muted-foreground)" fontSize={11} />
               <YAxis stroke="var(--muted-foreground)" fontSize={11} width={30} />
               <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)" }} />
-              <Line dataKey="v" name=t("Belastning", "Load") stroke="var(--primary)" strokeWidth={3} dot />
+              <Line dataKey="v" name={t("Belastning", "Load")} stroke="var(--primary)" strokeWidth={3} dot />
             </LineChart>
           </ResponsiveContainer>
         </div>
