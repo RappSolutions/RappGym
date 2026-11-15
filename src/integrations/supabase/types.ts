@@ -14,7 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      exercises: {
+        Row: {
+          category: string
+          code: string
+          created_at: string
+          dose: string
+          equipment: string
+          focus: string
+          id: string
+          instructions: string
+          muscles: string
+          name: string
+          sort_order: number
+          variant: string
+        }
+        Insert: {
+          category: string
+          code: string
+          created_at?: string
+          dose?: string
+          equipment?: string
+          focus?: string
+          id?: string
+          instructions?: string
+          muscles?: string
+          name: string
+          sort_order?: number
+          variant?: string
+        }
+        Update: {
+          category?: string
+          code?: string
+          created_at?: string
+          dose?: string
+          equipment?: string
+          focus?: string
+          id?: string
+          instructions?: string
+          muscles?: string
+          name?: string
+          sort_order?: number
+          variant?: string
+        }
+        Relationships: []
+      }
+      log_entries: {
+        Row: {
+          code: string
+          created_at: string
+          date: string
+          id: string
+          load: string
+          note: string | null
+          reps: number | null
+          sets: number
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          date?: string
+          id?: string
+          load?: string
+          note?: string | null
+          reps?: number | null
+          sets?: number
+          user_id?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          date?: string
+          id?: string
+          load?: string
+          note?: string | null
+          reps?: number | null
+          sets?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
