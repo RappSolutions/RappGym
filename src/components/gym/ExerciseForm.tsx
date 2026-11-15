@@ -27,11 +27,18 @@ export function ExerciseForm({
   const { t, language, localize } = useLanguage();
   const invalidate = useInvalidateGym();
   const [f, setF] = useState(empty);
+  const [textLanguage, setTextLanguage] = useState<"sv" | "en">(language);
   const { data: gyms = [] } = useQuery(gymsQuery);
   const [gym] = useSelectedGym();
   useEffect(() => {
-    if (open) setF(exercise ? { ...empty, ...exercise, gym_id: exercise.gym_id ?? "" } : { ...empty, gym_id: gym ?? "" });
-  }, [open, exercise, gym]);
+    if (open) setTextLanguage(language);
+  }, [open, language]);
+  useEffect(() => {
+    if (open) {
+      const translated = exercise && textLanguage === "en" ? localize(exercise) : exercise;
+      setF(translated ? { ...empty, ...translated, gym_id: translated.gym_id ?? "" } : { ...empty, gym_id: gym ?? "" });
+    }
+  }, [open, exercise, gym, textLanguage, language]);
   const set = (k: keyof typeof empty) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setF({ ...f, [k]: e.target.value });
   const uniq = (k: "category" | "equipment" | "muscles") => [...new Set(all.map((e) => e[k]).filter(Boolean))];
@@ -44,8 +51,14 @@ export function ExerciseForm({
       instructions: f.instructions, dose: f.dose, focus: f.focus,
       gym_id: f.gym_id || null,
     };
+    const texts = { name: row.name, equipment: row.equipment, variant: row.variant, muscles: row.muscles, instructions: row.instructions, dose: row.dose, focus: row.focus };
+    const existing = exercise?.translations;
+    const translations = existing && typeof existing === "object" && !Array.isArray(existing) ? existing : {};
+    const update = textLanguage === "en" && exercise
+      ? { code: row.code, category: row.category, gym_id: row.gym_id, translations: { ...translations, en: texts } }
+      : row;
     const res = exercise
-      ? await supabase.from("exercises").update(row).eq("id", exercise.id).select().single()
+      ? await supabase.from("exercises").update(update).eq("id", exercise.id).select().single()
       : await supabase.from("exercises").insert({ ...row, sort_order: all.length }).select().single();
     if (res.error) {
       toast.error(res.error.code === "23505" ? t("Koden finns redan", "Code already exists") : res.error.message);
@@ -66,6 +79,7 @@ export function ExerciseForm({
           <DialogTitle className="font-display text-2xl uppercase">{exercise ? t("Redigera övning", "Edit exercise") : t("Ny övning", "New exercise")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={save} className="space-y-3">
+          <div className="space-y-1"><Label>{t("Övningstexternas språk", "Exercise text language")}</Label><select aria-label={t("Övningstexternas språk", "Exercise text language")} value={textLanguage} onChange={(e) => setTextLanguage(e.target.value === "en" ? "en" : "sv")} className="h-10 w-full rounded-md border bg-background px-3"><option value="sv">Svenska</option><option value="en">English</option></select></div>
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1"><Label>{t("Kod", "Code")}</Label><Input required value={f.code} onChange={set("code")} placeholder="PU11" /></div>
             <div className="col-span-2 space-y-1">
