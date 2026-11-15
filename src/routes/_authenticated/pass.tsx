@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Info } from "lucide-react";
+import { Info, MapPin } from "lucide-react";
+import { GymPicker } from "@/components/gym/GymPicker";
+import { useSelectedGym } from "@/hooks/use-gym";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { ExerciseCard } from "@/components/gym/ExerciseCard";
 import { LogSheet } from "@/components/gym/LogSheet";
-import { categoriesOf, categoryToken, exercisesQuery, lastByCode, logQuery, todayISO, type Exercise } from "@/lib/gym";
+import { categoriesOf, categoryToken, exercisesAtGym, exercisesQuery, gymsQuery, lastByCode, logQuery, todayISO, type Exercise } from "@/lib/gym";
 
 export const Route = createFileRoute("/_authenticated/pass")({
   validateSearch: z.object({ cat: z.string().optional() }),
@@ -19,17 +21,22 @@ export const Route = createFileRoute("/_authenticated/pass")({
     ],
   }),
   loader: ({ context }) =>
-    Promise.all([context.queryClient.ensureQueryData(exercisesQuery), context.queryClient.ensureQueryData(logQuery)]),
+    Promise.all([context.queryClient.ensureQueryData(gymsQuery), context.queryClient.ensureQueryData(exercisesQuery), context.queryClient.ensureQueryData(logQuery)]),
   component: PassPage,
 });
 
 function PassPage() {
-  const { data: exercises } = useSuspenseQuery(exercisesQuery);
+  const { data: allExercises } = useSuspenseQuery(exercisesQuery);
+  const { data: gyms } = useSuspenseQuery(gymsQuery);
+  const [gymId, setGym] = useSelectedGym();
+  const [picking, setPicking] = useState(false);
+  const gym = gyms.find((g) => g.id === gymId);
+  const exercises = exercisesAtGym(allExercises, gym?.id ?? null);
   const { data: log } = useSuspenseQuery(logQuery);
   const { cat } = Route.useSearch();
   const navigate = Route.useNavigate();
   const cats = categoriesOf(exercises);
-  const active = cat && cats.includes(cat) ? cat : cats[0];
+  const active = cat && cats.includes(cat) ? cat : (cats[0] ?? "");
   const last = useMemo(() => lastByCode(log), [log]);
   const today = todayISO();
   const todayCount = useMemo(() => {
@@ -40,8 +47,18 @@ function PassPage() {
   const [open, setOpen] = useState<Exercise | null>(null);
   const list = exercises.filter((e) => e.category === active);
 
+  if (!gym || picking)
+    return (
+      <main className="px-4">
+        <GymPicker gyms={gyms} selected={gym?.id ?? null} onPick={(id) => { setGym(id); setPicking(false); }} />
+      </main>
+    );
+
   return (
     <main className="space-y-4 px-4">
+      <button onClick={() => setPicking(true)} className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-sm font-medium">
+        <MapPin className="h-4 w-4 text-primary" /> {gym.name} <span className="text-muted-foreground">· byt</span>
+      </button>
       <div>
         <h1 className="text-4xl font-extrabold uppercase">Dagens pass</h1>
         <p className="text-sm text-muted-foreground">{todayCount.size ? `${[...todayCount.values()].reduce((a, b) => a + b, 0)} set loggade idag` : "Tryck på en övning för att logga"}</p>
@@ -84,6 +101,7 @@ function PassPage() {
       <LogSheet
         exercise={open}
         last={open ? last.get(open.code) : undefined}
+        gymId={gym.id}
         defaultRound={open ? (todayCount.get(open.code) ?? 0) + 1 : 1}
         onClose={() => setOpen(null)}
       />
