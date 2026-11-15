@@ -37,7 +37,7 @@ function AuthPage() {
       if (mode === "in") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate({ to: "/pass", replace: true });
+        navigate({ to: "/workout", replace: true });
       } else {
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -45,7 +45,7 @@ function AuthPage() {
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        if (data.session) navigate({ to: "/pass", replace: true });
+        if (data.session) navigate({ to: "/workout", replace: true });
         else toast.success(t("Kolla din e-post och bekräfta kontot.", "Check your email to confirm your account."));
       }
     } catch (err) {
@@ -62,7 +62,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/pass", replace: true });
+    navigate({ to: "/workout", replace: true });
   }
 
   return (

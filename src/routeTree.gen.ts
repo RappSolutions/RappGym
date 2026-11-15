@@ -12,9 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedLogRouteImport } from './routes/_authenticated/log'
 import { Route as AuthenticatedLoggRouteImport } from './routes/_authenticated/logg'
 import { Route as AuthenticatedPassRouteImport } from './routes/_authenticated/pass'
+import { Route as AuthenticatedStatisticsRouteImport } from './routes/_authenticated/statistics'
 import { Route as AuthenticatedStatistikRouteImport } from './routes/_authenticated/statistik'
+import { Route as AuthenticatedWorkoutRouteImport } from './routes/_authenticated/workout'
+import { Route as AuthenticatedExercisesIndexRouteImport } from './routes/_authenticated/exercises.index'
+import { Route as AuthenticatedExercisesCodeRouteImport } from './routes/_authenticated/exercises.$code'
 import { Route as AuthenticatedOvningarIndexRouteImport } from './routes/_authenticated/ovningar.index'
 import { Route as AuthenticatedOvningarCodeRouteImport } from './routes/_authenticated/ovningar.$code'
 
@@ -32,6 +37,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedLogRoute = AuthenticatedLogRouteImport.update({
+  id: '/log',
+  path: '/log',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedLoggRoute = AuthenticatedLoggRouteImport.update({
   id: '/logg',
   path: '/logg',
@@ -42,11 +52,33 @@ const AuthenticatedPassRoute = AuthenticatedPassRouteImport.update({
   path: '/pass',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedStatisticsRoute = AuthenticatedStatisticsRouteImport.update({
+  id: '/statistics',
+  path: '/statistics',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedStatistikRoute = AuthenticatedStatistikRouteImport.update({
   id: '/statistik',
   path: '/statistik',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedWorkoutRoute = AuthenticatedWorkoutRouteImport.update({
+  id: '/workout',
+  path: '/workout',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedExercisesIndexRoute =
+  AuthenticatedExercisesIndexRouteImport.update({
+    id: '/exercises/',
+    path: '/exercises/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedExercisesCodeRoute =
+  AuthenticatedExercisesCodeRouteImport.update({
+    id: '/exercises/$code',
+    path: '/exercises/$code',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOvningarIndexRoute =
   AuthenticatedOvningarIndexRouteImport.update({
     id: '/ovningar/',
@@ -63,19 +95,29 @@ const AuthenticatedOvningarCodeRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/log': typeof AuthenticatedLogRoute
   '/logg': typeof AuthenticatedLoggRoute
   '/pass': typeof AuthenticatedPassRoute
+  '/statistics': typeof AuthenticatedStatisticsRoute
   '/statistik': typeof AuthenticatedStatistikRoute
+  '/workout': typeof AuthenticatedWorkoutRoute
+  '/exercises/$code': typeof AuthenticatedExercisesCodeRoute
   '/ovningar/$code': typeof AuthenticatedOvningarCodeRoute
+  '/exercises/': typeof AuthenticatedExercisesIndexRoute
   '/ovningar/': typeof AuthenticatedOvningarIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/log': typeof AuthenticatedLogRoute
   '/logg': typeof AuthenticatedLoggRoute
   '/pass': typeof AuthenticatedPassRoute
+  '/statistics': typeof AuthenticatedStatisticsRoute
   '/statistik': typeof AuthenticatedStatistikRoute
+  '/workout': typeof AuthenticatedWorkoutRoute
+  '/exercises/$code': typeof AuthenticatedExercisesCodeRoute
   '/ovningar/$code': typeof AuthenticatedOvningarCodeRoute
+  '/exercises': typeof AuthenticatedExercisesIndexRoute
   '/ovningar': typeof AuthenticatedOvningarIndexRoute
 }
 export interface FileRoutesById {
@@ -83,10 +125,15 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/log': typeof AuthenticatedLogRoute
   '/_authenticated/logg': typeof AuthenticatedLoggRoute
   '/_authenticated/pass': typeof AuthenticatedPassRoute
+  '/_authenticated/statistics': typeof AuthenticatedStatisticsRoute
   '/_authenticated/statistik': typeof AuthenticatedStatistikRoute
+  '/_authenticated/workout': typeof AuthenticatedWorkoutRoute
+  '/_authenticated/exercises/$code': typeof AuthenticatedExercisesCodeRoute
   '/_authenticated/ovningar/$code': typeof AuthenticatedOvningarCodeRoute
+  '/_authenticated/exercises/': typeof AuthenticatedExercisesIndexRoute
   '/_authenticated/ovningar/': typeof AuthenticatedOvningarIndexRoute
 }
 export interface FileRouteTypes {
@@ -94,29 +141,44 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/log'
     | '/logg'
     | '/pass'
+    | '/statistics'
     | '/statistik'
+    | '/workout'
+    | '/exercises/$code'
     | '/ovningar/$code'
+    | '/exercises/'
     | '/ovningar/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/log'
     | '/logg'
     | '/pass'
+    | '/statistics'
     | '/statistik'
+    | '/workout'
+    | '/exercises/$code'
     | '/ovningar/$code'
+    | '/exercises'
     | '/ovningar'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/log'
     | '/_authenticated/logg'
     | '/_authenticated/pass'
+    | '/_authenticated/statistics'
     | '/_authenticated/statistik'
+    | '/_authenticated/workout'
+    | '/_authenticated/exercises/$code'
     | '/_authenticated/ovningar/$code'
+    | '/_authenticated/exercises/'
     | '/_authenticated/ovningar/'
   fileRoutesById: FileRoutesById
 }
@@ -149,6 +211,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/log': {
+      id: '/_authenticated/log'
+      path: '/log'
+      fullPath: '/log'
+      preLoaderRoute: typeof AuthenticatedLogRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/logg': {
       id: '/_authenticated/logg'
       path: '/logg'
@@ -163,11 +232,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPassRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/statistics': {
+      id: '/_authenticated/statistics'
+      path: '/statistics'
+      fullPath: '/statistics'
+      preLoaderRoute: typeof AuthenticatedStatisticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/statistik': {
       id: '/_authenticated/statistik'
       path: '/statistik'
       fullPath: '/statistik'
       preLoaderRoute: typeof AuthenticatedStatistikRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/workout': {
+      id: '/_authenticated/workout'
+      path: '/workout'
+      fullPath: '/workout'
+      preLoaderRoute: typeof AuthenticatedWorkoutRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/exercises/': {
+      id: '/_authenticated/exercises/'
+      path: '/exercises'
+      fullPath: '/exercises/'
+      preLoaderRoute: typeof AuthenticatedExercisesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/exercises/$code': {
+      id: '/_authenticated/exercises/$code'
+      path: '/exercises/$code'
+      fullPath: '/exercises/$code'
+      preLoaderRoute: typeof AuthenticatedExercisesCodeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/ovningar/': {
@@ -188,18 +285,28 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedLogRoute: typeof AuthenticatedLogRoute
   AuthenticatedLoggRoute: typeof AuthenticatedLoggRoute
   AuthenticatedPassRoute: typeof AuthenticatedPassRoute
+  AuthenticatedStatisticsRoute: typeof AuthenticatedStatisticsRoute
   AuthenticatedStatistikRoute: typeof AuthenticatedStatistikRoute
+  AuthenticatedWorkoutRoute: typeof AuthenticatedWorkoutRoute
+  AuthenticatedExercisesCodeRoute: typeof AuthenticatedExercisesCodeRoute
   AuthenticatedOvningarCodeRoute: typeof AuthenticatedOvningarCodeRoute
+  AuthenticatedExercisesIndexRoute: typeof AuthenticatedExercisesIndexRoute
   AuthenticatedOvningarIndexRoute: typeof AuthenticatedOvningarIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedLogRoute: AuthenticatedLogRoute,
   AuthenticatedLoggRoute: AuthenticatedLoggRoute,
   AuthenticatedPassRoute: AuthenticatedPassRoute,
+  AuthenticatedStatisticsRoute: AuthenticatedStatisticsRoute,
   AuthenticatedStatistikRoute: AuthenticatedStatistikRoute,
+  AuthenticatedWorkoutRoute: AuthenticatedWorkoutRoute,
+  AuthenticatedExercisesCodeRoute: AuthenticatedExercisesCodeRoute,
   AuthenticatedOvningarCodeRoute: AuthenticatedOvningarCodeRoute,
+  AuthenticatedExercisesIndexRoute: AuthenticatedExercisesIndexRoute,
   AuthenticatedOvningarIndexRoute: AuthenticatedOvningarIndexRoute,
 }
 

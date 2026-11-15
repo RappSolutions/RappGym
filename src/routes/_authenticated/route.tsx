@@ -16,10 +16,10 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 const tabs = [
-  { to: "/pass", label: "Pass", icon: Dumbbell },
-  { to: "/ovningar", label: "Övningar", icon: BookOpen },
-  { to: "/logg", label: "Logg", icon: History },
-  { to: "/statistik", label: "Statistik", icon: BarChart3 },
+  { to: "/workout", label: "Pass", icon: Dumbbell },
+  { to: "/exercises", label: "Övningar", icon: BookOpen },
+  { to: "/log", label: "Logg", icon: History },
+  { to: "/statistics", label: "Statistik", icon: BarChart3 },
 ] as const;
 
 function AppLayout() {
@@ -53,7 +53,7 @@ function AppLayout() {
               activeProps={{ className: "text-primary" }}
             >
               <Icon className="h-6 w-6" />
-              {t(label, to === "/pass" ? "Workout" : to === "/ovningar" ? "Exercises" : to === "/logg" ? "Log" : "Statistics")}
+              {t(label, to === "/workout" ? "Workout" : to === "/exercises" ? "Exercises" : to === "/log" ? "Log" : "Statistics")}
             </Link>
           ))}
         </div>
