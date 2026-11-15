@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Träningsdagbok – logga dina gympass" },
       { name: "description", content: "Snabb loggning av set, vikt och reps med din egen övningsbank." },
       { property: "og:title", content: "Träningsdagbok – logga dina gympass" },
@@ -33,7 +35,7 @@ function Index() {
       <LanguagePicker />
       <h1 className="text-5xl font-extrabold uppercase">{t("Träningsdagbok", "Workout diary")}</h1>
       <p className="max-w-sm text-muted-foreground">
-        Välj kategori, tryck på övningen och logga. Din övningsbank och historik finns alltid med dig i gymmet.
+        {t("Din träningsdagbok och övningsbank.", "Your workout diary and exercise bank.")}
       </p>
       <Button asChild size="lg" className="h-12 px-8 text-base font-semibold">
         <Link to="/auth">{t("Logga in", "Sign in")}</Link>

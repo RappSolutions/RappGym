@@ -41,7 +41,7 @@ export function GymPicker({ gyms, selected, onPick }: { gyms: Gym[]; selected: s
       ))}
       <form onSubmit={add} className="flex gap-2">
         <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("Nytt gym, t.ex. SATS City", "New gym, e.g. SATS City")} className="h-12" />
-        <Button type="submit" variant="secondary" className="h-12"><Plus className="h-5 w-5" /> Lägg till</Button>
+        <Button type="submit" variant="secondary" className="h-12"><Plus className="h-5 w-5" />{t("Lägg till", "Add")}</Button>
       </form>
     </div>
   );

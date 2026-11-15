@@ -15,6 +15,8 @@ import { categoriesOf, categoryToken, exercisesQuery, formatDate, logQuery, toda
 export const Route = createFileRoute("/_authenticated/ovningar/$code")({
   head: ({ params }) => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: `${params.code} – Träningsdagbok` },
       { name: "description", content: `Instruktioner och historik för övning ${params.code}.` },
       { property: "og:title", content: `${params.code} – Träningsdagbok` },
@@ -40,7 +42,7 @@ function ExercisePage() {
   const [entry, setEntry] = useState<LogEntry | null>(null);
   const original = exercises.find((e) => e.code === code);
   const ex = original ? localize(original) : undefined;
-  if (!ex) return <p className="p-4">Övningen finns inte. <Link to="/ovningar" className="underline">{t("Tillbaka", "Back")}</Link></p>;
+  if (!ex) return <p className="p-4">{t("Övningen finns inte.", "Exercise not found.")} <Link to="/ovningar" className="underline">{t("Tillbaka", "Back")}</Link></p>;
   const cats = categoriesOf(exercises);
   const token = categoryToken(ex.category, cats);
   const history = log.filter((e) => e.code === code);
@@ -97,7 +99,7 @@ function ExercisePage() {
           </button>
         ))}
       </section>
-      <ExerciseForm open={editing} exercise={original} all={exercises} onClose={(saved) => {
+      <ExerciseForm open={editing} exercise={original ?? null} all={exercises} onClose={(saved) => {
         setEditing(false);
         if (saved && saved.code !== code) navigate({ to: "/ovningar/$code", params: { code: saved.code }, replace: true });
       }} />

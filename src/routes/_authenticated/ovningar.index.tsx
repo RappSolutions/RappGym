@@ -12,6 +12,8 @@ import { categoriesOf, categoryToken, exercisesQuery, lastByCode, logQuery } fro
 export const Route = createFileRoute("/_authenticated/ovningar/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Övningsbank – Träningsdagbok" },
       { name: "description", content: "Sök och bläddra bland alla dina övningar." },
       { property: "og:title", content: "Övningsbank – Träningsdagbok" },

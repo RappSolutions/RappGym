@@ -10,6 +10,8 @@ import { exercisesQuery, formatDate, logQuery, type LogEntry, formatSet } from "
 export const Route = createFileRoute("/_authenticated/logg")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Logg – Träningsdagbok" },
       { name: "description", content: "Alla dina pass, dag för dag." },
       { property: "og:title", content: "Logg – Träningsdagbok" },

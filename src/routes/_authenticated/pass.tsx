@@ -15,6 +15,8 @@ export const Route = createFileRoute("/_authenticated/pass")({
   validateSearch: z.object({ cat: z.string().optional() }),
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Dagens pass – Träningsdagbok" },
       { name: "description", content: "Välj kategori och logga dina set." },
       { property: "og:title", content: "Dagens pass – Träningsdagbok" },
@@ -63,18 +65,18 @@ function PassPage() {
       </button>
       <div>
         <h1 className="text-4xl font-extrabold uppercase">{t("Dagens pass", "Today’s workout")}</h1>
-        <p className="text-sm text-muted-foreground">{todayCount.size ? `${[...todayCount.values()].reduce((a, b) => a + b, 0)} ${t("set loggade idag", "sets logged today")}` : t("Tryck på en övning för att logga", "")}</p>
+        <p className="text-sm text-muted-foreground">{todayCount.size ? `${[...todayCount.values()].reduce((a, b) => a + b, 0)} ${t("set loggade idag", "sets logged today")}` : ""}</p>
       </div>
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
         {cats.map((c) => {
-          const t = categoryToken(c, cats);
+          const token = categoryToken(c, cats);
           return (
             <button
               key={c}
               onClick={() => navigate({ search: { cat: c }, replace: true })}
               className={cn(
                 "shrink-0 rounded-full border-2 px-5 py-2 font-display text-lg font-bold uppercase",
-                c === active ? `border-${t} bg-${t} text-primary-foreground` : `border-${t} text-${t}`,
+                c === active ? `border-${token} bg-${token} text-primary-foreground` : `border-${token} text-${token}`,
               )}
             >
               {c}

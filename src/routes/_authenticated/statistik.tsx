@@ -10,6 +10,8 @@ import { computeStats, exercisesQuery, formatDate, logQuery, useInvalidateGym } 
 export const Route = createFileRoute("/_authenticated/statistik")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Statistik – Träningsdagbok" },
       { name: "description", content: "Set, pass och reps per kategori och redskap." },
       { property: "og:title", content: "Statistik – Träningsdagbok" },
