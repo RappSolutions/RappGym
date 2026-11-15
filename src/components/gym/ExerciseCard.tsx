@@ -1,3 +1,4 @@
+import { doseText } from "@/lib/gym";
 import { cn } from "@/lib/utils";
 import type { Exercise, LogEntry } from "@/lib/gym";
 
@@ -16,7 +17,7 @@ export function ExerciseCard({
             <span className="truncate font-display text-lg font-semibold uppercase">{ex.name}</span>
           </div>
           <div className="mt-0.5 text-sm text-muted-foreground">
-            {ex.equipment}{ex.dose && ` · ${ex.dose}`}
+            {ex.equipment}{ex.dose && ` · ${doseText(ex.dose)}`}
           </div>
           {ex.focus && <div className="mt-1 line-clamp-1 text-xs text-muted-foreground/80">Fokus: {ex.focus}</div>}
         </div>

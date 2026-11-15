@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ExerciseForm } from "@/components/gym/ExerciseForm";
 import { LogSheet } from "@/components/gym/LogSheet";
 import { supabase } from "@/integrations/supabase/client";
-import { categoriesOf, categoryToken, exercisesQuery, formatDate, logQuery, todayISO, useInvalidateGym, type LogEntry, formatSet } from "@/lib/gym";
+import { categoriesOf, categoryToken, exercisesQuery, formatDate, logQuery, todayISO, useInvalidateGym, type LogEntry, formatSet, doseText } from "@/lib/gym";
 
 export const Route = createFileRoute("/_authenticated/ovningar/$code")({
   head: ({ params }) => ({
@@ -40,7 +40,6 @@ function ExercisePage() {
   const cats = categoriesOf(exercises);
   const t = categoryToken(ex.category, cats);
   const history = log.filter((e) => e.code === code);
-  const today = todayISO();
   const chart = [...history].reverse().map((e) => ({ d: e.date.slice(5), v: parseFloat(e.load.replace(",", ".")) })).filter((p) => !isNaN(p.v));
 
   async function remove() {
@@ -63,7 +62,7 @@ function ExercisePage() {
         <h1 className="text-4xl font-extrabold uppercase leading-none">{ex.name}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{[ex.equipment, ex.variant, ex.muscles].filter(Boolean).join(" · ")}</p>
       </div>
-      {ex.dose && <div className="rounded-xl bg-secondary p-4 font-display text-2xl font-bold">{ex.dose}</div>}
+      {ex.dose && <div className="rounded-xl bg-secondary p-4 font-display text-2xl font-bold">{doseText(ex.dose)}</div>}
       {ex.instructions && <p className="leading-relaxed">{ex.instructions}</p>}
       {ex.focus && <p className={`border-l-4 pl-3 border-${t}`}><b>Fokus:</b> {ex.focus}</p>}
       <div className="flex gap-2">
