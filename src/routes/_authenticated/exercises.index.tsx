@@ -43,8 +43,7 @@ function BankPage() {
 
   return (
     <main className="space-y-4 px-4">
-      <div className="flex items-end justify-between">
-        <h1 className="text-4xl font-extrabold uppercase">{t("Övningar", "Exercises")}</h1>
+      <div className="flex justify-end">
         <Button onClick={() => setAdding(true)} className="font-semibold"><Plus className="h-4 w-4" />{t("Ny", "New")}</Button>
       </div>
       <div className="relative">

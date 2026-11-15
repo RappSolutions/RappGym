@@ -45,7 +45,6 @@ function HomePage() {
   const cat30Total = cat30.reduce((n, [, v]) => n + v, 0);
 
   return <main className="space-y-4 px-4">
-    <h1 className="text-4xl font-extrabold uppercase">{t("Hem", "Home")}</h1>
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
       {kpis.map(([l, v]) => <div key={l} className="rounded-xl border bg-card p-4">
         <div className="font-display text-3xl font-extrabold text-primary">{v}</div>

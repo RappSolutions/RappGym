@@ -36,7 +36,6 @@ function LogPage() {
 
   return (
     <main className="space-y-5 px-4">
-      <h1 className="text-4xl font-extrabold uppercase">{t("Logg", "Log")}</h1>
       {!log.length && <p className="text-muted-foreground">{t("Inga pass ännu.", "No workouts yet.")}</p>}
       {[...days].map(([date, entries]) => {
         const cats = [...new Set(entries.map((e) => byCode.get(e.code)?.category).filter(Boolean))];
