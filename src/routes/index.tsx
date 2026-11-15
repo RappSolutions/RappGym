@@ -24,7 +24,7 @@ function Index() {
   const navigate = useNavigate();
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/pass", replace: true });
+      if (data.session) navigate({ to: "/workout", replace: true });
     });
   }, [navigate]);
   return (
