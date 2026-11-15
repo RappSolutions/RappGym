@@ -15,6 +15,13 @@
       "when": 1794761037143,
       "tag": "0001_add_gyms",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794762020060,
+      "tag": "0002_owner_scope_exercises_gyms",
+      "breakpoints": true
     }
   ]
 }

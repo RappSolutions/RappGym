@@ -28,6 +28,7 @@ export type Database = {
           muscles: string
           name: string
           sort_order: number
+          user_id: string
           variant: string
         }
         Insert: {
@@ -43,6 +44,7 @@ export type Database = {
           muscles?: string
           name: string
           sort_order?: number
+          user_id?: string
           variant?: string
         }
         Update: {
@@ -58,6 +60,7 @@ export type Database = {
           muscles?: string
           name?: string
           sort_order?: number
+          user_id?: string
           variant?: string
         }
         Relationships: [
@@ -76,18 +79,21 @@ export type Database = {
           description: string
           id: string
           name: string
+          user_id: string
         }
         Insert: {
           created_at?: string
           description?: string
           id?: string
           name: string
+          user_id?: string
         }
         Update: {
           created_at?: string
           description?: string
           id?: string
           name?: string
+          user_id?: string
         }
         Relationships: []
       }
