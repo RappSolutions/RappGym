@@ -39,7 +39,7 @@ export function GoalsCard() {
       {goals.map((g) => <li key={g.id} className="flex items-center gap-2 py-2">
         <div className={`flex-1 ${g.status === "done" ? "text-muted-foreground line-through" : ""}`}>
           <div className="font-medium">{g.text}</div>
-          {g.target_date && <div className="text-xs text-muted-foreground">{formatDate(g.target_date, language)}</div>}
+          {g.target_date && <div className="text-xs text-muted-foreground">{t("Mål:", "By:")} {formatDate(g.target_date, language)}</div>}
         </div>
         <Button size="icon" variant="ghost" aria-label={g.status === "done" ? t("Återaktivera", "Reactivate") : t("Klart", "Done")} onClick={() => run(supabase.from("training_goals").update({ status: g.status === "done" ? "active" : "done" }).eq("id", g.id))}>
           {g.status === "done" ? <RotateCcw className="size-4" /> : <Check className="size-4" />}
