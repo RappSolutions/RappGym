@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Use English page addresses and preserve old links with redirects
+- [x] Use English page addresses and preserve old links with redirects
 - [x] Rename app and Lovable project to RappGym
 - [x] Apply FetchXML Builder / JonasR.app colors and styling, verify desktop and mobile
 - [x] Request publication with the rappgym Lovable URL (deployment completion not yet verified)
