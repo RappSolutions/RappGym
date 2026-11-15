@@ -72,7 +72,6 @@ function StatsPage() {
 
   return (
     <main className="space-y-4 px-4">
-      <h1 className="text-4xl font-extrabold uppercase">{t("Statistik", "Statistics")}</h1>
       <div className="grid grid-cols-2 gap-2">
         {kpis.map(([l, v]) => (
           <div key={l} className="rounded-xl border bg-card p-4">

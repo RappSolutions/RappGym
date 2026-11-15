@@ -63,10 +63,7 @@ function PassPage() {
       <button onClick={() => setPicking(true)} className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-sm font-medium">
         <MapPin className="h-4 w-4 text-primary" /> {gym.name} <span className="text-muted-foreground">· {t("byt", "change")}</span>
       </button>
-      <div>
-        <h1 className="text-4xl font-extrabold uppercase">{t("Dagens pass", "Today’s workout")}</h1>
-        <p className="text-sm text-muted-foreground">{todayCount.size ? `${[...todayCount.values()].reduce((a, b) => a + b, 0)} ${t("set loggade idag", "sets logged today")}` : ""}</p>
-      </div>
+      {todayCount.size > 0 && <p className="text-sm text-muted-foreground">{`${[...todayCount.values()].reduce((a, b) => a + b, 0)} ${t("set loggade idag", "sets logged today")}`}</p>}
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
         {cats.map((c) => {
           const token = categoryToken(c, cats);
