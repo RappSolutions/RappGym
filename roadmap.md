@@ -1,6 +1,6 @@
 # Roadmap
 - [ ] Add AI Gateway training summary and personal next-workout recommendation on Statistics
-- [ ] Limit sign-in to Google and Microsoft, disable email/password, and verify
+- [x] Limit sign-in to Google and Microsoft, disable email/password, and verify
 - [x] Use English page addresses and preserve old links with redirects
 - [x] Rename app and Lovable project to RappGym
 - [x] Apply FetchXML Builder / JonasR.app colors and styling, verify desktop and mobile

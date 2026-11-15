@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ProgressOverview } from "@/components/gym/ProgressOverview";
+import { TrainingInsights } from "@/components/gym/TrainingInsights";
 import { supabase } from "@/integrations/supabase/client";
 import { computeStats, exercisesQuery, formatDate, logQuery, useInvalidateGym } from "@/lib/gym";
 
@@ -81,6 +82,7 @@ function StatsPage() {
         ))}
       </div>
       {log.length > 0 && <ProgressOverview log={log} exercises={exercises} />}
+      <TrainingInsights exercises={exercises} hasLog={log.length > 0} />
       {s.totalSets > 0 && <Bars title={t("Set per kategori", "Sets by category")} data={s.perCat} total={s.totalSets} />}
       {s.totalSets > 0 && <Bars title={t("Set per redskap", "Sets by equipment")} data={s.perEq} total={s.totalSets} />}
       {log.length === 0 && (

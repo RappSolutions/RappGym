@@ -1,5 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { streamText, type ModelMessage } from "ai";
+import { Output, streamText, type ModelMessage } from "ai";
+import { trainingInsightsSchema } from "@/lib/training-insights-schema";
 
 import {
   createLovableAiGatewayRunIdFetch,
@@ -24,6 +25,7 @@ export function createResponsesCall(
   const result = streamText({
     model: provider.responses(config.model),
     maxRetries: 0,
+    output: Output.object({ schema: trainingInsightsSchema }),
     // AI SDK 6 lacks `instructions`: rename this key to `system` there.
     ...(instructions ? { system: instructions } : {}),
     messages,
@@ -34,7 +36,7 @@ export function createResponsesCall(
         ...(reasoning
           ? {
               forceReasoning: true,
-              reasoningEffort: "medium",
+              reasoningEffort: "low",
               reasoningSummary: "auto",
               include: ["reasoning.encrypted_content"],
             }
