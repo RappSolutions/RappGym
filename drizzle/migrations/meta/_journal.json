@@ -29,6 +29,13 @@
       "when": 1794763631050,
       "tag": "0003_exercise_images_translations",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794775136294,
+      "tag": "0004_training_goals",
+      "breakpoints": true
     }
   ]
 }

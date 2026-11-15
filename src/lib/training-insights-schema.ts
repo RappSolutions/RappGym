@@ -12,6 +12,7 @@ export const trainingInsightsSchema = z.object({
     load: z.string(),
     reason: z.string(),
   }).strict()),
+  goalNotes: z.string(),
   caution: z.string(),
 }).strict();
 
