@@ -78,8 +78,9 @@ export function formatDate(iso: string) {
 
 export function computeStats(log: LogEntry[], exercises: Exercise[]) {
   const byCode = new Map(exercises.map((e) => [e.code, e]));
-  const totalSets = log.reduce((s, e) => s + e.sets, 0);
-  const totalReps = log.reduce((s, e) => s + e.sets * (e.reps ?? 0), 0);
+  // Mirrors the Excel overview: each logged row counts as one set; reps are summed per row.
+  const totalSets = log.length;
+  const totalReps = log.reduce((s, e) => s + (e.reps ?? 0), 0);
   const sessions = new Set(log.map((e) => e.date)).size;
   const last = log.reduce<string | null>((m, e) => (!m || e.date > m ? e.date : m), null);
   const perCat = new Map<string, number>();
@@ -88,8 +89,8 @@ export function computeStats(log: LogEntry[], exercises: Exercise[]) {
     const ex = byCode.get(e.code);
     const c = ex?.category ?? "Okänd";
     const q = ex?.equipment || "Okänd";
-    perCat.set(c, (perCat.get(c) ?? 0) + e.sets);
-    perEq.set(q, (perEq.get(q) ?? 0) + e.sets);
+    perCat.set(c, (perCat.get(c) ?? 0) + 1);
+    perEq.set(q, (perEq.get(q) ?? 0) + 1);
   }
   return { totalSets, totalReps, sessions, last, perCat, perEq };
 }
