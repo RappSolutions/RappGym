@@ -1,4 +1,4 @@
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage, localizeExercise } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -35,7 +35,7 @@ export function ExerciseForm({
   }, [open, language]);
   useEffect(() => {
     if (open) {
-      const translated = exercise && textLanguage === "en" ? localize(exercise) : exercise;
+      const translated = exercise ? localizeExercise(exercise, textLanguage) : exercise;
       setF(translated ? { ...empty, ...translated, gym_id: translated.gym_id ?? "" } : { ...empty, gym_id: gym ?? "" });
     }
   }, [open, exercise, gym, textLanguage, language]);
@@ -59,7 +59,7 @@ export function ExerciseForm({
       : row;
     const res = exercise
       ? await supabase.from("exercises").update(update).eq("id", exercise.id).select().single()
-      : await supabase.from("exercises").insert({ ...row, sort_order: all.length }).select().single();
+      : await supabase.from("exercises").insert({ ...row, ...(textLanguage === "en" ? { translations: { en: texts } } : {}), sort_order: all.length }).select().single();
     if (res.error) {
       toast.error(res.error.code === "23505" ? t("Koden finns redan", "Code already exists") : res.error.message);
       return;
