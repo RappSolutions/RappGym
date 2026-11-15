@@ -10,33 +10,120 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedLoggRouteImport } from './routes/_authenticated/logg'
+import { Route as AuthenticatedPassRouteImport } from './routes/_authenticated/pass'
+import { Route as AuthenticatedStatistikRouteImport } from './routes/_authenticated/statistik'
+import { Route as AuthenticatedOvningarIndexRouteImport } from './routes/_authenticated/ovningar.index'
+import { Route as AuthenticatedOvningarCodeRouteImport } from './routes/_authenticated/ovningar.$code'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedLoggRoute = AuthenticatedLoggRouteImport.update({
+  id: '/logg',
+  path: '/logg',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPassRoute = AuthenticatedPassRouteImport.update({
+  id: '/pass',
+  path: '/pass',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedStatistikRoute = AuthenticatedStatistikRouteImport.update({
+  id: '/statistik',
+  path: '/statistik',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOvningarIndexRoute =
+  AuthenticatedOvningarIndexRouteImport.update({
+    id: '/ovningar/',
+    path: '/ovningar/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOvningarCodeRoute =
+  AuthenticatedOvningarCodeRouteImport.update({
+    id: '/ovningar/$code',
+    path: '/ovningar/$code',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/logg': typeof AuthenticatedLoggRoute
+  '/pass': typeof AuthenticatedPassRoute
+  '/statistik': typeof AuthenticatedStatistikRoute
+  '/ovningar/$code': typeof AuthenticatedOvningarCodeRoute
+  '/ovningar/': typeof AuthenticatedOvningarIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/logg': typeof AuthenticatedLoggRoute
+  '/pass': typeof AuthenticatedPassRoute
+  '/statistik': typeof AuthenticatedStatistikRoute
+  '/ovningar/$code': typeof AuthenticatedOvningarCodeRoute
+  '/ovningar': typeof AuthenticatedOvningarIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/logg': typeof AuthenticatedLoggRoute
+  '/_authenticated/pass': typeof AuthenticatedPassRoute
+  '/_authenticated/statistik': typeof AuthenticatedStatistikRoute
+  '/_authenticated/ovningar/$code': typeof AuthenticatedOvningarCodeRoute
+  '/_authenticated/ovningar/': typeof AuthenticatedOvningarIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/logg'
+    | '/pass'
+    | '/statistik'
+    | '/ovningar/$code'
+    | '/ovningar/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/logg'
+    | '/pass'
+    | '/statistik'
+    | '/ovningar/$code'
+    | '/ovningar'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/logg'
+    | '/_authenticated/pass'
+    | '/_authenticated/statistik'
+    | '/_authenticated/ovningar/$code'
+    | '/_authenticated/ovningar/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +135,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/logg': {
+      id: '/_authenticated/logg'
+      path: '/logg'
+      fullPath: '/logg'
+      preLoaderRoute: typeof AuthenticatedLoggRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/pass': {
+      id: '/_authenticated/pass'
+      path: '/pass'
+      fullPath: '/pass'
+      preLoaderRoute: typeof AuthenticatedPassRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/statistik': {
+      id: '/_authenticated/statistik'
+      path: '/statistik'
+      fullPath: '/statistik'
+      preLoaderRoute: typeof AuthenticatedStatistikRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ovningar/': {
+      id: '/_authenticated/ovningar/'
+      path: '/ovningar'
+      fullPath: '/ovningar/'
+      preLoaderRoute: typeof AuthenticatedOvningarIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ovningar/$code': {
+      id: '/_authenticated/ovningar/$code'
+      path: '/ovningar/$code'
+      fullPath: '/ovningar/$code'
+      preLoaderRoute: typeof AuthenticatedOvningarCodeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedLoggRoute: typeof AuthenticatedLoggRoute
+  AuthenticatedPassRoute: typeof AuthenticatedPassRoute
+  AuthenticatedStatistikRoute: typeof AuthenticatedStatistikRoute
+  AuthenticatedOvningarCodeRoute: typeof AuthenticatedOvningarCodeRoute
+  AuthenticatedOvningarIndexRoute: typeof AuthenticatedOvningarIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedLoggRoute: AuthenticatedLoggRoute,
+  AuthenticatedPassRoute: AuthenticatedPassRoute,
+  AuthenticatedStatistikRoute: AuthenticatedStatistikRoute,
+  AuthenticatedOvningarCodeRoute: AuthenticatedOvningarCodeRoute,
+  AuthenticatedOvningarIndexRoute: AuthenticatedOvningarIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
