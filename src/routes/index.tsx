@@ -10,9 +10,9 @@ export const Route = createFileRoute("/")({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: "Träningsdagbok – logga dina gympass" },
+      { title: "RappGym – logga dina gympass" },
       { name: "description", content: "Snabb loggning av set, vikt och reps med din egen övningsbank." },
-      { property: "og:title", content: "Träningsdagbok – logga dina gympass" },
+      { property: "og:title", content: "RappGym – logga dina gympass" },
       { property: "og:description", content: "Snabb loggning av set, vikt och reps med din egen övningsbank." },
     ],
   }),
@@ -28,12 +28,12 @@ function Index() {
     });
   }, [navigate]);
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center">
+    <main className="app-sheet mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-6 px-6 text-center">
       <div className="rounded-2xl bg-primary p-4 text-primary-foreground">
         <Dumbbell className="h-10 w-10" />
       </div>
       <LanguagePicker />
-      <h1 className="text-5xl font-extrabold uppercase">{t("Träningsdagbok", "Workout diary")}</h1>
+      <h1 className="text-5xl font-extrabold uppercase">{"RappGym"}</h1>
       <p className="max-w-sm text-muted-foreground">
         {t("Din träningsdagbok och övningsbank.", "Your workout diary and exercise bank.")}
       </p>

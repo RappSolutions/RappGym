@@ -17,9 +17,9 @@ export const Route = createFileRoute("/_authenticated/pass")({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: "Dagens pass – Träningsdagbok" },
+      { title: "Dagens pass – RappGym" },
       { name: "description", content: "Välj kategori och logga dina set." },
-      { property: "og:title", content: "Dagens pass – Träningsdagbok" },
+      { property: "og:title", content: "Dagens pass – RappGym" },
       { property: "og:description", content: "Välj kategori och logga dina set." },
     ],
   }),

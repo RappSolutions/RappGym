@@ -12,9 +12,9 @@ export const Route = createFileRoute("/_authenticated/logg")({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: "Logg – Träningsdagbok" },
+      { title: "Logg – RappGym" },
       { name: "description", content: "Alla dina pass, dag för dag." },
-      { property: "og:title", content: "Logg – Träningsdagbok" },
+      { property: "og:title", content: "Logg – RappGym" },
       { property: "og:description", content: "Alla dina pass, dag för dag." },
     ],
   }),
