@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Gym log app per plan
-- [ ] Exercises stored in database, user can add/edit (never hard-coded)
-- [ ] Google + Microsoft sign-in
-- [ ] Choose gym (location) first; exercises tied to gym, more gyms can be added
+- [x] Gym log app per plan
+- [x] Exercises stored in database, user can add/edit (never hard-coded)
+- [x] Google + Microsoft sign-in
+- [x] Choose gym first; exercises tied to a gym or all gyms, more gyms can be added

@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Gym log app
+- Exercises, categories and gyms come only from the database (exercises/gyms tables), never from code constants — the user edits them in the app.
+- Data is read client-side via the browser client + React Query under the `_authenticated` layout (ssr: false); RLS scopes log entries per user.
+- Selected gym is stored in localStorage (`src/lib/gym.ts`); exercises with no gym show at every gym.
