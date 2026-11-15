@@ -22,6 +22,7 @@ export type Database = {
           dose: string
           equipment: string
           focus: string
+          gym_id: string | null
           id: string
           instructions: string
           muscles: string
@@ -36,6 +37,7 @@ export type Database = {
           dose?: string
           equipment?: string
           focus?: string
+          gym_id?: string | null
           id?: string
           instructions?: string
           muscles?: string
@@ -50,12 +52,42 @@ export type Database = {
           dose?: string
           equipment?: string
           focus?: string
+          gym_id?: string | null
           id?: string
           instructions?: string
           muscles?: string
           name?: string
           sort_order?: number
           variant?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercises_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gyms: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          name?: string
         }
         Relationships: []
       }
@@ -64,6 +96,7 @@ export type Database = {
           code: string
           created_at: string
           date: string
+          gym_id: string | null
           id: string
           load: string
           note: string | null
@@ -75,6 +108,7 @@ export type Database = {
           code: string
           created_at?: string
           date?: string
+          gym_id?: string | null
           id?: string
           load?: string
           note?: string | null
@@ -86,6 +120,7 @@ export type Database = {
           code?: string
           created_at?: string
           date?: string
+          gym_id?: string | null
           id?: string
           load?: string
           note?: string | null
@@ -93,7 +128,15 @@ export type Database = {
           sets?: number
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "log_entries_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
