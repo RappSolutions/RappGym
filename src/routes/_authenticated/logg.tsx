@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { LogSheet } from "@/components/gym/LogSheet";
-import { exercisesQuery, formatDate, logQuery, type LogEntry } from "@/lib/gym";
+import { exercisesQuery, formatDate, logQuery, type LogEntry, formatSet } from "@/lib/gym";
 
 export const Route = createFileRoute("/_authenticated/logg")({
   head: () => ({
@@ -36,7 +36,7 @@ function LogPage() {
           <section key={date} className="space-y-1">
             <div className="flex items-baseline justify-between">
               <h2 className="text-xl font-bold uppercase">{formatDate(date)}</h2>
-              <span className="text-xs text-muted-foreground">{cats.join(" · ")} · {entries.length} set</span>
+              <span className="text-xs text-muted-foreground">{cats.join(" · ")} · {entries.reduce((n, x) => n + (x.sets ?? 1), 0)} set</span>
             </div>
             <div className="divide-y rounded-xl border bg-card">
               {entries.map((e) => (
@@ -46,8 +46,7 @@ function LogPage() {
                     <span className="block truncate">{byCode.get(e.code)?.name ?? "Okänd övning"}</span>
                     {e.note && <span className="block truncate text-xs text-muted-foreground">{e.note}</span>}
                   </span>
-                  <span className="text-xs text-muted-foreground">v{e.sets}</span>
-                  <span className="font-display text-lg font-bold">{e.load || "–"} × {e.reps ?? "–"}</span>
+                  <span className="font-display text-lg font-bold">{formatSet(e)}</span>
                 </button>
               ))}
             </div>

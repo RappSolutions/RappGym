@@ -78,9 +78,10 @@ export function formatDate(iso: string) {
 
 export function computeStats(log: LogEntry[], exercises: Exercise[]) {
   const byCode = new Map(exercises.map((e) => [e.code, e]));
-  // Mirrors the Excel overview: each logged row counts as one set; reps are summed per row.
-  const totalSets = log.length;
-  const totalReps = log.reduce((s, e) => s + (e.reps ?? 0), 0);
+  // Each row holds `sets` identical sets (repeat count).
+  const n = (e: LogEntry) => Math.max(1, e.sets ?? 1);
+  const totalSets = log.reduce((s, e) => s + n(e), 0);
+  const totalReps = log.reduce((s, e) => s + n(e) * (e.reps ?? 0), 0);
   const sessions = new Set(log.map((e) => e.date)).size;
   const last = log.reduce<string | null>((m, e) => (!m || e.date > m ? e.date : m), null);
   const perCat = new Map<string, number>();
@@ -89,8 +90,8 @@ export function computeStats(log: LogEntry[], exercises: Exercise[]) {
     const ex = byCode.get(e.code);
     const c = ex?.category ?? "Okänd";
     const q = ex?.equipment || "Okänd";
-    perCat.set(c, (perCat.get(c) ?? 0) + 1);
-    perEq.set(q, (perEq.get(q) ?? 0) + 1);
+    perCat.set(c, (perCat.get(c) ?? 0) + n(e));
+    perEq.set(q, (perEq.get(q) ?? 0) + n(e));
   }
   return { totalSets, totalReps, sessions, last, perCat, perEq };
 }
@@ -127,3 +128,10 @@ export function subscribeGym(l: () => void) {
 export function exercisesAtGym(exercises: Exercise[], gymId: string | null) {
   return exercises.filter((e) => !e.gym_id || e.gym_id === gymId);
 }
+
+export function formatSet(e: { sets: number | null; reps: number | null; load: string | null }) {
+  const base = `${e.reps ?? "–"}${e.load ? ` @ ${e.load}` : ""}`;
+  return (e.sets ?? 1) > 1 ? `${e.sets} × ${base}` : base;
+}
+
+export const doseText = (d: string | null | undefined) => (d ?? "").replace(/varv/gi, "set");

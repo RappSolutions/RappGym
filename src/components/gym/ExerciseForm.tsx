@@ -94,7 +94,7 @@ export function ExerciseForm({
           </div>
           <div className="space-y-1"><Label>Anpassning</Label><Input value={f.variant} onChange={set("variant")} placeholder="Bilateralt / Enarm" /></div>
           <div className="space-y-1"><Label>Utförande</Label><Textarea rows={3} value={f.instructions} onChange={set("instructions")} /></div>
-          <div className="space-y-1"><Label>Varv × reps</Label><Input value={f.dose} onChange={set("dose")} placeholder="3–4 varv × 10–12 reps" /></div>
+          <div className="space-y-1"><Label>Set × reps</Label><Input value={f.dose} onChange={set("dose")} placeholder="3–4 set × 10–12 reps" /></div>
           <div className="space-y-1"><Label>Fokus</Label><Input value={f.focus} onChange={set("focus")} /></div>
           <Button type="submit" className="h-12 w-full font-bold uppercase">Spara</Button>
         </form>

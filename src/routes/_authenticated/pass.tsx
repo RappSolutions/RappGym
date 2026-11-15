@@ -102,7 +102,6 @@ function PassPage() {
         exercise={open}
         last={open ? last.get(open.code) : undefined}
         gymId={gym.id}
-        defaultRound={open ? (todayCount.get(open.code) ?? 0) + 1 : 1}
         onClose={() => setOpen(null)}
       />
     </main>
