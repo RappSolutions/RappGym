@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/i18n";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Plus, Search } from "lucide-react";
@@ -23,7 +24,9 @@ export const Route = createFileRoute("/_authenticated/ovningar/")({
 });
 
 function BankPage() {
-  const { data: exercises } = useSuspenseQuery(exercisesQuery);
+  const { t, language, localize } = useLanguage();
+  const { data: sourceExercises } = useSuspenseQuery(exercisesQuery);
+  const exercises = sourceExercises.map(localize);
   const { data: log } = useSuspenseQuery(logQuery);
   const navigate = useNavigate();
   const [q, setQ] = useState("");
@@ -38,12 +41,12 @@ function BankPage() {
   return (
     <main className="space-y-4 px-4">
       <div className="flex items-end justify-between">
-        <h1 className="text-4xl font-extrabold uppercase">Övningar</h1>
+        <h1 className="text-4xl font-extrabold uppercase">{t("Övningar", "Exercises")}</h1>
         <Button onClick={() => setAdding(true)} className="font-semibold"><Plus className="h-4 w-4" /> Ny</Button>
       </div>
       <div className="relative">
         <Search className="absolute top-3.5 left-3 h-5 w-5 text-muted-foreground" />
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Sök namn, kod, redskap, muskel…" className="h-12 pl-10" />
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("Sök namn, kod, redskap, muskel…", "Search name, code, equipment, muscle…")} className="h-12 pl-10" />
       </div>
       {cats.map((c) => {
         const list = hits.filter((e) => e.category === c);

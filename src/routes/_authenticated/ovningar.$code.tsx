@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/i18n";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft, Pencil, Plus, Trash2 } from "lucide-react";
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/_authenticated/ovningar/$code")({
 });
 
 function ExercisePage() {
+  const { t, language, localize } = useLanguage();
   const { code } = Route.useParams();
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
   const { data: log } = useSuspenseQuery(logQuery);
@@ -35,8 +37,9 @@ function ExercisePage() {
   const [editing, setEditing] = useState(false);
   const [logging, setLogging] = useState(false);
   const [entry, setEntry] = useState<LogEntry | null>(null);
-  const ex = exercises.find((e) => e.code === code);
-  if (!ex) return <p className="p-4">Övningen finns inte. <Link to="/ovningar" className="underline">Tillbaka</Link></p>;
+  const original = exercises.find((e) => e.code === code);
+  const ex = original ? localize(original) : undefined;
+  if (!ex) return <p className="p-4">Övningen finns inte. <Link to="/ovningar" className="underline">{t("Tillbaka", "Back")}</Link></p>;
   const cats = categoriesOf(exercises);
   const t = categoryToken(ex.category, cats);
   const history = log.filter((e) => e.code === code);
@@ -44,7 +47,7 @@ function ExercisePage() {
 
   async function remove() {
     if (!ex) return;
-    if (!confirm(`Ta bort ${ex.code} ${ex.name}? Loggade set behålls.`)) return;
+    if (!confirm(`${t("Ta bort", "Delete")} ${ex.code} ${ex.name}? ${t("Loggade set behålls.", "Logged sets are kept.")}`)) return;
     const { error } = await supabase.from("exercises").delete().eq("id", ex.id);
     if (error) {
       toast.error(error.message);
@@ -64,11 +67,11 @@ function ExercisePage() {
       </div>
       {ex.dose && <div className="rounded-xl bg-secondary p-4 font-display text-2xl font-bold">{doseText(ex.dose)}</div>}
       {ex.instructions && <p className="leading-relaxed">{ex.instructions}</p>}
-      {ex.focus && <p className={`border-l-4 pl-3 border-${t}`}><b>Fokus:</b> {ex.focus}</p>}
+      {ex.focus && <p className={`border-l-4 pl-3 border-${t}`}><b>{t("Fokus:", "Focus:")}</b> {ex.focus}</p>}
       <div className="flex gap-2">
         <Button onClick={() => { setEntry(null); setLogging(true); }} className="h-12 flex-1 font-bold uppercase"><Plus className="h-5 w-5" /> Logga set</Button>
-        <Button variant="secondary" className="h-12" onClick={() => setEditing(true)} aria-label="Redigera"><Pencil className="h-5 w-5" /></Button>
-        <Button variant="secondary" className="h-12" onClick={remove} aria-label="Ta bort"><Trash2 className="h-5 w-5" /></Button>
+        <Button variant="secondary" className="h-12" onClick={() => setEditing(true)} aria-label={t("Redigera", "Edit")}><Pencil className="h-5 w-5" /></Button>
+        <Button variant="secondary" className="h-12" onClick={remove} aria-label={t("Ta bort", "Delete")}><Trash2 className="h-5 w-5" /></Button>
       </div>
       {chart.length > 1 && (
         <div className="h-48 rounded-xl border bg-card p-2">
@@ -77,22 +80,22 @@ function ExercisePage() {
               <XAxis dataKey="d" stroke="var(--muted-foreground)" fontSize={11} />
               <YAxis stroke="var(--muted-foreground)" fontSize={11} width={30} />
               <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)" }} />
-              <Line dataKey="v" name="Belastning" stroke="var(--primary)" strokeWidth={3} dot />
+              <Line dataKey="v" name=t("Belastning", "Load") stroke="var(--primary)" strokeWidth={3} dot />
             </LineChart>
           </ResponsiveContainer>
         </div>
       )}
       <section className="space-y-2">
-        <h2 className="text-xl font-bold uppercase">Historik</h2>
-        {!history.length && <p className="text-muted-foreground">Inga loggade set ännu.</p>}
+        <h2 className="text-xl font-bold uppercase">{t("Historik", "History")}</h2>
+        {!history.length && <p className="text-muted-foreground">{t("Inga loggade set ännu.", "No sets logged yet.")}</p>}
         {history.map((e) => (
           <button key={e.id} onClick={() => { setEntry(e); setLogging(true); }} className="flex w-full items-center justify-between rounded-lg border bg-card px-4 py-3 text-left">
-            <span className="text-sm text-muted-foreground">{formatDate(e.date)}</span>
+            <span className="text-sm text-muted-foreground">{formatDate(e.date, language)}</span>
             <span className="font-display text-lg font-bold">{formatSet(e)}</span>
           </button>
         ))}
       </section>
-      <ExerciseForm open={editing} exercise={ex} all={exercises} onClose={(saved) => {
+      <ExerciseForm open={editing} exercise={original} all={exercises} onClose={(saved) => {
         setEditing(false);
         if (saved && saved.code !== code) navigate({ to: "/ovningar/$code", params: { code: saved.code }, replace: true });
       }} />

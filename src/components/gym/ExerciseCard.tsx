@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/i18n";
 import { doseText } from "@/lib/gym";
 import { cn } from "@/lib/utils";
 import type { Exercise, LogEntry } from "@/lib/gym";
@@ -7,6 +8,8 @@ export function ExerciseCard({
 }: {
   ex: Exercise; last?: LogEntry | undefined; doneToday?: number | undefined; token: string; onClick?: () => void; action?: React.ReactNode;
 }) {
+  const { t, language, localize } = useLanguage();
+  ex = localize(ex);
   return (
     <div className={cn("flex items-stretch overflow-hidden rounded-xl border bg-card")}>
       <div className={cn("w-1.5 shrink-0", `bg-${token}`)} />
@@ -25,12 +28,12 @@ export function ExerciseCard({
           {last ? (
             <>
               <div className="font-display text-xl font-bold">{last.load || "–"}<span className="text-sm text-muted-foreground"> × {last.reps ?? "–"}</span></div>
-              <div className="text-xs text-muted-foreground">senast</div>
+              <div className="text-xs text-muted-foreground">{t("senast", "last")}</div>
             </>
           ) : (
-            <div className="text-xs text-muted-foreground">ny</div>
+            <div className="text-xs text-muted-foreground">{t("ny", "new")}</div>
           )}
-          {!!doneToday && <div className="mt-1 rounded bg-primary px-1.5 text-xs font-bold text-primary-foreground">{doneToday} idag</div>}
+          {!!doneToday && <div className="mt-1 rounded bg-primary px-1.5 text-xs font-bold text-primary-foreground">{doneToday} {t("idag", "today")}</div>}
         </div>
       </button>
       {action}
