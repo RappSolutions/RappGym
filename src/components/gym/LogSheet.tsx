@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { todayISO, useInvalidateGym, type Exercise, type LogEntry } from "@/lib/gym";
+import { todayISO, useInvalidateGym, formatSet, doseText, type Exercise, type LogEntry } from "@/lib/gym";
 
 function Stepper({ label, value, onChange }: { label: string; value: number; onChange: (n: number) => void }) {
   return (
@@ -25,14 +25,12 @@ export function LogSheet({
   exercise,
   last,
   entry,
-  defaultRound,
   gymId,
   onClose,
 }: {
   exercise: Exercise | null;
   last?: LogEntry | undefined;
   entry?: LogEntry | null;
-  defaultRound?: number;
   gymId?: string | null;
   onClose: () => void;
 }) {
@@ -47,17 +45,17 @@ export function LogSheet({
   useEffect(() => {
     if (!exercise) return;
     const src = entry ?? last;
-    setRound(entry?.sets ?? defaultRound ?? 1);
+    setRound(entry?.sets ?? 1);
     setLoad(src?.load ?? "");
     setReps(src?.reps ?? 10);
     setNote(entry?.note ?? "");
     setDate(entry?.date ?? todayISO());
-  }, [exercise, entry, last, defaultRound]);
+  }, [exercise, entry, last]);
 
   async function save() {
     if (!exercise) return;
     setBusy(true);
-    const row = { code: exercise.code, sets: round, load, reps, note: note || null, date, ...(entry ? {} : { gym_id: gymId ?? null }) };
+    const row = { code: exercise.code, sets: Math.max(1, round), load, reps, note: note || null, date, ...(entry ? {} : { gym_id: gymId ?? null }) };
     const { error } = entry
       ? await supabase.from("log_entries").update(row).eq("id", entry.id)
       : await supabase.from("log_entries").insert(row);
@@ -66,7 +64,18 @@ export function LogSheet({
       toast.error(error.message);
       return;
     }
-    toast.success(`${exercise.code} sparad`);
+    const code = exercise.code;
+    toast.success(`${code} sparad${row.sets > 1 ? ` (${row.sets} set)` : ""}`, entry ? undefined : {
+      duration: 8000,
+      action: {
+        label: "+1 likadant set",
+        onClick: async () => {
+          const { error: e2 } = await supabase.from("log_entries").insert({ ...row, sets: 1 });
+          if (e2) toast.error(e2.message);
+          else { toast.success(`${code}: ett set till`); invalidate(); }
+        },
+      },
+    });
     invalidate();
     onClose();
   }
@@ -91,12 +100,12 @@ export function LogSheet({
               <span className="text-primary">{exercise?.code}</span> {exercise?.name}
             </DrawerTitle>
             <DrawerDescription>
-              {exercise?.dose}
-              {last && !entry && ` · Senast: ${last.load || "–"} × ${last.reps ?? "–"}`}
+              {doseText(exercise?.dose)}
+              {last && !entry && ` · Senast: ${formatSet({ ...last, sets: 1 })}`}
             </DrawerDescription>
           </DrawerHeader>
           <div className="grid grid-cols-2 gap-3">
-            <Stepper label="Varv" value={round} onChange={setRound} />
+            <Stepper label="Antal set" value={round} onChange={setRound} />
             <Stepper label="Reps / sek" value={reps} onChange={setReps} />
           </div>
           <div className="grid grid-cols-2 gap-3">

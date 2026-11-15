@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ExerciseForm } from "@/components/gym/ExerciseForm";
 import { LogSheet } from "@/components/gym/LogSheet";
 import { supabase } from "@/integrations/supabase/client";
-import { categoriesOf, categoryToken, exercisesQuery, formatDate, logQuery, todayISO, useInvalidateGym, type LogEntry } from "@/lib/gym";
+import { categoriesOf, categoryToken, exercisesQuery, formatDate, logQuery, todayISO, useInvalidateGym, type LogEntry, formatSet } from "@/lib/gym";
 
 export const Route = createFileRoute("/_authenticated/ovningar/$code")({
   head: ({ params }) => ({
@@ -88,8 +88,8 @@ function ExercisePage() {
         {!history.length && <p className="text-muted-foreground">Inga loggade set ännu.</p>}
         {history.map((e) => (
           <button key={e.id} onClick={() => { setEntry(e); setLogging(true); }} className="flex w-full items-center justify-between rounded-lg border bg-card px-4 py-3 text-left">
-            <span className="text-sm text-muted-foreground">{formatDate(e.date)} · varv {e.sets}</span>
-            <span className="font-display text-lg font-bold">{e.load || "–"} × {e.reps ?? "–"}</span>
+            <span className="text-sm text-muted-foreground">{formatDate(e.date)}</span>
+            <span className="font-display text-lg font-bold">{formatSet(e)}</span>
           </button>
         ))}
       </section>
@@ -101,7 +101,6 @@ function ExercisePage() {
         exercise={logging ? ex : null}
         entry={entry}
         last={history[0]}
-        defaultRound={history.filter((e) => e.date === today).length + 1}
         onClose={() => { setLogging(false); setEntry(null); }}
       />
     </main>
