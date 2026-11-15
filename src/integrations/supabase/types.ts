@@ -24,10 +24,12 @@ export type Database = {
           focus: string
           gym_id: string | null
           id: string
+          image_urls: Json
           instructions: string
           muscles: string
           name: string
           sort_order: number
+          translations: Json
           user_id: string
           variant: string
         }
@@ -40,10 +42,12 @@ export type Database = {
           focus?: string
           gym_id?: string | null
           id?: string
+          image_urls?: Json
           instructions?: string
           muscles?: string
           name: string
           sort_order?: number
+          translations?: Json
           user_id?: string
           variant?: string
         }
@@ -56,10 +60,12 @@ export type Database = {
           focus?: string
           gym_id?: string | null
           id?: string
+          image_urls?: Json
           instructions?: string
           muscles?: string
           name?: string
           sort_order?: number
+          translations?: Json
           user_id?: string
           variant?: string
         }
