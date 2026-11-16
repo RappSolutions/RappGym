@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Create a FetchXML Builder-family RappGym logo, use it on Home and as favicon.ico, and verify
 - [x] Add AI Gateway training summary and personal next-workout recommendation on Statistics
 - [x] Limit sign-in to Google and Microsoft, disable email/password, and verify
 - [x] Use English page addresses and preserve old links with redirects
