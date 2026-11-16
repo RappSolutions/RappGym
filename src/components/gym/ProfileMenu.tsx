@@ -5,7 +5,7 @@ import type { User } from "@supabase/supabase-js";
 import { LogOut, UserRound, Save, Trash2, LoaderCircle, Target } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage, LanguagePicker } from "@/lib/i18n";
 import { emptyTrainingProfile, trainingProfileSchema, type TrainingProfile } from "@/lib/training-profile";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => Promise<void> }) {
-  const { t, language, setLanguage } = useLanguage();
+  const { t } = useLanguage();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -59,7 +59,7 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
   }
   return <>
     <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label={t("Mitt konto", "My account")} title={t("Mitt konto", "My account")} className="shrink-0 rounded-full text-brand-yellow hover:bg-brand-royal hover:text-brand-yellow"><Avatar className="size-9 border-2 border-brand-yellow"><AvatarFallback className="bg-brand-royal text-sm font-semibold text-brand-yellow">{initials || <UserRound className="size-5" />}</AvatarFallback></Avatar></Button></DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 max-w-[calc(100vw-2rem)]"><DropdownMenuLabel><span className="block break-words">{name}</span>{user.email !== name && <span className="block break-words text-xs font-normal text-muted-foreground">{user.email}</span>}</DropdownMenuLabel><DropdownMenuSeparator /><DropdownMenuItem className="min-h-12" onSelect={() => void edit()}><UserRound />{t("Min träningsprofil", "My training profile")}</DropdownMenuItem><DropdownMenuSeparator /><div className="flex gap-2 px-2 py-2" role="group" aria-label={t("Språk", "Language")}>{(["sv", "en"] as const).map((value) => <Button key={value} type="button" variant={language === value ? "secondary" : "ghost"} size="icon" aria-label={value === "sv" ? "Svenska" : "English"} aria-pressed={language === value} onClick={() => setLanguage(value)} className="size-12 text-2xl">{value === "sv" ? "🇸🇪" : "🇬🇧"}</Button>)}</div><DropdownMenuSeparator /><DropdownMenuItem className="min-h-12" onSelect={() => void onSignOut()}><LogOut />{t("Logga ut", "Sign out")}</DropdownMenuItem></DropdownMenuContent>
+      <DropdownMenuContent align="end" className="w-64 max-w-[calc(100vw-2rem)]"><DropdownMenuLabel><span className="block break-words">{name}</span>{user.email !== name && <span className="block break-words text-xs font-normal text-muted-foreground">{user.email}</span>}</DropdownMenuLabel><DropdownMenuSeparator /><DropdownMenuItem className="min-h-12" onSelect={() => void edit()}><UserRound />{t("Min träningsprofil", "My training profile")}</DropdownMenuItem><DropdownMenuSeparator /><div className="px-2 py-2"><LanguagePicker flagsOnly /></div><DropdownMenuSeparator /><DropdownMenuItem className="min-h-12" onSelect={() => void onSignOut()}><LogOut />{t("Logga ut", "Sign out")}</DropdownMenuItem></DropdownMenuContent>
     </DropdownMenu>
     <Dialog open={open} onOpenChange={(value) => { if (!busy) setOpen(value); }}><DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] overflow-y-auto p-5"><DialogHeader><DialogTitle className="text-2xl">{t("Min träningsprofil", "My training profile")}</DialogTitle><DialogDescription>{t("Alla uppgifter är valfria och privata. Ange bara det du vill dela.", "All details are optional and private. Enter only what you want to share.")}</DialogDescription></DialogHeader>
       {!loaded ? <LoaderCircle className="size-6 animate-spin" /> : <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); if (!busy) void save(); }}>
