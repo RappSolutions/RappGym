@@ -64,8 +64,8 @@ function LogPage() {
               <div><span className="font-semibold text-primary">{t("Förslag", "Suggestion")}</span><h3 className="text-xl font-bold">{first.proposal_title}</h3><p className="text-sm">{formatDateWithWeekday(first.date, language)}{gym ? ` · ${gym.name}` : ""}</p></div>
               <span className="text-sm font-medium">{done}/{done + rows.length} {t("övningar genomförda", "exercises completed")}</span>
             </div>
-            <div className="divide-y divide-border">{rows.map((row) => <Button key={row.id} variant="ghost" data-category={categoryToken(byCode.get(row.code)?.category ?? "", categories)} className="category-theme flex h-auto min-h-12 w-full flex-wrap justify-start gap-2 whitespace-normal border-l-4 border-category-fill px-2 text-left" onClick={() => { setGuidedId(null); setEntry(row); }}>
-              <Circle className="size-4 shrink-0 text-primary" /><span className="font-bold text-category-ink">{row.code}</span><span className="min-w-0 flex-1">{byCode.get(row.code)?.name}</span><span className="font-semibold">{formatSet(row)}</span>
+            <div className="divide-y divide-border">{rows.map((row) => <Button key={row.id} variant="ghost" data-category={categoryToken(byCode.get(row.code)?.category ?? "", categories)} className="category-theme grid h-auto min-h-12 w-full grid-cols-[1rem_2.5rem_minmax(0,1fr)] gap-x-2 gap-y-1 whitespace-normal border-l-4 border-category-fill px-2 py-3 text-left sm:grid-cols-[1rem_2.5rem_minmax(0,1fr)_auto]" onClick={() => { setGuidedId(null); setEntry(row); }}>
+              <Circle className="size-4 shrink-0 text-primary" /><span className="font-bold text-category-ink">{row.code}</span><span className="min-w-0 break-words">{byCode.get(row.code)?.name}</span><span className="col-span-2 col-start-2 min-w-0 break-words font-semibold sm:col-span-1 sm:col-start-auto">{formatSet(row)}</span>
             </Button>)}</div>
             <Button className="w-full sm:w-auto" onClick={() => { setGuidedId(id); setEntry(first); }}><Play className="size-4" />{done ? t("Fortsätt passet", "Continue workout") : t("Gå igenom passet", "Start workout")}</Button>
           </article>;
