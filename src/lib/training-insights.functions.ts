@@ -37,7 +37,15 @@ export const getTrainingInsights = createServerFn({ method: "POST" })
     if (!log.length) return fail(data.language === "sv" ? "Logga ett pass först." : "Log a workout first.");
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) return fail(data.language === "sv" ? "AI är inte konfigurerad ännu." : "AI is not configured yet.");
-    const facts = trainingContext(log, exercises, data.gymId);
+    let usable = exercises;
+    if (data.gymId) {
+      const { data: links, error: linkError } = await supabase.from("exercise_locations").select("exercise_id").eq("user_id", userId).eq("gym_id", data.gymId);
+      if (linkError) throw new Error(linkError.message);
+      const ids = new Set(links.map((l) => l.exercise_id));
+      usable = exercises.filter((e) => ids.has(e.id));
+      if (!usable.length) return fail(data.language === "sv" ? "Platsen har inga övningar. Lägg till övningar till platsen under Inställningar." : "This location has no exercises. Add exercises to it under Settings.");
+    }
+    const facts = { ...trainingContext(log, exercises, data.gymId), availableExerciseCodes: usable.map((e) => e.code) };
     const request = trainingRequestSchema.parse(data.request ?? {});
     try {
       const { createResponsesCall } = await import("@/lib/ai/responses.server");
