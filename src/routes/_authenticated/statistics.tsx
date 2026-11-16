@@ -77,12 +77,15 @@ function StatsPage() {
   return (
     <main className="space-y-4 px-4">
       <div className="grid grid-cols-2 gap-2">
-        {kpis.map(([l, v]) => (
-          <div key={l} className="rounded-xl border bg-card p-4">
-            <div className="text-3xl font-extrabold text-primary">{v}</div>
-            <div className="text-xs uppercase text-muted-foreground">{l}</div>
-          </div>
-        ))}
+        {kpis.map(([l, v]) => {
+          const value = String(v);
+          return (
+            <div key={l} className="min-w-0 rounded-xl border bg-card p-4">
+              <div className={`truncate font-extrabold text-primary ${value.length > 8 ? "text-xl" : "text-3xl"}`}>{value}</div>
+              <div className="text-xs uppercase text-muted-foreground">{l}</div>
+            </div>
+          );
+        })}
       </div>
       {log.length > 0 && <ProgressOverview log={log} exercises={exercises} />}
       <TrainingInsights exercises={exercises} hasLog={log.length > 0} />
