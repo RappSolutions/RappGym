@@ -77,6 +77,7 @@ function LogPage() {
 
   return (
     <main className="space-y-5 px-4">
+      <p className="text-sm text-muted-foreground">{t("Logg: allt du har tränat, per datum, plus sparade passförslag.", "Log: everything you have trained, by date, plus saved workout suggestions.")}</p>
       {proposals.length > 0 && <section className="space-y-3 border-b border-border pb-5" aria-label={t("Föreslagna pass", "Suggested workouts")}>
         <Button variant="ghost" className="h-auto min-h-12 w-full justify-start gap-2 whitespace-normal px-0 text-left" aria-expanded={proposalsExpanded} aria-controls="proposed-workouts" onClick={() => setProposalsExpanded(!proposalsExpanded)}>{proposalsExpanded ? <ChevronDown className="size-4 shrink-0" /> : <ChevronRight className="size-4 shrink-0" />}<Circle className="size-5 shrink-0 text-primary" /><span className="font-display text-2xl font-bold">{t("Föreslagna pass", "Suggested workouts")}</span><span className="ml-auto text-sm text-muted-foreground">{planned.size}</span></Button>
         <div id="proposed-workouts" hidden={!proposalsExpanded} className="space-y-3">

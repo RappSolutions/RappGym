@@ -43,6 +43,7 @@ function BankPage() {
 
   return (
     <main className="space-y-4 px-4">
+      <p className="text-sm text-muted-foreground">{t("Övningar: din övningsbank med instruktioner och bilder – lägg till och redigera här.", "Exercises: your exercise library with instructions and pictures – add and edit here.")}</p>
       <div className="flex justify-end">
         <Button onClick={() => setAdding(true)} className="font-semibold"><Plus className="h-4 w-4" />{t("Ny", "New")}</Button>
       </div>
