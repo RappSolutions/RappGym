@@ -17,6 +17,7 @@ import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/h
 import { Route as AuthenticatedLogRouteImport } from './routes/_authenticated/log'
 import { Route as AuthenticatedLoggRouteImport } from './routes/_authenticated/logg'
 import { Route as AuthenticatedPassRouteImport } from './routes/_authenticated/pass'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedStatisticsRouteImport } from './routes/_authenticated/statistics'
 import { Route as AuthenticatedStatistikRouteImport } from './routes/_authenticated/statistik'
 import { Route as AuthenticatedWorkoutRouteImport } from './routes/_authenticated/workout'
@@ -62,6 +63,11 @@ const AuthenticatedLoggRoute = AuthenticatedLoggRouteImport.update({
 const AuthenticatedPassRoute = AuthenticatedPassRouteImport.update({
   id: '/pass',
   path: '/pass',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedStatisticsRoute = AuthenticatedStatisticsRouteImport.update({
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/log': typeof AuthenticatedLogRoute
   '/logg': typeof AuthenticatedLoggRoute
   '/pass': typeof AuthenticatedPassRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/statistics': typeof AuthenticatedStatisticsRoute
   '/statistik': typeof AuthenticatedStatistikRoute
   '/workout': typeof AuthenticatedWorkoutRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/log': typeof AuthenticatedLogRoute
   '/logg': typeof AuthenticatedLoggRoute
   '/pass': typeof AuthenticatedPassRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/statistics': typeof AuthenticatedStatisticsRoute
   '/statistik': typeof AuthenticatedStatistikRoute
   '/workout': typeof AuthenticatedWorkoutRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   '/_authenticated/log': typeof AuthenticatedLogRoute
   '/_authenticated/logg': typeof AuthenticatedLoggRoute
   '/_authenticated/pass': typeof AuthenticatedPassRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/statistics': typeof AuthenticatedStatisticsRoute
   '/_authenticated/statistik': typeof AuthenticatedStatistikRoute
   '/_authenticated/workout': typeof AuthenticatedWorkoutRoute
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/log'
     | '/logg'
     | '/pass'
+    | '/settings'
     | '/statistics'
     | '/statistik'
     | '/workout'
@@ -180,6 +190,7 @@ export interface FileRouteTypes {
     | '/log'
     | '/logg'
     | '/pass'
+    | '/settings'
     | '/statistics'
     | '/statistik'
     | '/workout'
@@ -197,6 +208,7 @@ export interface FileRouteTypes {
     | '/_authenticated/log'
     | '/_authenticated/logg'
     | '/_authenticated/pass'
+    | '/_authenticated/settings'
     | '/_authenticated/statistics'
     | '/_authenticated/statistik'
     | '/_authenticated/workout'
@@ -270,6 +282,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPassRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/statistics': {
       id: '/_authenticated/statistics'
       path: '/statistics'
@@ -328,6 +347,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedLogRoute: typeof AuthenticatedLogRoute
   AuthenticatedLoggRoute: typeof AuthenticatedLoggRoute
   AuthenticatedPassRoute: typeof AuthenticatedPassRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedStatisticsRoute: typeof AuthenticatedStatisticsRoute
   AuthenticatedStatistikRoute: typeof AuthenticatedStatistikRoute
   AuthenticatedWorkoutRoute: typeof AuthenticatedWorkoutRoute
@@ -343,6 +363,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedLogRoute: AuthenticatedLogRoute,
   AuthenticatedLoggRoute: AuthenticatedLoggRoute,
   AuthenticatedPassRoute: AuthenticatedPassRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedStatisticsRoute: AuthenticatedStatisticsRoute,
   AuthenticatedStatistikRoute: AuthenticatedStatistikRoute,
   AuthenticatedWorkoutRoute: AuthenticatedWorkoutRoute,

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { BarChart3, House, BookOpen, Dumbbell, History, Sparkles } from "lucide-react";
+import { BarChart3, House, Dumbbell, History, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/lib/i18n";
 import { ProfileMenu } from "@/components/gym/ProfileMenu";
@@ -17,8 +17,7 @@ export const Route = createFileRoute("/_authenticated")({
 
 const tabs = [
   { to: "/home", label: "Hem", icon: House },
-  { to: "/workout", label: "Pass", icon: Dumbbell },
-  { to: "/exercises", label: "Övningar", icon: BookOpen },
+  { to: "/workout", label: "Träna", icon: Dumbbell },
   { to: "/log", label: "Logg", icon: History },
   { to: "/statistics", label: "Statistik", icon: BarChart3 },
   { to: "/ai", label: "AI", icon: Sparkles },
@@ -26,11 +25,12 @@ const tabs = [
 
 const pageLabels: [RegExp, string, string][] = [
   [/^\/home/, "Hem", "Home"],
-  [/^\/workout/, "Pass", "Workout"],
+  [/^\/workout/, "Träna", "Train"],
   [/^\/exercises/, "Övningar", "Exercises"],
   [/^\/log/, "Logg", "Log"],
   [/^\/statistics/, "Statistik", "Statistics"],
   [/^\/ai/, "AI", "AI"],
+  [/^\/settings/, "Inställningar", "Settings"],
 ];
 
 function AppLayout() {
@@ -58,7 +58,7 @@ function AppLayout() {
       </header>
       <Outlet />
       <nav className="app-navigation fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur">
-        <div className="mx-auto grid max-w-2xl grid-cols-6">
+        <div className="mx-auto grid max-w-2xl grid-cols-5">
           {tabs.map(({ to, label, icon: Icon }) => (
             <Link
               key={to}
@@ -69,7 +69,7 @@ function AppLayout() {
               {({ isActive }) => (
                 <>
                   <Icon className={`h-6 w-6 ${isActive ? "text-brand-blue" : ""}`} />
-                   {t(label, to === "/home" ? "Home" : to === "/workout" ? "Workout" : to === "/exercises" ? "Exercises" : to === "/log" ? "Log" : to === "/ai" ? "AI" : "Statistics")}
+                   {t(label, to === "/home" ? "Home" : to === "/workout" ? "Train" : to === "/log" ? "Log" : to === "/ai" ? "AI" : "Statistics")}
                 </>
               )}
             </Link>

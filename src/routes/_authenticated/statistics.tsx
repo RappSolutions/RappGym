@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ProgressOverview } from "@/components/gym/ProgressOverview";
 import { supabase } from "@/integrations/supabase/client";
-import { categoriesOf, categoryToken, computeStats, exercisesQuery, formatDate, logQuery, useInvalidateGym } from "@/lib/gym";
+import { categoriesOf, categoryToken, computeStats, exercisesQuery, gymsQuery, formatDate, logQuery, useInvalidateGym } from "@/lib/gym";
 
 export const Route = createFileRoute("/_authenticated/statistics")({
   head: () => ({
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/statistics")({
     ],
   }),
   loader: ({ context }) =>
-    Promise.all([context.queryClient.ensureQueryData(exercisesQuery), context.queryClient.ensureQueryData(logQuery)]),
+    Promise.all([context.queryClient.ensureQueryData(gymsQuery), context.queryClient.ensureQueryData(exercisesQuery), context.queryClient.ensureQueryData(logQuery)]),
   component: StatsPage,
 });
 
@@ -45,7 +45,10 @@ function Bars({ title, data, total, tokenOf }: { title: string; data: Map<string
 function StatsPage() {
   const { t, language, localize } = useLanguage();
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
-  const { data: log } = useSuspenseQuery(logQuery);
+  const { data: allLog } = useSuspenseQuery(logQuery);
+  const { data: gyms } = useSuspenseQuery(gymsQuery);
+  const [place, setPlace] = useState("");
+  const log = place ? allLog.filter((e) => e.gym_id === place) : allLog;
   const invalidate = useInvalidateGym();
   const [busy, setBusy] = useState(false);
   const s = computeStats(log, exercises.map(localize));
@@ -75,6 +78,12 @@ function StatsPage() {
 
   return (
     <main className="space-y-4 px-4">
+      {gyms.length > 0 && (
+        <select aria-label={t("Plats", "Location")} value={place} onChange={(e) => setPlace(e.target.value)} className="h-11 w-full rounded-md border bg-background px-3 sm:w-auto">
+          <option value="">{t("Alla platser", "All locations")}</option>
+          {gyms.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+        </select>
+      )}
       <div className="grid grid-cols-2 gap-2">
         {kpis.map(([l, v]) => {
           const value = String(v);
@@ -86,10 +95,10 @@ function StatsPage() {
           );
         })}
       </div>
-      {log.length > 0 && <ProgressOverview log={log} exercises={exercises} />}
       {s.totalSets > 0 && <Bars title={t("Set per kategori", "Sets by category")} data={s.perCat} total={s.totalSets} tokenOf={(k) => categoryToken(k, categories)} />}
       {s.totalSets > 0 && <Bars title={t("Set per redskap", "Sets by equipment")} data={s.perEq} total={s.totalSets} />}
-      {log.length === 0 && (
+      {log.length > 0 && <ProgressOverview key={place} log={log} exercises={exercises} />}
+      {allLog.length === 0 && (
         <div className="space-y-3 rounded-xl border border-dashed p-4">
           <p className="text-sm text-muted-foreground">{t("Hämta in dina 72 tidigare set från Excel-dagboken (3–14 nov 2026).", "Import your 72 previous exercise entries from Excel (3–14 Nov 2026).")}</p>
           <Button onClick={importExcel} disabled={busy} className="w-full font-semibold">{t("Importera Excel-historik", "Import Excel history")}</Button>
