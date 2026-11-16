@@ -10,12 +10,12 @@ export function HeaderLocation() {
   const [gymId, setGym] = useSelectedGym();
   if (!gyms.length) return null;
   return (
-    <label className="flex min-w-0 items-center gap-1 rounded-md border border-brand-yellow/60 bg-brand-royal/40 px-2 text-brand-yellow">
+    <label className="flex min-w-0 items-center gap-2 rounded-md border border-brand-yellow/60 px-3 text-brand-yellow">
       <MapPin className="size-4 shrink-0" aria-hidden="true" />
       <span className="sr-only">{t("Plats", "Location")}</span>
-      <select value={gymId ?? ""} onChange={(e) => setGym(e.target.value)} className="h-10 max-w-[9rem] truncate appearance-none border-0 !bg-brand-royal text-sm font-semibold !text-brand-yellow outline-none md:max-w-[14rem]">
+      <select value={gymId ?? ""} onChange={(e) => setGym(e.target.value)} className="h-10 max-w-[9rem] truncate header-location appearance-none border-0 text-sm font-semibold outline-none md:max-w-[14rem]">
         {!gymId && <option value="">{t("Välj plats", "Pick location")}</option>}
-        {gyms.map((g) => <option key={g.id} value={g.id} className="text-foreground">{g.name}</option>)}
+        {gyms.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
       </select>
     </label>
   );
