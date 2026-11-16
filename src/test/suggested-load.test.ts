@@ -9,9 +9,10 @@ describe("suggested load", () => {
     expect(row?.load).toBe("20");
     expect(row?.note).toBe("Bekant kombination\n20 kg eller lägre vid behov");
   });
-  it("does not invent numeric weights for ambiguous loads", () => {
-    for (const load of ["15–20 kg", "Band 20", "Kroppsvikt", "Orange", "20 eller mindre"])
-      expect(splitSuggestedLoad(load)).toEqual({ load, advice: "" });
+  it("moves free-text loads to the note instead of the load field", () => {
+    for (const load of ["15–20 kg", "Band 20", "Kroppsvikt", "Light hotel-machine setting", "20 eller mindre"])
+      expect(splitSuggestedLoad(load)).toEqual({ load: "", advice: load });
+    expect(splitSuggestedLoad("17,5")).toEqual({ load: "17.5", advice: "" });
   });
   it("keeps decimal weights and avoids duplicate advice", () => {
     expect(splitSuggestedLoad("12,5 kg")).toEqual({ load: "12.5", advice: "" });

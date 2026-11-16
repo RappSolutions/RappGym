@@ -1,5 +1,5 @@
 import { useLanguage } from "@/lib/i18n";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { ExerciseImages } from "@/components/gym/ExerciseImages";
@@ -39,8 +39,7 @@ export function ExerciseDetails({
       {ex.instructions && <p className="leading-relaxed">{ex.instructions}</p>}
       {ex.focus && <p className="border-l-4 border-category-fill pl-3"><b>{t("Fokus:", "Focus:")}</b> {ex.focus}</p>}
       <div className="flex gap-2">
-        <Button onClick={() => onLog(null)} className="h-12 flex-1 font-bold uppercase"><Plus className="h-5 w-5" />{t("Logga set", "Log sets")}</Button>
-        <Button variant="secondary" className="h-12" onClick={onEdit} aria-label={t("Redigera", "Edit")}><Pencil className="h-5 w-5" /></Button>
+        <Button variant="secondary" className="h-12 flex-1" onClick={onEdit} aria-label={t("Redigera", "Edit")}><Pencil className="h-5 w-5" /></Button>
         <Button variant="secondary" className="h-12" onClick={onDelete} aria-label={t("Ta bort", "Delete")}><Trash2 className="h-5 w-5" /></Button>
       </div>
       {chart.length > 1 && (
