@@ -2,7 +2,7 @@ import { createFileRoute, Link, Outlet, redirect, useNavigate, useRouterState } 
 import { useQueryClient } from "@tanstack/react-query";
 import { BarChart3, House, BookOpen, Dumbbell, History } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { LanguagePicker, useLanguage } from "@/lib/i18n";
+import { useLanguage } from "@/lib/i18n";
 import { ProfileMenu } from "@/components/gym/ProfileMenu";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -52,7 +52,7 @@ function AppLayout() {
           Rapp<span className="text-brand-yellow">Gym</span>
           {page && <span className="ml-2 text-brand-yellow">– {page}</span>}
         </Link>
-        <div className="flex shrink-0 items-center gap-2"><LanguagePicker /><ProfileMenu user={user} onSignOut={signOut} /></div>
+        <div className="flex shrink-0 items-center gap-2"><ProfileMenu user={user} onSignOut={signOut} /></div>
       </header>
       <Outlet />
       <nav className="app-navigation fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur">
