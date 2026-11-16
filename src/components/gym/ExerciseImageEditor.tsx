@@ -37,11 +37,11 @@ export function ExerciseImageEditor({ exercise }: { exercise: Exercise }) {
     const path = `${user.user?.id}/${exercise.id}-${Date.now()}.${file.name.split(".").pop() || "jpg"}`;
     const { error } = await supabase.storage.from("exercise-images").upload(path, file, { contentType: file.type });
     setBusy(null);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     await saveUrls([...urls, `storage:${path}`]);
   }
   async function addUrl() {
-    if (!/^https:\/\//i.test(url.trim())) return toast.error(t("Länken måste börja med https://", "The link must start with https://"));
+    if (!/^https:\/\//i.test(url.trim())) { toast.error(t("Länken måste börja med https://", "The link must start with https://")); return; }
     if (await saveUrls([...urls, url.trim()])) setUrl("");
   }
   async function ai() {
