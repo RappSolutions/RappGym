@@ -30,6 +30,8 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## Gym log app
+- Split explicit single-kg suggested loads into numeric load and preserved note advice at acceptance/editing boundaries, never retroactively reinterpret completed history.
+- Use the shared ISO log date picker with an interactive Shadcn calendar inside the drawer, so selecting dates is independent of native browser picker support.
 - Keep AI analysis/planning/history on the dedicated authenticated AI route; shared navigation provides access without crowding dashboard or statistics.
 - Progress exercise selection uses searchable, database-derived category groups; log proposal deletion targets suggested rows only and preserves completed work and AI history.
 - Keep supported OAuth methods in a shared auth-provider module used by the sign-in page and tested, so authentication restrictions stay consistent.

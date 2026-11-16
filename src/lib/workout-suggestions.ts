@@ -1,5 +1,6 @@
 import type { TrainingInsights } from "@/lib/training-insights-schema";
 import { plannedWorkoutDate } from "@/lib/training-request";
+import { appendLoadAdvice, splitSuggestedLoad } from "@/lib/suggested-load";
 
 export function completedEntries<T extends { status?: string }>(rows: readonly T[]): T[] {
   return rows.filter((row) => row.status !== "suggested");
@@ -11,12 +12,14 @@ export function removableSuggestionIds(rows: readonly { id: string; status: stri
 }
 
 export function suggestionRows(items: TrainingInsights["exercises"], today: string, dayOffset: number, title: string, gymId: string | null, proposalId: string) {
-  return items.map((item, index) => ({
-    code: item.code, sets: item.sets, reps: item.reps, load: item.load,
-    date: plannedWorkoutDate(today, dayOffset), note: item.reason || null,
+  return items.map((item, index) => {
+    const split = splitSuggestedLoad(item.load);
+    return {
+    code: item.code, sets: item.sets, reps: item.reps, load: split.load,
+    date: plannedWorkoutDate(today, dayOffset), note: appendLoadAdvice(item.reason, split.advice) || null,
     gym_id: gymId, status: "suggested" as const, proposal_id: proposalId,
     proposal_title: title, proposal_order: index,
-  }));
+  }; });
 }
 
 /** Local calendar date and 24-hour clock, independent of UI language. */
