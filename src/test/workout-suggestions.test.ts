@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analysisDateTime, suggestionRows } from "@/lib/workout-suggestions";
+import { analysisDateTime, suggestionRows, removableSuggestionIds } from "@/lib/workout-suggestions";
 import { computeStats, lastByCode, type LogEntry } from "@/lib/gym";
 import { dashboardStats } from "@/lib/dashboard";
 import { progressByDay } from "@/lib/progress";
@@ -11,6 +11,13 @@ const rows = [
 ] as LogEntry[];
 
 describe("saved suggestions", () => {
+  it("removes only uncompleted exercises in the selected proposal", () => {
+    expect(removableSuggestionIds([
+      { id: "pending", status: "suggested", proposal_id: "selected" },
+      { id: "done", status: "completed", proposal_id: "selected" },
+      { id: "other", status: "suggested", proposal_id: "other-plan" },
+    ], "selected")).toEqual(["pending"]);
+  });
   it("stores planned date, dose, suggestion status and exercise order without recording completed work", () => {
     const result = suggestionRows([{ code: "A", sets: 2, reps: 12, load: "15", reason: "Balance" }], "2026-11-16", 3, "Workout", null, "plan-id");
     expect(result[0]).toEqual({ code: "A", sets: 2, reps: 12, load: "15", note: "Balance", date: "2026-11-19", status: "suggested", gym_id: null, proposal_id: "plan-id", proposal_title: "Workout", proposal_order: 0 });

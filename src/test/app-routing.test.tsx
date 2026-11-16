@@ -14,6 +14,7 @@ describe("App routing", () => {
     ["/exercises/PU1", "/_authenticated/exercises/$code"],
     ["/log", "/_authenticated/log"],
     ["/statistics", "/_authenticated/statistics"],
+    ["/ai", "/_authenticated/ai"],
   ])("matches the English page address %s", (path, routeId) => {
     const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
     expect(router.matchRoutes(path).at(-1)?.routeId).toBe(routeId);
