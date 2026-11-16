@@ -14,7 +14,7 @@ export const scanLocationPhoto = createServerFn({ method: "POST" })
     const fail = (error: string) => ({ exerciseIds: [], equipment: "", error });
     const { data: gym } = await supabase.from("gyms").select("id").eq("id", data.gymId).eq("user_id", userId).maybeSingle();
     if (!gym) return fail(sv ? "Platsen hittades inte." : "Location not found.");
-    const { data: exercises, error } = await supabase.from("exercises").select("id,code,name,equipment,category").eq("user_id", userId);
+    const { data: exercises, error } = await supabase.from("exercises").select("id,code,name,equipment,category").eq("user_id", userId).eq("is_active", true);
     if (error) throw new Error(error.message);
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) return fail(sv ? "AI är inte konfigurerad ännu." : "AI is not configured yet.");

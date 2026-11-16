@@ -15,7 +15,9 @@ import { categoriesOf, categoryToken, exercisesQuery, lastByCode, logQuery, useI
 export function ExerciseManager() {
   const { t, localize } = useLanguage();
   const { data: sourceExercises } = useSuspenseQuery(exercisesQuery);
-  const exercises = sourceExercises.map(localize);
+  const [showInactive, setShowInactive] = useState(false);
+  const inactiveCount = sourceExercises.filter((e) => !e.is_active).length;
+  const exercises = sourceExercises.filter((e) => showInactive || e.is_active).map(localize);
   const { data: log } = useSuspenseQuery(logQuery);
   const invalidate = useInvalidateGym();
   const [q, setQ] = useState("");
@@ -34,7 +36,18 @@ export function ExerciseManager() {
   const live = (ex: Exercise) => sourceExercises.find((e) => e.id === ex.id) ?? ex;
 
   async function remove(ex: Exercise) {
-    if (!confirm(`${t("Ta bort", "Delete")} ${ex.code} ${ex.name}? ${t("Loggade set behålls.", "Logged sets are kept.")}`)) return;
+    const { count, error: countError } = await supabase.from("log_entries").select("id", { count: "exact", head: true }).eq("exercise_id", ex.id);
+    if (countError) { toast.error(countError.message); return; }
+    if (count) {
+      if (!confirm(t(`${ex.code} ${ex.name} används i ${count} loggrader (genomförda eller föreslagna) och kan därför inte raderas. Den döljs istället och all historik behålls. Du kan återaktivera den under "Visa inaktiva". Dölj övningen?`, `${ex.code} ${ex.name} is used in ${count} log rows (completed or suggested), so it can't be deleted. It will be hidden instead and all history is kept. You can reactivate it under "Show inactive". Hide the exercise?`))) return;
+      const { error } = await supabase.from("exercises").update({ is_active: false }).eq("id", ex.id);
+      if (error) { toast.error(error.message); return; }
+      toast.success(t("Övningen är dold", "Exercise hidden"));
+      if (openId === ex.id) setOpenId(null);
+      invalidate();
+      return;
+    }
+    if (!confirm(t(`Radera ${ex.code} ${ex.name} permanent? Den har aldrig använts i loggen.`, `Permanently delete ${ex.code} ${ex.name}? It has never been used in the log.`))) return;
     const { error } = await supabase.from("exercises").delete().eq("id", ex.id);
     if (error) {
       toast.error(error.message);
@@ -44,10 +57,18 @@ export function ExerciseManager() {
     invalidate();
   }
 
+  async function reactivate(ex: Exercise) {
+    const { error } = await supabase.from("exercises").update({ is_active: true }).eq("id", ex.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success(t("Övningen är aktiv igen", "Exercise reactivated"));
+    invalidate();
+  }
+
   return (
     <section className="space-y-4 rounded-xl border bg-card p-4">
       <h2 className="font-display text-2xl font-bold uppercase">{t("Övningar", "Exercises")}</h2>
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between gap-2">
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="size-4" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />{t(`Visa inaktiva (${inactiveCount})`, `Show inactive (${inactiveCount})`)}</label>
         <Button onClick={() => setAdding(true)} className="font-semibold"><Plus className="h-4 w-4" />{t("Ny", "New")}</Button>
       </div>
       <div className="relative">
@@ -66,6 +87,7 @@ export function ExerciseManager() {
               <div key={ex.id} className="space-y-2">
                 <ExerciseCard ex={ex} last={last.get(ex.code)} token={categoryToken(c, cats)}
                   onClick={() => setOpenId(openId === ex.id ? null : ex.id)} />
+                {!ex.is_active && <div className="flex items-center justify-between gap-2 rounded-md border border-dashed px-3 py-2 text-sm"><span className="font-semibold text-muted-foreground">{t("Inaktiv – dold i Träna och AI-planering", "Inactive – hidden in Train and AI planning")}</span><Button size="sm" variant="outline" onClick={() => void reactivate(live(ex))}>{t("Återaktivera", "Reactivate")}</Button></div>}
                 {openId === ex.id && (
                   <ExerciseDetails
                     exercise={live(ex)}
