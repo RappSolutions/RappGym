@@ -1,4 +1,7 @@
 # Roadmap
+- [ ] Move AI analysis/planning/history to its own page and navigation tab
+- [ ] Replace long progress exercise list with searchable category-filtered selection
+- [ ] Collapse/expand proposed and completed log sections; delete remaining proposed workouts safely
 - [x] Add header avatar menu with private optional training profile and sign-out; verified desktop/mobile
 - [x] Use consented profile data in every explicit AI request; save/reload/delete and AI/sign-out flow verified, consent tests passed, test profile removed
 - [x] Accept all remaining suggested workouts together without duplicates or completed status; individual then bulk acceptance verified
