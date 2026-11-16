@@ -35,7 +35,7 @@ export function ExerciseManager() {
 
   async function remove(ex: Exercise) {
     if (!confirm(`${t("Ta bort", "Delete")} ${ex.code} ${ex.name}? ${t("Loggade set behålls.", "Logged sets are kept.")}`)) return;
-    const { error } = await supabaseDelete(ex.id);
+    const { error } = await supabase.from("exercises").delete().eq("id", ex.id);
     if (error) {
       toast.error(error.message);
       return;
@@ -96,9 +96,4 @@ export function ExerciseManager() {
       />
     </section>
   );
-}
-
-async function supabaseDelete(id: string) {
-  const { supabase } = await import("@/integrations/supabase/client");
-  return supabase.from("exercises").delete().eq("id", id);
 }
