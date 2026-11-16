@@ -37,8 +37,8 @@ export function LogSheet({
   entry?: LogEntry | null;
   gymId?: string | null;
   onClose: () => void;
-  onCompleted?: () => void;
-  progress?: string;
+  onCompleted?: (() => void) | undefined;
+  progress?: string | undefined;
 }) {
   const { t, language, localize } = useLanguage();
   const invalidate = useInvalidateGym();
