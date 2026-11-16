@@ -62,6 +62,7 @@ export type Database = {
           id: string
           image_urls: Json
           instructions: string
+          is_active: boolean
           muscles: string
           name: string
           sort_order: number
@@ -80,6 +81,7 @@ export type Database = {
           id?: string
           image_urls?: Json
           instructions?: string
+          is_active?: boolean
           muscles?: string
           name: string
           sort_order?: number
@@ -98,6 +100,7 @@ export type Database = {
           id?: string
           image_urls?: Json
           instructions?: string
+          is_active?: boolean
           muscles?: string
           name?: string
           sort_order?: number
@@ -146,6 +149,7 @@ export type Database = {
           code: string
           created_at: string
           date: string
+          exercise_id: string | null
           gym_id: string | null
           id: string
           load: string
@@ -164,6 +168,7 @@ export type Database = {
           code: string
           created_at?: string
           date?: string
+          exercise_id?: string | null
           gym_id?: string | null
           id?: string
           load?: string
@@ -182,6 +187,7 @@ export type Database = {
           code?: string
           created_at?: string
           date?: string
+          exercise_id?: string | null
           gym_id?: string | null
           id?: string
           load?: string
@@ -200,6 +206,13 @@ export type Database = {
             columns: ["ai_history_id"]
             isOneToOne: false
             referencedRelation: "training_ai_history"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "log_entries_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
             referencedColumns: ["id"]
           },
           {
