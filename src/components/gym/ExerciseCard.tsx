@@ -2,18 +2,22 @@ import { useLanguage } from "@/lib/i18n";
 import { doseText } from "@/lib/gym";
 import type { Exercise, LogEntry } from "@/lib/gym";
 import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 export function ExerciseCard({
-  ex, last, doneToday, token, onClick, action,
+  ex, last, doneToday, token, onClick, action, expanded, children,
 }: {
-  ex: Exercise; last?: LogEntry | undefined; doneToday?: number | undefined; token: string; onClick?: () => void; action?: React.ReactNode;
+  ex: Exercise; last?: LogEntry | undefined; doneToday?: number | undefined; token: string; onClick?: () => void; action?: React.ReactNode; expanded?: boolean; children?: React.ReactNode;
 }) {
   const { t, language, localize } = useLanguage();
   ex = localize(ex);
   return (
     <div data-category={token} className="category-theme flex items-stretch overflow-hidden rounded-xl border bg-card">
       <div className="w-1.5 shrink-0 bg-category-fill" />
-      <Button variant="ghost" onClick={onClick} className="flex h-auto min-w-0 flex-1 items-center gap-3 whitespace-normal p-4 text-left active:bg-accent">
+      <div className="min-w-0 flex-1">
+      <div className="flex items-stretch">
+      <Button variant="ghost" aria-expanded={expanded} onClick={onClick} className="flex h-auto min-w-0 flex-1 items-center gap-3 whitespace-normal p-4 text-left active:bg-accent">
+        {expanded !== undefined && (expanded ? <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground" /> : <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />)}
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
             <span className="font-display text-lg font-bold text-category-ink">{ex.code}</span>
@@ -37,6 +41,9 @@ export function ExerciseCard({
         </div>
       </Button>
       {action}
+      </div>
+      {expanded && children && <div className="border-t p-4">{children}</div>}
+      </div>
     </div>
   );
 }
