@@ -105,6 +105,8 @@ export type Database = {
       }
       log_entries: {
         Row: {
+          ai_history_id: string | null
+          ai_workout_key: string | null
           code: string
           created_at: string
           date: string
@@ -121,6 +123,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_history_id?: string | null
+          ai_workout_key?: string | null
           code: string
           created_at?: string
           date?: string
@@ -137,6 +141,8 @@ export type Database = {
           user_id?: string
         }
         Update: {
+          ai_history_id?: string | null
+          ai_workout_key?: string | null
           code?: string
           created_at?: string
           date?: string
@@ -154,7 +160,55 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "log_entries_ai_history_id_fkey"
+            columns: ["ai_history_id"]
+            isOneToOne: false
+            referencedRelation: "training_ai_history"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "log_entries_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_ai_history: {
+        Row: {
+          generated_at: string
+          gym_id: string | null
+          id: string
+          insights: Json
+          language: string
+          request: Json
+          today: string
+          user_id: string
+        }
+        Insert: {
+          generated_at?: string
+          gym_id?: string | null
+          id?: string
+          insights: Json
+          language: string
+          request: Json
+          today: string
+          user_id?: string
+        }
+        Update: {
+          generated_at?: string
+          gym_id?: string | null
+          id?: string
+          insights?: Json
+          language?: string
+          request?: Json
+          today?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_ai_history_gym_id_fkey"
             columns: ["gym_id"]
             isOneToOne: false
             referencedRelation: "gyms"
