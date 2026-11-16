@@ -1,7 +1,7 @@
 import { useLanguage } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Info, MapPin, Search } from "lucide-react";
+import { MapPin, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { GymPicker } from "@/components/gym/GymPicker";
 import { useSelectedGym } from "@/hooks/use-gym";
@@ -71,7 +71,7 @@ function PassPage() {
       <Button variant="secondary" onClick={() => setPicking(true)} className="gap-1.5 rounded-full px-3 text-sm font-medium">
         <MapPin className="h-4 w-4 text-primary" /> {gym.name} <span className="text-muted-foreground">· {t("byt", "change")}</span>
       </Button>
-      <p className="text-sm text-muted-foreground">{t("Välj en övning för att logga set, eller ⓘ för instruktioner och bilder. Lägg till och redigera övningar under Inställningar.", "Pick an exercise to log sets, or ⓘ for instructions and pictures. Add and edit exercises under Settings.")}</p>
+      <p className="text-sm text-muted-foreground">{t("Välj en övning för att logga set. Lägg till och redigera övningar under Inställningar.", "Pick an exercise to log sets. Add and edit exercises under Settings.")}</p>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} className="size-4" />{t(`Visa alla övningar (${atPlace.length} av ${allExercises.length} finns här)`, `Show all exercises (${atPlace.length} of ${allExercises.length} available here)`)}</label>
       {!showAll && atPlace.length === 0 && <p className="text-sm text-muted-foreground">{t("Inga övningar kopplade till platsen ännu. Välj övningar under Inställningar → Platser.", "No exercises linked to this location yet. Choose them under Settings → Locations.")}</p>}
       <div className="relative"><Search className="absolute top-3.5 left-3 h-5 w-5 text-muted-foreground" /><Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("Sök övning…", "Search exercise…")} className="h-12 pl-10" /></div>
@@ -105,11 +105,6 @@ function PassPage() {
             doneToday={todayCount.get(ex.code)}
             token={categoryToken(ex.category, cats)}
             onClick={() => setOpen(ex)}
-            action={
-              <Link to="/exercises/$code" params={{ code: ex.code }} aria-label={t("Visa instruktioner", "View instructions")} className="flex items-center border-l px-3 text-muted-foreground">
-                <Info className="h-5 w-5" />
-              </Link>
-            }
           />
         ))}
         {!list.length && <p className="text-muted-foreground">{s ? t("Inga träffar.", "No matches.") : t("Inga övningar ännu. Lägg till under Inställningar.", "No exercises yet. Add one under Settings.")}</p>}
