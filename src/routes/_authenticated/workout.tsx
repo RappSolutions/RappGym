@@ -1,7 +1,8 @@
 import { useLanguage } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Info, MapPin } from "lucide-react";
+import { Info, MapPin, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { GymPicker } from "@/components/gym/GymPicker";
 import { useSelectedGym } from "@/hooks/use-gym";
 import { useMemo, useState } from "react";
@@ -10,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { ExerciseCard } from "@/components/gym/ExerciseCard";
 import { LogSheet } from "@/components/gym/LogSheet";
 import { Button } from "@/components/ui/button";
-import { categoriesOf, categoryToken, exercisesAtGym, exercisesQuery, gymsQuery, lastByCode, logQuery, todayISO, type Exercise } from "@/lib/gym";
+import { categoriesOf, categoryToken, exercisesQuery, gymsQuery, lastByCode, logQuery, todayISO, type Exercise } from "@/lib/gym";
 
 export const Route = createFileRoute("/_authenticated/workout")({
   validateSearch: z.object({ cat: z.string().optional() }),
@@ -18,10 +19,10 @@ export const Route = createFileRoute("/_authenticated/workout")({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: "Dagens pass – RappGym" },
-      { name: "description", content: "Välj kategori och logga dina set." },
-      { property: "og:title", content: "Dagens pass – RappGym" },
-      { property: "og:description", content: "Välj kategori och logga dina set." },
+      { title: "Träna – RappGym" },
+      { name: "description", content: "Hitta övningar, läs instruktioner och logga dina set." },
+      { property: "og:title", content: "Träna – RappGym" },
+      { property: "og:description", content: "Hitta övningar, läs instruktioner och logga dina set." },
     ],
   }),
   loader: ({ context }) =>
@@ -36,10 +37,8 @@ function PassPage() {
   const [gymId, setGym] = useSelectedGym();
   const [picking, setPicking] = useState(false);
   const gym = gyms.find((g) => g.id === gymId);
-  const gymExercises = exercisesAtGym(allExercises, gym?.id ?? null);
-  const [showAll, setShowAll] = useState(false);
-  const useAll = showAll || gymExercises.length === 0;
-  const exercises = useAll ? allExercises : gymExercises;
+  const [q, setQ] = useState("");
+  const exercises = allExercises;
   const { data: log } = useSuspenseQuery(logQuery);
   const { cat } = Route.useSearch();
   const navigate = Route.useNavigate();
@@ -51,9 +50,10 @@ function PassPage() {
     const m = new Map<string, number>();
     for (const e of log) if (e.date === today && e.gym_id === gym?.id) m.set(e.code, (m.get(e.code) ?? 0) + Math.max(1, e.sets));
     return m;
-  }, [log, today]);
+  }, [log, today, gym?.id]);
   const [open, setOpen] = useState<Exercise | null>(null);
-  const list = exercises.filter((e) => e.category === active);
+  const s = q.trim().toLowerCase();
+  const list = s ? exercises.filter((e) => { const l = localize(e); return [l.code, l.name, l.equipment, l.muscles, l.category].some((v) => v.toLowerCase().includes(s)); }) : exercises.filter((e) => e.category === active);
 
   if (!gym || picking)
     return (
@@ -67,9 +67,8 @@ function PassPage() {
       <Button variant="secondary" onClick={() => setPicking(true)} className="gap-1.5 rounded-full px-3 text-sm font-medium">
         <MapPin className="h-4 w-4 text-primary" /> {gym.name} <span className="text-muted-foreground">· {t("byt", "change")}</span>
       </Button>
-      <p className="text-sm text-muted-foreground">{t("Träna nu: välj en övning och logga dina set. Övningar = bank med instruktioner, Logg = historik.", "Train now: pick an exercise and log your sets. Exercises = library with instructions, Log = history.")}</p>
-      {gymExercises.length === 0 ? <p className="rounded-lg border bg-secondary p-3 text-sm">{t(`Inga övningar är kopplade till ${gym.name} än – visar alla dina övningar. Koppla övningar till gymmet (eller "Alla gym") under Övningar.`, `No exercises are linked to ${gym.name} yet – showing all your exercises. Link exercises to this gym (or "All gyms") under Exercises.`)}</p>
-        : <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} />{t("Visa övningar från alla gym", "Show exercises from all gyms")}</label>}
+      <p className="text-sm text-muted-foreground">{t("Välj en övning för att logga set, eller ⓘ för instruktioner och bilder. Lägg till och redigera övningar under Inställningar.", "Pick an exercise to log sets, or ⓘ for instructions and pictures. Add and edit exercises under Settings.")}</p>
+      <div className="relative"><Search className="absolute top-3.5 left-3 h-5 w-5 text-muted-foreground" /><Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("Sök övning…", "Search exercise…")} className="h-12 pl-10" /></div>
       {todayCount.size > 0 && <p className="text-sm text-muted-foreground">{`${[...todayCount.values()].reduce((a, b) => a + b, 0)} ${t("set loggade idag", "sets logged today")}`}</p>}
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
         {cats.map((c) => {
@@ -80,10 +79,10 @@ function PassPage() {
               key={c}
               data-category={token}
               aria-pressed={c === active}
-              onClick={() => navigate({ search: { cat: c }, replace: true })}
+              onClick={() => { setQ(""); navigate({ search: { cat: c }, replace: true }); }}
               className={cn(
                 "category-theme h-12 shrink-0 rounded-lg border-2 border-category-fill px-5 font-display text-lg font-bold uppercase",
-                c === active ? "bg-category-fill text-category-on hover:bg-category-fill hover:text-category-on" : "bg-background text-category-ink hover:bg-category-fill/15 hover:text-category-ink",
+                c === active && !s ? "bg-category-fill text-category-on hover:bg-category-fill hover:text-category-on" : "bg-background text-category-ink hover:bg-category-fill/15 hover:text-category-ink",
               )}
             >
               {c}
@@ -107,7 +106,7 @@ function PassPage() {
             }
           />
         ))}
-        {!list.length && <p className="text-muted-foreground">{t("Inga övningar ännu. Lägg till under Övningar.", "No exercises yet. Add one under Exercises.")}</p>}
+        {!list.length && <p className="text-muted-foreground">{s ? t("Inga träffar.", "No matches.") : t("Inga övningar ännu. Lägg till under Inställningar.", "No exercises yet. Add one under Settings.")}</p>}
       </div>
       <LogSheet
         exercise={open}

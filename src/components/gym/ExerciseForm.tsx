@@ -7,9 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { categoriesOf, gymsQuery, useInvalidateGym, type Exercise } from "@/lib/gym";
+import { categoriesOf, useInvalidateGym, type Exercise } from "@/lib/gym";
 import { useQuery } from "@tanstack/react-query";
-import { useSelectedGym } from "@/hooks/use-gym";
 
 const empty = { gym_id: "", code: "", category: "", name: "", equipment: "", variant: "", muscles: "", instructions: "", dose: "", focus: "" };
 
@@ -28,17 +27,15 @@ export function ExerciseForm({
   const invalidate = useInvalidateGym();
   const [f, setF] = useState(empty);
   const [textLanguage, setTextLanguage] = useState<"sv" | "en">(language);
-  const { data: gyms = [] } = useQuery(gymsQuery);
-  const [gym] = useSelectedGym();
   useEffect(() => {
     if (open) setTextLanguage(language);
   }, [open, language]);
   useEffect(() => {
     if (open) {
       const translated = exercise ? localizeExercise(exercise, textLanguage) : exercise;
-      setF(translated ? { ...empty, ...translated, gym_id: translated.gym_id ?? "" } : { ...empty, gym_id: gym ?? "" });
+      setF(translated ? { ...empty, ...translated, gym_id: "" } : { ...empty });
     }
-  }, [open, exercise, gym, textLanguage, language]);
+  }, [open, exercise, textLanguage, language]);
   const set = (k: keyof typeof empty) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setF({ ...f, [k]: e.target.value });
   const uniq = (k: "category" | "equipment" | "muscles") => [...new Set(all.map((e) => e[k]).filter(Boolean))];
@@ -49,7 +46,7 @@ export function ExerciseForm({
       code: f.code.trim().toUpperCase(), category: f.category.trim(), name: f.name.trim(),
       equipment: f.equipment, variant: f.variant, muscles: f.muscles,
       instructions: f.instructions, dose: f.dose, focus: f.focus,
-      gym_id: f.gym_id || null,
+      gym_id: null,
     };
     const texts = { name: row.name, equipment: row.equipment, variant: row.variant, muscles: row.muscles, instructions: row.instructions, dose: row.dose, focus: row.focus };
     const existing = exercise?.translations;
@@ -87,13 +84,6 @@ export function ExerciseForm({
               <Input required list="cats" value={f.category} onChange={set("category")} placeholder="Push" />
               <datalist id="cats">{categoriesOf(all).map((c) => <option key={c} value={c} />)}</datalist>
             </div>
-          </div>
-          <div className="space-y-1">
-            <Label>Gym</Label>
-            <select value={f.gym_id} onChange={set("gym_id")} className="h-10 w-full rounded-md border bg-background px-3">
-              <option value="">{t("Alla gym", "All gyms")}</option>
-              {gyms.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
-            </select>
           </div>
           <div className="space-y-1"><Label>{t("Namn", "Name")}</Label><Input required value={f.name} onChange={set("name")} /></div>
           <div className="grid grid-cols-2 gap-3">
