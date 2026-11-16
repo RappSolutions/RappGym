@@ -12,7 +12,7 @@ export const trainingProfileSchema = z.object({
 export type TrainingProfile = z.infer<typeof trainingProfileSchema>;
 export const emptyTrainingProfile: TrainingProfile = { birth_year: null, height_cm: null, weight_kg: null, experience: "", preferences: "", limitations: "", pace: "" };
 
-export function profileForAI(profile: TrainingProfile | null, today: string) {
+export function profileForAI(profile: Record<string, unknown> | null, today: string) {
   if (!profile) return null;
   const fields = trainingProfileSchema.parse(profile);
   return { ...fields, approximate_age: fields.birth_year === null ? null : Number(today.slice(0, 4)) - fields.birth_year };
