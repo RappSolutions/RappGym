@@ -28,12 +28,15 @@ export function ProgressExercisePicker({ exercises, loggedCodes, value, onChange
       <div className="relative"><Search className="absolute left-3 top-3 size-4 text-muted-foreground" /><Input aria-label={t("Sök övning", "Search exercises")} placeholder={t("Sök namn eller kod", "Search name or code")} value={search} onChange={(event) => setSearch(event.target.value)} className="pl-9" /></div>
       <div className="flex flex-wrap gap-2" role="group" aria-label={t("Kategori", "Category")}>
         <Button size="sm" variant={category === null ? "default" : "outline"} aria-pressed={category === null} onClick={() => setCategory(null)}>{t("Alla", "All")}</Button>
-        {categoriesOf(options).map((cat) => <Button key={cat} size="sm" variant="outline" data-category={categoryToken(cat, categories)} className="category-theme border-l-4 border-category-fill text-category-ink" aria-pressed={category === cat} onClick={() => setCategory(category === cat ? null : cat)}>{category === cat && <Check className="size-3" />}{localize(options.find((exercise) => exercise.category === cat) ?? options[0] as Exercise).category}</Button>)}
+        {categoriesOf(options).map((cat) => {
+          const example = options.find((exercise) => exercise.category === cat);
+          return <Button key={cat} size="sm" variant="outline" data-category={categoryToken(cat, categories)} className="category-theme border-l-4 border-category-fill text-category-ink" aria-pressed={category === cat} onClick={() => setCategory(category === cat ? null : cat)}>{category === cat && <Check className="size-3" />}{example ? localize(example).category : cat}</Button>;
+        })}
       </div>
       <div className="max-h-[50dvh] overflow-y-auto">
         <Button variant="ghost" className="min-h-11 w-full justify-start whitespace-normal text-left" onClick={() => choose("all")}>{value === "all" && <Check className="size-4 shrink-0" />}{t("Alla övningar – antal set", "All exercises – sets")}</Button>
         {categoriesOf(matches).map((cat) => <div key={cat} className="mt-3" data-category={categoryToken(cat, categories)}>
-          <h3 className="category-theme border-b border-category-fill px-2 py-1 text-sm font-bold text-category-ink">{localize(matches.find((exercise) => exercise.category === cat) as Exercise).category}</h3>
+          <h3 className="category-theme border-b border-category-fill px-2 py-1 text-sm font-bold text-category-ink">{(() => { const example = options.find((exercise) => exercise.category === cat); return example ? localize(example).category : cat; })()}</h3>
           {matches.filter((exercise) => exercise.category === cat).map((exercise) => <Button key={exercise.id} variant="ghost" className="category-theme h-auto min-h-11 w-full justify-start gap-2 whitespace-normal text-left" onClick={() => choose(exercise.code)}><span className="w-10 shrink-0 font-bold text-category-ink">{exercise.code}</span><span className="min-w-0 flex-1 break-words">{exercise.name}</span>{value === exercise.code && <Check className="size-4 shrink-0" />}</Button>)}
         </div>)}
         {category === null && missing.map((code) => <Button key={code} variant="ghost" className="w-full justify-start" onClick={() => choose(code)}>{code} · {t("Borttagen övning", "Deleted exercise")}</Button>)}

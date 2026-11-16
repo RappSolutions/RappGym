@@ -13,7 +13,12 @@ export const Route = createFileRoute("/_authenticated/ai")({
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
-  loader: ({ context }) => Promise.all([exercisesQuery, logQuery, aiHistoryQuery, acceptedAiQuery].map((query) => context.queryClient.ensureQueryData(query))),
+  loader: ({ context }) => Promise.all([
+    context.queryClient.ensureQueryData(exercisesQuery),
+    context.queryClient.ensureQueryData(logQuery),
+    context.queryClient.ensureQueryData(aiHistoryQuery),
+    context.queryClient.ensureQueryData(acceptedAiQuery),
+  ]),
   component: AiPage,
 });
 
