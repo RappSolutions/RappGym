@@ -7,7 +7,7 @@ import { dashboardStats } from "@/lib/dashboard";
 import { goalsQuery } from "@/lib/goals";
 import { exercisesQuery, formatDate, logQuery, todayISO } from "@/lib/gym";
 import { useLanguage } from "@/lib/i18n";
-import rappgymLogo from "@/assets/rappgym-logo.jpg";
+import rappgymLogo from "@/assets/rappgym-logo-berlin.png";
 
 export const Route = createFileRoute("/_authenticated/home")({
   head: () => ({
