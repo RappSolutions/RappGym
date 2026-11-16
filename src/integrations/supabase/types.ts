@@ -112,8 +112,12 @@ export type Database = {
           id: string
           load: string
           note: string | null
+          proposal_id: string | null
+          proposal_order: number | null
+          proposal_title: string | null
           reps: number | null
           sets: number
+          status: string
           user_id: string
         }
         Insert: {
@@ -124,8 +128,12 @@ export type Database = {
           id?: string
           load?: string
           note?: string | null
+          proposal_id?: string | null
+          proposal_order?: number | null
+          proposal_title?: string | null
           reps?: number | null
           sets?: number
+          status?: string
           user_id?: string
         }
         Update: {
@@ -136,8 +144,12 @@ export type Database = {
           id?: string
           load?: string
           note?: string | null
+          proposal_id?: string | null
+          proposal_order?: number | null
+          proposal_title?: string | null
           reps?: number | null
           sets?: number
+          status?: string
           user_id?: string
         }
         Relationships: [

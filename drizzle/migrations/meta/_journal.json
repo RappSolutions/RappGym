@@ -36,6 +36,13 @@
       "when": 1794775136294,
       "tag": "0004_training_goals",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794827316249,
+      "tag": "0005_saved_workout_suggestions",
+      "breakpoints": true
     }
   ]
 }
