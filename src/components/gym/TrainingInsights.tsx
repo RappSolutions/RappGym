@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/lib/i18n";
 import { categoriesOf, categoryToken, getSelectedGym, todayISO } from "@/lib/gym";
-import { plannedWorkoutDate, trainingRequestSchema } from "@/lib/training-request";
+import { plannedWorkoutDate, trainingRequestSchema, trainingResultSections } from "@/lib/training-request";
 import { getTrainingInsights } from "@/lib/training-insights.functions";
 import type { Exercise } from "@/lib/gym";
 import type { TrainingInsights as Insights } from "@/lib/training-insights-schema";
@@ -64,14 +64,15 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
     } finally { setBusy(false); }
   }
 
-  const scopedHistory = history.filter((row) => row.language === language && row.gymId === gymId);
-  const current = scopedHistory.find((row) => row.id === selectedId) ?? (result?.id === selectedId && result.language === language && result.gymId === gymId ? result : scopedHistory[0] ?? null);
+  const scopedHistory = history.filter((row) => row.language === language && row.gymId === gymId && row.request.mode === mode);
+  const current = scopedHistory.find((row) => row.id === selectedId) ?? (result?.id === selectedId && result.language === language && result.gymId === gymId && result.request.mode === mode ? result : scopedHistory[0] ?? null);
+  const sections = trainingResultSections(mode);
   const acceptedKeys = new Set(accepted.filter((row) => row.ai_history_id === current?.id).map((row) => row.ai_workout_key ?? ""));
   for (const key of saved) if (key.startsWith(`${current?.id}:`)) acceptedKeys.add(key.slice(key.indexOf(":") + 1));
   const workouts = current ? current.insights.workouts.length ? current.insights.workouts.map((workout, index) => ({ ...workout, key: String(index) })) : [{ exercises: current.insights.exercises, dayOffset: 0, title: t("Nästa pass", "Next workout"), key: "next" }] : [];
   const pending = unacceptedWorkoutKeys(workouts.filter((workout) => workout.exercises.length).map((workout) => workout.key), acceptedKeys);
   async function saveWorkouts(keys: string[]) {
-    if (!current || saving || !keys.length) return;
+    if (!current || !sections.plan || saving || !keys.length) return;
     setSaving(keys.length > 1 ? "all" : keys[0] ?? "all");
     setError(null);
     try {
@@ -137,7 +138,8 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     <div aria-live="polite" aria-busy={busy}>
       {current && <div className="space-y-4">
-        <p className="text-xs text-muted-foreground">{t("Analyserad", "Analyzed")} {analysisDateTime(current.generatedAt)}</p>
+        <p className="text-xs text-muted-foreground">{sections.plan ? t("Planerad", "Planned") : t("Analyserad", "Analyzed")} {analysisDateTime(current.generatedAt)}</p>
+        {sections.analysis && <>
         {current.question && <p className="break-words border-l-4 border-brand-yellow pl-3 text-sm">{current.question}</p>}
         {current.insights.answer && <p className="whitespace-pre-line leading-relaxed">{current.insights.answer}</p>}
         <p className="leading-relaxed">{current.insights.summary}</p>
@@ -145,6 +147,8 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
           <div><h3 className="font-bold">{t("Viktutveckling", "Weight development")}</h3><p className="mt-1 text-sm leading-relaxed">{current.insights.weightDevelopment}</p></div>
           <div><h3 className="font-bold">{t("Utveckling i set", "Set development")}</h3><p className="mt-1 text-sm leading-relaxed">{current.insights.setDevelopment}</p></div>
         </div>
+        </>}
+        {sections.plan && <>
         <h3 className="text-xl font-bold">{current.insights.workouts.length ? t("Din träningsplan", "Your workout plan") : t("Förslag på nästa pass", "Suggested next workout")}</h3>
         {current.insights.workouts.length > 0 && <Button type="button" disabled={busy || saving !== null || pending.length === 0} onClick={() => void saveWorkouts(pending)}>{saving === "all" ? <LoaderCircle className="size-4 animate-spin" /> : pending.length === 0 ? <Check className="size-4" /> : <CalendarPlus className="size-4" />}{pending.length === 0 ? t("Alla pass accepterade som förslag", "All workouts accepted as suggestions") : t("Acceptera alla pass som förslag", "Accept all workouts as suggestions")}</Button>}
         <p className="text-sm leading-relaxed">{current.insights.recommendation}</p>
@@ -155,6 +159,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
           {suggestions(workout.exercises)}
           {saveControl(workout.exercises, workout.dayOffset, workout.title, String(index))}
         </article>)}</div> : <>{suggestions(current.insights.exercises)}{saveControl(current.insights.exercises, 0, t("Nästa pass", "Next workout"), "next")}</>}
+        </>}
         <p className="text-xs leading-relaxed text-muted-foreground">{current.insights.caution}</p>
       </div>}
     </div>
