@@ -54,8 +54,8 @@ function BankPage() {
         const list = hits.filter((e) => e.category === c);
         if (!list.length) return null;
         return (
-          <section key={c} className="space-y-2">
-            <Button variant="ghost" aria-expanded={expanded.has(c)} onClick={() => setExpanded((current) => { const next = new Set(current); if (next.has(c)) next.delete(c); else next.add(c); return next; })} className={`h-14 w-full justify-start px-0 text-xl font-bold uppercase text-${categoryToken(c, cats)}`}>
+          <section key={c} data-category={categoryToken(c, cats)} className="category-theme space-y-2">
+            <Button variant="ghost" aria-expanded={expanded.has(c)} onClick={() => setExpanded((current) => { const next = new Set(current); if (next.has(c)) next.delete(c); else next.add(c); return next; })} className="h-14 w-full justify-start border-l-4 border-category-fill bg-category-fill/10 px-3 font-display text-xl font-bold uppercase text-category-ink hover:bg-category-fill/20 hover:text-category-ink">
               {expanded.has(c) ? <ChevronDown /> : <ChevronRight />}{c} <span className="text-muted-foreground">({list.length})</span>
             </Button>
             {(expanded.has(c) || !!q.trim()) && list.map((ex) => (
