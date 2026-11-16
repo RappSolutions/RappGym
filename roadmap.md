@@ -36,3 +36,5 @@
 - [x] Explain physical data location and Dataverse options
 - [x] Add weight and set trends from workout logs and verify the overview
 - [x] Home dashboard with overview stats, soft goals and goal-aware AI next-workout suggestions
+- [x] Real exercise link on log rows, usage-aware delete with hide/reactivate, retire exercises.gym_id
+- [x] Exercise picture add/upload/remove and AI-generated pictures with user wishes
