@@ -61,16 +61,17 @@ function LogPage() {
 
   async function deleteProposal() {
     if (!deletingId || deleting) return;
-    const ids = removableSuggestionIds(proposals, deletingId);
+    const all = deletingId === "__all__";
+    const ids = all ? proposals.filter((row) => row.status === "suggested").map((row) => row.id) : removableSuggestionIds(proposals, deletingId);
     if (!ids.length) { setDeletingId(null); return; }
     setDeleting(true);
     try {
       const { error } = await supabase.from("log_entries").delete().in("id", ids).eq("status", "suggested");
       if (error) throw error;
-      if (guidedId === deletingId) { setGuidedId(null); setEntry(null); }
+      if (all || guidedId === deletingId) { setGuidedId(null); setEntry(null); }
       await Promise.all([queryClient.invalidateQueries({ queryKey: ["workout-suggestions"] }), queryClient.invalidateQueries({ queryKey: ["accepted-ai-workouts"] })]);
       setDeletingId(null);
-      toast.success(t("Förslaget borttaget", "Suggestion removed"));
+      toast.success(all ? t("Alla förslag borttagna", "All suggestions removed") : t("Förslaget borttaget", "Suggestion removed"));
     } catch { toast.error(t("Förslaget kunde inte tas bort. Försök igen.", "Could not remove suggestion. Try again.")); }
     finally { setDeleting(false); }
   }
@@ -80,6 +81,7 @@ function LogPage() {
       <p className="text-sm text-muted-foreground">{t("Logg: allt du har tränat, per datum, plus sparade passförslag.", "Log: everything you have trained, by date, plus saved workout suggestions.")}</p>
       {proposals.length > 0 && <section className="space-y-3 border-b border-border pb-5" aria-label={t("Föreslagna pass", "Suggested workouts")}>
         <Button variant="ghost" className="h-auto min-h-12 w-full justify-start gap-2 whitespace-normal px-0 text-left" aria-expanded={proposalsExpanded} aria-controls="proposed-workouts" onClick={() => setProposalsExpanded(!proposalsExpanded)}>{proposalsExpanded ? <ChevronDown className="size-4 shrink-0" /> : <ChevronRight className="size-4 shrink-0" />}<Circle className="size-5 shrink-0 text-primary" /><span className="font-display text-2xl font-bold">{t("Föreslagna pass", "Suggested workouts")}</span><span className="ml-auto text-sm text-muted-foreground">{planned.size}</span></Button>
+        {proposalsExpanded && <Button variant="outline" size="sm" className="text-destructive" onClick={() => setDeletingId("__all__")}><Trash2 className="size-4" />{t("Ta bort alla förslag", "Delete all suggestions")}</Button>}
         <div id="proposed-workouts" hidden={!proposalsExpanded} className="space-y-3">
         {[...planned].map(([id, rows]) => {
           const first = rows[0];
@@ -133,7 +135,7 @@ function LogPage() {
           </section>
         );
       })}</div>
-      <AlertDialog open={deletingId !== null} onOpenChange={(open) => { if (!open && !deleting) setDeletingId(null); }}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{t("Ta bort föreslaget pass?", "Remove suggested workout?")}</AlertDialogTitle><AlertDialogDescription>{t("Ej genomförda övningar i detta förslag tas bort. Genomförda övningar och AI-svaret i historiken behålls.", "Uncompleted exercises in this suggestion will be removed. Completed exercises and the AI answer in history are kept.")}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel disabled={deleting}>{t("Avbryt", "Cancel")}</AlertDialogCancel><AlertDialogAction disabled={deleting} onClick={(event) => { event.preventDefault(); void deleteProposal(); }}>{deleting ? t("Tar bort…", "Removing…") : t("Ta bort förslag", "Remove suggestion")}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+      <AlertDialog open={deletingId !== null} onOpenChange={(open) => { if (!open && !deleting) setDeletingId(null); }}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{deletingId === "__all__" ? t(`Ta bort alla ${planned.size} föreslagna pass?`, `Remove all ${planned.size} suggested workouts?`) : t("Ta bort föreslaget pass?", "Remove suggested workout?")}</AlertDialogTitle><AlertDialogDescription>{t("Ej genomförda övningar tas bort. Genomförda övningar och AI-svaret i historiken behålls.", "Uncompleted exercises will be removed. Completed exercises and the AI answer in history are kept.")}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel disabled={deleting}>{t("Avbryt", "Cancel")}</AlertDialogCancel><AlertDialogAction disabled={deleting} onClick={(event) => { event.preventDefault(); void deleteProposal(); }}>{deleting ? t("Tar bort…", "Removing…") : deletingId === "__all__" ? t("Ta bort alla", "Delete all") : t("Ta bort förslag", "Remove suggestion")}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
       <LogSheet exercise={entry ? byCode.get(entry.code) ?? null : null} entry={entry} onCompleted={guidedId ? nextExercise : undefined} progress={guidedId ? `${guidedDone + 1}/${guidedDone + guidedRows.length}` : undefined} onClose={() => { setEntry(null); setGuidedId(null); }} />
     </main>
   );
