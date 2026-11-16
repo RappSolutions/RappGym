@@ -2,7 +2,9 @@ import { useId, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Sparkles, LoaderCircle, Send } from "lucide-react";
+import { Sparkles, LoaderCircle, Send, CalendarPlus, Check } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { analysisDateTime, suggestionRows } from "@/lib/workout-suggestions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,6 +27,8 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
   const [purpose, setPurpose] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState<Set<string>>(new Set());
+  const [saving, setSaving] = useState<string | null>(null);
   const [result, setResult] = useState<{ insights: Insights; generatedAt: string; language: string; gymId: string | null; today: string; question: string } | null>(null);
 
   async function analyze() {
@@ -43,6 +47,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
       if (response.insights && response.generatedAt) {
         const next = { insights: response.insights, generatedAt: response.generatedAt, language, gymId, today, question: request.question };
         setResult(next);
+        setSaved(new Set());
         queryClient.setQueryData(["training-insights", language, gymId, request], next);
       } else setError(response.error);
     } catch (error) {
@@ -51,6 +56,25 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
   }
 
   const current = result?.language === language && result.gymId === getSelectedGym() ? result : null;
+  async function saveWorkout(items: Insights["exercises"], dayOffset: number, title: string, key: string) {
+    if (!current || saving || saved.has(key) || !items.length) return;
+    setSaving(key);
+    setError(null);
+    try {
+      const rows = suggestionRows(items, current.today, dayOffset, title, current.gymId, crypto.randomUUID());
+      const { error } = await supabase.from("log_entries").insert(rows);
+      if (error) throw error;
+      setSaved((previous) => new Set(previous).add(key));
+      await queryClient.invalidateQueries({ queryKey: ["workout-suggestions"] });
+    } catch (error) { setError(error instanceof Error ? error.message : t("Passet kunde inte sparas", "Could not save workout")); }
+    finally { setSaving(null); }
+  }
+  function saveControl(items: Insights["exercises"], offset: number, title: string, key: string) {
+    return <div className="flex flex-wrap items-center gap-3 pt-2"><Button type="button" variant="outline" disabled={busy || saving !== null || saved.has(key) || !items.length} onClick={() => void saveWorkout(items, offset, title, key)}>
+      {saving === key ? <LoaderCircle className="size-4 animate-spin" /> : saved.has(key) ? <Check className="size-4" /> : <CalendarPlus className="size-4" />}
+      {saved.has(key) ? t("Sparat som förslag", "Saved as suggestion") : t("Spara som förslag", "Save as suggestion")}
+    </Button>{saved.has(key) && <Link to="/log" className="text-sm font-semibold text-primary underline">{t("Gå till passet i Logg", "Open workout in Log")}</Link>}</div>;
+  }
   const categories = categoriesOf(exercises);
   function suggestions(items: Insights["exercises"]) {
     return <ul className="divide-y divide-border">{items.map((suggestion, index) => {
@@ -91,7 +115,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     <div aria-live="polite" aria-busy={busy}>
       {current && <div className="space-y-4">
-        <p className="text-xs text-muted-foreground">{t("Analyserad", "Analyzed")} {current.generatedAt.slice(0, 10)}</p>
+        <p className="text-xs text-muted-foreground">{t("Analyserad", "Analyzed")} {analysisDateTime(current.generatedAt)}</p>
         {current.question && <p className="break-words border-l-4 border-brand-yellow pl-3 text-sm">{current.question}</p>}
         {current.insights.answer && <p className="whitespace-pre-line leading-relaxed">{current.insights.answer}</p>}
         <p className="leading-relaxed">{current.insights.summary}</p>
@@ -106,7 +130,8 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
           <div className="flex flex-wrap items-baseline justify-between gap-2"><h4 className="text-xl font-bold">{index + 1}. {workout.title}</h4><span className="text-sm font-medium text-muted-foreground">{plannedWorkoutDate(current.today, workout.dayOffset)}</span></div>
           <p className="mt-1 text-sm leading-relaxed">{workout.focus}</p>
           {suggestions(workout.exercises)}
-        </article>)}</div> : suggestions(current.insights.exercises)}
+          {saveControl(workout.exercises, workout.dayOffset, workout.title, String(index))}
+        </article>)}</div> : <>{suggestions(current.insights.exercises)}{saveControl(current.insights.exercises, 0, t("Nästa pass", "Next workout"), "next")}</>}
         <p className="text-xs leading-relaxed text-muted-foreground">{current.insights.caution}</p>
       </div>}
     </div>

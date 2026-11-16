@@ -1,4 +1,5 @@
 import type { Exercise, LogEntry } from "@/lib/gym";
+import { completedEntries } from "@/lib/workout-suggestions";
 
 const DAY = 86_400_000;
 const toDay = (iso: string) => Math.floor(Date.parse(`${iso}T00:00:00Z`) / DAY);
@@ -6,6 +7,7 @@ const toDay = (iso: string) => Math.floor(Date.parse(`${iso}T00:00:00Z`) / DAY);
 const weekOf = (day: number) => Math.floor((day + 3) / 7);
 
 export function dashboardStats(log: LogEntry[], exercises: Exercise[], today: string) {
+  log = completedEntries(log);
   const t = toDay(today);
   const dates = [...new Set(log.map((e) => e.date))].sort();
   const days = dates.map(toDay);

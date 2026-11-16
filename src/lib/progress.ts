@@ -1,4 +1,5 @@
 import type { LogEntry } from "@/lib/gym";
+import { completedEntries } from "@/lib/workout-suggestions";
 
 /** Only explicit numeric loads (optionally kg) are comparable as weights. */
 export function weightKg(load: string): number | null {
@@ -10,7 +11,7 @@ export function weightKg(load: string): number | null {
 
 export function progressByDay(log: LogEntry[], code?: string, since?: string) {
   const days = new Map<string, { date: string; sets: number; weight: number | null }>();
-  for (const entry of log) {
+  for (const entry of completedEntries(log)) {
     if ((code && entry.code !== code) || (since && entry.date < since)) continue;
     const day = days.get(entry.date) ?? { date: entry.date, sets: 0, weight: null };
     day.sets += Math.max(1, entry.sets ?? 1);

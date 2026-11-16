@@ -1,7 +1,9 @@
 import type { Exercise, LogEntry } from "@/lib/gym";
 import { progressByDay } from "@/lib/progress";
+import { completedEntries } from "@/lib/workout-suggestions";
 
 export function trainingContext(log: LogEntry[], exercises: Exercise[], gymId: string | null) {
+  log = completedEntries(log);
   const dates = [...new Set(log.map((row) => row.date))].sort();
   const recentDates = new Set(dates.slice(-10));
   const groups = new Map<string, LogEntry[]>();
