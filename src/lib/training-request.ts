@@ -13,6 +13,10 @@ export const trainingRequestSchema = z.object({
 
 export type TrainingRequest = z.infer<typeof trainingRequestSchema>;
 
+export function trainingResultSections(mode: TrainingRequest["mode"]) {
+  return { analysis: mode === "summary", plan: mode === "plan" };
+}
+
 export function normalizeTrainingPlan(insights: TrainingInsights, request: TrainingRequest, allowedCodes: string[]) {
   const allowed = new Set(allowedCodes);
   const clean = (items: TrainingInsights["exercises"]) => items.filter((item) => allowed.has(item.code)).slice(0, 5).map((item) => ({

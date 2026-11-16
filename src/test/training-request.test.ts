@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeTrainingPlan, plannedWorkoutDate, trainingRequestSchema } from "@/lib/training-request";
+import { normalizeTrainingPlan, plannedWorkoutDate, trainingRequestSchema, trainingResultSections } from "@/lib/training-request";
 import type { TrainingInsights } from "@/lib/training-insights-schema";
 
 const suggestion = { code: "DB-EX", sets: 2, reps: 12, load: "15", reason: "" };
@@ -7,6 +7,12 @@ const insights = { summary: "", weightDevelopment: "", setDevelopment: "", recom
 const request = trainingRequestSchema.parse({ mode: "plan", workoutCount: 4, periodDays: 7, question: "Ge mig fyra nya pass med bra blandning under 7 dagar", purpose: "Skidåkning" });
 
 describe("Personal training requests", () => {
+  it("analysis results do not include next-workout proposals", () => {
+    expect(trainingResultSections("summary")).toEqual({ analysis: true, plan: false });
+  });
+  it("workout planning results do not include completed-training analysis", () => {
+    expect(trainingResultSections("plan")).toEqual({ analysis: false, plan: true });
+  });
   it("carries the four-workout seven-day request and purpose unchanged", () => {
     expect(request).toMatchObject({ workoutCount: 4, periodDays: 7, question: "Ge mig fyra nya pass med bra blandning under 7 dagar", purpose: "Skidåkning" });
     expect(normalizeTrainingPlan(insights, request, ["DB-EX"]).workouts).toHaveLength(4);
