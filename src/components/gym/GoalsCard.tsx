@@ -45,7 +45,7 @@ export function GoalsCard() {
           {g.status === "done" ? <RotateCcw className="size-4" /> : <Check className="size-4" />}
         </Button>
         <Button size="icon" variant="ghost" aria-label={t("Redigera", "Edit")} onClick={() => edit(g)}><Pencil className="size-4" /></Button>
-        <Button size="icon" variant="ghost" aria-label={t("Ta bort", "Delete")} onClick={() => run(supabase.from("training_goals").delete().eq("id", g.id))}><Trash2 className="size-4" /></Button>
+        <Button size="icon" variant="ghost" aria-label={t("Ta bort", "Delete")} onClick={() => { if (confirm(t(`Ta bort målet "${g.text}"?`, `Delete the goal "${g.text}"?`))) run(supabase.from("training_goals").delete().eq("id", g.id)); }}><Trash2 className="size-4" /></Button>
       </li>)}
     </ul>
     <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); void save(); }}>

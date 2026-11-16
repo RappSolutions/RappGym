@@ -98,6 +98,7 @@ export function LogSheet({
 
   async function remove() {
     if (!entry) return;
+    if (!confirm(t("Ta bort denna rad ur loggen?", "Delete this log entry?"))) return;
     const { error } = await supabase.from("log_entries").delete().eq("id", entry.id);
     if (error) {
       toast.error(error.message);
