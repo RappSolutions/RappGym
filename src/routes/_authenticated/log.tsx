@@ -9,7 +9,7 @@ import { removableSuggestionIds } from "@/lib/workout-suggestions";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { useLanguage } from "@/lib/i18n";
 import { LogSheet } from "@/components/gym/LogSheet";
-import { categoriesOf, categoryToken, exercisesQuery, gymsQuery, suggestionsQuery, formatDateWithWeekday, logQuery, type LogEntry, formatSet, todayISO, isWorkoutExpanded, workoutRecordingOrder } from "@/lib/gym";
+import { categoriesOf, categoryToken, exercisesQuery, gymsQuery, suggestionsQuery, formatDateWithWeekday, logQuery, type LogEntry, formatSet, todayISO, isWorkoutExpanded, isProposalExpanded, workoutRecordingOrder } from "@/lib/gym";
 
 export const Route = createFileRoute("/_authenticated/log")({
   head: () => ({
@@ -37,6 +37,7 @@ function LogPage() {
   const [guidedId, setGuidedId] = useState<string | null>(null);
   const [entry, setEntry] = useState<LogEntry | null>(null);
   const [expandedOverrides, setExpandedOverrides] = useState<Map<string, boolean>>(new Map());
+  const [proposalOverrides, setProposalOverrides] = useState<Map<string, boolean>>(new Map());
   const [proposalsExpanded, setProposalsExpanded] = useState(true);
   const [completedExpanded, setCompletedExpanded] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -88,15 +89,18 @@ function LogPage() {
           if (!first) return null;
           const done = log.filter((row) => row.proposal_id === id).length;
           const gym = gyms.find((gym) => gym.id === first.gym_id);
+          const open = isProposalExpanded(first.date, today, proposalOverrides, id);
           return <article key={id} className="space-y-3 rounded-lg border-2 border-dashed border-primary bg-secondary p-3">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div><span className="font-semibold text-primary">{t("Förslag", "Suggestion")}</span><h3 className="text-xl font-bold">{first.proposal_title}</h3><p className="text-sm">{formatDateWithWeekday(first.date, language)}{gym ? ` · ${gym.name}` : ""}</p></div>
+            <Button variant="ghost" aria-expanded={open} aria-controls={`proposal-${id}`} onClick={() => setProposalOverrides((current) => new Map(current).set(id, !isProposalExpanded(first.date, today, current, id)))} className="h-auto min-h-12 w-full flex-wrap items-start justify-between gap-2 whitespace-normal px-0 py-1 text-left hover:bg-transparent">
+              <span className="flex min-w-0 items-start gap-2 text-left">{open ? <ChevronDown className="mt-1.5 size-4 shrink-0" /> : <ChevronRight className="mt-1.5 size-4 shrink-0" />}<span className="min-w-0"><span className="block font-semibold text-primary">{t("Förslag", "Suggestion")}</span><span className="block text-xl font-bold">{first.proposal_title}</span><span className="block text-sm">{formatDateWithWeekday(first.date, language)}{gym ? ` · ${gym.name}` : ""}</span></span></span>
               <span className="text-sm font-medium">{done}/{done + rows.length} {t("övningar genomförda", "exercises completed")}</span>
-            </div>
+            </Button>
+            <div id={`proposal-${id}`} hidden={!open} className="space-y-3">
             <div className="divide-y divide-border">{rows.map((row) => <Button key={row.id} variant="ghost" data-category={categoryToken(byCode.get(row.code)?.category ?? "", categories)} className="category-theme grid h-auto min-h-12 w-full grid-cols-[1rem_2.5rem_minmax(0,1fr)] gap-x-2 gap-y-1 whitespace-normal border-l-4 border-category-fill px-2 py-3 text-left sm:grid-cols-[1rem_2.5rem_minmax(0,1fr)_auto]" onClick={() => { setGuidedId(null); setEntry(row); }}>
               <Circle className="size-4 shrink-0 text-primary" /><span className="font-bold text-category-ink">{row.code}</span><span className="min-w-0 break-words">{byCode.get(row.code)?.name}</span><span className="col-span-2 col-start-2 min-w-0 break-words font-semibold sm:col-span-1 sm:col-start-auto">{formatSet(row)}</span>
             </Button>)}</div>
              <div className="flex items-center justify-between gap-2"><Button className="min-w-0 whitespace-normal sm:w-auto" onClick={() => { setGuidedId(id); setEntry(first); }}><Play className="size-4 shrink-0" />{done ? t("Fortsätt passet", "Continue workout") : t("Gå igenom passet", "Start workout")}</Button><Button variant="ghost" size="icon" className="shrink-0 text-destructive" aria-label={`${t("Ta bort förslag", "Remove suggestion")}: ${first.proposal_title}`} title={t("Ta bort förslag", "Remove suggestion")} onClick={() => setDeletingId(id)}><Trash2 className="size-5" /></Button></div>
+            </div>
           </article>;
         })}
         </div>
