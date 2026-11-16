@@ -243,6 +243,42 @@ export type Database = {
         }
         Relationships: []
       }
+      training_profiles: {
+        Row: {
+          age: number | null
+          experience: string
+          height_cm: number | null
+          limitations: string
+          preferences: string
+          updated_at: string
+          use_for_ai: boolean
+          user_id: string
+          weight_kg: number | null
+        }
+        Insert: {
+          age?: number | null
+          experience?: string
+          height_cm?: number | null
+          limitations?: string
+          preferences?: string
+          updated_at?: string
+          use_for_ai?: boolean
+          user_id?: string
+          weight_kg?: number | null
+        }
+        Update: {
+          age?: number | null
+          experience?: string
+          height_cm?: number | null
+          limitations?: string
+          preferences?: string
+          updated_at?: string
+          use_for_ai?: boolean
+          user_id?: string
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
