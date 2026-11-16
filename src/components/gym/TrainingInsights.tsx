@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Sparkles, LoaderCircle, Send, CalendarPlus, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,11 +14,17 @@ import { plannedWorkoutDate, trainingRequestSchema } from "@/lib/training-reques
 import { getTrainingInsights } from "@/lib/training-insights.functions";
 import type { Exercise } from "@/lib/gym";
 import type { TrainingInsights as Insights } from "@/lib/training-insights-schema";
+import { aiHistoryQuery, acceptedAiQuery, unacceptedWorkoutKeys } from "@/lib/ai-history";
+import { useSelectedGym } from "@/hooks/use-gym";
 
 export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[]; hasLog: boolean }) {
   const { t, language, localize } = useLanguage();
   const queryClient = useQueryClient();
   const generate = useServerFn(getTrainingInsights);
+  const { data: history } = useSuspenseQuery(aiHistoryQuery);
+  const { data: accepted } = useSuspenseQuery(acceptedAiQuery);
+  const [gymId] = useSelectedGym();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const id = useId();
   const [mode, setMode] = useState<"summary" | "plan">("summary");
   const [question, setQuestion] = useState("");
@@ -29,7 +35,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState<string | null>(null);
-  const [result, setResult] = useState<{ insights: Insights; generatedAt: string; language: string; gymId: string | null; today: string; question: string } | null>(null);
+  const [result, setResult] = useState<{ id: string; insights: Insights; generatedAt: string; language: string; gymId: string | null; today: string; question: string; request: ReturnType<typeof trainingRequestSchema.parse> } | null>(null);
 
   async function analyze() {
     const parsed = trainingRequestSchema.safeParse({ mode, question: mode === "plan" ? "" : question, workoutCount: workoutCount ? Number(workoutCount) : null, periodDays: periodDays ? Number(periodDays) : null, purpose });
@@ -45,9 +51,12 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
       const request = parsed.data;
       const response = await generate({ data: { language, gymId, today, request } });
       if (response.insights && response.generatedAt) {
-        const next = { insights: response.insights, generatedAt: response.generatedAt, language, gymId, today, question: request.question };
+        const next = { id: response.historyId ?? crypto.randomUUID(), insights: response.insights, generatedAt: response.generatedAt, language, gymId, today, question: request.question, request };
         setResult(next);
+        setSelectedId(next.id);
+        setError(response.error);
         setSaved(new Set());
+        await queryClient.invalidateQueries({ queryKey: ["ai-history"] });
         queryClient.setQueryData(["training-insights", language, gymId, request], next);
       } else setError(response.error);
     } catch (error) {
@@ -55,25 +64,37 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
     } finally { setBusy(false); }
   }
 
-  const current = result?.language === language && result.gymId === getSelectedGym() ? result : null;
-  async function saveWorkout(items: Insights["exercises"], dayOffset: number, title: string, key: string) {
-    if (!current || saving || saved.has(key) || !items.length) return;
-    setSaving(key);
+  const scopedHistory = history.filter((row) => row.language === language && row.gymId === gymId);
+  const current = scopedHistory.find((row) => row.id === selectedId) ?? (result?.id === selectedId && result.language === language && result.gymId === gymId ? result : scopedHistory[0] ?? null);
+  const acceptedKeys = new Set(accepted.filter((row) => row.ai_history_id === current?.id).map((row) => row.ai_workout_key ?? ""));
+  for (const key of saved) if (key.startsWith(`${current?.id}:`)) acceptedKeys.add(key.slice(key.indexOf(":") + 1));
+  const workouts = current ? current.insights.workouts.length ? current.insights.workouts.map((workout, index) => ({ ...workout, key: String(index) })) : [{ exercises: current.insights.exercises, dayOffset: 0, title: t("Nästa pass", "Next workout"), key: "next" }] : [];
+  const pending = unacceptedWorkoutKeys(workouts.filter((workout) => workout.exercises.length).map((workout) => workout.key), acceptedKeys);
+  async function saveWorkouts(keys: string[]) {
+    if (!current || saving || !keys.length) return;
+    setSaving(keys.length > 1 ? "all" : keys[0] ?? "all");
     setError(null);
     try {
-      const rows = suggestionRows(items, current.today, dayOffset, title, current.gymId, crypto.randomUUID());
-      const { error } = await supabase.from("log_entries").insert(rows);
+      let historyId = current.id;
+      if (!history.some((row) => row.id === historyId)) {
+        const { data, error } = await supabase.from("training_ai_history").insert({ language: current.language, gym_id: current.gymId, today: current.today, request: current.request, insights: current.insights, generated_at: current.generatedAt }).select("id").single();
+        if (error) throw error;
+        historyId = data.id;
+        setSelectedId(historyId);
+      }
+      const rows = workouts.filter((workout) => keys.includes(workout.key) && !acceptedKeys.has(workout.key)).flatMap((workout) => suggestionRows(workout.exercises, current.today, workout.dayOffset, workout.title, current.gymId, crypto.randomUUID()).map((row) => ({ ...row, ai_history_id: historyId, ai_workout_key: workout.key })));
+      const { error } = await supabase.from("log_entries").upsert(rows, { onConflict: "user_id,ai_history_id,ai_workout_key,proposal_order", ignoreDuplicates: true });
       if (error) throw error;
-      setSaved((previous) => new Set(previous).add(key));
-      await queryClient.invalidateQueries({ queryKey: ["workout-suggestions"] });
+      setSaved((previous) => new Set([...previous, ...keys.map((key) => `${historyId}:${key}`)]));
+      await Promise.all([queryClient.invalidateQueries({ queryKey: ["workout-suggestions"] }), queryClient.invalidateQueries({ queryKey: ["accepted-ai-workouts"] }), queryClient.invalidateQueries({ queryKey: ["ai-history"] })]);
     } catch (error) { setError(error instanceof Error ? error.message : t("Passet kunde inte sparas", "Could not save workout")); }
     finally { setSaving(null); }
   }
   function saveControl(items: Insights["exercises"], offset: number, title: string, key: string) {
-    return <div className="flex flex-wrap items-center gap-3 pt-2"><Button type="button" variant="outline" disabled={busy || saving !== null || saved.has(key) || !items.length} onClick={() => void saveWorkout(items, offset, title, key)}>
-      {saving === key ? <LoaderCircle className="size-4 animate-spin" /> : saved.has(key) ? <Check className="size-4" /> : <CalendarPlus className="size-4" />}
-      {saved.has(key) ? t("Sparat som förslag", "Saved as suggestion") : t("Spara som förslag", "Save as suggestion")}
-    </Button>{saved.has(key) && <Link to="/log" className="text-sm font-semibold text-primary underline">{t("Gå till passet i Logg", "Open workout in Log")}</Link>}</div>;
+    return <div className="flex flex-wrap items-center gap-3 pt-2"><Button type="button" variant="outline" disabled={busy || saving !== null || acceptedKeys.has(key) || !items.length} onClick={() => void saveWorkouts([key])}>
+      {saving === key ? <LoaderCircle className="size-4 animate-spin" /> : acceptedKeys.has(key) ? <Check className="size-4" /> : <CalendarPlus className="size-4" />}
+      {acceptedKeys.has(key) ? t("Sparat som förslag", "Saved as suggestion") : t("Spara som förslag", "Save as suggestion")}
+    </Button>{acceptedKeys.has(key) && <Link to="/log" className="text-sm font-semibold text-primary underline">{t("Gå till passet i Logg", "Open workout in Log")}</Link>}</div>;
   }
   const categories = categoriesOf(exercises);
   function suggestions(items: Insights["exercises"]) {
@@ -111,6 +132,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
         {busy ? t("Tänker…", "Thinking…") : mode === "plan" ? t("Ge mig passförslag", "Suggest workouts") : question.trim() ? t("Fråga om min träning", "Ask about my training") : current ? t("Uppdatera analys", "Update analysis") : t("Analysera mina pass", "Analyze my workouts")}
       </Button>
     </form>
+    {scopedHistory.length > 0 && <div className="space-y-1"><label htmlFor={`${id}-history`} className="text-sm font-semibold">{t("AI-historik", "AI history")}</label><select id={`${id}-history`} className="h-12 w-full rounded-md border border-input bg-background px-3 text-sm" value={current?.id ?? ""} disabled={busy || saving !== null} onChange={(event) => setSelectedId(event.target.value)}>{scopedHistory.map((row) => <option key={row.id} value={row.id}>{analysisDateTime(row.generatedAt)} · {row.request.mode === "plan" ? t("Träningsplan", "Workout plan") : t("Analys", "Analysis")}{row.request.purpose || row.question ? ` · ${(row.request.purpose || row.question).slice(0, 70)}` : ""}</option>)}</select></div>}
     {!hasLog && <p className="text-sm text-muted-foreground">{t("Inga träningsloggar ännu.", "No workouts logged yet.")}</p>}
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     <div aria-live="polite" aria-busy={busy}>
@@ -124,6 +146,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
           <div><h3 className="font-bold">{t("Utveckling i set", "Set development")}</h3><p className="mt-1 text-sm leading-relaxed">{current.insights.setDevelopment}</p></div>
         </div>
         <h3 className="text-xl font-bold">{current.insights.workouts.length ? t("Din träningsplan", "Your workout plan") : t("Förslag på nästa pass", "Suggested next workout")}</h3>
+        {current.insights.workouts.length > 0 && <Button type="button" disabled={busy || saving !== null || pending.length === 0} onClick={() => void saveWorkouts(pending)}>{saving === "all" ? <LoaderCircle className="size-4 animate-spin" /> : pending.length === 0 ? <Check className="size-4" /> : <CalendarPlus className="size-4" />}{pending.length === 0 ? t("Alla pass accepterade som förslag", "All workouts accepted as suggestions") : t("Acceptera alla pass som förslag", "Accept all workouts as suggestions")}</Button>}
         <p className="text-sm leading-relaxed">{current.insights.recommendation}</p>
         {current.insights.goalNotes && <p className="rounded-lg border-l-4 border-brand-yellow bg-muted p-3 text-sm leading-relaxed"><strong>{t("Dina mål", "Your goals")}: </strong>{current.insights.goalNotes}</p>}
         {current.insights.workouts.length ? <div className="divide-y divide-border">{current.insights.workouts.map((workout, index) => <article key={workout.dayOffset} className="py-4" aria-label={`${t("Pass", "Workout")} ${index + 1}`}>
