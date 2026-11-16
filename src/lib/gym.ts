@@ -83,6 +83,11 @@ export function isWorkoutExpanded(date: string, today: string, overrides: Map<st
   return overrides.get(date) ?? date === today;
 }
 
+/** Suggested workouts stay collapsed unless they are for today; a click overrides that. */
+export function isProposalExpanded(date: string, today: string, overrides: Map<string, boolean>, key: string) {
+  return overrides.get(key) ?? date === today;
+}
+
 /** Recording order within a workout; tied import timestamps retain their existing order. */
 export function workoutRecordingOrder<T extends { created_at: string }>(entries: readonly T[]): T[] {
   return [...entries].sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
