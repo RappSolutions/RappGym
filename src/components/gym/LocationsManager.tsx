@@ -23,14 +23,14 @@ export function LocationsManager() {
     e.preventDefault();
     if (!fresh.name.trim()) return;
     const { error } = await supabase.from("gyms").insert({ name: fresh.name.trim(), description: fresh.description.trim() });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setFresh({ name: "", description: "" });
     refresh();
   }
   async function save(g: Gym) {
     if (!draft.name.trim()) return;
     const { error } = await supabase.from("gyms").update({ name: draft.name.trim(), description: draft.description.trim() }).eq("id", g.id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setEditing(null);
     refresh();
   }
