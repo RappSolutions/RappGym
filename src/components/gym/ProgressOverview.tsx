@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useLanguage } from "@/lib/i18n";
 import { categoriesOf, categoryToken, formatDate, todayISO, type Exercise, type LogEntry } from "@/lib/gym";
 import { periodStart, progressByDay, weightKg } from "@/lib/progress";
+import { ProgressExercisePicker } from "@/components/gym/ProgressExercisePicker";
 
 export function ProgressOverview({ log, exercises }: { log: LogEntry[]; exercises: Exercise[] }) {
   const { t, language, localize } = useLanguage();
@@ -40,14 +41,7 @@ export function ProgressOverview({ log, exercises }: { log: LogEntry[]; exercise
       <div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_160px]">
         <div className="min-w-0 space-y-1">
           <label htmlFor="progress-exercise" className="text-xs uppercase text-muted-foreground">{t("Övning", "Exercise")}</label>
-          <Select value={code} onValueChange={setSelection}>
-            <SelectTrigger id="progress-exercise" className="h-11"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("Alla övningar – antal set", "All exercises – sets")}</SelectItem>
-              {options.map((exercise) => <SelectItem key={exercise.id} value={exercise.code}>{exercise.code} · {localize(exercise).name}</SelectItem>)}
-              {[...loggedCodes].filter((item) => !options.some((exercise) => exercise.code === item)).map((item) => <SelectItem key={item} value={item}>{item} · {t("Borttagen övning", "Deleted exercise")}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <ProgressExercisePicker exercises={exercises} loggedCodes={loggedCodes} value={code} onChange={setSelection} />
         </div>
         <div className="space-y-1">
           <label htmlFor="progress-period" className="text-xs uppercase text-muted-foreground">{t("Period", "Period")}</label>

@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { GoalsCard } from "@/components/gym/GoalsCard";
-import { TrainingInsights } from "@/components/gym/TrainingInsights";
 import { Button } from "@/components/ui/button";
 import { dashboardStats } from "@/lib/dashboard";
 import { goalsQuery } from "@/lib/goals";
@@ -15,9 +14,9 @@ export const Route = createFileRoute("/_authenticated/home")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { title: "Hem – RappGym" },
-      { name: "description", content: "Din träningsöversikt med statistik, mål och AI-förslag på nästa pass." },
+      { name: "description", content: "Din träningsöversikt med statistik, mål och senaste pass." },
       { property: "og:title", content: "Hem – RappGym" },
-      { property: "og:description", content: "Din träningsöversikt med statistik, mål och AI-förslag på nästa pass." },
+      { property: "og:description", content: "Din träningsöversikt med statistik, mål och senaste pass." },
     ],
   }),
   loader: ({ context }) => Promise.all([
@@ -75,6 +74,5 @@ function HomePage() {
       <Button asChild variant="outline" size="sm"><Link to="/log">{t("Visa logg", "View log")}</Link></Button>
     </section>}
     <GoalsCard />
-    <TrainingInsights exercises={exercises} hasLog={log.length > 0} />
   </main>;
 }

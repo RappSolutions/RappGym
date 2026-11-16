@@ -5,6 +5,11 @@ export function completedEntries<T extends { status?: string }>(rows: readonly T
   return rows.filter((row) => row.status !== "suggested");
 }
 
+/** Removing a proposal must never remove its already completed exercises. */
+export function removableSuggestionIds(rows: readonly { id: string; status: string; proposal_id: string | null }[], proposalId: string): string[] {
+  return rows.filter((row) => row.status === "suggested" && (row.proposal_id ?? row.id) === proposalId).map((row) => row.id);
+}
+
 export function suggestionRows(items: TrainingInsights["exercises"], today: string, dayOffset: number, title: string, gymId: string | null, proposalId: string) {
   return items.map((item, index) => ({
     code: item.code, sets: item.sets, reps: item.reps, load: item.load,

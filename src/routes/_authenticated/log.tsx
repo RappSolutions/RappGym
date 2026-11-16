@@ -1,8 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, Play, Circle, CheckCircle2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Play, Circle, CheckCircle2, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { removableSuggestionIds } from "@/lib/workout-suggestions";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { useLanguage } from "@/lib/i18n";
 import { LogSheet } from "@/components/gym/LogSheet";
 import { categoriesOf, categoryToken, exercisesQuery, gymsQuery, suggestionsQuery, formatDateWithWeekday, logQuery, type LogEntry, formatSet, todayISO, isWorkoutExpanded, workoutRecordingOrder } from "@/lib/gym";
@@ -25,6 +29,7 @@ export const Route = createFileRoute("/_authenticated/log")({
 
 function LogPage() {
   const { t, language, localize } = useLanguage();
+  const queryClient = useQueryClient();
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
   const { data: log } = useSuspenseQuery(logQuery);
   const { data: proposals } = useSuspenseQuery(suggestionsQuery);
@@ -32,6 +37,10 @@ function LogPage() {
   const [guidedId, setGuidedId] = useState<string | null>(null);
   const [entry, setEntry] = useState<LogEntry | null>(null);
   const [expandedOverrides, setExpandedOverrides] = useState<Map<string, boolean>>(new Map());
+  const [proposalsExpanded, setProposalsExpanded] = useState(true);
+  const [completedExpanded, setCompletedExpanded] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const today = todayISO();
   const categories = categoriesOf(exercises);
   const byCode = new Map(exercises.map((e) => [e.code, localize(e)]));
@@ -50,10 +59,27 @@ function LogPage() {
     else { setEntry(null); setGuidedId(null); }
   }
 
+  async function deleteProposal() {
+    if (!deletingId || deleting) return;
+    const ids = removableSuggestionIds(proposals, deletingId);
+    if (!ids.length) { setDeletingId(null); return; }
+    setDeleting(true);
+    try {
+      const { error } = await supabase.from("log_entries").delete().in("id", ids).eq("status", "suggested");
+      if (error) throw error;
+      if (guidedId === deletingId) { setGuidedId(null); setEntry(null); }
+      await Promise.all([queryClient.invalidateQueries({ queryKey: ["workout-suggestions"] }), queryClient.invalidateQueries({ queryKey: ["accepted-ai-workouts"] })]);
+      setDeletingId(null);
+      toast.success(t("Förslaget borttaget", "Suggestion removed"));
+    } catch { toast.error(t("Förslaget kunde inte tas bort. Försök igen.", "Could not remove suggestion. Try again.")); }
+    finally { setDeleting(false); }
+  }
+
   return (
     <main className="space-y-5 px-4">
       {proposals.length > 0 && <section className="space-y-3 border-b border-border pb-5" aria-label={t("Föreslagna pass", "Suggested workouts")}>
-        <h2 className="flex items-center gap-2 text-2xl font-bold"><Circle className="size-5 text-primary" />{t("Föreslagna pass", "Suggested workouts")}</h2>
+        <Button variant="ghost" className="h-auto min-h-12 w-full justify-start gap-2 whitespace-normal px-0 text-left" aria-expanded={proposalsExpanded} aria-controls="proposed-workouts" onClick={() => setProposalsExpanded(!proposalsExpanded)}>{proposalsExpanded ? <ChevronDown className="size-4 shrink-0" /> : <ChevronRight className="size-4 shrink-0" />}<Circle className="size-5 shrink-0 text-primary" /><span className="font-display text-2xl font-bold">{t("Föreslagna pass", "Suggested workouts")}</span><span className="ml-auto text-sm text-muted-foreground">{planned.size}</span></Button>
+        <div id="proposed-workouts" hidden={!proposalsExpanded} className="space-y-3">
         {[...planned].map(([id, rows]) => {
           const first = rows[0];
           if (!first) return null;
@@ -67,13 +93,14 @@ function LogPage() {
             <div className="divide-y divide-border">{rows.map((row) => <Button key={row.id} variant="ghost" data-category={categoryToken(byCode.get(row.code)?.category ?? "", categories)} className="category-theme grid h-auto min-h-12 w-full grid-cols-[1rem_2.5rem_minmax(0,1fr)] gap-x-2 gap-y-1 whitespace-normal border-l-4 border-category-fill px-2 py-3 text-left sm:grid-cols-[1rem_2.5rem_minmax(0,1fr)_auto]" onClick={() => { setGuidedId(null); setEntry(row); }}>
               <Circle className="size-4 shrink-0 text-primary" /><span className="font-bold text-category-ink">{row.code}</span><span className="min-w-0 break-words">{byCode.get(row.code)?.name}</span><span className="col-span-2 col-start-2 min-w-0 break-words font-semibold sm:col-span-1 sm:col-start-auto">{formatSet(row)}</span>
             </Button>)}</div>
-            <Button className="w-full sm:w-auto" onClick={() => { setGuidedId(id); setEntry(first); }}><Play className="size-4" />{done ? t("Fortsätt passet", "Continue workout") : t("Gå igenom passet", "Start workout")}</Button>
+             <div className="flex items-center justify-between gap-2"><Button className="min-w-0 whitespace-normal sm:w-auto" onClick={() => { setGuidedId(id); setEntry(first); }}><Play className="size-4 shrink-0" />{done ? t("Fortsätt passet", "Continue workout") : t("Gå igenom passet", "Start workout")}</Button><Button variant="ghost" size="icon" className="shrink-0 text-destructive" aria-label={`${t("Ta bort förslag", "Remove suggestion")}: ${first.proposal_title}`} title={t("Ta bort förslag", "Remove suggestion")} onClick={() => setDeletingId(id)}><Trash2 className="size-5" /></Button></div>
           </article>;
         })}
-      </section>}
-      {log.length > 0 && <h2 className="flex items-center gap-2 text-2xl font-bold"><CheckCircle2 className="size-5 text-primary" />{t("Genomförda pass", "Completed workouts")}</h2>}
+        </div>
+       </section>}
+       {log.length > 0 && <Button variant="ghost" className="h-auto min-h-12 w-full justify-start gap-2 whitespace-normal px-0 text-left" aria-expanded={completedExpanded} aria-controls="completed-workouts" onClick={() => setCompletedExpanded(!completedExpanded)}>{completedExpanded ? <ChevronDown className="size-4 shrink-0" /> : <ChevronRight className="size-4 shrink-0" />}<CheckCircle2 className="size-5 shrink-0 text-primary" /><span className="font-display text-2xl font-bold">{t("Genomförda pass", "Completed workouts")}</span><span className="ml-auto text-sm text-muted-foreground">{days.size}</span></Button>}
       {!log.length && <p className="text-muted-foreground">{t("Inga pass ännu.", "No workouts yet.")}</p>}
-      {[...days].map(([date, entries]) => {
+       <div id="completed-workouts" hidden={!completedExpanded} className="space-y-5">{[...days].map(([date, entries]) => {
         const cats = [...new Set(entries.map((e) => exercises.find((ex) => ex.code === e.code)?.category).filter((c): c is string => !!c))];
         const expanded = isWorkoutExpanded(date, today, expandedOverrides);
         return (
@@ -102,7 +129,8 @@ function LogPage() {
             </div>
           </section>
         );
-      })}
+      })}</div>
+      <AlertDialog open={deletingId !== null} onOpenChange={(open) => { if (!open && !deleting) setDeletingId(null); }}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{t("Ta bort föreslaget pass?", "Remove suggested workout?")}</AlertDialogTitle><AlertDialogDescription>{t("Ej genomförda övningar i detta förslag tas bort. Genomförda övningar och AI-svaret i historiken behålls.", "Uncompleted exercises in this suggestion will be removed. Completed exercises and the AI answer in history are kept.")}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel disabled={deleting}>{t("Avbryt", "Cancel")}</AlertDialogCancel><AlertDialogAction disabled={deleting} onClick={(event) => { event.preventDefault(); void deleteProposal(); }}>{deleting ? t("Tar bort…", "Removing…") : t("Ta bort förslag", "Remove suggestion")}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
       <LogSheet exercise={entry ? byCode.get(entry.code) ?? null : null} entry={entry} onCompleted={guidedId ? nextExercise : undefined} progress={guidedId ? `${guidedDone + 1}/${guidedDone + guidedRows.length}` : undefined} onClose={() => { setEntry(null); setGuidedId(null); }} />
     </main>
   );

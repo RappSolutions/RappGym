@@ -30,6 +30,8 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## Gym log app
+- Keep AI analysis/planning/history on the dedicated authenticated AI route; shared navigation provides access without crowding dashboard or statistics.
+- Progress exercise selection uses searchable, database-derived category groups; log proposal deletion targets suggested rows only and preserves completed work and AI history.
 - Keep supported OAuth methods in a shared auth-provider module used by the sign-in page and tested, so authentication restrictions stay consistent.
 - Generate training insights only on an explicit request through an authenticated server function, with user-scoped reads and server-only streamed AI Gateway Responses calls; keep computed facts separate from AI advice to protect log accuracy and avoid automatic billing.
 - Validate custom training requests and normalize multi-workout plans in a shared pure module; scope cached results by request, language and gym to avoid showing another plan as the current answer.
