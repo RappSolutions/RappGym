@@ -246,6 +246,7 @@ export type Database = {
       training_profiles: {
         Row: {
           age: number | null
+          birth_year: number | null
           experience: string
           height_cm: number | null
           limitations: string
@@ -257,6 +258,7 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          birth_year?: number | null
           experience?: string
           height_cm?: number | null
           limitations?: string
@@ -268,6 +270,7 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          birth_year?: number | null
           experience?: string
           height_cm?: number | null
           limitations?: string

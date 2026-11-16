@@ -27,7 +27,7 @@ export const getTrainingInsights = createServerFn({ method: "POST" })
     const goals = goalRows.map((g) => ({ goal: g.text.slice(0, 300), targetDate: g.target_date }));
     const { data: profile, error: profileError } = await supabase.from("training_profiles").select("*").eq("user_id", userId).maybeSingle();
     if (profileError) throw new Error(profileError.message);
-    const trainingProfile = profileForAI(profile);
+    const trainingProfile = profileForAI(profile, data.today);
     const fail = (message: string) => ({ insights: null, error: message, generatedAt: null });
     if (!log.length) return fail(data.language === "sv" ? "Logga ett pass först." : "Log a workout first.");
     const key = process.env["LOVABLE_API_KEY"];
