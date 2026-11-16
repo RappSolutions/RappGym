@@ -67,8 +67,8 @@
   --color-cat-3: var(--cat-3);
   --color-cat-4: var(--cat-4);
   --color-cat-5: var(--cat-5);
-  --font-display: "Ubuntu", system-ui, sans-serif;
-  --font-sans: "Ubuntu", system-ui, sans-serif;
+  --font-display: "Berlin Sans", "Ubuntu", system-ui, sans-serif;
+  --font-sans: "Berlin Sans", "Ubuntu", system-ui, sans-serif;
   --color-brand-royal: var(--brand-royal);
   --color-brand-blue: var(--brand-blue);
   --color-brand-yellow: var(--brand-yellow);
@@ -127,6 +127,15 @@
   --sidebar-accent-foreground: oklch(0.419978 0.180811 260.938);
   --sidebar-border: oklch(0.897547 0.000000 89.876);
   --sidebar-ring: var(--brand-blue);
+}
+
+/* Brand font: Berlin Sans (BRLNSR.TTF), served as a CDN asset. */
+@font-face {
+  font-family: "Berlin Sans";
+  src: url("/__l5e/assets-v1/a1588351-bcaf-4bd7-9347-2a2290dd44d7/berlin-sans.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
 }
 
 @layer base {
