@@ -36,7 +36,10 @@ function PassPage() {
   const [gymId, setGym] = useSelectedGym();
   const [picking, setPicking] = useState(false);
   const gym = gyms.find((g) => g.id === gymId);
-  const exercises = exercisesAtGym(allExercises, gym?.id ?? null);
+  const gymExercises = exercisesAtGym(allExercises, gym?.id ?? null);
+  const [showAll, setShowAll] = useState(false);
+  const useAll = showAll || gymExercises.length === 0;
+  const exercises = useAll ? allExercises : gymExercises;
   const { data: log } = useSuspenseQuery(logQuery);
   const { cat } = Route.useSearch();
   const navigate = Route.useNavigate();
@@ -46,7 +49,7 @@ function PassPage() {
   const today = todayISO();
   const todayCount = useMemo(() => {
     const m = new Map<string, number>();
-    for (const e of log) if (e.date === today) m.set(e.code, (m.get(e.code) ?? 0) + Math.max(1, e.sets));
+    for (const e of log) if (e.date === today && e.gym_id === gym?.id) m.set(e.code, (m.get(e.code) ?? 0) + Math.max(1, e.sets));
     return m;
   }, [log, today]);
   const [open, setOpen] = useState<Exercise | null>(null);
@@ -64,6 +67,9 @@ function PassPage() {
       <Button variant="secondary" onClick={() => setPicking(true)} className="gap-1.5 rounded-full px-3 text-sm font-medium">
         <MapPin className="h-4 w-4 text-primary" /> {gym.name} <span className="text-muted-foreground">· {t("byt", "change")}</span>
       </Button>
+      <p className="text-sm text-muted-foreground">{t("Träna nu: välj en övning och logga dina set. Övningar = bank med instruktioner, Logg = historik.", "Train now: pick an exercise and log your sets. Exercises = library with instructions, Log = history.")}</p>
+      {gymExercises.length === 0 ? <p className="rounded-lg border bg-secondary p-3 text-sm">{t(`Inga övningar är kopplade till ${gym.name} än – visar alla dina övningar. Koppla övningar till gymmet (eller "Alla gym") under Övningar.`, `No exercises are linked to ${gym.name} yet – showing all your exercises. Link exercises to this gym (or "All gyms") under Exercises.`)}</p>
+        : <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} />{t("Visa övningar från alla gym", "Show exercises from all gyms")}</label>}
       {todayCount.size > 0 && <p className="text-sm text-muted-foreground">{`${[...todayCount.values()].reduce((a, b) => a + b, 0)} ${t("set loggade idag", "sets logged today")}`}</p>}
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
         {cats.map((c) => {
