@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX log_entries_ai_acceptance ON public.log_entries (user_id, ai_history_id, ai_workout_key, proposal_order);
