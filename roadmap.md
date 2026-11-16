@@ -1,4 +1,6 @@
 # Roadmap
+- [ ] Accept all remaining suggested workouts together without duplicates or completed status
+- [ ] Persist full AI answers and requests, restore latest answer and browse history across navigation/reload
 - [x] Show analysis date with local HH:mm
 - [x] Save desired AI workouts as persistent suggestions, distinguish them in Logg and guide confirmation/adjustments
 - [x] Exclude suggestions from all statistics, history prefills and AI facts; 34 tests passed and signed-in save/reload/adjust/confirm flow verified on desktop/mobile; test workout removed
