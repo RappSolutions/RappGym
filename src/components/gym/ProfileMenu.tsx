@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { User } from "@supabase/supabase-js";
-import { LogOut, Settings, UserRound, Save, Trash2, LoaderCircle } from "lucide-react";
+import { LogOut, Settings, UserRound, Save, Trash2, LoaderCircle, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage, LanguagePicker } from "@/lib/i18n";
@@ -11,7 +11,7 @@ import { gymsQuery } from "@/lib/gym";
 import { useSelectedGym } from "@/hooks/use-gym";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +22,8 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
   const qc = useQueryClient();
   const { data: gyms = [] } = useQuery(gymsQuery);
   const [gymId, setGym] = useSelectedGym();
+  const currentGym = gyms.find((g) => g.id === gymId);
+  useEffect(() => { if (gyms.length > 0 && !currentGym) setGym(gyms[0].id); }, [gyms, currentGym, setGym]);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -62,7 +64,7 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
   }
   return <>
     <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label={t("Mitt konto", "My account")} title={t("Mitt konto", "My account")} className="shrink-0 rounded-full text-brand-yellow hover:bg-brand-royal hover:text-brand-yellow"><Avatar className="size-9 border-2 border-brand-yellow"><AvatarFallback className="bg-brand-royal text-sm font-semibold text-brand-yellow">{initials || <UserRound className="size-5" />}</AvatarFallback></Avatar></Button></DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 max-w-[calc(100vw-2rem)]"><DropdownMenuLabel><span className="block break-words">{name}</span>{user.email !== name && <span className="block break-words text-xs font-normal text-muted-foreground">{user.email}</span>}</DropdownMenuLabel><DropdownMenuSeparator />{gyms.length > 0 && <><DropdownMenuRadioGroup value={gymId ?? ""} onValueChange={(value) => setGym(value || null)}><DropdownMenuLabel className="text-xs font-normal text-muted-foreground">{t("Plats", "Location")}</DropdownMenuLabel><DropdownMenuRadioItem value="" className="min-h-11">{t("Alla platser", "All locations")}</DropdownMenuRadioItem>{gyms.map((g) => <DropdownMenuRadioItem key={g.id} value={g.id} className="min-h-11">{g.name}</DropdownMenuRadioItem>)}</DropdownMenuRadioGroup><DropdownMenuSeparator /></>}<DropdownMenuItem className="min-h-12" onSelect={() => void edit()}><UserRound />{t("Min träningsprofil", "My training profile")}</DropdownMenuItem><DropdownMenuItem asChild className="min-h-12"><Link to="/settings"><Settings />{t("Inställningar", "Settings")}</Link></DropdownMenuItem><DropdownMenuSeparator /><div className="px-2 py-2"><LanguagePicker flagsOnly /></div><DropdownMenuSeparator /><DropdownMenuItem className="min-h-12" onSelect={() => void onSignOut()}><LogOut />{t("Logga ut", "Sign out")}</DropdownMenuItem></DropdownMenuContent>
+      <DropdownMenuContent align="end" className="w-64 max-w-[calc(100vw-2rem)]"><DropdownMenuLabel><span className="block break-words">{name}</span>{user.email !== name && <span className="block break-words text-xs font-normal text-muted-foreground">{user.email}</span>}</DropdownMenuLabel><DropdownMenuSeparator />{gyms.length > 0 && <><DropdownMenuSub><DropdownMenuSubTrigger className="min-h-12"><MapPin /><span className="min-w-0"><span className="block text-xs text-muted-foreground">{t("Plats", "Location")}</span><span className="block truncate font-medium">{currentGym?.name ?? ""}</span></span></DropdownMenuSubTrigger><DropdownMenuSubContent className="max-h-[60dvh] w-56 max-w-[calc(100vw-2rem)] overflow-y-auto"><DropdownMenuRadioGroup value={gymId ?? ""} onValueChange={(value) => setGym(value)}>{gyms.map((g) => <DropdownMenuRadioItem key={g.id} value={g.id} className="min-h-11">{g.name}</DropdownMenuRadioItem>)}</DropdownMenuRadioGroup></DropdownMenuSubContent></DropdownMenuSub><DropdownMenuSeparator /></>}<DropdownMenuItem className="min-h-12" onSelect={() => void edit()}><UserRound />{t("Min träningsprofil", "My training profile")}</DropdownMenuItem><DropdownMenuItem asChild className="min-h-12"><Link to="/settings"><Settings />{t("Inställningar", "Settings")}</Link></DropdownMenuItem><DropdownMenuSeparator /><div className="px-2 py-2"><LanguagePicker flagsOnly /></div><DropdownMenuSeparator /><DropdownMenuItem className="min-h-12" onSelect={() => void onSignOut()}><LogOut />{t("Logga ut", "Sign out")}</DropdownMenuItem></DropdownMenuContent>
     </DropdownMenu>
     <Dialog open={open} onOpenChange={(value) => { if (!busy) setOpen(value); }}><DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] overflow-y-auto p-5"><DialogHeader><DialogTitle className="text-2xl">{t("Min träningsprofil", "My training profile")}</DialogTitle><DialogDescription>{t("Alla uppgifter är valfria och privata. Ange bara det du vill dela.", "All details are optional and private. Enter only what you want to share.")}</DialogDescription></DialogHeader>
       {!loaded ? <LoaderCircle className="size-6 animate-spin" /> : <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); if (!busy) void save(); }}>
