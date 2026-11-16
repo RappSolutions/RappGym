@@ -94,7 +94,7 @@ function ExercisePage() {
         {!history.length && <p className="text-muted-foreground">{t("Inga loggade set ännu.", "No sets logged yet.")}</p>}
         {history.map((e) => (
           <button key={e.id} onClick={() => { setEntry(e); setLogging(true); }} className="flex w-full items-center justify-between rounded-lg border bg-card px-4 py-3 text-left">
-            <span className="text-sm text-muted-foreground">{formatDate(e.date, language)}</span>
+            <span className="text-sm text-muted-foreground">{formatDate(e.date)}</span>
             <span className="text-lg font-bold">{formatSet(e)}</span>
           </button>
         ))}
