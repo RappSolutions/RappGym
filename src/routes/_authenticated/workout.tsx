@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { ExerciseCard } from "@/components/gym/ExerciseCard";
 import { LogSheet } from "@/components/gym/LogSheet";
 import { Button } from "@/components/ui/button";
+import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
 import { categoriesOf, categoryToken, exercisesQuery, gymsQuery, lastByCode, logQuery, todayISO, type Exercise } from "@/lib/gym";
 
 export const Route = createFileRoute("/_authenticated/workout")({
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/_authenticated/workout")({
     ],
   }),
   loader: ({ context }) =>
-    Promise.all([context.queryClient.ensureQueryData(gymsQuery), context.queryClient.ensureQueryData(exercisesQuery), context.queryClient.ensureQueryData(logQuery)]),
+    Promise.all([context.queryClient.ensureQueryData(gymsQuery), context.queryClient.ensureQueryData(exercisesQuery), context.queryClient.ensureQueryData(logQuery), context.queryClient.ensureQueryData(exerciseLocationsQuery)]),
   component: PassPage,
 });
 
@@ -38,7 +39,10 @@ function PassPage() {
   const [picking, setPicking] = useState(false);
   const gym = gyms.find((g) => g.id === gymId);
   const [q, setQ] = useState("");
-  const exercises = allExercises;
+  const { data: links } = useSuspenseQuery(exerciseLocationsQuery);
+  const [showAll, setShowAll] = useState(false);
+  const atPlace = exercisesAtLocation(allExercises, links, gymId);
+  const exercises = showAll ? allExercises : atPlace;
   const { data: log } = useSuspenseQuery(logQuery);
   const { cat } = Route.useSearch();
   const navigate = Route.useNavigate();
@@ -68,6 +72,8 @@ function PassPage() {
         <MapPin className="h-4 w-4 text-primary" /> {gym.name} <span className="text-muted-foreground">· {t("byt", "change")}</span>
       </Button>
       <p className="text-sm text-muted-foreground">{t("Välj en övning för att logga set, eller ⓘ för instruktioner och bilder. Lägg till och redigera övningar under Inställningar.", "Pick an exercise to log sets, or ⓘ for instructions and pictures. Add and edit exercises under Settings.")}</p>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} className="size-4" />{t(`Visa alla övningar (${atPlace.length} av ${allExercises.length} finns här)`, `Show all exercises (${atPlace.length} of ${allExercises.length} available here)`)}</label>
+      {!showAll && atPlace.length === 0 && <p className="text-sm text-muted-foreground">{t("Inga övningar kopplade till platsen ännu. Välj övningar under Inställningar → Platser.", "No exercises linked to this location yet. Choose them under Settings → Locations.")}</p>}
       <div className="relative"><Search className="absolute top-3.5 left-3 h-5 w-5 text-muted-foreground" /><Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("Sök övning…", "Search exercise…")} className="h-12 pl-10" /></div>
       {todayCount.size > 0 && <p className="text-sm text-muted-foreground">{`${[...todayCount.values()].reduce((a, b) => a + b, 0)} ${t("set loggade idag", "sets logged today")}`}</p>}
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">

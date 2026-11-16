@@ -8,7 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { categoriesOf, useInvalidateGym, type Exercise } from "@/lib/gym";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { gymsQuery } from "@/lib/gym";
+import { exerciseLocationsQuery } from "@/lib/exercise-locations";
 
 const empty = { gym_id: "", code: "", category: "", name: "", equipment: "", variant: "", muscles: "", instructions: "", dose: "", focus: "" };
 
@@ -26,6 +28,14 @@ export function ExerciseForm({
   const { t, language, localize } = useLanguage();
   const invalidate = useInvalidateGym();
   const [f, setF] = useState(empty);
+  const qc = useQueryClient();
+  const { data: gyms = [] } = useQuery(gymsQuery);
+  const { data: links = [] } = useQuery(exerciseLocationsQuery);
+  const [places, setPlaces] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (open) setPlaces(new Set(exercise ? links.filter((l) => l.exercise_id === exercise.id).map((l) => l.gym_id) : gyms.map((g) => g.id)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, exercise?.id]);
   const [textLanguage, setTextLanguage] = useState<"sv" | "en">(language);
   useEffect(() => {
     if (open) setTextLanguage(language);
@@ -61,6 +71,12 @@ export function ExerciseForm({
       toast.error(res.error.code === "23505" ? t("Koden finns redan", "Code already exists") : res.error.message);
       return;
     }
+    const before = new Set(exercise ? links.filter((l) => l.exercise_id === exercise.id).map((l) => l.gym_id) : []);
+    const add = [...places].filter((id) => !before.has(id)).map((gym_id) => ({ exercise_id: res.data.id, gym_id }));
+    const drop = [...before].filter((id) => !places.has(id));
+    if (add.length) { const { error } = await supabase.from("exercise_locations").insert(add); if (error) toast.error(error.message); }
+    if (drop.length) { const { error } = await supabase.from("exercise_locations").delete().eq("exercise_id", res.data.id).in("gym_id", drop); if (error) toast.error(error.message); }
+    void qc.invalidateQueries({ queryKey: ["exercise-locations"] });
     if (exercise && exercise.code !== row.code) {
       await supabase.from("log_entries").update({ code: row.code }).eq("code", exercise.code);
     }
@@ -102,6 +118,10 @@ export function ExerciseForm({
           <div className="space-y-1"><Label>{t("Utförande", "Instructions")}</Label><Textarea rows={3} value={f.instructions} onChange={set("instructions")} /></div>
           <div className="space-y-1"><Label>{t("Set × reps", "Sets × reps")}</Label><Input value={f.dose} onChange={set("dose")} placeholder={t("3–4 set × 10–12 reps", "3–4 sets × 10–12 reps")} /></div>
           <div className="space-y-1"><Label>{t("Fokus", "Focus")}</Label><Input value={f.focus} onChange={set("focus")} /></div>
+          {gyms.length > 0 && <fieldset className="space-y-1"><legend className="text-sm font-medium">{t("Platser där övningen finns", "Locations where this exercise is available")}</legend>
+            <label className="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" className="size-4" checked={places.size === gyms.length} onChange={() => setPlaces(places.size === gyms.length ? new Set() : new Set(gyms.map((g) => g.id)))} />{t("Alla platser", "All locations")}</label>
+            <div className="grid gap-1 pl-6 sm:grid-cols-2">{gyms.map((g) => <label key={g.id} className="flex items-center gap-2 text-sm"><input type="checkbox" className="size-4" checked={places.has(g.id)} onChange={() => { const n = new Set(places); if (n.has(g.id)) n.delete(g.id); else n.add(g.id); setPlaces(n); }} />{g.name}</label>)}</div>
+          </fieldset>}
           <Button type="submit" className="h-12 w-full font-bold uppercase">{t("Spara", "Save")}</Button>
         </form>
       </DialogContent>

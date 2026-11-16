@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      exercise_locations: {
+        Row: {
+          created_at: string
+          exercise_id: string
+          gym_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          exercise_id: string
+          gym_id: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          exercise_id?: string
+          gym_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_locations_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exercise_locations_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exercises: {
         Row: {
           category: string
