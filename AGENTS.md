@@ -41,6 +41,7 @@ use the editor.
 
 - Keep app branding in shared global CSS tokens and the shared masthead; all content routes inherit the same visual frame so changes stay consistent across pages.
 - Category surfaces use shared data-category themes with separate fill, ink and on-fill tokens; this keeps category accents consistent and text legible on bright fills.
+- Sort rows within displayed workout dates by recording timestamp ascending without changing the newest-first shared log query, so latest-set prefills remain correct.
 - Derive the Home logo and favicon from the same logo artwork; use only the circular badge for the favicon so it stays legible at browser-tab sizes.
 - Use canonical English file routes for app navigation and retain legacy Swedish routes only as redirects, preserving exercise codes and workout filters so existing bookmarks continue working.
 - Home dashboard numbers come from the pure `src/lib/dashboard.ts` module (tested); soft training goals live in the owner-scoped `training_goals` table and are passed to the AI insight call as untrusted data, so AI advice can reflect goals without trusting them as instructions.

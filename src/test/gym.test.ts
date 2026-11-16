@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeStats, lastByCode, isWorkoutExpanded } from "@/lib/gym";
+import { computeStats, lastByCode, isWorkoutExpanded, workoutRecordingOrder } from "@/lib/gym";
 import history from "@/data/history.json";
 
 const ex = [
@@ -23,6 +23,18 @@ describe("workout expansion", () => {
     const overrides = new Map([["2026-11-14", true], ["2026-11-15", false]]);
     expect(isWorkoutExpanded("2026-11-14", "2026-11-15", overrides)).toBe(true);
     expect(isWorkoutExpanded("2026-11-15", "2026-11-15", overrides)).toBe(false);
+  });
+});
+
+describe("workout recording order", () => {
+  it("shows the first recorded exercise at the top and last at the bottom without changing the source log", () => {
+    const entries = [
+      { code: "CO4", created_at: "2026-11-16T10:30:00Z" },
+      { code: "PU1", created_at: "2026-11-16T10:00:00Z" },
+      { code: "PL1", created_at: "2026-11-16T10:15:00Z" },
+    ];
+    expect(workoutRecordingOrder(entries).map((e) => e.code)).toEqual(["PU1", "PL1", "CO4"]);
+    expect(entries.map((e) => e.code)).toEqual(["CO4", "PU1", "PL1"]);
   });
 });
 

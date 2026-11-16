@@ -66,6 +66,11 @@ export function isWorkoutExpanded(date: string, today: string, overrides: Map<st
   return overrides.get(date) ?? date === today;
 }
 
+/** Recording order within a workout; tied import timestamps retain their existing order. */
+export function workoutRecordingOrder<T extends { created_at: string }>(entries: readonly T[]): T[] {
+  return [...entries].sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
+}
+
 const CAT_TOKENS = ["cat-1", "cat-2", "cat-3", "cat-4", "cat-5"];
 export function categoryToken(category: string, categories: string[]): string {
   const i = categories.indexOf(category);

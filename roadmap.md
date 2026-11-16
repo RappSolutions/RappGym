@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Color log rows and date summaries by category; sort timestamped rows first-to-last (imported rows share a timestamp)
 - [x] Use Berlin for headings and Ubuntu for body text, refresh category colors, and verify mobile/desktop
 - [x] Create a FetchXML Builder-family RappGym logo, use it on Home and as favicon.ico, and verify
 - [x] Add AI Gateway training summary and personal next-workout recommendation on Statistics
