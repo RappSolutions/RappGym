@@ -41,7 +41,7 @@ export function GymPicker({ gyms, selected, onPick }: { gyms: Gym[]; selected: s
         </button>
       ))}
       <form onSubmit={add} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
-        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("Nytt gym, t.ex. SATS City", "New gym, e.g. SATS City")} className="h-12" />
+        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("Ny plats, t.ex. SATS City", "New location, e.g. SATS City")} className="h-12" />
         <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("Beskrivning, t.ex. hotellgym i Santa Maria", "Description, e.g. hotel gym in Santa Maria")} className="h-12" />
         <Button type="submit" variant="secondary" className="h-12"><Plus className="h-5 w-5" />{t("Lägg till", "Add")}</Button>
       </form>

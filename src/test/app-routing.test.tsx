@@ -11,6 +11,7 @@ describe("App routing", () => {
     ["/home", "/_authenticated/home"],
     ["/workout", "/_authenticated/workout"],
     ["/exercises", "/_authenticated/exercises/"],
+    ["/settings", "/_authenticated/settings"],
     ["/exercises/PU1", "/_authenticated/exercises/$code"],
     ["/log", "/_authenticated/log"],
     ["/statistics", "/_authenticated/statistics"],
