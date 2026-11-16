@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => Promise<void> }) {
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -37,7 +37,7 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
   }
   async function save() {
     const parsed = trainingProfileSchema.safeParse(profile);
-    if (!parsed.success) { toast.error(t("Kontrollera ålder, längd och vikt.", "Check age, height and weight.")); return; }
+    if (!parsed.success) { toast.error(t("Kontrollera födelseår, längd och vikt.", "Check birth year, height and weight.")); return; }
     setBusy(true);
     try {
       const { error } = await supabase.from("training_profiles").upsert({ ...parsed.data, user_id: user.id, updated_at: new Date().toISOString() });
@@ -60,10 +60,11 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
   return <>
     <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label={t("Mitt konto", "My account")} title={t("Mitt konto", "My account")} className="shrink-0 rounded-full text-brand-yellow hover:bg-brand-royal hover:text-brand-yellow"><Avatar className="size-9 border-2 border-brand-yellow"><AvatarFallback className="bg-brand-royal text-sm font-semibold text-brand-yellow">{initials || <UserRound className="size-5" />}</AvatarFallback></Avatar></Button></DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64 max-w-[calc(100vw-2rem)]"><DropdownMenuLabel><span className="block break-words">{name}</span>{user.email !== name && <span className="block break-words text-xs font-normal text-muted-foreground">{user.email}</span>}</DropdownMenuLabel><DropdownMenuSeparator /><DropdownMenuItem className="min-h-12" onSelect={() => void edit()}><UserRound />{t("Min träningsprofil", "My training profile")}</DropdownMenuItem><DropdownMenuSeparator /><DropdownMenuItem className="min-h-12" onSelect={() => void onSignOut()}><LogOut />{t("Logga ut", "Sign out")}</DropdownMenuItem></DropdownMenuContent>
+      <div className="hidden" />
     </DropdownMenu>
     <Dialog open={open} onOpenChange={(value) => { if (!busy) setOpen(value); }}><DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] overflow-y-auto p-5"><DialogHeader><DialogTitle className="text-2xl">{t("Min träningsprofil", "My training profile")}</DialogTitle><DialogDescription>{t("Alla uppgifter är valfria och privata. Ange bara det du vill dela.", "All details are optional and private. Enter only what you want to share.")}</DialogDescription></DialogHeader>
       {!loaded ? <LoaderCircle className="size-6 animate-spin" /> : <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); if (!busy) void save(); }}>
-        <div className="grid grid-cols-3 gap-3">{([['age', t('Ålder', 'Age'), 1, 120, 1], ['height_cm', t('Längd (cm)', 'Height (cm)'), 30, 300, 0.1], ['weight_kg', t('Vikt (kg)', 'Weight (kg)'), 1, 500, 0.1]] as const).map(([field, label, min, max, step]) => <div key={field} className="space-y-1"><Label htmlFor={`profile-${field}`}>{label}</Label><Input id={`profile-${field}`} type="number" min={min} max={max} step={step} value={profile[field] ?? ""} disabled={busy} onChange={(event) => setProfile((old) => ({ ...old, [field]: event.target.value === "" ? null : Number(event.target.value) }))} /></div>)}</div>
+        <div className="grid grid-cols-3 gap-3">{([['birth_year', t('Födelseår', 'Birth year'), 1900, new Date().getFullYear(), 1], ['height_cm', t('Längd (cm)', 'Height (cm)'), 30, 300, 0.1], ['weight_kg', t('Vikt (kg)', 'Weight (kg)'), 1, 500, 0.1]] as const).map(([field, label, min, max, step]) => <div key={field} className="space-y-1"><Label htmlFor={`profile-${field}`}>{label}</Label><Input id={`profile-${field}`} type="number" min={min} max={max} step={step} value={profile[field] ?? ""} disabled={busy} onChange={(event) => setProfile((old) => ({ ...old, [field]: event.target.value === "" ? null : Number(event.target.value) }))} /></div>)}</div>
         {([['experience', t('Träningsvana', 'Training experience'), 1000], ['preferences', t('Önskemål', 'Preferences'), 2000], ['limitations', t('Problem & begränsningar', 'Problems & limitations'), 2000]] as const).map(([field,label,max]) => <div key={field} className="space-y-1"><Label htmlFor={`profile-${field}`}>{label}</Label><Textarea id={`profile-${field}`} rows={2} maxLength={max} disabled={busy} value={profile[field]} onChange={(event) => setProfile((old) => ({ ...old, [field]: event.target.value }))} /></div>)}
         <Button asChild variant="outline" className="w-full"><Link to="/home" onClick={() => setOpen(false)}><Target className="size-4" />{t("Mina mål på Hem", "My goals on Home")}</Link></Button>
         <div className="flex items-start gap-3"><Checkbox id="profile-ai" checked={profile.use_for_ai} disabled={busy} onCheckedChange={(checked) => setProfile((old) => ({ ...old, use_for_ai: checked === true }))} /><Label htmlFor="profile-ai" className="leading-relaxed">{t("Använd mina profiluppgifter i AI-frågor", "Use my profile details in AI requests")}</Label></div>
