@@ -14,7 +14,7 @@ export const getTrainingInsights = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const log: LogEntry[] = [];
     for (let from = 0; ; from += 1000) {
-      const result = await supabase.from("log_entries").select("*").eq("user_id", userId).order("date", { ascending: false }).range(from, from + 999);
+      const result = await supabase.from("log_entries").select("*").eq("user_id", userId).eq("status", "completed").order("date", { ascending: false }).range(from, from + 999);
       if (result.error) throw new Error(result.error.message);
       log.push(...result.data);
       if (result.data.length < 1000) break;

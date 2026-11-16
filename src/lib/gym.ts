@@ -1,6 +1,7 @@
 import { queryOptions, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
+import { completedEntries } from "@/lib/workout-suggestions";
 
 export type Exercise = Tables<"exercises">;
 export type LogEntry = Tables<"log_entries">;
@@ -26,9 +27,24 @@ export const logQuery = queryOptions({
       const { data, error } = await supabase
         .from("log_entries")
         .select("*")
+        .eq("status", "completed")
         .order("date", { ascending: false })
         .order("created_at", { ascending: false })
         .range(from, from + 999);
+      if (error) throw error;
+      all.push(...data);
+      if (data.length < 1000) break;
+    }
+    return all;
+  },
+});
+
+export const suggestionsQuery = queryOptions({
+  queryKey: ["workout-suggestions"],
+  queryFn: async () => {
+    const all: LogEntry[] = [];
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabase.from("log_entries").select("*").eq("status", "suggested").order("date").order("proposal_order").range(from, from + 999);
       if (error) throw error;
       all.push(...data);
       if (data.length < 1000) break;
@@ -41,6 +57,7 @@ export function useInvalidateGym() {
   const qc = useQueryClient();
   return () => {
     qc.invalidateQueries({ queryKey: ["log"] });
+    qc.invalidateQueries({ queryKey: ["workout-suggestions"] });
     qc.invalidateQueries({ queryKey: ["exercises"] });
   };
 }
@@ -53,7 +70,7 @@ export function categoriesOf(exercises: Exercise[]): string[] {
 /** Latest log entry per exercise code (log must be sorted newest first). */
 export function lastByCode(log: LogEntry[]): Map<string, LogEntry> {
   const m = new Map<string, LogEntry>();
-  for (const e of log) if (!m.has(e.code)) m.set(e.code, e);
+  for (const e of completedEntries(log)) if (!m.has(e.code)) m.set(e.code, e);
   return m;
 }
 
@@ -89,6 +106,7 @@ export function formatDateWithWeekday(iso: string, language: "sv" | "en" = "sv")
 }
 
 export function computeStats(log: LogEntry[], exercises: Exercise[]) {
+  log = completedEntries(log);
   const byCode = new Map(exercises.map((e) => [e.code, e]));
   // Each row holds `sets` identical sets (repeat count).
   const n = (e: LogEntry) => Math.max(1, e.sets ?? 1);

@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Show analysis date with local HH:mm
+- [x] Save desired AI workouts as persistent suggestions, distinguish them in Logg and guide confirmation/adjustments
+- [x] Exclude suggestions from all statistics, history prefills and AI facts; 34 tests passed and signed-in save/reload/adjust/confirm flow verified on desktop/mobile; test workout removed
 - [x] Drop the free-text question when planning workouts; plan from workout count, days and purpose only
 - [x] Add custom AI requests and optional workout count, period and purpose; verified four workouts over seven days with real logs on desktop/mobile
 - [x] Show all dates as ISO 8601, with weekday in Logg

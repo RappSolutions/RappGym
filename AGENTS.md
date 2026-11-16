@@ -32,7 +32,8 @@ use the editor.
 ## Gym log app
 - Keep supported OAuth methods in a shared auth-provider module used by the sign-in page and tested, so authentication restrictions stay consistent.
 - Generate training insights only on an explicit request through an authenticated server function, with user-scoped reads and server-only streamed AI Gateway Responses calls; keep computed facts separate from AI advice to protect log accuracy and avoid automatic billing.
-- Validate custom training requests and normalize multi-workout plans in a shared pure module; keep suggestions separate from saved logs and scope cached results by request, language and gym to avoid showing another plan as the current answer.
+- Validate custom training requests and normalize multi-workout plans in a shared pure module; scope cached results by request, language and gym to avoid showing another plan as the current answer.
+- Persist selected AI workouts as log_entries with suggested status and proposal grouping/order; shared history queries and all aggregation/AI facts exclude suggestions, and confirming a row updates it in place to completed with its recording time, so plans never inflate history or duplicate completed work.
 - Exercises, categories and gyms come only from the database (exercises/gyms tables), never from code constants — the user edits them in the app.
 - Data is read client-side via the browser client + React Query under the `_authenticated` layout (ssr: false); RLS scopes log entries per user.
 - Selected gym is stored in localStorage (`src/lib/gym.ts`); exercises with no gym show at every gym.

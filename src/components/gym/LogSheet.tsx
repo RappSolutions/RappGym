@@ -29,12 +29,16 @@ export function LogSheet({
   entry,
   gymId,
   onClose,
+  onCompleted,
+  progress,
 }: {
   exercise: Exercise | null;
   last?: LogEntry | undefined;
   entry?: LogEntry | null;
   gymId?: string | null;
   onClose: () => void;
+  onCompleted?: (() => void) | undefined;
+  progress?: string | undefined;
 }) {
   const { t, language, localize } = useLanguage();
   const invalidate = useInvalidateGym();
@@ -56,10 +60,10 @@ export function LogSheet({
     setDate(entry?.date ?? todayISO());
   }, [exercise, entry, last]);
 
-  async function save() {
+  async function save(complete = true) {
     if (!exercise) return;
     setBusy(true);
-    const row = { code: exercise.code, sets: Math.max(1, round), load, reps, note: note || null, date, ...(entry ? {} : { gym_id: gymId ?? null }) };
+    const row = { code: exercise.code, sets: Math.max(1, round), load, reps, note: note || null, date, status: entry?.status === "suggested" && !complete ? "suggested" : "completed", ...(entry?.status === "suggested" && complete ? { created_at: new Date().toISOString() } : {}), ...(entry ? {} : { gym_id: gymId ?? null }) };
     const { error } = entry
       ? await supabase.from("log_entries").update(row).eq("id", entry.id)
       : await supabase.from("log_entries").insert(row);
@@ -81,7 +85,8 @@ export function LogSheet({
       },
     });
     invalidate();
-    onClose();
+    if (entry?.status === "suggested" && complete && onCompleted) onCompleted();
+    else onClose();
   }
 
   async function remove() {
@@ -100,6 +105,7 @@ export function LogSheet({
       <DrawerContent>
         <div className="mx-auto max-h-[85vh] w-full max-w-md space-y-4 overflow-y-auto px-4 pb-8">
           <DrawerHeader className="px-0">
+            {entry?.status === "suggested" && <p className="font-semibold text-primary">{t("Förslag", "Suggestion")}{progress ? ` · ${progress}` : ""}</p>}
             <DrawerTitle className="font-display text-2xl uppercase">
               <span className="text-primary">{shown?.code}</span> {shown?.name}
             </DrawerTitle>
@@ -127,11 +133,12 @@ export function LogSheet({
             <Label>{t("Notering & känsla", "Notes & feel")}</Label>
             <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
           </div>
-          <Button onClick={save} disabled={busy} className="h-14 w-full text-lg font-bold uppercase">
-            {entry ? t("Spara ändring", "Save changes") : t("Logga set", "Log sets")}
+          <Button onClick={() => void save()} disabled={busy} className="h-14 w-full text-lg font-bold uppercase">
+            {entry?.status === "suggested" ? t("Bekräfta genomfört", "Confirm completed") : entry ? t("Spara ändring", "Save changes") : t("Logga set", "Log sets")}
           </Button>
+          {entry?.status === "suggested" && <Button variant="outline" disabled={busy} className="w-full" onClick={() => void save(false)}>{t("Spara justerat förslag", "Save adjusted suggestion")}</Button>}
           {entry && (
-            <Button variant="ghost" onClick={remove} className="w-full text-destructive">{t("Ta bort", "Delete")}</Button>
+            <Button variant="ghost" disabled={busy} onClick={remove} className="w-full text-destructive">{t("Ta bort", "Delete")}</Button>
           )}
         </div>
       </DrawerContent>

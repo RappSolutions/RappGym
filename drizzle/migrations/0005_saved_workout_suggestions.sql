@@ -1,0 +1,3 @@
+ALTER TABLE public.log_entries ADD COLUMN status text NOT NULL DEFAULT 'completed' CHECK (status IN ('completed', 'suggested')), ADD COLUMN proposal_id uuid, ADD COLUMN proposal_title text, ADD COLUMN proposal_order integer;
+CREATE INDEX log_entries_user_status ON public.log_entries (user_id, status);
+COMMENT ON COLUMN public.log_entries.status IS 'Suggested rows are planned work, not training history. Only completed rows contribute to statistics.';
