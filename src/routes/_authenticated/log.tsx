@@ -77,7 +77,9 @@ function LogPage() {
     finally { setDeleting(false); }
   }
 
-       </section>}
+  return (
+    <main className="space-y-5 px-4">
+      <p className="text-sm text-muted-foreground">{t("Logg: allt du har genomfört, per datum. Planerade pass finns under Träna.", "Log: everything you have completed, by date. Planned workouts live under Train.")}</p>
        {log.length > 0 && <Button variant="ghost" className="h-auto min-h-12 w-full justify-start gap-2 whitespace-normal px-0 text-left" aria-expanded={completedExpanded} aria-controls="completed-workouts" onClick={() => setCompletedExpanded(!completedExpanded)}>{completedExpanded ? <ChevronDown className="size-4 shrink-0" /> : <ChevronRight className="size-4 shrink-0" />}<CheckCircle2 className="size-5 shrink-0 text-primary" /><span className="font-display text-2xl font-bold">{t("Genomförda pass", "Completed workouts")}</span><span className="ml-auto text-sm text-muted-foreground">{days.size}</span></Button>}
       {!log.length && <p className="text-muted-foreground">{t("Inga pass ännu.", "No workouts yet.")}</p>}
        <div id="completed-workouts" hidden={!completedExpanded} className="space-y-5">{[...days].map(([date, entries]) => {
