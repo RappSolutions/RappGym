@@ -3,7 +3,7 @@ import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "rec
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLanguage } from "@/lib/i18n";
-import { formatDate, todayISO, type Exercise, type LogEntry } from "@/lib/gym";
+import { categoriesOf, categoryToken, formatDate, todayISO, type Exercise, type LogEntry } from "@/lib/gym";
 import { periodStart, progressByDay, weightKg } from "@/lib/progress";
 
 export function ProgressOverview({ log, exercises }: { log: LogEntry[]; exercises: Exercise[] }) {
@@ -14,6 +14,9 @@ export function ProgressOverview({ log, exercises }: { log: LogEntry[]; exercise
   const [selection, setSelection] = useState<string | null>(null);
   const [period, setPeriod] = useState("all");
   const code = selection ?? defaultCode ?? "all";
+  const categories = categoriesOf(exercises);
+  const selected = code === "all" ? undefined : exercises.find((exercise) => exercise.code === code);
+  const chartToken = selected ? categoryToken(selected.category, categories) : null;
   const data = progressByDay(log, code === "all" ? undefined : code, period === "all" ? undefined : periodStart(todayISO(), Number(period)));
   const weighted = data.filter((day) => day.weight !== null);
   const firstWeight = weighted[0]?.weight;
@@ -25,13 +28,14 @@ export function ProgressOverview({ log, exercises }: { log: LogEntry[]; exercise
   const number = (value: number) => value.toLocaleString(language === "sv" ? "sv-SE" : "en-GB");
   const delta = (value: number) => `${value > 0 ? "+" : ""}${number(value)}`;
   const shortDate = (date: string) => new Date(`${date}T12:00:00`).toLocaleDateString(language === "sv" ? "sv-SE" : "en-GB", { day: "numeric", month: "short" });
+  const chartColor = (fallback: string) => (chartToken ? `var(--category-chart, ${fallback})` : fallback);
   const config = {
-    weight: { label: t("Högsta vikt (kg)", "Heaviest weight (kg)"), color: "var(--chart-1)" },
-    sets: { label: t("Antal set", "Sets"), color: "var(--chart-3)" },
+    weight: { label: t("Högsta vikt (kg)", "Heaviest weight (kg)"), color: chartColor("var(--chart-1)") },
+    sets: { label: t("Antal set", "Sets"), color: chartColor("var(--chart-3)") },
   };
 
   return (
-    <section className="min-w-0 space-y-4 border-t pt-5" aria-labelledby="progress-title">
+    <section className={`min-w-0 space-y-4 border-t pt-5${chartToken ? " category-theme" : ""}`} data-category={chartToken ?? undefined} aria-labelledby="progress-title">
       <h2 id="progress-title" className="text-2xl font-bold uppercase">{t("Utveckling över tid", "Progress over time")}</h2>
       <div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_160px]">
         <div className="min-w-0 space-y-1">

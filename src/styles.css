@@ -123,6 +123,7 @@
   --cat-4: oklch(0.65 0.22 25);
   --cat-5: var(--brand-royal);
   --cat-2-ink: oklch(0.43 0.08 205);
+  --cat-3-ink: oklch(0.72 0.15 95);
   --cat-4-ink: oklch(0.5 0.19 25);
   --sidebar: oklch(1.000000 0.000000 89.876);
   --sidebar-foreground: oklch(0.371495 0.000000 89.876);
@@ -166,23 +167,28 @@
   --category-fill: var(--brand-blue);
   --category-ink: var(--brand-royal);
   --category-on: var(--primary-foreground);
+  --category-chart: var(--brand-blue);
 }
 .category-theme[data-category="cat-2"] {
   --category-fill: var(--cat-2);
   --category-ink: var(--cat-2-ink);
   --category-on: var(--foreground);
+  --category-chart: var(--cat-2-ink);
 }
 .category-theme[data-category="cat-3"] {
   --category-fill: var(--cat-3);
   --category-ink: var(--brand-royal);
   --category-on: var(--brand-royal);
+  --category-chart: var(--cat-3-ink);
 }
 .category-theme[data-category="cat-4"] {
   --category-fill: var(--cat-4);
   --category-ink: var(--cat-4-ink);
+  --category-chart: var(--cat-4-ink);
 }
 .category-theme[data-category="cat-5"] {
   --category-fill: var(--cat-5);
+  --category-chart: var(--brand-royal);
 }
 
 @utility google-btn {

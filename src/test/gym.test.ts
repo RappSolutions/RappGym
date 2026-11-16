@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeStats, lastByCode, isWorkoutExpanded, workoutRecordingOrder } from "@/lib/gym";
+import { computeStats, lastByCode, isWorkoutExpanded, workoutRecordingOrder, categoriesOf, categoryToken } from "@/lib/gym";
 import history from "@/data/history.json";
 
 const ex = [
@@ -35,6 +35,22 @@ describe("workout recording order", () => {
     ];
     expect(workoutRecordingOrder(entries).map((e) => e.code)).toEqual(["PU1", "PL1", "CO4"]);
     expect(entries.map((e) => e.code)).toEqual(["CO4", "PU1", "PL1"]);
+  });
+});
+
+describe("category colors", () => {
+  it("gives each training category its own color token in bank order", () => {
+    const bank = [
+      { code: "PU1", category: "Push" },
+      { code: "PL1", category: "Pull" },
+      { code: "LE1", category: "Legs" },
+      { code: "CO1", category: "Core" },
+    ] as never[];
+    const cats = categoriesOf(bank);
+    expect(categoryToken("Push", cats)).toBe("cat-1");
+    expect(categoryToken("Pull", cats)).toBe("cat-2");
+    expect(categoryToken("Legs", cats)).toBe("cat-3");
+    expect(categoryToken("Core", cats)).toBe("cat-4");
   });
 });
 

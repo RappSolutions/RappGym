@@ -39,8 +39,8 @@ use the editor.
 - Use the shared language context for Swedish/English UI and browser language persistence; preserve original user notes and exercise fields while storing translations separately.
 - Derive progress charts client-side through the shared progress aggregation module; compare weights per exercise and sum repeat counts per date so unrelated exercises and text loads are never mixed into weight trends.
 
-- Keep app branding in shared global CSS tokens and the shared masthead; all content routes inherit the same visual frame so changes stay consistent across pages.
-- Category surfaces use shared data-category themes with separate fill, ink and on-fill tokens; this keeps category accents consistent and text legible on bright fills.
+- Keep app branding in shared global CSS tokens and the shared masthead, which links to Home from every page; all content routes inherit the same visual frame so changes stay consistent across pages.
+- Category surfaces use shared data-category themes with separate fill, ink, on-fill and chart tokens; this keeps category accents consistent, text legible on bright fills and charts readable on white.
 - Sort rows within displayed workout dates by recording timestamp ascending without changing the newest-first shared log query, so latest-set prefills remain correct.
 - Derive the Home logo and favicon from the same logo artwork; use only the circular badge for the favicon so it stays legible at browser-tab sizes.
 - Use canonical English file routes for app navigation and retain legacy Swedish routes only as redirects, preserving exercise codes and workout filters so existing bookmarks continue working.
