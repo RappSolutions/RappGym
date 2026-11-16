@@ -46,14 +46,16 @@ function HomePage() {
   const cat30Total = cat30.reduce((n, [, v]) => n + v, 0);
 
   return <main className="space-y-4 px-4">
-    <div className="flex justify-center">
-      <img src={rappgymLogo} alt="RappGym" width={144} height={144} className="h-28 w-28 object-contain md:h-36 md:w-36" />
-    </div>
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-      {kpis.map(([l, v]) => <div key={l} className="rounded-xl border bg-card p-4">
-        <div className="font-display text-3xl font-extrabold text-primary">{v}</div>
-        <div className="text-xs uppercase text-muted-foreground">{l}</div>
-      </div>)}
+    <div className="grid items-center gap-4 md:grid-cols-[15rem_minmax(0,1fr)] md:gap-6">
+      <div className="flex justify-center">
+        <img src={rappgymLogo} alt="RappGym" width={240} height={240} className="h-28 w-28 object-contain md:h-60 md:w-60" />
+      </div>
+      <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-3">
+        {kpis.map(([l, v]) => <div key={l} className="min-w-0 rounded-xl border bg-card p-4">
+          <div className="font-display text-3xl font-extrabold text-primary">{v}</div>
+          <div className="break-words text-xs uppercase text-muted-foreground">{l}</div>
+        </div>)}
+      </div>
     </div>
     {cat30Total > 0 && <section className="space-y-2 rounded-xl border bg-card p-4">
       <h2 className="text-xl font-bold uppercase">{t("Set per kategori, 30 dagar", "Sets by category, 30 days")}</h2>
