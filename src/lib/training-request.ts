@@ -8,6 +8,7 @@ export const trainingRequestSchema = z.object({
   periodDays: z.number().int().min(1).max(90).nullable().default(null),
   sessionMinutes: z.number().int().min(5).max(240).nullable().default(null),
   purpose: z.string().trim().max(300).default(""),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().default(null),
 }).strict().refine((data) => !data.workoutCount || !data.periodDays || data.workoutCount <= data.periodDays, {
   message: "workoutCount exceeds periodDays", path: ["workoutCount"],
 });
@@ -30,6 +31,11 @@ export function normalizeTrainingPlan(insights: TrainingInsights, request: Train
   if (new Set(workouts.map((workout) => workout.dayOffset)).size !== workouts.length) throw new Error("invalid-plan");
   if (request.mode === "plan" && allowed.size && (!workouts.length || workouts.some((workout) => !workout.exercises.length) || (request.workoutCount !== null && workouts.length !== request.workoutCount))) throw new Error("invalid-plan");
   return { ...insights, exercises: clean(insights.exercises), workouts };
+}
+
+/** First day of a plan: the chosen start date, otherwise the request day. */
+export function planStartDate(request: Pick<TrainingRequest, "startDate">, today: string) {
+  return request.startDate ?? today;
 }
 
 export function plannedWorkoutDate(today: string, dayOffset: number) {

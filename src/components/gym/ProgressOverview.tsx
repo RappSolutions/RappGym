@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLanguage } from "@/lib/i18n";
-import { categoriesOf, categoryToken, formatDate, todayISO, type Exercise, type LogEntry } from "@/lib/gym";
-import { periodStart, progressByDay, weightKg } from "@/lib/progress";
+import { categoriesOf, categoryToken, formatDate, type Exercise, type LogEntry } from "@/lib/gym";
+import { progressByDay, weightKg } from "@/lib/progress";
 import { ProgressExercisePicker } from "@/components/gym/ProgressExercisePicker";
 
 export function ProgressOverview({ log, exercises }: { log: LogEntry[]; exercises: Exercise[] }) {
@@ -13,12 +12,11 @@ export function ProgressOverview({ log, exercises }: { log: LogEntry[]; exercise
   const options = exercises.filter((exercise) => loggedCodes.has(exercise.code));
   const defaultCode = options.find((exercise) => log.some((entry) => entry.code === exercise.code && weightKg(entry.load) !== null))?.code;
   const [selection, setSelection] = useState<string | null>(null);
-  const [period, setPeriod] = useState("all");
   const code = selection ?? defaultCode ?? "all";
   const categories = categoriesOf(exercises);
   const selected = code === "all" ? undefined : exercises.find((exercise) => exercise.code === code);
   const chartToken = selected ? categoryToken(selected.category, categories) : null;
-  const data = progressByDay(log, code === "all" ? undefined : code, period === "all" ? undefined : periodStart(todayISO(), Number(period)));
+  const data = progressByDay(log, code === "all" ? undefined : code, undefined);
   const weighted = data.filter((day) => day.weight !== null);
   const firstWeight = weighted[0]?.weight;
   const lastWeight = weighted.at(-1)?.weight;
@@ -38,22 +36,10 @@ export function ProgressOverview({ log, exercises }: { log: LogEntry[]; exercise
   return (
     <section className={`min-w-0 space-y-4 border-t pt-5${chartToken ? " category-theme" : ""}`} data-category={chartToken ?? undefined} aria-labelledby="progress-title">
       <h2 id="progress-title" className="text-2xl font-bold uppercase">{t("Utveckling över tid", "Progress over time")}</h2>
-      <div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_160px]">
+      <div className="grid min-w-0 gap-3 ">
         <div className="min-w-0 space-y-1">
           <label htmlFor="progress-exercise" className="text-xs uppercase text-muted-foreground">{t("Övning", "Exercise")}</label>
           <ProgressExercisePicker exercises={exercises} loggedCodes={loggedCodes} value={code} onChange={setSelection} />
-        </div>
-        <div className="space-y-1">
-          <label htmlFor="progress-period" className="text-xs uppercase text-muted-foreground">{t("Period", "Period")}</label>
-          <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger id="progress-period" className="h-11"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("Hela historiken", "All time")}</SelectItem>
-              <SelectItem value="30">{t("Senaste 30 dagarna", "Last 30 days")}</SelectItem>
-              <SelectItem value="90">{t("Senaste 90 dagarna", "Last 90 days")}</SelectItem>
-              <SelectItem value="365">{t("Senaste året", "Last year")}</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </div>
       {!data.length ? <p className="py-6 text-muted-foreground">{t("Inga loggade set under perioden.", "No sets logged in this period.")}</p> : (

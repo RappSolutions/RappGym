@@ -26,7 +26,7 @@ export function ExerciseManager() {
   );
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 rounded-xl border bg-card p-4">
       <h2 className="font-display text-2xl font-bold uppercase">{t("Övningar", "Exercises")}</h2>
       <div className="flex justify-end">
         <Button onClick={() => setAdding(true)} className="font-semibold"><Plus className="h-4 w-4" />{t("Ny", "New")}</Button>

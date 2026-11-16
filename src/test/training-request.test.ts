@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeTrainingPlan, plannedWorkoutDate, trainingRequestSchema, trainingResultSections } from "@/lib/training-request";
+import { normalizeTrainingPlan, planStartDate, plannedWorkoutDate, trainingRequestSchema, trainingResultSections } from "@/lib/training-request";
 import type { TrainingInsights } from "@/lib/training-insights-schema";
 
 const suggestion = { code: "DB-EX", sets: 2, reps: 12, load: "15", reason: "" };
@@ -27,6 +27,11 @@ describe("Personal training requests", () => {
     const extra = { ...suggestion, code: "invented" };
     const output = normalizeTrainingPlan({ ...insights, workouts: insights.workouts.map((workout) => ({ ...workout, exercises: [extra, suggestion] })) }, request, ["DB-EX"]);
     expect(output.workouts.flatMap((workout) => workout.exercises.map((exercise) => exercise.code))).toEqual(["DB-EX", "DB-EX", "DB-EX", "DB-EX"]);
+  });
+  it("starts the plan on the chosen start date", () => {
+    const r = trainingRequestSchema.parse({ mode: "plan", startDate: "2026-12-01" });
+    expect(plannedWorkoutDate(planStartDate(r, "2026-11-16"), 2)).toBe("2026-12-03");
+    expect(planStartDate(trainingRequestSchema.parse({ mode: "plan" }), "2026-11-16")).toBe("2026-11-16");
   });
   it("formats workout dates as ISO 8601 across year boundaries", () => {
     expect(plannedWorkoutDate("2026-12-30", 6)).toBe("2027-01-05");

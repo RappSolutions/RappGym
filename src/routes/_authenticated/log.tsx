@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, Play, Circle, CheckCircle2, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Play, Circle, CheckCircle2, Trash2, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { removableSuggestionIds } from "@/lib/workout-suggestions";
@@ -114,6 +114,7 @@ function LogPage() {
                   return <span key={cat} data-category={categoryToken(cat, categories)} className="category-theme inline-flex items-center gap-1 font-semibold text-category-ink"><span className="size-2 shrink-0 rounded-full bg-category-fill" />{exercise ? localize(exercise).category : cat}</span>;
                 })}
                 <span>{entries.reduce((n, x) => n + (x.sets ?? 1), 0)} {t("set", "sets")}</span>
+                {(() => { const names = [...new Set(entries.map((x) => gyms.find((g) => g.id === x.gym_id)?.name ?? t("Ingen plats", "No location")))]; return <span className="inline-flex items-center gap-1 font-semibold text-foreground"><MapPin className="size-3" />{names.join(", ")}</span>; })()}
               </span>
             </Button>
             <div id={`workout-${date}`} hidden={!expanded} className="divide-y rounded-xl border bg-card">
@@ -124,6 +125,7 @@ function LogPage() {
                     <span className="block truncate">{byCode.get(e.code)?.name ?? t("Okänd övning", "Unknown exercise")}</span>
                     {e.note && <span className="block truncate text-xs text-muted-foreground">{e.note}</span>}
                   </span>
+                  {new Set(entries.map((x) => x.gym_id)).size > 1 && <span className="hidden text-xs text-muted-foreground sm:inline">{gyms.find((g) => g.id === e.gym_id)?.name}</span>}
                   <span className="text-lg font-bold">{formatSet(e)}</span>
                 </Button>
               ))}

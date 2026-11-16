@@ -10,12 +10,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/lib/i18n";
 import { categoriesOf, categoryToken, getSelectedGym, todayISO } from "@/lib/gym";
-import { plannedWorkoutDate, trainingRequestSchema, trainingResultSections } from "@/lib/training-request";
+import { planStartDate, plannedWorkoutDate, trainingRequestSchema, trainingResultSections } from "@/lib/training-request";
 import { getTrainingInsights } from "@/lib/training-insights.functions";
 import type { Exercise } from "@/lib/gym";
 import type { TrainingInsights as Insights } from "@/lib/training-insights-schema";
 import { aiHistoryQuery, acceptedAiQuery, unacceptedWorkoutKeys } from "@/lib/ai-history";
 import { useSelectedGym } from "@/hooks/use-gym";
+import { gymsQuery } from "@/lib/gym";
+import { LogDatePicker } from "./LogDatePicker";
 
 export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[]; hasLog: boolean }) {
   const { t, language, localize } = useLanguage();
@@ -32,6 +34,10 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
   const [periodDays, setPeriodDays] = useState("");
   const [purpose, setPurpose] = useState("");
   const [minutes, setMinutes] = useState("");
+  const { data: gyms } = useSuspenseQuery(gymsQuery);
+  const [planGym, setPlanGym] = useState<string | null | undefined>(undefined);
+  const [startDate, setStartDate] = useState(todayISO());
+  const requestGym = mode === "plan" && planGym !== undefined ? planGym : gymId;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<Set<string>>(new Set());
@@ -39,7 +45,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
   const [result, setResult] = useState<{ id: string; insights: Insights; generatedAt: string; language: string; gymId: string | null; today: string; question: string; request: ReturnType<typeof trainingRequestSchema.parse> } | null>(null);
 
   async function analyze() {
-    const parsed = trainingRequestSchema.safeParse({ mode, question: mode === "plan" ? "" : question, workoutCount: workoutCount ? Number(workoutCount) : null, periodDays: periodDays ? Number(periodDays) : null, sessionMinutes: mode === "plan" && minutes ? Number(minutes) : null, purpose });
+    const parsed = trainingRequestSchema.safeParse({ mode, question: mode === "plan" ? "" : question, workoutCount: workoutCount ? Number(workoutCount) : null, periodDays: periodDays ? Number(periodDays) : null, sessionMinutes: mode === "plan" && minutes ? Number(minutes) : null, purpose, startDate: mode === "plan" ? startDate : null });
     if (!parsed.success) {
       setError(t("Kontrollera antal pass och dagar: högst ett pass per dag, 1–14 pass, 1–90 dagar och 5–240 minuter per pass.", "Check workouts and days: at most one workout per day, 1–14 workouts, 1–90 days and 5–240 minutes per workout."));
       return;
@@ -47,7 +53,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
     setBusy(true);
     setError(null);
     try {
-      const gymId = getSelectedGym();
+      const gymId = mode === "plan" ? requestGym : getSelectedGym();
       const today = todayISO();
       const request = parsed.data;
       const response = await generate({ data: { language, gymId, today, request } });
@@ -65,8 +71,8 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
     } finally { setBusy(false); }
   }
 
-  const scopedHistory = history.filter((row) => row.language === language && row.gymId === gymId && row.request.mode === mode);
-  const current = scopedHistory.find((row) => row.id === selectedId) ?? (result?.id === selectedId && result.language === language && result.gymId === gymId && result.request.mode === mode ? result : scopedHistory[0] ?? null);
+  const scopedHistory = history.filter((row) => row.language === language && row.gymId === requestGym && row.request.mode === mode);
+  const current = scopedHistory.find((row) => row.id === selectedId) ?? (result?.id === selectedId && result.language === language && result.gymId === requestGym && result.request.mode === mode ? result : scopedHistory[0] ?? null);
   const sections = trainingResultSections(mode);
   const acceptedKeys = new Set(accepted.filter((row) => row.ai_history_id === current?.id).map((row) => row.ai_workout_key ?? ""));
   for (const key of saved) if (key.startsWith(`${current?.id}:`)) acceptedKeys.add(key.slice(key.indexOf(":") + 1));
@@ -84,7 +90,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
         historyId = data.id;
         setSelectedId(historyId);
       }
-      const rows = workouts.filter((workout) => keys.includes(workout.key) && !acceptedKeys.has(workout.key)).flatMap((workout) => suggestionRows(workout.exercises, current.today, workout.dayOffset, workout.title, current.gymId, crypto.randomUUID()).map((row) => ({ ...row, ai_history_id: historyId, ai_workout_key: workout.key })));
+      const rows = workouts.filter((workout) => keys.includes(workout.key) && !acceptedKeys.has(workout.key)).flatMap((workout) => suggestionRows(workout.exercises, planStartDate(current.request, current.today), workout.dayOffset, workout.title, current.gymId, crypto.randomUUID()).map((row) => ({ ...row, ai_history_id: historyId, ai_workout_key: workout.key })));
       const { error } = await supabase.from("log_entries").upsert(rows, { onConflict: "user_id,ai_history_id,ai_workout_key,proposal_order", ignoreDuplicates: true });
       if (error) throw error;
       setSaved((previous) => new Set([...previous, ...keys.map((key) => `${historyId}:${key}`)]));
@@ -95,7 +101,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
   function saveControl(items: Insights["exercises"], offset: number, title: string, key: string) {
     return <div className="flex flex-wrap items-center gap-3 pt-2"><Button type="button" variant="outline" disabled={busy || saving !== null || acceptedKeys.has(key) || !items.length} onClick={() => void saveWorkouts([key])}>
       {saving === key ? <LoaderCircle className="size-4 animate-spin" /> : acceptedKeys.has(key) ? <Check className="size-4" /> : <CalendarPlus className="size-4" />}
-      {acceptedKeys.has(key) ? t("Sparat som förslag", "Saved as suggestion") : t("Spara som förslag", "Save as suggestion")}
+      {acceptedKeys.has(key) ? t("Passet accepterat som förslag", "Workout accepted as suggestion") : t("Acceptera passet som förslag", "Accept workout as suggestion")}
     </Button>{acceptedKeys.has(key) && <Link to="/log" className="text-sm font-semibold text-primary underline">{t("Gå till passet i Logg", "Open workout in Log")}</Link>}</div>;
   }
   const categories = categoriesOf(exercises);
@@ -129,6 +135,10 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
         <div className="col-span-2 space-y-1 sm:col-span-1"><label htmlFor={`${id}-purpose`} className="text-sm font-medium">{t("Syfte", "Purpose")}</label><Input id={`${id}-purpose`} value={purpose} maxLength={300} disabled={busy} onChange={(event) => setPurpose(event.target.value)} placeholder={t("T.ex. skidåkning, styrka eller variation", "E.g. skiing, strength or variety")} /></div>
       </div>}
       {mode === "plan" && <div className="space-y-1"><label htmlFor={`${id}-minutes`} className="text-sm font-medium">{t("Ungefärlig längd per pass (min)", "Approximate length per workout (min)")}</label><div className="flex flex-wrap gap-2">{[15, 30, 45, 60, 75, 90].map((m) => <Button key={m} type="button" size="sm" variant={minutes === String(m) ? "default" : "outline"} aria-pressed={minutes === String(m)} disabled={busy} onClick={() => setMinutes(minutes === String(m) ? "" : String(m))}>{m}</Button>)}<Input id={`${id}-minutes`} type="number" min={5} max={240} step={5} placeholder={t("Annat", "Other")} value={minutes} disabled={busy} onChange={(event) => setMinutes(event.target.value)} className="h-9 w-24" /></div></div>}
+      {mode === "plan" && <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="space-y-1"><label htmlFor={`${id}-gym`} className="text-sm font-medium">{t("Plats", "Location")}</label><select id={`${id}-gym`} className="h-12 w-full rounded-md border border-input bg-background px-3 text-sm" value={requestGym ?? ""} disabled={busy} onChange={(event) => setPlanGym(event.target.value || null)}><option value="">{t("Ingen särskild plats", "No specific location")}</option>{gyms.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}</select></div>
+        <div className="space-y-1"><label htmlFor="log-date" className="text-sm font-medium">{t("Startdatum", "Start date")}</label><LogDatePicker value={startDate} onChange={setStartDate} /></div>
+      </div>}
       {mode === "plan" && <p className="text-sm text-muted-foreground">{t("Antal pass och dagar är valfria — tomt ger 4 pass under 7 dagar. Ditt träningstempo i profilen används också.", "Workouts and days are optional — empty means 4 workouts over 7 days. Your profile training pace is also used.")}</p>}
       <Button type="submit" disabled={busy || !hasLog} className="w-full sm:w-auto">
         {busy ? <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" /> : <Send className="size-4" />}
@@ -156,7 +166,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
         <p className="text-sm leading-relaxed">{current.insights.recommendation}</p>
         {current.insights.goalNotes && <p className="rounded-lg border-l-4 border-brand-yellow bg-muted p-3 text-sm leading-relaxed"><strong>{t("Dina mål", "Your goals")}: </strong>{current.insights.goalNotes}</p>}
         {current.insights.workouts.length ? <div className="divide-y divide-border">{current.insights.workouts.map((workout, index) => <article key={workout.dayOffset} className="py-4" aria-label={`${t("Pass", "Workout")} ${index + 1}`}>
-          <div className="flex flex-wrap items-baseline justify-between gap-2"><h4 className="text-xl font-bold">{index + 1}. {workout.title}</h4><span className="text-sm font-medium text-muted-foreground">{plannedWorkoutDate(current.today, workout.dayOffset)}</span></div>
+          <div className="flex flex-wrap items-baseline justify-between gap-2"><h4 className="text-xl font-bold">{index + 1}. {workout.title}</h4><span className="text-sm font-medium text-muted-foreground">{plannedWorkoutDate(planStartDate(current.request, current.today), workout.dayOffset)}</span></div>
           <p className="mt-1 text-sm leading-relaxed">{workout.focus}</p>
           {suggestions(workout.exercises)}
           {saveControl(workout.exercises, workout.dayOffset, workout.title, String(index))}

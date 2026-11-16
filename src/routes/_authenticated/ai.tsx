@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { TrainingInsights } from "@/components/gym/TrainingInsights";
-import { exercisesQuery, logQuery } from "@/lib/gym";
+import { exercisesQuery, gymsQuery, logQuery } from "@/lib/gym";
 import { aiHistoryQuery, acceptedAiQuery } from "@/lib/ai-history";
 
 export const Route = createFileRoute("/_authenticated/ai")({
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/_authenticated/ai")({
   loader: ({ context }) => Promise.all([
     context.queryClient.ensureQueryData(exercisesQuery),
     context.queryClient.ensureQueryData(logQuery),
+    context.queryClient.ensureQueryData(gymsQuery),
     context.queryClient.ensureQueryData(aiHistoryQuery),
     context.queryClient.ensureQueryData(acceptedAiQuery),
   ]),

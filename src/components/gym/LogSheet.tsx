@@ -1,5 +1,6 @@
 import { useLanguage } from "@/lib/i18n";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { todayISO, useInvalidateGym, formatSet, doseText, type Exercise, type LogEntry } from "@/lib/gym";
+import { gymsQuery, todayISO, useInvalidateGym, formatSet, doseText, type Exercise, type LogEntry } from "@/lib/gym";
 import { ExerciseImages } from "./ExerciseImages";
 import { LogDatePicker } from "./LogDatePicker";
 import { appendLoadAdvice, splitSuggestedLoad } from "@/lib/suggested-load";
@@ -50,6 +51,8 @@ export function LogSheet({
   const [note, setNote] = useState("");
   const [date, setDate] = useState(todayISO());
   const [busy, setBusy] = useState(false);
+  const { data: gyms = [] } = useQuery(gymsQuery);
+  const [place, setPlace] = useState<string>("");
   const shown = exercise ? localize(exercise) : null;
 
   useEffect(() => {
@@ -61,12 +64,13 @@ export function LogSheet({
     setReps(src?.reps ?? 10);
     setNote(appendLoadAdvice(entry?.note ?? "", split.advice));
     setDate(entry?.date ?? todayISO());
-  }, [exercise, entry, last]);
+    setPlace((entry ? entry.gym_id : gymId) ?? "");
+  }, [exercise, entry, last, gymId]);
 
   async function save(complete = true) {
     if (!exercise) return;
     setBusy(true);
-    const row = { code: exercise.code, sets: Math.max(1, round), load, reps, note: note || null, date, status: entry?.status === "suggested" && !complete ? "suggested" : "completed", ...(entry?.status === "suggested" && complete ? { created_at: new Date().toISOString() } : {}), ...(entry ? {} : { gym_id: gymId ?? null }) };
+    const row = { code: exercise.code, sets: Math.max(1, round), load, reps, note: note || null, date, status: entry?.status === "suggested" && !complete ? "suggested" : "completed", ...(entry?.status === "suggested" && complete ? { created_at: new Date().toISOString() } : {}), gym_id: place || null };
     const { error } = entry
       ? await supabase.from("log_entries").update(row).eq("id", entry.id)
       : await supabase.from("log_entries").insert(row);
@@ -132,6 +136,13 @@ export function LogSheet({
               <LogDatePicker value={date} onChange={setDate} />
             </div>
           </div>
+          {gyms.length > 0 && <div className="space-y-2">
+            <Label htmlFor="log-place">{t("Plats", "Location")}</Label>
+            <select id="log-place" value={place} onChange={(e) => setPlace(e.target.value)} className="h-12 w-full rounded-md border border-input bg-background px-3">
+              <option value="">{t("Ingen plats", "No location")}</option>
+              {gyms.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+            </select>
+          </div>}
           <div className="space-y-2">
             <Label htmlFor="log-note">{t("Notering & känsla", "Notes & feel")}</Label>
             <Textarea id="log-note" value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
