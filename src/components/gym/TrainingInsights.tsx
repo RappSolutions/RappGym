@@ -28,7 +28,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
   const [result, setResult] = useState<{ insights: Insights; generatedAt: string; language: string; gymId: string | null; today: string; question: string } | null>(null);
 
   async function analyze() {
-    const parsed = trainingRequestSchema.safeParse({ mode, question, workoutCount: workoutCount ? Number(workoutCount) : null, periodDays: periodDays ? Number(periodDays) : null, purpose });
+    const parsed = trainingRequestSchema.safeParse({ mode, question: mode === "plan" ? "" : question, workoutCount: workoutCount ? Number(workoutCount) : null, periodDays: periodDays ? Number(periodDays) : null, purpose });
     if (!parsed.success) {
       setError(t("Kontrollera antal pass och dagar: högst ett pass per dag, 1–14 pass och 1–90 dagar.", "Check workouts and days: at most one workout per day, 1–14 workouts and 1–90 days."));
       return;
@@ -72,15 +72,16 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
         <Button type="button" size="sm" variant={mode === "summary" ? "default" : "outline"} aria-pressed={mode === "summary"} disabled={busy} onClick={() => setMode("summary")}>{t("Analys & frågor", "Analysis & questions")}</Button>
         <Button type="button" size="sm" variant={mode === "plan" ? "default" : "outline"} aria-pressed={mode === "plan"} disabled={busy} onClick={() => setMode("plan")}>{t("Planera pass", "Plan workouts")}</Button>
       </div>
-      <div className="space-y-1">
+      {mode === "summary" && <div className="space-y-1">
         <label htmlFor={`${id}-question`} className="text-sm font-medium">{t("Din fråga eller önskemål", "Your question or request")}</label>
-        <Textarea id={`${id}-question`} value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={2000} disabled={busy} placeholder={mode === "plan" ? t("Ge mig fyra nya pass med bra blandning under 7 dagar", "Give me four new workouts with a good mix over 7 days") : t("Vad borde jag prioritera i min träning?", "What should I prioritize in my training?")} className="min-h-24" />
-      </div>
+        <Textarea id={`${id}-question`} value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={2000} disabled={busy} placeholder={t("Vad borde jag prioritera i min träning?", "What should I prioritize in my training?")} className="min-h-24" />
+      </div>}
       {mode === "plan" && <div className="grid grid-cols-2 gap-3 sm:grid-cols-[7rem_7rem_minmax(0,1fr)]">
         <div className="space-y-1"><label htmlFor={`${id}-count`} className="text-sm font-medium">{t("Antal pass", "Workouts")}</label><Input id={`${id}-count`} type="number" min={1} max={14} step={1} placeholder="4" value={workoutCount} disabled={busy} onChange={(event) => setWorkoutCount(event.target.value)} /></div>
         <div className="space-y-1"><label htmlFor={`${id}-days`} className="text-sm font-medium">{t("Antal dagar", "Days")}</label><Input id={`${id}-days`} type="number" min={1} max={90} step={1} placeholder="7" value={periodDays} disabled={busy} onChange={(event) => setPeriodDays(event.target.value)} /></div>
         <div className="col-span-2 space-y-1 sm:col-span-1"><label htmlFor={`${id}-purpose`} className="text-sm font-medium">{t("Syfte", "Purpose")}</label><Input id={`${id}-purpose`} value={purpose} maxLength={300} disabled={busy} onChange={(event) => setPurpose(event.target.value)} placeholder={t("T.ex. skidåkning, styrka eller variation", "E.g. skiing, strength or variety")} /></div>
       </div>}
+      {mode === "plan" && <p className="text-sm text-muted-foreground">{t("Antal pass och dagar är valfria — tomt ger 4 pass under 7 dagar.", "Workouts and days are optional — empty means 4 workouts over 7 days.")}</p>}
       <Button type="submit" disabled={busy || !hasLog} className="w-full sm:w-auto">
         {busy ? <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" /> : <Send className="size-4" />}
         {busy ? t("Tänker…", "Thinking…") : mode === "plan" ? t("Ge mig passförslag", "Suggest workouts") : question.trim() ? t("Fråga om min träning", "Ask about my training") : current ? t("Uppdatera analys", "Update analysis") : t("Analysera mina pass", "Analyze my workouts")}
