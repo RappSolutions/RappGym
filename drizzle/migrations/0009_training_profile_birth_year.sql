@@ -1,0 +1,2 @@
+ALTER TABLE public.training_profiles ADD COLUMN birth_year integer CHECK (birth_year BETWEEN 1900 AND 2200);
+COMMENT ON COLUMN public.training_profiles.age IS 'DEPRECATED: replaced by birth_year; retained without inferring an uncertain birth year from age.';
