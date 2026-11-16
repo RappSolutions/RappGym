@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeStats, lastByCode, isWorkoutExpanded, workoutRecordingOrder, categoriesOf, categoryToken } from "@/lib/gym";
+import { computeStats, lastByCode, isWorkoutExpanded, workoutRecordingOrder, categoriesOf, categoryToken, formatDate, formatDateWithWeekday } from "@/lib/gym";
 import history from "@/data/history.json";
 
 const ex = [
@@ -35,6 +35,17 @@ describe("workout recording order", () => {
     ];
     expect(workoutRecordingOrder(entries).map((e) => e.code)).toEqual(["PU1", "PL1", "CO4"]);
     expect(entries.map((e) => e.code)).toEqual(["CO4", "PU1", "PL1"]);
+  });
+});
+
+describe("date display", () => {
+  it("shows every date as ISO 8601 with the full year", () => {
+    expect(formatDate("2027-12-24")).toBe("2027-12-24");
+    expect(formatDate("2027-12-24T18:00:00Z")).toBe("2027-12-24");
+  });
+  it("appends the weekday for logs, in the current language", () => {
+    expect(formatDateWithWeekday("2026-11-14", "sv")).toBe("2026-11-14 · lör");
+    expect(formatDateWithWeekday("2026-11-14", "en")).toBe("2026-11-14 · Sat");
   });
 });
 

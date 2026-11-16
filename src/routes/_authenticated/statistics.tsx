@@ -71,7 +71,7 @@ function StatsPage() {
     [t("Totalt set", "Total sets"), s.totalSets],
     [t("Pass", "Workouts"), s.sessions],
     [t("Totalt reps", "Total reps"), s.totalReps],
-    [t("Senaste pass", "Last workout"), s.last ? formatDate(s.last, language) : "–"],
+    [t("Senaste pass", "Last workout"), s.last ? formatDate(s.last) : "–"],
   ] as const;
 
   return (

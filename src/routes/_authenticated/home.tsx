@@ -69,7 +69,7 @@ function HomePage() {
       <ul className="divide-y divide-border">
         {s.recentDates.map((d) => {
           const rows = log.filter((e) => e.date === d);
-          return <li key={d} className="flex justify-between py-2 text-sm"><span className="font-medium">{formatDate(d, language)}</span><span className="text-muted-foreground">{rows.reduce((n, e) => n + (e.sets ?? 1), 0)} {t("set", "sets")} · {new Set(rows.map((e) => e.code)).size} {t("övningar", "exercises")}</span></li>;
+          return <li key={d} className="flex justify-between py-2 text-sm"><span className="font-medium">{formatDate(d)}</span><span className="text-muted-foreground">{rows.reduce((n, e) => n + (e.sets ?? 1), 0)} {t("set", "sets")} · {new Set(rows.map((e) => e.code)).size} {t("övningar", "exercises")}</span></li>;
         })}
       </ul>
       <Button asChild variant="outline" size="sm"><Link to="/log">{t("Visa logg", "View log")}</Link></Button>

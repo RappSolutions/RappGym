@@ -27,7 +27,7 @@ export function ProgressOverview({ log, exercises }: { log: LogEntry[]; exercise
   const setChange = firstSets !== undefined && lastSets !== undefined && data.length > 1 ? lastSets - firstSets : null;
   const number = (value: number) => value.toLocaleString(language === "sv" ? "sv-SE" : "en-GB");
   const delta = (value: number) => `${value > 0 ? "+" : ""}${number(value)}`;
-  const shortDate = (date: string) => new Date(`${date}T12:00:00`).toLocaleDateString(language === "sv" ? "sv-SE" : "en-GB", { day: "numeric", month: "short" });
+  const shortDate = (date: string) => formatDate(date);
   const chartColor = (fallback: string) => (chartToken ? `var(--category-chart, ${fallback})` : fallback);
   const config = {
     weight: { label: t("Högsta vikt (kg)", "Heaviest weight (kg)"), color: chartColor("var(--chart-1)") },
@@ -76,7 +76,7 @@ export function ProgressOverview({ log, exercises }: { log: LogEntry[]; exercise
                     <CartesianGrid vertical={false} stroke="var(--border)" />
                     <XAxis dataKey="date" tickFormatter={shortDate} minTickGap={30} tickLine={false} axisLine={false} />
                     <YAxis width={40} tickLine={false} axisLine={false} domain={[0, "auto"]} />
-                    <ChartTooltip content={<ChartTooltipContent labelFormatter={(_, payload) => formatDate(String(payload[0]?.payload.date), language)} />} />
+                    <ChartTooltip content={<ChartTooltipContent labelFormatter={(_, payload) => formatDate(String(payload[0]?.payload.date))} />} />
                     <Line dataKey="weight" type="linear" stroke="var(--color-weight)" strokeWidth={3} dot={{ r: 4 }} connectNulls={false} isAnimationActive={false} />
                   </LineChart>
                 </ChartContainer>
@@ -94,8 +94,8 @@ export function ProgressOverview({ log, exercises }: { log: LogEntry[]; exercise
                 <CartesianGrid vertical={false} stroke="var(--border)" />
                 <XAxis dataKey="date" tickFormatter={shortDate} minTickGap={30} tickLine={false} axisLine={false} />
                 <YAxis width={40} allowDecimals={false} tickLine={false} axisLine={false} />
-                <ChartTooltip content={<ChartTooltipContent labelFormatter={(_, payload) => formatDate(String(payload[0]?.payload.date), language)} />} />
-                <Bar dataKey="sets" fill="var(--color-sets)" maxBarSize={40} radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                    <ChartTooltip content={<ChartTooltipContent labelFormatter={(_, payload) => formatDate(String(payload[0]?.payload.date))} />} />
+                    <Bar dataKey="sets" fill="var(--color-sets)" maxBarSize={40} radius={[4, 4, 0, 0]} isAnimationActive={false} />
               </BarChart>
             </ChartContainer>
           </div>
@@ -103,7 +103,7 @@ export function ProgressOverview({ log, exercises }: { log: LogEntry[]; exercise
             <summary className="cursor-pointer text-sm font-semibold">{t("Pass i perioden", "Workouts in period")} · {data.length} · {data.reduce((sum, day) => sum + day.sets, 0)} {t("set totalt", "total sets")}</summary>
             <table className="mt-3 w-full text-left text-sm">
               <thead className="text-muted-foreground"><tr><th className="py-2">{t("Datum", "Date")}</th>{code !== "all" && <th className="text-right">{t("Högsta kg", "Max kg")}</th>}<th className="text-right">{t("Set", "Sets")}</th></tr></thead>
-              <tbody>{data.map((day) => <tr key={day.date} className="border-t"><td className="py-2">{formatDate(day.date, language)} {day.date.slice(0, 4)}</td>{code !== "all" && <td className="text-right tabular-nums">{day.weight === null ? "–" : number(day.weight)}</td>}<td className="text-right tabular-nums">{day.sets}</td></tr>)}</tbody>
+              <tbody>{data.map((day) => <tr key={day.date} className="border-t"><td className="py-2">{formatDate(day.date)}</td>{code !== "all" && <td className="text-right tabular-nums">{day.weight === null ? "–" : number(day.weight)}</td>}<td className="text-right tabular-nums">{day.sets}</td></tr>)}</tbody>
             </table>
           </details>
         </>

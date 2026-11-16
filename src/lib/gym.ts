@@ -77,12 +77,15 @@ export function categoryToken(category: string, categories: string[]): string {
   return CAT_TOKENS[(i < 0 ? 0 : i) % CAT_TOKENS.length] ?? "cat-1";
 }
 
-export function formatDate(iso: string, language: "sv" | "en" = "sv") {
-  return new Date(iso + "T12:00:00").toLocaleDateString(language === "en" ? "en-GB" : "sv-SE", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
+/** ISO 8601 calendar date (YYYY-MM-DD) — the app shows dates this way everywhere. */
+export function formatDate(iso: string) {
+  return iso.slice(0, 10);
+}
+
+/** ISO 8601 date with the weekday appended, e.g. "2026-11-14 · lör". */
+export function formatDateWithWeekday(iso: string, language: "sv" | "en" = "sv") {
+  const weekday = new Date(iso.slice(0, 10) + "T12:00:00").toLocaleDateString(language === "en" ? "en-GB" : "sv-SE", { weekday: "short" });
+  return `${formatDate(iso)} · ${weekday}`;
 }
 
 export function computeStats(log: LogEntry[], exercises: Exercise[]) {

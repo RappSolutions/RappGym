@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import { LogSheet } from "@/components/gym/LogSheet";
-import { categoriesOf, categoryToken, exercisesQuery, formatDate, logQuery, type LogEntry, formatSet, todayISO, isWorkoutExpanded, workoutRecordingOrder } from "@/lib/gym";
+import { categoriesOf, categoryToken, exercisesQuery, formatDateWithWeekday, logQuery, type LogEntry, formatSet, todayISO, isWorkoutExpanded, workoutRecordingOrder } from "@/lib/gym";
 
 export const Route = createFileRoute("/_authenticated/log")({
   head: () => ({
@@ -44,7 +44,7 @@ function LogPage() {
         return (
           <section key={date} className="space-y-1">
             <Button variant="ghost" aria-expanded={expanded} aria-controls={`workout-${date}`} onClick={() => setExpandedOverrides((current) => new Map(current).set(date, !isWorkoutExpanded(date, today, current)))} className="h-auto min-h-12 w-full flex-wrap justify-between gap-2 whitespace-normal px-0 text-left">
-              <span className="flex items-center gap-2 font-display text-xl font-bold uppercase">{expanded ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}{formatDate(date, language)}</span>
+              <span className="flex items-center gap-2 font-display text-xl font-bold uppercase">{expanded ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}{formatDateWithWeekday(date, language)}</span>
               <span className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1 text-right text-xs text-muted-foreground">
                 {cats.map((cat) => {
                   const exercise = exercises.find((ex) => ex.category === cat);
