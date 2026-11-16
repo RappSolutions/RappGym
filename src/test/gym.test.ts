@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeStats, lastByCode, isWorkoutExpanded, workoutRecordingOrder, categoriesOf, categoryToken, formatDate, formatDateWithWeekday } from "@/lib/gym";
+import { computeStats, lastByCode, isWorkoutExpanded, isProposalExpanded, workoutRecordingOrder, categoriesOf, categoryToken, formatDate, formatDateWithWeekday } from "@/lib/gym";
 import history from "@/data/history.json";
 
 const ex = [
@@ -23,6 +23,20 @@ describe("workout expansion", () => {
     const overrides = new Map([["2026-11-14", true], ["2026-11-15", false]]);
     expect(isWorkoutExpanded("2026-11-14", "2026-11-15", overrides)).toBe(true);
     expect(isWorkoutExpanded("2026-11-15", "2026-11-15", overrides)).toBe(false);
+  });
+});
+
+describe("suggested workout expansion", () => {
+  it("opens only today's suggestion by default", () => {
+    const overrides = new Map<string, boolean>();
+    expect(isProposalExpanded("2026-11-16", "2026-11-16", overrides, "p1")).toBe(true);
+    expect(isProposalExpanded("2026-11-17", "2026-11-16", overrides, "p1")).toBe(false);
+    expect(isProposalExpanded("2026-11-15", "2026-11-16", overrides, "p1")).toBe(false);
+  });
+  it("keeps a clicked suggestion open or closed whatever its date", () => {
+    const overrides = new Map([["p1", true], ["p2", false]]);
+    expect(isProposalExpanded("2026-11-15", "2026-11-16", overrides, "p1")).toBe(true);
+    expect(isProposalExpanded("2026-11-16", "2026-11-16", overrides, "p2")).toBe(false);
   });
 });
 
