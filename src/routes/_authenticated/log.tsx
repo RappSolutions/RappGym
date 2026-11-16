@@ -46,7 +46,10 @@ function LogPage() {
             <Button variant="ghost" aria-expanded={expanded} aria-controls={`workout-${date}`} onClick={() => setExpandedOverrides((current) => new Map(current).set(date, !isWorkoutExpanded(date, today, current)))} className="h-auto min-h-12 w-full justify-between gap-2 whitespace-normal px-0 text-left">
               <span className="flex items-center gap-2 font-display text-xl font-bold uppercase">{expanded ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}{formatDate(date, language)}</span>
               <span className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1 text-right text-xs text-muted-foreground">
-                {cats.map((cat) => <span key={cat} data-category={categoryToken(cat, categories)} className="category-theme inline-flex items-center gap-1 font-semibold text-category-ink"><span className="size-2 shrink-0 rounded-full bg-category-fill" />{localize(exercises.find((ex) => ex.category === cat) ?? { category: cat }).category}</span>)}
+                {cats.map((cat) => {
+                  const exercise = exercises.find((ex) => ex.category === cat);
+                  return <span key={cat} data-category={categoryToken(cat, categories)} className="category-theme inline-flex items-center gap-1 font-semibold text-category-ink"><span className="size-2 shrink-0 rounded-full bg-category-fill" />{exercise ? localize(exercise).category : cat}</span>;
+                })}
                 <span>{entries.reduce((n, x) => n + (x.sets ?? 1), 0)} {t("set", "sets")}</span>
               </span>
             </Button>
