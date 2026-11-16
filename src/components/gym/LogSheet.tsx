@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { todayISO, useInvalidateGym, formatSet, doseText, type Exercise, type LogEntry } from "@/lib/gym";
 import { ExerciseImages } from "./ExerciseImages";
+import { LogDatePicker } from "./LogDatePicker";
+import { appendLoadAdvice, splitSuggestedLoad } from "@/lib/suggested-load";
 
 function Stepper({ label, value, onChange }: { label: string; value: number; onChange: (n: number) => void }) {
   return (
@@ -54,9 +56,10 @@ export function LogSheet({
     if (!exercise) return;
     const src = entry ?? last;
     setRound(entry?.sets ?? 1);
-    setLoad(src?.load ?? "");
+    const split = entry?.status === "suggested" ? splitSuggestedLoad(src?.load ?? "") : { load: src?.load ?? "", advice: "" };
+    setLoad(split.load);
     setReps(src?.reps ?? 10);
-    setNote(entry?.note ?? "");
+    setNote(appendLoadAdvice(entry?.note ?? "", split.advice));
     setDate(entry?.date ?? todayISO());
   }, [exercise, entry, last]);
 
@@ -121,17 +124,17 @@ export function LogSheet({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>{t("Belastning (kg / band)", "Load (kg / band)")}</Label>
-              <Input value={load} onChange={(e) => setLoad(e.target.value)} className="h-12 text-lg font-semibold" placeholder={t("t.ex. 25 eller Orange", "e.g. 25 or Orange")} />
+              <Label htmlFor="log-load">{t("Belastning (kg / band)", "Load (kg / band)")}</Label>
+              <Input id="log-load" value={load} onChange={(e) => setLoad(e.target.value)} className="h-12 text-lg font-semibold" placeholder={t("t.ex. 25 eller Orange", "e.g. 25 or Orange")} />
             </div>
             <div className="space-y-2">
-              <Label>{t("Datum", "Date")}</Label>
-              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-12" />
+              <Label htmlFor="log-date">{t("Datum", "Date")}</Label>
+              <LogDatePicker value={date} onChange={setDate} />
             </div>
           </div>
           <div className="space-y-2">
-            <Label>{t("Notering & känsla", "Notes & feel")}</Label>
-            <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
+            <Label htmlFor="log-note">{t("Notering & känsla", "Notes & feel")}</Label>
+            <Textarea id="log-note" value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
           </div>
           <Button onClick={() => void save()} disabled={busy} className="h-14 w-full text-lg font-bold uppercase">
             {entry?.status === "suggested" ? t("Bekräfta genomfört", "Confirm completed") : entry ? t("Spara ändring", "Save changes") : t("Logga set", "Log sets")}

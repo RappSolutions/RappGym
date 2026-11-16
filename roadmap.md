@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Separate numeric suggested loads from advice without changing completed history; 20 kg example and ambiguous-load tests passed
+- [x] Replace nonworking log date control with interactive ISO date calendar; desktop save/reload and mobile completion verified, test entry removed
 - [x] Move AI analysis/planning/history to its own page and navigation tab; authenticated navigation verified
 - [x] Replace long progress exercise list with searchable category-filtered selection; mobile search/selection verified
 - [x] Collapse/expand proposed and completed log sections; delete remaining proposed workouts safely; completed-row preservation and reload verified, test rows removed
