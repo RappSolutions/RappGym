@@ -41,7 +41,7 @@ export function GoalsCard() {
           <div className="font-medium">{g.text}</div>
           {g.target_date && <div className="text-xs text-muted-foreground">{t("Mål:", "By:")} {formatDate(g.target_date)}</div>}
         </div>
-        <Button size="icon" variant="ghost" aria-label={g.status === "done" ? t("Återaktivera", "Reactivate") : t("Klart", "Done")} onClick={() => { if (confirm(t(`Ta bort målet "${g.text}"?`, `Delete the goal "${g.text}"?`))) run(supabase.from("training_goals").update({ status: g.status === "done" ? "active" : "done" }).eq("id", g.id))}>
+        <Button size="icon" variant="ghost" aria-label={g.status === "done" ? t("Återaktivera", "Reactivate") : t("Klart", "Done")} onClick={() => run(supabase.from("training_goals").update({ status: g.status === "done" ? "active" : "done" }).eq("id", g.id))}>
           {g.status === "done" ? <RotateCcw className="size-4" /> : <Check className="size-4" />}
         </Button>
         <Button size="icon" variant="ghost" aria-label={t("Redigera", "Edit")} onClick={() => edit(g)}><Pencil className="size-4" /></Button>
