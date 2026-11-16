@@ -23,7 +23,7 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
   const { data: gyms = [] } = useQuery(gymsQuery);
   const [gymId, setGym] = useSelectedGym();
   const currentGym = gyms.find((g) => g.id === gymId);
-  useEffect(() => { if (gyms.length > 0 && !currentGym) setGym(gyms[0].id); }, [gyms, currentGym, setGym]);
+  useEffect(() => { if (gyms.length > 0 && !currentGym) setGym(gyms[0]!.id); }, [gyms, currentGym, setGym]);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
