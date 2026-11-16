@@ -9,10 +9,11 @@ import { ExerciseCard } from "@/components/gym/ExerciseCard";
 import { ExerciseDetails } from "@/components/gym/ExerciseDetails";
 import { ExerciseForm } from "@/components/gym/ExerciseForm";
 import { LogSheet } from "@/components/gym/LogSheet";
+import { supabase } from "@/integrations/supabase/client";
 import { categoriesOf, categoryToken, exercisesQuery, lastByCode, logQuery, useInvalidateGym, type Exercise, type LogEntry } from "@/lib/gym";
 
 export function ExerciseManager() {
-  const { t, language, localize } = useLanguage();
+  const { t, localize } = useLanguage();
   const { data: sourceExercises } = useSuspenseQuery(exercisesQuery);
   const exercises = sourceExercises.map(localize);
   const { data: log } = useSuspenseQuery(logQuery);
