@@ -22,8 +22,8 @@ describe("AI training facts", () => {
       { code: "PL1", gymId: "A", days: [] },
     ]);
   });
-  it("offers only database exercises available at the selected gym", () => {
+  it("offers every database exercise at any location", () => {
     const exercises = [{ code: "PU3", gym_id: "A" }, { code: "PL1", gym_id: "B" }, { code: "CO1", gym_id: null }] as Exercise[];
-    expect(trainingContext([], exercises, "A").availableExerciseCodes).toEqual(["PU3", "CO1"]);
+    expect(trainingContext([], exercises, "A").availableExerciseCodes).toEqual(["PU3", "PL1", "CO1"]);
   });
 });

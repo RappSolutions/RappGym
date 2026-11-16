@@ -27,6 +27,6 @@ export function trainingContext(log: LogEntry[], exercises: Exercise[], gymId: s
     recentLogs: log.filter((row) => recentDates.has(row.date)).map(({ code, date, gym_id, load, sets, reps }) => ({ code, date, gymId: gym_id, load, sets, reps })),
     exercises: exercises.map(({ code, name, category, equipment, gym_id, translations }) => ({ code, name, category, equipment, gymId: gym_id, translations })),
     nextWorkoutGymId: gymId,
-    availableExerciseCodes: exercises.filter((exercise) => !gymId || !exercise.gym_id || exercise.gym_id === gymId).map((exercise) => exercise.code),
+    availableExerciseCodes: exercises.map((exercise) => exercise.code),
   };
 }
