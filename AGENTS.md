@@ -35,6 +35,7 @@ use the editor.
 - Validate custom training requests and normalize multi-workout plans in a shared pure module; scope cached results by request, language and gym to avoid showing another plan as the current answer.
 - Persist selected AI workouts as log_entries with suggested status and proposal grouping/order; shared history queries and all aggregation/AI facts exclude suggestions, and confirming a row updates it in place to completed with its recording time, so plans never inflate history or duplicate completed work.
 - Persist successful AI requests and full answers server-side in owner-scoped training_ai_history; shared history reads restore answers across pages, and unique history/workout/exercise links make individual and bulk acceptance idempotent without overwriting completed work.
+- Store optional training background in owner-scoped training_profiles, separate from OAuth identity and existing goals; pass only validated consented fields to explicit AI calls as untrusted user-reported context, so sensitive profile data stays private by default.
 - Exercises, categories and gyms come only from the database (exercises/gyms tables), never from code constants — the user edits them in the app.
 - Data is read client-side via the browser client + React Query under the `_authenticated` layout (ssr: false); RLS scopes log entries per user.
 - Selected gym is stored in localStorage (`src/lib/gym.ts`); exercises with no gym show at every gym.
