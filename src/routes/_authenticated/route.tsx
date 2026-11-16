@@ -4,7 +4,6 @@ import { BarChart3, House, Dumbbell, History, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/lib/i18n";
 import { ProfileMenu } from "@/components/gym/ProfileMenu";
-import { HeaderLocation } from "@/components/gym/HeaderLocation";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -55,7 +54,7 @@ function AppLayout() {
           Rapp<span className="text-brand-yellow">Gym</span>
           {page && <span className="ml-2 text-brand-yellow">– {page}</span>}
         </Link>
-        <div className="flex min-w-0 shrink items-center gap-2"><HeaderLocation /><ProfileMenu user={user} onSignOut={signOut} /></div>
+        <div className="flex shrink-0 items-center"><ProfileMenu user={user} onSignOut={signOut} /></div>
       </header>
       <Outlet />
       <nav className="app-navigation fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur">
