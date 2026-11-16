@@ -1,16 +1,38 @@
 import { useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Check, MapPin, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Dumbbell, MapPin, Pencil, Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/lib/i18n";
-import { gymsQuery, type Gym } from "@/lib/gym";
+import { categoriesOf, exercisesQuery, gymsQuery, type Gym } from "@/lib/gym";
+import { exerciseLocationsQuery, missingLinks } from "@/lib/exercise-locations";
 import { useSelectedGym } from "@/hooks/use-gym";
 
 export function LocationsManager() {
-  const { t } = useLanguage();
+  const { t, localize } = useLanguage();
+  const { data: exercises } = useSuspenseQuery(exercisesQuery);
+  const { data: links } = useSuspenseQuery(exerciseLocationsQuery);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const refreshLinks = () => qc.invalidateQueries({ queryKey: ["exercise-locations"] });
+  async function addLinks(gymId: string, ids: string[]) {
+    const rows = missingLinks(ids, links, gymId);
+    if (!rows.length) return;
+    setBusy(true);
+    const { error } = await supabase.from("exercise_locations").insert(rows);
+    setBusy(false);
+    if (error) toast.error(error.message);
+    await refreshLinks();
+  }
+  async function removeLinks(gymId: string, ids: string[]) {
+    setBusy(true);
+    const { error } = await supabase.from("exercise_locations").delete().eq("gym_id", gymId).in("exercise_id", ids);
+    setBusy(false);
+    if (error) toast.error(error.message);
+    await refreshLinks();
+  }
   const qc = useQueryClient();
   const { data: gyms } = useSuspenseQuery(gymsQuery);
   const [selected, setSelected] = useSelectedGym();
@@ -22,8 +44,14 @@ export function LocationsManager() {
   async function add(e: React.FormEvent) {
     e.preventDefault();
     if (!fresh.name.trim()) return;
-    const { error } = await supabase.from("gyms").insert({ name: fresh.name.trim(), description: fresh.description.trim() });
+    const { data: created, error } = await supabase.from("gyms").insert({ name: fresh.name.trim(), description: fresh.description.trim() }).select("id").single();
     if (error) { toast.error(error.message); return; }
+    if (exercises.length) {
+      const { error: linkError } = await supabase.from("exercise_locations").insert(exercises.map((e) => ({ exercise_id: e.id, gym_id: created.id })));
+      if (linkError) toast.error(linkError.message);
+      await refreshLinks();
+    }
+    setOpenId(created.id);
     setFresh({ name: "", description: "" });
     refresh();
   }
@@ -59,7 +87,8 @@ export function LocationsManager() {
           </div>
         </div>
       ) : (
-        <div key={g.id} className="flex items-center gap-3 rounded-lg border p-3">
+        <div key={g.id} className="rounded-lg border">
+        <div className="flex items-center gap-3 p-3">
           <MapPin className="h-5 w-5 shrink-0 text-primary" />
           <div className="min-w-0 flex-1">
             <div className="font-semibold">{g.name}</div>
@@ -67,6 +96,32 @@ export function LocationsManager() {
           </div>
           <Button size="icon" variant="ghost" onClick={() => { setEditing(g.id); setDraft({ name: g.name, description: g.description }); }} aria-label={t("Redigera", "Edit")}><Pencil /></Button>
           <Button size="icon" variant="ghost" onClick={() => void remove(g)} aria-label={t("Ta bort", "Delete")}><Trash2 /></Button>
+        </div>
+        {(() => {
+          const here = new Set(links.filter((l) => l.gym_id === g.id).map((l) => l.exercise_id));
+          const open = openId === g.id;
+          const allIds = exercises.map((e) => e.id);
+          return <div className="border-t px-3 py-2">
+            <Button variant="ghost" className="h-auto w-full justify-start gap-2 px-0" aria-expanded={open} onClick={() => setOpenId(open ? null : g.id)}>
+              {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}<Dumbbell className="size-4 text-primary" />{t("Övningar här", "Exercises here")}<span className="ml-auto text-sm text-muted-foreground">{here.size} / {exercises.length}</span>
+            </Button>
+            {open && <div className="space-y-3 pb-2">
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" variant="outline" disabled={busy || here.size === exercises.length} onClick={() => void addLinks(g.id, allIds)}>{t("Lägg till alla", "Add all")}</Button>
+                <Button size="sm" variant="outline" disabled={busy || here.size === 0} onClick={() => void removeLinks(g.id, [...here])}>{t("Ta bort alla", "Remove all")}</Button>
+              </div>
+              {categoriesOf(exercises).map((cat) => {
+                const inCat = exercises.filter((e) => e.category === cat);
+                const ids = inCat.map((e) => e.id);
+                const allIn = ids.every((id) => here.has(id));
+                return <div key={cat} className="space-y-1">
+                  <label className="flex items-center gap-2 font-semibold"><input type="checkbox" className="size-4" checked={allIn} disabled={busy} onChange={() => void (allIn ? removeLinks(g.id, ids) : addLinks(g.id, ids))} />{localize(inCat[0]!).category}</label>
+                  <div className="grid gap-1 pl-6 sm:grid-cols-2">{inCat.map((e) => <label key={e.id} className="flex items-center gap-2 text-sm"><input type="checkbox" className="size-4" checked={here.has(e.id)} disabled={busy} onChange={() => void (here.has(e.id) ? removeLinks(g.id, [e.id]) : addLinks(g.id, [e.id]))} /><span className="font-semibold">{e.code}</span> {localize(e).name}</label>)}</div>
+                </div>;
+              })}
+            </div>}
+          </div>;
+        })()}
         </div>
       ))}
       <form onSubmit={add} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
