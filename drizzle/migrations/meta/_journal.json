@@ -43,6 +43,13 @@
       "when": 1794827316249,
       "tag": "0005_saved_workout_suggestions",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794827849043,
+      "tag": "0006_training_ai_history",
+      "breakpoints": true
     }
   ]
 }
