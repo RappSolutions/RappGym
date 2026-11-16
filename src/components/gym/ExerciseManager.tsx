@@ -86,9 +86,8 @@ export function ExerciseManager() {
             {(expanded.has(c) || !!q.trim()) && list.map((ex) => (
               <div key={ex.id} className="space-y-2">
                 <ExerciseCard ex={ex} last={last.get(ex.code)} token={categoryToken(c, cats)}
-                  onClick={() => setOpenId(openId === ex.id ? null : ex.id)} />
-                {!ex.is_active && <div className="flex items-center justify-between gap-2 rounded-md border border-dashed px-3 py-2 text-sm"><span className="font-semibold text-muted-foreground">{t("Inaktiv – dold i Träna och AI-planering", "Inactive – hidden in Train and AI planning")}</span><Button size="sm" variant="outline" onClick={() => void reactivate(live(ex))}>{t("Återaktivera", "Reactivate")}</Button></div>}
-                {openId === ex.id && (
+                  expanded={openId === ex.id}
+                  onClick={() => setOpenId(openId === ex.id ? null : ex.id)}>
                   <ExerciseDetails
                     exercise={live(ex)}
                     log={log}
@@ -96,7 +95,8 @@ export function ExerciseManager() {
                     onEdit={() => setEditing(live(ex))}
                     onDelete={() => void remove(live(ex))}
                   />
-                )}
+                </ExerciseCard>
+                {!ex.is_active && <div className="flex items-center justify-between gap-2 rounded-md border border-dashed px-3 py-2 text-sm"><span className="font-semibold text-muted-foreground">{t("Inaktiv – dold i Träna och AI-planering", "Inactive – hidden in Train and AI planning")}</span><Button size="sm" variant="outline" onClick={() => void reactivate(live(ex))}>{t("Återaktivera", "Reactivate")}</Button></div>}
               </div>
             ))}
           </section>

@@ -3,7 +3,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { ExerciseImages } from "@/components/gym/ExerciseImages";
-import { doseText, formatDate, formatSet, type Exercise, type LogEntry } from "@/lib/gym";
+import { formatDate, formatSet, type Exercise, type LogEntry } from "@/lib/gym";
 
 /** Full exercise details shown inline in Settings, so nothing navigates away. */
 export function ExerciseDetails({
@@ -28,13 +28,8 @@ export function ExerciseDetails({
     .filter((p) => !isNaN(p.v));
 
   return (
-    <div className="space-y-3 rounded-xl border bg-card p-4">
-      <div>
-        <div className="font-display text-lg font-bold uppercase text-category-ink">{ex.code} · {ex.category}</div>
-        <div className="text-2xl font-extrabold uppercase leading-none">{ex.name}</div>
-        <p className="mt-1 text-sm text-muted-foreground">{[ex.equipment, ex.variant, ex.muscles].filter(Boolean).join(" · ")}</p>
-      </div>
-      {ex.dose && <div className="rounded-xl bg-secondary p-3 text-xl font-bold">{doseText(ex.dose)}</div>}
+    <div className="space-y-3">
+      {(ex.variant || ex.muscles) && <p className="text-sm text-muted-foreground">{[ex.variant, ex.muscles].filter(Boolean).join(" · ")}</p>}
       <ExerciseImages exercise={ex} />
       {ex.instructions && <p className="leading-relaxed">{ex.instructions}</p>}
       {ex.focus && <p className="border-l-4 border-category-fill pl-3"><b>{t("Fokus:", "Focus:")}</b> {ex.focus}</p>}
