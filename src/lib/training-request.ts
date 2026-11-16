@@ -6,6 +6,7 @@ export const trainingRequestSchema = z.object({
   question: z.string().trim().max(2000).default(""),
   workoutCount: z.number().int().min(1).max(14).nullable().default(null),
   periodDays: z.number().int().min(1).max(90).nullable().default(null),
+  sessionMinutes: z.number().int().min(5).max(240).nullable().default(null),
   purpose: z.string().trim().max(300).default(""),
 }).strict().refine((data) => !data.workoutCount || !data.periodDays || data.workoutCount <= data.periodDays, {
   message: "workoutCount exceeds periodDays", path: ["workoutCount"],

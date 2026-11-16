@@ -1,0 +1,2 @@
+ALTER TABLE public.training_profiles ADD COLUMN IF NOT EXISTS pace text NOT NULL DEFAULT '' CHECK (pace IN ('', 'relaxed', 'normal', 'intense'));
+COMMENT ON COLUMN public.training_profiles.use_for_ai IS 'DEPRECATED: profile is always used for the owner''s explicit AI requests';
