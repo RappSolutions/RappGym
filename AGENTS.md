@@ -40,5 +40,6 @@ use the editor.
 - Derive progress charts client-side through the shared progress aggregation module; compare weights per exercise and sum repeat counts per date so unrelated exercises and text loads are never mixed into weight trends.
 
 - Keep app branding in shared global CSS tokens and the shared masthead; all content routes inherit the same visual frame so changes stay consistent across pages.
+- Derive the Home logo and favicon from the same logo artwork; use only the circular badge for the favicon so it stays legible at browser-tab sizes.
 - Use canonical English file routes for app navigation and retain legacy Swedish routes only as redirects, preserving exercise codes and workout filters so existing bookmarks continue working.
 - Home dashboard numbers come from the pure `src/lib/dashboard.ts` module (tested); soft training goals live in the owner-scoped `training_goals` table and are passed to the AI insight call as untrusted data, so AI advice can reflect goals without trusting them as instructions.
