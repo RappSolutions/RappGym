@@ -35,7 +35,7 @@ function Bars({ title, data, total, tokenOf }: { title: string; data: Map<string
         return (
           <div key={k} {...theme}>
             <div className="flex justify-between text-sm"><span className={token ? "text-category-ink" : ""}>{k}</span><span className="text-muted-foreground">{v} · {Math.round((v / total) * 100)}%</span></div>
-            <div className="mt-1 h-2 rounded bg-muted"><div className={token ? "h-2 rounded border border-category-ink/40 bg-category-fill" : "h-2 rounded bg-primary"} style={{ width: `${(v / total) * 100}%` }} /></div>
+            <div className="mt-1 h-2 rounded bg-muted"><div className={token ? "h-2 rounded border border-category-ink bg-category-fill" : "h-2 rounded bg-primary"} style={{ width: `${(v / total) * 100}%` }} /></div>
           </div>
         );
       })}
