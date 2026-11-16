@@ -92,6 +92,13 @@
       "when": 1794855541054,
       "tag": "0012_exercise_fk_soft_delete",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794855572252,
+      "tag": "0013_exercise_images_storage_policies",
+      "breakpoints": true
     }
   ]
 }
