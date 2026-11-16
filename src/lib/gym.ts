@@ -159,10 +159,6 @@ export function subscribeGym(l: () => void) {
   };
 }
 
-/** Exercises available at a gym: those linked to it plus those for all gyms (no gym). */
-export function exercisesAtGym(exercises: Exercise[], gymId: string | null) {
-  return exercises.filter((e) => !e.gym_id || e.gym_id === gymId);
-}
 
 export function formatSet(e: { sets: number | null; reps: number | null; load: string | null }) {
   const base = `${e.reps ?? "–"}${e.load ? ` @ ${e.load}` : ""}`;

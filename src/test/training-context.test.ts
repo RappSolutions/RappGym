@@ -23,7 +23,11 @@ describe("AI training facts", () => {
     ]);
   });
   it("offers every database exercise at any location", () => {
-    const exercises = [{ code: "PU3", gym_id: "A" }, { code: "PL1", gym_id: "B" }, { code: "CO1", gym_id: null }] as Exercise[];
+    const exercises = [{ code: "PU3", is_active: true }, { code: "PL1", is_active: true }, { code: "CO1", is_active: true }] as Exercise[];
     expect(trainingContext([], exercises, "A").availableExerciseCodes).toEqual(["PU3", "PL1", "CO1"]);
+  });
+  it("never offers inactive (hidden) exercises to AI planning", () => {
+    const exercises = [{ code: "PU3", is_active: true }, { code: "OLD", is_active: false }] as Exercise[];
+    expect(trainingContext([], exercises, "A").availableExerciseCodes).toEqual(["PU3"]);
   });
 });

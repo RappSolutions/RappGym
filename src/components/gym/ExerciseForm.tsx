@@ -11,8 +11,9 @@ import { categoriesOf, useInvalidateGym, type Exercise } from "@/lib/gym";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { gymsQuery } from "@/lib/gym";
 import { exerciseLocationsQuery } from "@/lib/exercise-locations";
+import { ExerciseImageEditor } from "@/components/gym/ExerciseImageEditor";
 
-const empty = { gym_id: "", code: "", category: "", name: "", equipment: "", variant: "", muscles: "", instructions: "", dose: "", focus: "" };
+const empty = { code: "", category: "", name: "", equipment: "", variant: "", muscles: "", instructions: "", dose: "", focus: "" };
 
 export function ExerciseForm({
   open,
@@ -43,7 +44,7 @@ export function ExerciseForm({
   useEffect(() => {
     if (open) {
       const translated = exercise ? localizeExercise(exercise, textLanguage) : exercise;
-      setF(translated ? { ...empty, ...translated, gym_id: "" } : { ...empty });
+      setF(translated ? { ...empty, ...translated } : { ...empty });
     }
   }, [open, exercise, textLanguage, language]);
   const set = (k: keyof typeof empty) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -56,13 +57,12 @@ export function ExerciseForm({
       code: f.code.trim().toUpperCase(), category: f.category.trim(), name: f.name.trim(),
       equipment: f.equipment, variant: f.variant, muscles: f.muscles,
       instructions: f.instructions, dose: f.dose, focus: f.focus,
-      gym_id: null,
     };
     const texts = { name: row.name, equipment: row.equipment, variant: row.variant, muscles: row.muscles, instructions: row.instructions, dose: row.dose, focus: row.focus };
     const existing = exercise?.translations;
     const translations = existing && typeof existing === "object" && !Array.isArray(existing) ? existing : {};
     const update = textLanguage === "en" && exercise
-      ? { code: row.code, category: row.category, gym_id: row.gym_id, translations: { ...translations, en: texts } }
+      ? { code: row.code, category: row.category, translations: { ...translations, en: texts } }
       : row;
     const res = exercise
       ? await supabase.from("exercises").update(update).eq("id", exercise.id).select().single()
@@ -77,9 +77,7 @@ export function ExerciseForm({
     if (add.length) { const { error } = await supabase.from("exercise_locations").insert(add); if (error) toast.error(error.message); }
     if (drop.length) { const { error } = await supabase.from("exercise_locations").delete().eq("exercise_id", res.data.id).in("gym_id", drop); if (error) toast.error(error.message); }
     void qc.invalidateQueries({ queryKey: ["exercise-locations"] });
-    if (exercise && exercise.code !== row.code) {
-      await supabase.from("log_entries").update({ code: row.code }).eq("code", exercise.code);
-    }
+    // Log rows follow the exercise by id; the database keeps their code in sync.
     invalidate();
     toast.success(t("Övning sparad", "Exercise saved"));
     onClose(res.data);
@@ -122,6 +120,7 @@ export function ExerciseForm({
             <label className="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" className="size-4" checked={places.size === gyms.length} onChange={() => setPlaces(places.size === gyms.length ? new Set() : new Set(gyms.map((g) => g.id)))} />{t("Alla platser", "All locations")}</label>
             <div className="grid gap-1 pl-6 sm:grid-cols-2">{gyms.map((g) => <label key={g.id} className="flex items-center gap-2 text-sm"><input type="checkbox" className="size-4" checked={places.has(g.id)} onChange={() => { const n = new Set(places); if (n.has(g.id)) n.delete(g.id); else n.add(g.id); setPlaces(n); }} />{g.name}</label>)}</div>
           </fieldset>}
+          {exercise && <ExerciseImageEditor exercise={exercise} />}
           <Button type="submit" className="h-12 w-full font-bold uppercase">{t("Spara", "Save")}</Button>
         </form>
       </DialogContent>

@@ -33,7 +33,8 @@ export const Route = createFileRoute("/_authenticated/workout")({
 
 function PassPage() {
   const { t, language, localize } = useLanguage();
-  const { data: allExercises } = useSuspenseQuery(exercisesQuery);
+  const { data: everyExercise } = useSuspenseQuery(exercisesQuery);
+  const allExercises = everyExercise.filter((e) => e.is_active);
   const { data: gyms } = useSuspenseQuery(gymsQuery);
   const [gymId, setGym] = useSelectedGym();
   const [picking, setPicking] = useState(false);
