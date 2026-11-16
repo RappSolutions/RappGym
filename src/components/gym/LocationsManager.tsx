@@ -9,6 +9,7 @@ import { useLanguage } from "@/lib/i18n";
 import { categoriesOf, exercisesQuery, gymsQuery, type Gym } from "@/lib/gym";
 import { exerciseLocationsQuery, missingLinks } from "@/lib/exercise-locations";
 import { useSelectedGym } from "@/hooks/use-gym";
+import { LocationPhotoScan } from "@/components/gym/LocationPhotoScan";
 
 export function LocationsManager() {
   const { t, localize } = useLanguage();
@@ -32,6 +33,17 @@ export function LocationsManager() {
     setBusy(false);
     if (error) toast.error(error.message);
     await refreshLinks();
+  }
+  async function applyScan(g: Gym, ids: string[], equipment: string) {
+    const keep = new Set(ids);
+    const current = links.filter((l) => l.gym_id === g.id).map((l) => l.exercise_id);
+    const drop = current.filter((id) => !keep.has(id));
+    if (drop.length) await removeLinks(g.id, drop);
+    await addLinks(g.id, ids);
+    const note = `${t("Utrustning", "Equipment")}: ${equipment}`;
+    const description = (g.description ? `${g.description.split(/\n?(Utrustning|Equipment): /)[0]!.trim()} — ${note}` : note).slice(0, 300);
+    await supabase.from("gyms").update({ description }).eq("id", g.id);
+    refresh();
   }
   const qc = useQueryClient();
   const { data: gyms } = useSuspenseQuery(gymsQuery);
@@ -106,6 +118,7 @@ export function LocationsManager() {
               {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}<Dumbbell className="size-4 text-primary" />{t("Övningar här", "Exercises here")}<span className="ml-auto text-sm text-muted-foreground">{here.size} / {exercises.length}</span>
             </Button>
             {open && <div className="space-y-3 pb-2">
+              <LocationPhotoScan gymId={g.id} onApply={(ids, eq) => applyScan(g, ids, eq)} />
               <div className="flex flex-wrap gap-2">
                 <Button size="sm" variant="outline" disabled={busy || here.size === exercises.length} onClick={() => void addLinks(g.id, allIds)}>{t("Lägg till alla", "Add all")}</Button>
                 <Button size="sm" variant="outline" disabled={busy || here.size === 0} onClick={() => void removeLinks(g.id, [...here])}>{t("Ta bort alla", "Remove all")}</Button>
