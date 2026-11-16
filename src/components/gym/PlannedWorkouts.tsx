@@ -62,7 +62,6 @@ export function PlannedWorkouts() {
     finally { setDeleting(false); }
   }
   const [circuitId, setCircuitId] = useState<string | null>(null);
-  if (!proposals.length) return null;
   return (
     <>
       {proposals.length > 0 && <section className="space-y-3 border-b border-border pb-5" aria-label={t("Föreslagna pass", "Suggested workouts")}>
@@ -89,6 +88,7 @@ export function PlannedWorkouts() {
           </article>;
         })}
         </div>
+       </section>}
       <AlertDialog open={deletingId !== null} onOpenChange={(open) => { if (!open && !deleting) setDeletingId(null); }}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{deletingId === "__all__" ? t(`Ta bort alla ${planned.size} föreslagna pass?`, `Remove all ${planned.size} suggested workouts?`) : t("Ta bort föreslaget pass?", "Remove suggested workout?")}</AlertDialogTitle><AlertDialogDescription>{t("Ej genomförda övningar tas bort. Genomförda övningar och AI-svaret i historiken behålls.", "Uncompleted exercises will be removed. Completed exercises and the AI answer in history are kept.")}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel disabled={deleting}>{t("Avbryt", "Cancel")}</AlertDialogCancel><AlertDialogAction disabled={deleting} onClick={(event) => { event.preventDefault(); void deleteProposal(); }}>{deleting ? t("Tar bort…", "Removing…") : deletingId === "__all__" ? t("Ta bort alla", "Delete all") : t("Ta bort förslag", "Remove suggestion")}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
       <LogSheet exercise={entry ? byCode.get(entry.code) ?? null : null} entry={entry} onCompleted={guidedId ? nextExercise : undefined} progress={guidedId ? `${guidedDone + 1}/${guidedDone + guidedRows.length}` : undefined} onClose={() => { setEntry(null); setGuidedId(null); }} />
       {circuitId && <CircuitRunner rows={planned.get(circuitId) ?? []} names={byCode} onClose={() => setCircuitId(null)} />}
