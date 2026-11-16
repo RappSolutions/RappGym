@@ -28,4 +28,9 @@ describe("Personal training requests", () => {
   it("retains summary requests without creating a multi-workout plan", () => {
     expect(normalizeTrainingPlan(insights, trainingRequestSchema.parse({}), ["DB-EX"]).workouts).toEqual([]);
   });
+  it("plans workouts without a free-text question", () => {
+    const bare = trainingRequestSchema.parse({ mode: "plan" });
+    expect(bare).toMatchObject({ mode: "plan", question: "", workoutCount: null, periodDays: null });
+    expect(normalizeTrainingPlan(insights, bare, ["DB-EX"]).workouts).toHaveLength(4);
+  });
 });
