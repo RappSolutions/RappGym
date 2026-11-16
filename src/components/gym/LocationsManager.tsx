@@ -41,7 +41,7 @@ export function LocationsManager() {
     if (drop.length) await removeLinks(g.id, drop);
     await addLinks(g.id, ids);
     const note = `${t("Utrustning", "Equipment")}: ${equipment}`;
-    const description = (g.description ? `${g.description.split(/\n?(Utrustning|Equipment): /)[0]!.trim()} — ${note}` : note).slice(0, 300);
+    const description = (g.description ? `${g.description.split(/\s*—?\s*(?:Utrustning|Equipment): /)[0]!.trim()} — ${note}` : note).slice(0, 300);
     await supabase.from("gyms").update({ description }).eq("id", g.id);
     refresh();
   }

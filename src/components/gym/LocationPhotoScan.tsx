@@ -18,7 +18,7 @@ async function fileToDataUrl(file: File): Promise<string> {
 }
 
 export function LocationPhotoScan({ gymId, onApply }: { gymId: string; onApply: (ids: string[], equipment: string) => Promise<void> }) {
-  const { t, lang } = useLanguage();
+  const { t, language } = useLanguage();
   const scan = useServerFn(scanLocationPhoto);
   const [url, setUrl] = useState("");
   const [image, setImage] = useState<string | null>(null);
@@ -29,7 +29,7 @@ export function LocationPhotoScan({ gymId, onApply }: { gymId: string; onApply: 
     if (!src) return;
     setBusy(true);
     try {
-      const res = await scan({ data: { gymId, image: src, language: lang } });
+      const res = await scan({ data: { gymId, image: src, language } });
       if (res.error) { toast.error(res.error); return; }
       if (!res.exerciseIds.length) { toast.error(t("AI hittade inga övningar som passar bilden.", "AI found no matching exercises in the photo.")); return; }
       if (!confirm(t(`AI ser: ${res.equipment}\n\nSätt ${res.exerciseIds.length} övningar för platsen? Övriga kopplingar tas bort.`, `AI sees: ${res.equipment}\n\nSet ${res.exerciseIds.length} exercises for this location? Other links are removed.`))) return;
