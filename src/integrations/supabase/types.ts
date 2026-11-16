@@ -250,6 +250,7 @@ export type Database = {
           experience: string
           height_cm: number | null
           limitations: string
+          pace: string
           preferences: string
           updated_at: string
           use_for_ai: boolean
@@ -262,6 +263,7 @@ export type Database = {
           experience?: string
           height_cm?: number | null
           limitations?: string
+          pace?: string
           preferences?: string
           updated_at?: string
           use_for_ai?: boolean
@@ -274,6 +276,7 @@ export type Database = {
           experience?: string
           height_cm?: number | null
           limitations?: string
+          pace?: string
           preferences?: string
           updated_at?: string
           use_for_ai?: boolean

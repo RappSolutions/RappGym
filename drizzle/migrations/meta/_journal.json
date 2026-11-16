@@ -71,6 +71,13 @@
       "when": 1794829284855,
       "tag": "0009_training_profile_birth_year",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794834459115,
+      "tag": "0010_training_profile_pace",
+      "breakpoints": true
     }
   ]
 }
