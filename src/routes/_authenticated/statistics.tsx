@@ -75,7 +75,7 @@ function StatsPage() {
       <div className="grid grid-cols-2 gap-2">
         {kpis.map(([l, v]) => (
           <div key={l} className="rounded-xl border bg-card p-4">
-            <div className="font-display text-3xl font-extrabold text-primary">{v}</div>
+            <div className="text-3xl font-extrabold text-primary">{v}</div>
             <div className="text-xs uppercase text-muted-foreground">{l}</div>
           </div>
         ))}

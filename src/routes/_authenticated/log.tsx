@@ -43,18 +43,18 @@ function LogPage() {
         return (
           <section key={date} className="space-y-1">
             <Button variant="ghost" aria-expanded={expanded} aria-controls={`workout-${date}`} onClick={() => setExpandedOverrides((current) => new Map(current).set(date, !isWorkoutExpanded(date, today, current)))} className="h-auto min-h-12 w-full justify-between gap-2 whitespace-normal px-0 text-left">
-              <span className="flex items-center gap-2 text-xl font-bold uppercase">{expanded ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}{formatDate(date, language)}</span>
+              <span className="flex items-center gap-2 font-display text-xl font-bold uppercase">{expanded ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}{formatDate(date, language)}</span>
               <span className="text-right text-xs text-muted-foreground">{cats.join(" · ")} · {entries.reduce((n, x) => n + (x.sets ?? 1), 0)} {t("set", "sets")}</span>
             </Button>
             <div id={`workout-${date}`} hidden={!expanded} className="divide-y rounded-xl border bg-card">
               {entries.map((e) => (
                 <Button variant="ghost" key={e.id} onClick={() => setEntry(e)} className="flex h-auto w-full items-center gap-3 whitespace-normal px-4 py-2.5 text-left">
-                  <span className="w-12 font-display font-bold text-primary">{e.code}</span>
+                  <span className="w-12 font-bold text-primary">{e.code}</span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate">{byCode.get(e.code)?.name ?? t("Okänd övning", "Unknown exercise")}</span>
                     {e.note && <span className="block truncate text-xs text-muted-foreground">{e.note}</span>}
                   </span>
-                  <span className="font-display text-lg font-bold">{formatSet(e)}</span>
+                  <span className="text-lg font-bold">{formatSet(e)}</span>
                 </Button>
               ))}
             </div>

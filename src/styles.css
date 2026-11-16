@@ -67,8 +67,11 @@
   --color-cat-3: var(--cat-3);
   --color-cat-4: var(--cat-4);
   --color-cat-5: var(--cat-5);
+  --color-category-fill: var(--category-fill);
+  --color-category-ink: var(--category-ink);
+  --color-category-on: var(--category-on);
   --font-display: "Berlin Sans", "Ubuntu", system-ui, sans-serif;
-  --font-sans: "Berlin Sans", "Ubuntu", system-ui, sans-serif;
+  --font-sans: "Ubuntu", Arial, sans-serif;
   --color-brand-royal: var(--brand-royal);
   --color-brand-blue: var(--brand-blue);
   --color-brand-yellow: var(--brand-yellow);
@@ -114,11 +117,13 @@
   --chart-3: oklch(0.540563 0.092116 203.586);
   --chart-4: oklch(0.498089 0.153154 295.000);
   --chart-5: oklch(0.526109 0.159927 357.546);
-  --cat-1: oklch(0.419978 0.180811 260.938);
-  --cat-2: oklch(0.540563 0.092116 203.586);
-  --cat-3: oklch(0.520300 0.106638 84.967);
-  --cat-4: oklch(0.526109 0.159927 357.546);
-  --cat-5: oklch(0.498089 0.153154 295.000);
+  --cat-1: var(--brand-blue);
+  --cat-2: oklch(0.76 0.13 205);
+  --cat-3: var(--brand-yellow);
+  --cat-4: oklch(0.65 0.22 25);
+  --cat-5: var(--brand-royal);
+  --cat-2-ink: oklch(0.43 0.08 205);
+  --cat-4-ink: oklch(0.5 0.19 25);
   --sidebar: oklch(1.000000 0.000000 89.876);
   --sidebar-foreground: oklch(0.371495 0.000000 89.876);
   --sidebar-primary: oklch(0.419978 0.180811 260.938);
@@ -148,13 +153,37 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
-  h1, h2, h3 {
+  h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     letter-spacing: 0;
   }
 }
 
 @source inline("bg-cat-1 bg-cat-2 bg-cat-3 bg-cat-4 bg-cat-5 text-cat-1 text-cat-2 text-cat-3 text-cat-4 text-cat-5 border-cat-1 border-cat-2 border-cat-3 border-cat-4 border-cat-5");
+
+/* Separate vivid category fills from readable text, especially on yellow. */
+.category-theme {
+  --category-fill: var(--brand-blue);
+  --category-ink: var(--brand-royal);
+  --category-on: var(--primary-foreground);
+}
+.category-theme[data-category="cat-2"] {
+  --category-fill: var(--cat-2);
+  --category-ink: var(--cat-2-ink);
+  --category-on: var(--foreground);
+}
+.category-theme[data-category="cat-3"] {
+  --category-fill: var(--cat-3);
+  --category-ink: var(--brand-royal);
+  --category-on: var(--brand-royal);
+}
+.category-theme[data-category="cat-4"] {
+  --category-fill: var(--cat-4);
+  --category-ink: var(--cat-4-ink);
+}
+.category-theme[data-category="cat-5"] {
+  --category-fill: var(--cat-5);
+}
 
 @utility google-btn {
   display: flex;

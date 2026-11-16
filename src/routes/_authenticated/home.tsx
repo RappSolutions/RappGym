@@ -52,7 +52,7 @@ function HomePage() {
       </div>
       <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-3">
         {kpis.map(([l, v]) => <div key={l} className="min-w-0 rounded-xl border bg-card p-4">
-          <div className="font-display text-3xl font-extrabold text-primary">{v}</div>
+          <div className="text-3xl font-extrabold text-primary">{v}</div>
           <div className="break-words text-xs uppercase text-muted-foreground">{l}</div>
         </div>)}
       </div>

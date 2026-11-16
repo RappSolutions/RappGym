@@ -9,6 +9,7 @@ import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { ExerciseCard } from "@/components/gym/ExerciseCard";
 import { LogSheet } from "@/components/gym/LogSheet";
+import { Button } from "@/components/ui/button";
 import { categoriesOf, categoryToken, exercisesAtGym, exercisesQuery, gymsQuery, lastByCode, logQuery, todayISO, type Exercise } from "@/lib/gym";
 
 export const Route = createFileRoute("/_authenticated/workout")({
@@ -60,24 +61,27 @@ function PassPage() {
 
   return (
     <main className="space-y-4 px-4">
-      <button onClick={() => setPicking(true)} className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-sm font-medium">
+      <Button variant="secondary" onClick={() => setPicking(true)} className="gap-1.5 rounded-full px-3 text-sm font-medium">
         <MapPin className="h-4 w-4 text-primary" /> {gym.name} <span className="text-muted-foreground">· {t("byt", "change")}</span>
-      </button>
+      </Button>
       {todayCount.size > 0 && <p className="text-sm text-muted-foreground">{`${[...todayCount.values()].reduce((a, b) => a + b, 0)} ${t("set loggade idag", "sets logged today")}`}</p>}
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
         {cats.map((c) => {
           const token = categoryToken(c, cats);
           return (
-            <button
+            <Button
+              variant="outline"
               key={c}
+              data-category={token}
+              aria-pressed={c === active}
               onClick={() => navigate({ search: { cat: c }, replace: true })}
               className={cn(
-                "shrink-0 rounded-full border-2 px-5 py-2 font-display text-lg font-bold uppercase",
-                c === active ? `border-${token} bg-${token} text-primary-foreground` : `border-${token} text-${token}`,
+                "category-theme h-12 shrink-0 rounded-lg border-2 border-category-fill px-5 font-display text-lg font-bold uppercase",
+                c === active ? "bg-category-fill text-category-on hover:bg-category-fill hover:text-category-on" : "bg-background text-category-ink hover:bg-category-fill/15 hover:text-category-ink",
               )}
             >
               {c}
-            </button>
+            </Button>
           );
         })}
       </div>
