@@ -10,9 +10,11 @@ import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { ExerciseCard } from "@/components/gym/ExerciseCard";
 import { LogSheet } from "@/components/gym/LogSheet";
+import { PlannedWorkouts } from "@/components/gym/PlannedWorkouts";
+import { WorkoutBuilder } from "@/components/gym/WorkoutBuilder";
 import { Button } from "@/components/ui/button";
 import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
-import { categoriesOf, categoryToken, exercisesQuery, gymsQuery, lastByCode, logQuery, todayISO, type Exercise } from "@/lib/gym";
+import { categoriesOf, categoryToken, exercisesQuery, gymsQuery, lastByCode, logQuery, suggestionsQuery, todayISO, type Exercise } from "@/lib/gym";
 
 export const Route = createFileRoute("/_authenticated/workout")({
   validateSearch: z.object({ cat: z.string().optional() }),
@@ -27,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/workout")({
     ],
   }),
   loader: ({ context }) =>
-    Promise.all([context.queryClient.ensureQueryData(gymsQuery), context.queryClient.ensureQueryData(exercisesQuery), context.queryClient.ensureQueryData(logQuery), context.queryClient.ensureQueryData(exerciseLocationsQuery)]),
+    Promise.all([context.queryClient.ensureQueryData(gymsQuery), context.queryClient.ensureQueryData(exercisesQuery), context.queryClient.ensureQueryData(logQuery), context.queryClient.ensureQueryData(exerciseLocationsQuery), context.queryClient.ensureQueryData(suggestionsQuery)]),
   component: PassPage,
 });
 
@@ -72,6 +74,8 @@ function PassPage() {
       <Button variant="secondary" onClick={() => setPicking(true)} className="gap-1.5 rounded-full px-3 text-sm font-medium">
         <MapPin className="h-4 w-4 text-primary" /> {gym.name} <span className="text-muted-foreground">· {t("byt", "change")}</span>
       </Button>
+      <PlannedWorkouts />
+      <WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} />
       <p className="text-sm text-muted-foreground">{t("Välj en övning för att logga set. Lägg till och redigera övningar under Inställningar.", "Pick an exercise to log sets. Add and edit exercises under Settings.")}</p>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} className="size-4" />{t(`Visa alla övningar (${atPlace.length} av ${allExercises.length} finns här)`, `Show all exercises (${atPlace.length} of ${allExercises.length} available here)`)}</label>
       {!showAll && atPlace.length === 0 && <p className="text-sm text-muted-foreground">{t("Inga övningar kopplade till platsen ännu. Välj övningar under Inställningar → Platser.", "No exercises linked to this location yet. Choose them under Settings → Locations.")}</p>}
