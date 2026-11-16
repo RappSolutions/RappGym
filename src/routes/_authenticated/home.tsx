@@ -5,7 +5,7 @@ import { TrainingInsights } from "@/components/gym/TrainingInsights";
 import { Button } from "@/components/ui/button";
 import { dashboardStats } from "@/lib/dashboard";
 import { goalsQuery } from "@/lib/goals";
-import { exercisesQuery, formatDate, logQuery, todayISO } from "@/lib/gym";
+import { categoriesOf, categoryToken, exercisesQuery, formatDate, logQuery, todayISO } from "@/lib/gym";
 import { useLanguage } from "@/lib/i18n";
 import rappgymLogo from "@/assets/rappgym-logo-berlin.png";
 
@@ -59,9 +59,9 @@ function HomePage() {
     </div>
     {cat30Total > 0 && <section className="space-y-2 rounded-xl border bg-card p-4">
       <h2 className="text-xl font-bold uppercase">{t("Set per kategori, 30 dagar", "Sets by category, 30 days")}</h2>
-      {cat30.map(([k, v]) => <div key={k}>
-        <div className="flex justify-between text-sm"><span>{k}</span><span className="text-muted-foreground">{v}</span></div>
-        <div className="mt-1 h-2 rounded bg-muted"><div className="h-2 rounded bg-primary" style={{ width: `${(v / cat30Total) * 100}%` }} /></div>
+      {cat30.map(([k, v]) => <div key={k} data-category={categoryToken(k, categoriesOf(exercises))} className="category-theme">
+        <div className="flex justify-between text-sm"><span className="text-category-ink">{k}</span><span className="text-muted-foreground">{v}</span></div>
+        <div className="mt-1 h-2 rounded bg-muted"><div className="h-2 rounded border border-category-ink/40 bg-category-fill" style={{ width: `${(v / cat30Total) * 100}%` }} /></div>
       </div>)}
     </section>}
     {s.recentDates.length > 0 && <section className="space-y-2 rounded-xl border bg-card p-4">

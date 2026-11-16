@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ProgressOverview } from "@/components/gym/ProgressOverview";
 import { TrainingInsights } from "@/components/gym/TrainingInsights";
 import { supabase } from "@/integrations/supabase/client";
-import { computeStats, exercisesQuery, formatDate, logQuery, useInvalidateGym } from "@/lib/gym";
+import { categoriesOf, categoryToken, computeStats, exercisesQuery, formatDate, logQuery, useInvalidateGym } from "@/lib/gym";
 
 export const Route = createFileRoute("/_authenticated/statistics")({
   head: () => ({
@@ -25,17 +25,20 @@ export const Route = createFileRoute("/_authenticated/statistics")({
   component: StatsPage,
 });
 
-function Bars({ title, data, total }: { title: string; data: Map<string, number>; total: number }) {
-  const { t, language, localize } = useLanguage();
+function Bars({ title, data, total, tokenOf }: { title: string; data: Map<string, number>; total: number; tokenOf?: (key: string) => string }) {
   return (
     <section className="space-y-2 rounded-xl border bg-card p-4">
       <h2 className="text-xl font-bold uppercase">{title}</h2>
-      {[...data].sort((a, b) => b[1] - a[1]).map(([k, v]) => (
-        <div key={k}>
-          <div className="flex justify-between text-sm"><span>{k}</span><span className="text-muted-foreground">{v} · {Math.round((v / total) * 100)}%</span></div>
-          <div className="mt-1 h-2 rounded bg-muted"><div className="h-2 rounded bg-primary" style={{ width: `${(v / total) * 100}%` }} /></div>
-        </div>
-      ))}
+      {[...data].sort((a, b) => b[1] - a[1]).map(([k, v]) => {
+        const token = tokenOf?.(k);
+        const theme: { "data-category"?: string; className?: string } = token ? { "data-category": token, className: "category-theme" } : {};
+        return (
+          <div key={k} {...theme}>
+            <div className="flex justify-between text-sm"><span className={token ? "text-category-ink" : ""}>{k}</span><span className="text-muted-foreground">{v} · {Math.round((v / total) * 100)}%</span></div>
+            <div className="mt-1 h-2 rounded bg-muted"><div className={token ? "h-2 rounded border border-category-ink/40 bg-category-fill" : "h-2 rounded bg-primary"} style={{ width: `${(v / total) * 100}%` }} /></div>
+          </div>
+        );
+      })}
     </section>
   );
 }
@@ -47,6 +50,7 @@ function StatsPage() {
   const invalidate = useInvalidateGym();
   const [busy, setBusy] = useState(false);
   const s = computeStats(log, exercises.map(localize));
+  const categories = categoriesOf(exercises);
 
   async function importExcel() {
     setBusy(true);
@@ -82,7 +86,7 @@ function StatsPage() {
       </div>
       {log.length > 0 && <ProgressOverview log={log} exercises={exercises} />}
       <TrainingInsights exercises={exercises} hasLog={log.length > 0} />
-      {s.totalSets > 0 && <Bars title={t("Set per kategori", "Sets by category")} data={s.perCat} total={s.totalSets} />}
+      {s.totalSets > 0 && <Bars title={t("Set per kategori", "Sets by category")} data={s.perCat} total={s.totalSets} tokenOf={(k) => categoryToken(k, categories)} />}
       {s.totalSets > 0 && <Bars title={t("Set per redskap", "Sets by equipment")} data={s.perEq} total={s.totalSets} />}
       {log.length === 0 && (
         <div className="space-y-3 rounded-xl border border-dashed p-4">
