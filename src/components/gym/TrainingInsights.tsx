@@ -31,6 +31,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
   const [workoutCount, setWorkoutCount] = useState("");
   const [periodDays, setPeriodDays] = useState("");
   const [purpose, setPurpose] = useState("");
+  const [minutes, setMinutes] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<Set<string>>(new Set());
@@ -38,9 +39,9 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
   const [result, setResult] = useState<{ id: string; insights: Insights; generatedAt: string; language: string; gymId: string | null; today: string; question: string; request: ReturnType<typeof trainingRequestSchema.parse> } | null>(null);
 
   async function analyze() {
-    const parsed = trainingRequestSchema.safeParse({ mode, question: mode === "plan" ? "" : question, workoutCount: workoutCount ? Number(workoutCount) : null, periodDays: periodDays ? Number(periodDays) : null, purpose });
+    const parsed = trainingRequestSchema.safeParse({ mode, question: mode === "plan" ? "" : question, workoutCount: workoutCount ? Number(workoutCount) : null, periodDays: periodDays ? Number(periodDays) : null, sessionMinutes: mode === "plan" && minutes ? Number(minutes) : null, purpose });
     if (!parsed.success) {
-      setError(t("Kontrollera antal pass och dagar: högst ett pass per dag, 1–14 pass och 1–90 dagar.", "Check workouts and days: at most one workout per day, 1–14 workouts and 1–90 days."));
+      setError(t("Kontrollera antal pass och dagar: högst ett pass per dag, 1–14 pass, 1–90 dagar och 5–240 minuter per pass.", "Check workouts and days: at most one workout per day, 1–14 workouts, 1–90 days and 5–240 minutes per workout."));
       return;
     }
     setBusy(true);
@@ -127,7 +128,8 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
         <div className="space-y-1"><label htmlFor={`${id}-days`} className="text-sm font-medium">{t("Antal dagar", "Days")}</label><Input id={`${id}-days`} type="number" min={1} max={90} step={1} placeholder="7" value={periodDays} disabled={busy} onChange={(event) => setPeriodDays(event.target.value)} /></div>
         <div className="col-span-2 space-y-1 sm:col-span-1"><label htmlFor={`${id}-purpose`} className="text-sm font-medium">{t("Syfte", "Purpose")}</label><Input id={`${id}-purpose`} value={purpose} maxLength={300} disabled={busy} onChange={(event) => setPurpose(event.target.value)} placeholder={t("T.ex. skidåkning, styrka eller variation", "E.g. skiing, strength or variety")} /></div>
       </div>}
-      {mode === "plan" && <p className="text-sm text-muted-foreground">{t("Antal pass och dagar är valfria — tomt ger 4 pass under 7 dagar.", "Workouts and days are optional — empty means 4 workouts over 7 days.")}</p>}
+      {mode === "plan" && <div className="space-y-1"><label htmlFor={`${id}-minutes`} className="text-sm font-medium">{t("Ungefärlig längd per pass (min)", "Approximate length per workout (min)")}</label><div className="flex flex-wrap gap-2">{[15, 30, 45, 60, 75, 90].map((m) => <Button key={m} type="button" size="sm" variant={minutes === String(m) ? "default" : "outline"} aria-pressed={minutes === String(m)} disabled={busy} onClick={() => setMinutes(minutes === String(m) ? "" : String(m))}>{m}</Button>)}<Input id={`${id}-minutes`} type="number" min={5} max={240} step={5} placeholder={t("Annat", "Other")} value={minutes} disabled={busy} onChange={(event) => setMinutes(event.target.value)} className="h-9 w-24" /></div></div>}
+      {mode === "plan" && <p className="text-sm text-muted-foreground">{t("Antal pass och dagar är valfria — tomt ger 4 pass under 7 dagar. Ditt träningstempo i profilen används också.", "Workouts and days are optional — empty means 4 workouts over 7 days. Your profile training pace is also used.")}</p>}
       <Button type="submit" disabled={busy || !hasLog} className="w-full sm:w-auto">
         {busy ? <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" /> : <Send className="size-4" />}
         {busy ? t("Tänker…", "Thinking…") : mode === "plan" ? t("Ge mig passförslag", "Suggest workouts") : question.trim() ? t("Fråga om min träning", "Ask about my training") : current ? t("Uppdatera analys", "Update analysis") : t("Analysera mina pass", "Analyze my workouts")}
