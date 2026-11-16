@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Add custom AI requests and optional workout count, period and purpose; verified four workouts over seven days with real logs on desktop/mobile
 - [x] Show all dates as ISO 8601, with weekday in Logg
 - [x] Header click goes to Home; category colors on stats bars, home bars and progress charts
 - [x] Color log rows and date summaries by category; sort timestamped rows first-to-last (imported rows share a timestamp)
