@@ -1,4 +1,6 @@
 # Roadmap
+- [ ] Add header avatar menu with private optional training profile and sign-out
+- [ ] Use consented profile data in every explicit AI request; verify save/reload/delete and privacy rules
 - [x] Accept all remaining suggested workouts together without duplicates or completed status; individual then bulk acceptance verified
 - [x] Persist full AI answers and requests, restore latest answer and browse history across navigation/reload; verified signed-in desktop/mobile and removed test data
 - [x] Show analysis date with local HH:mm
