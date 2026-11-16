@@ -7,6 +7,7 @@ import { dashboardStats } from "@/lib/dashboard";
 import { goalsQuery } from "@/lib/goals";
 import { exercisesQuery, formatDate, logQuery, todayISO } from "@/lib/gym";
 import { useLanguage } from "@/lib/i18n";
+import rappgymLogo from "@/assets/rappgym-logo.jpg";
 
 export const Route = createFileRoute("/_authenticated/home")({
   head: () => ({
@@ -45,6 +46,9 @@ function HomePage() {
   const cat30Total = cat30.reduce((n, [, v]) => n + v, 0);
 
   return <main className="space-y-4 px-4">
+    <div className="flex justify-center">
+      <img src={rappgymLogo} alt="RappGym" width={144} height={144} className="h-28 w-28 object-contain md:h-36 md:w-36" />
+    </div>
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
       {kpis.map(([l, v]) => <div key={l} className="rounded-xl border bg-card p-4">
         <div className="font-display text-3xl font-extrabold text-primary">{v}</div>
