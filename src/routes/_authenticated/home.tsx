@@ -73,7 +73,7 @@ function HomePage() {
         const { done: doneSets, total } = workoutSetProgress(id, rows, log);
         if (isWorkoutFinished(doneSets, total)) return null;
         const ongoing = doneSets > 0;
-        return <Button key={id} size="lg" variant={ongoing ? "default" : "secondary"} className="h-auto min-h-12 w-full justify-start whitespace-normal text-left" onClick={() => setRunning(rows)}><Play className="size-4 shrink-0" /><span className="min-w-0 flex-1"><span className="block font-bold">{ongoing ? `${t("Pågående", "Ongoing")}: ` : ""}{rows[0]?.proposal_title}</span><span className="block text-xs font-normal">{rows[0]?.date !== todayISO() ? `${formatDate(rows[0]?.date ?? "")} · ` : ""}{rows.map((r) => r.code).join(" · ")}</span>{ongoing && <span className="block text-xs font-semibold">{t(`${doneSets}/${total} set klara – fortsätt`, `${doneSets}/${total} sets done – continue`)}</span>}</span></Button>;
+        return <Button key={id} size="lg" variant="secondary" className="h-auto min-h-12 w-full justify-start whitespace-normal text-left" onClick={() => setRunning(rows)}><Play className="size-4 shrink-0" /><span className="min-w-0 flex-1"><span className="block font-bold">{ongoing ? `${t("Pågående", "Ongoing")}: ` : ""}{rows[0]?.proposal_title}</span><span className="block text-xs font-normal">{rows[0]?.date !== todayISO() ? `${formatDate(rows[0]?.date ?? "")} · ` : ""}{rows.map((r) => r.code).join(" · ")}{ongoing ? ` (${doneSets}/${total} ${t("klara", "done")})` : ""}</span></span></Button>;
       })}
       {gym && <WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} quickStart />}
     </section>

@@ -1,4 +1,4 @@
-import { workoutSetProgress } from "@/lib/circuit";
+import { isWorkoutFinished, workoutSetProgress } from "@/lib/circuit";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -73,6 +73,7 @@ export function PlannedWorkouts() {
           const first = rows[0];
           if (!first) return null;
           const { done, total } = workoutSetProgress(id, rows, log);
+          if (isWorkoutFinished(done, total)) return null;
           const gym = gyms.find((gym) => gym.id === first.gym_id);
           const open = isProposalExpanded(first.date, today, proposalOverrides, id);
           return <article key={id} className="space-y-3 rounded-lg border-2 border-dashed border-primary bg-secondary p-3">
