@@ -43,7 +43,7 @@ use the editor.
 - Derive approximate age at request time from profile birth year and request date; never infer birth year from legacy age because the birthday is unknown.
 - Exercises, categories and gyms come only from the database (exercises/gyms tables), never from code constants — the user edits them in the app.
 - Data is read client-side via the browser client + React Query under the `_authenticated` layout (ssr: false); RLS scopes log entries per user.
-- Selected gym is stored in localStorage (`src/lib/gym.ts`); exercises with no gym show at every gym.
+- Selected gym is stored in localStorage (`src/lib/gym.ts`); exercises show at a gym only when linked in exercise_locations, and no selected gym shows every exercise.
 - Store exercise illustrations and localized field values on each database exercise; never use a code-keyed exercise bank in application code, so edits and new exercises remain data-driven.
 - Use the shared language context for Swedish/English UI and browser language persistence; preserve original user notes and exercise fields while storing translations separately.
 - Render flag-only language controls through the shared LanguagePicker with image assets, not emoji, because desktop platforms may display country letters instead of flags.
@@ -54,7 +54,6 @@ use the editor.
 - Sort rows within displayed workout dates by recording timestamp ascending without changing the newest-first shared log query, so latest-set prefills remain correct.
 - Derive the Home logo and favicon from the same logo artwork; use only the circular badge for the favicon so it stays legible at browser-tab sizes.
 - Use canonical English file routes for app navigation and retain legacy Swedish routes only as redirects, preserving exercise codes and workout filters so existing bookmarks continue working.
-- Home dashboard numbers come from the pure `src/lib/dashboard.ts` module (tested); soft training goals live in the owner-scoped `training_goals` table and are passed to the AI insight call as untrusted data, so AI advice can reflect goals without trusting them as instructions.
 - AI plans carry an optional startDate in the validated request and use the plan's chosen location (name/description as untrusted context); available exercises come from the owner-scoped exercise_locations link table (shared helpers in src/lib/exercise-locations.ts), with no location meaning all.
 - Location photo scans run only on explicit request via an authenticated server function; AI output only toggles existing exercise_locations links (plus an equipment note in the location description), so planning keeps using the same link table.
 - log_entries.exercise_id is the real FK to exercises (ON DELETE RESTRICT); DB triggers fill it from code on insert and cascade code renames to log rows, so renames never orphan history.
@@ -62,4 +61,3 @@ use the editor.
 - Exercise pictures live in the private exercise-images storage bucket as "storage:<path>" refs resolved to signed URLs; AI pictures are generated only on explicit click via an authenticated server function.
 - Planned workouts (AI or own, status suggested) live on the Train page with circuit mode logging one completed set per exercise per lap; the Log page shows completed history only, keeping facts separate from plans.
 - Exercise bank: all read, admin (user_roles) writes; one CircuitRunner with circuit toggle.
-- Keep supabase/schema.puml (and the README Mermaid model) in sync with every schema migration; it is the reviewed data-model documentation.

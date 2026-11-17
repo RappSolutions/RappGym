@@ -1,0 +1,1 @@
+- Keep supabase/schema.puml (and the README Mermaid model) in sync with every schema migration; it is the reviewed data-model documentation.

@@ -1,0 +1,1 @@
+- Home dashboard numbers come from the pure `src/lib/dashboard.ts` module (tested); soft training goals live in the owner-scoped `training_goals` table and are passed to the AI insight call as untrusted data, so AI advice can reflect goals without trusting them as instructions.
