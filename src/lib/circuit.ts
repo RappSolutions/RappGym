@@ -13,3 +13,8 @@ export function adjustLoad(load: string, delta: number): string {
   if (!Number.isFinite(n)) return load;
   return String(Math.max(0, Math.round((n + delta) * 100) / 100));
 }
+
+/** Station order: all sets of one exercise before moving to the next. */
+export function stationSteps<T extends { id: string; sets: number }>(rows: readonly T[]): { lap: number; row: T }[] {
+  return rows.flatMap((row) => Array.from({ length: Math.max(1, row.sets) }, (_, k) => ({ lap: k + 1, row })));
+}
