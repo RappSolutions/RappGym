@@ -37,7 +37,7 @@ use the editor.
 - Keep supported OAuth methods in a shared auth-provider module used by the sign-in page and tested, so authentication restrictions stay consistent.
 - Generate training insights only on an explicit request through an authenticated server function, with user-scoped reads and server-only streamed AI Gateway Responses calls; keep computed facts separate from AI advice to protect log accuracy and avoid automatic billing.
 - Validate custom training requests and normalize multi-workout plans in a shared pure module; scope cached results by request, language and gym to avoid showing another plan as the current answer.
-- Workouts are first-class rows in `workouts` (title, origin user/ai, scheduled date, location, circuit flag, AI link, source workout); log_entries.workout_id is an optional FK and status suggested/completed separates plans from facts; log_entries.proposal_id/proposal_title/ai_* are deprecated, so never write them. Aggregations and AI facts exclude suggestions.
+- Workouts are rows in `workouts`; log_entries.workout_id is an optional FK, status separates plans from facts; proposal_id/proposal_title/ai_* on log_entries are deprecated, never write them.
 - Persist successful AI requests and full answers server-side in owner-scoped training_ai_history; shared history reads restore answers across pages, and unique history/workout/exercise links make individual and bulk acceptance idempotent without overwriting completed work.
 - Store optional training background in owner-scoped training_profiles, separate from OAuth identity and existing goals; always pass the validated profile (incl. pace) to explicit AI calls as untrusted user-reported context, so sensitive profile data stays private by default.
 - Derive approximate age at request time from profile birth year and request date; never infer birth year from legacy age because the birthday is unknown.
@@ -63,5 +63,5 @@ use the editor.
 - Planned workouts (AI or own, status suggested) live on the Train page with circuit mode logging one completed set per exercise per lap; the Log page shows completed history only, keeping facts separate from plans.
 - Exercise bank: all read, admin (user_roles) writes; one CircuitRunner with circuit toggle.
 
-- The Log groups completed rows per workout via src/lib/log-workouts.ts (loose rows per date); "plan again" clones into a new workout with source_workout_id, so history is never mutated.
-- AI runs store model and token usage in training_ai_history; SEK/token estimates come from src/lib/ai-cost.ts (approximate prices), so cost display stays in one place.
+- Log groups per workout (src/lib/log-workouts.ts); "plan again" clones via source_workout_id, never mutating history.
+- AI token usage is stored per run; cost maths lives only in src/lib/ai-cost.ts.
