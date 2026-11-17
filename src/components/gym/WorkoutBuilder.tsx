@@ -21,9 +21,8 @@ export function WorkoutBuilder({ exercises, last, gymId, quickStart = false }: {
   const [title, setTitle] = useState("");
   const [busy, setBusy] = useState(false);
   const [openCats, setOpenCats] = useState<Set<string>>(new Set());
-  const [running, setRunning] = useState<LogEntry[] | null>(null);
+  const [running, setRunning] = useState<string | null>(null);
   const cats = categoriesOf(exercises);
-  const names = new Map(exercises.map((e) => [e.code, localize(e)]));
 
   async function save(start: boolean) {
     if (!picked.length || busy) return;
@@ -32,12 +31,12 @@ export function WorkoutBuilder({ exercises, last, gymId, quickStart = false }: {
     const head = await supabase.from("workouts").insert({ id: workoutId, title: title.trim() || t("Eget pass", "Own workout"), created_by: "user", scheduled_date: todayISO(), gym_id: gymId, is_circuit: true });
     if (head.error) { setBusy(false); toast.error(t("Kunde inte spara passet.", "Could not save the workout.")); return; }
     const rows = picked.map((code, index) => ({ code, sets: Math.max(1, laps), reps, load: last.get(code)?.load ?? "", date: todayISO(), gym_id: gymId, status: "suggested", workout_id: workoutId, proposal_order: index }));
-    const { data, error } = await supabase.from("log_entries").insert(rows).select("*, workout:workouts(id,title,created_by,is_circuit,scheduled_date,created_at)");
+    const { error } = await supabase.from("log_entries").insert(rows);
     setBusy(false);
     if (error) { toast.error(t("Kunde inte spara passet.", "Could not save the workout.")); return; }
     await qc.invalidateQueries({ queryKey: ["workout-suggestions"] });
     setOpen(false); setPicked([]); setTitle("");
-    if (start) setRunning(data as LogEntry[]);
+    if (start) setRunning(workoutId);
     else toast.success(t("Passet är planerat", "Workout planned"));
   }
 
@@ -76,7 +75,7 @@ export function WorkoutBuilder({ exercises, last, gymId, quickStart = false }: {
           </div>
         </DialogContent>
       </Dialog>
-      {running && <CircuitRunner rows={running} names={names} onClose={() => setRunning(null)} />}
+      {running && <CircuitRunner workoutId={running} onClose={() => setRunning(null)} />}
     </>
   );
 }

@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, CheckCircle2, Trash2, Repeat, Sparkles, LayoutList, Rows3 } from "lucide-react";
+import { ChevronDown, ChevronRight, CheckCircle2, Trash2, Repeat, Sparkles, LayoutList, Rows3, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -71,6 +71,16 @@ function LogPage() {
   const [deleting, setDeleting] = useState<Group | null>(null);
   const [busy, setBusy] = useState(false);
   const [copying, setCopying] = useState<Group | null>(null);
+  const [renaming, setRenaming] = useState<{ id: string; title: string } | null>(null);
+  async function saveRename() {
+    if (!renaming || !renaming.title.trim()) return;
+    setBusy(true);
+    const { error } = await supabase.from("workouts").update({ title: renaming.title.trim() }).eq("id", renaming.id);
+    setBusy(false);
+    if (error) { toast.error(t("Kunde inte byta namn.", "Could not rename.")); return; }
+    setRenaming(null);
+    await queryClient.invalidateQueries({ queryKey: ["log"] });
+  }
   const [form, setForm] = useState({ title: "", date: "", gymId: "", circuit: true });
   const [compact, setCompact] = useState(false);
   useEffect(() => setCompact(localStorage.getItem("rappgym-log-view") === "compact"), []);
@@ -312,6 +322,9 @@ function LogPage() {
                     ))}
                     <div className="flex items-center justify-end gap-1 px-2 py-1 text-xs text-muted-foreground">
                       <span className="mr-auto">{sets} {t("set", "sets")} · {places.join(", ")}</span>
+                      {g.workoutId && <Button variant="ghost" size="icon" disabled={busy} title={t("Byt namn", "Rename")} aria-label={`${t("Byt namn", "Rename")}: ${titleOf(g)}`} onClick={() => setRenaming({ id: g.workoutId!, title: titleOf(g) })}>
+                        <Pencil className="size-4" />
+                      </Button>}
                       <Button variant="ghost" size="icon" disabled={busy} title={t("Planera igen", "Plan again")} aria-label={`${t("Planera igen", "Plan again")}: ${titleOf(g)}`} onClick={() => openCopy(g)}>
                         <Repeat className="size-4" />
                       </Button>
@@ -371,6 +384,9 @@ function LogPage() {
                     </span>
                   </span>
                 </Button>
+                {g.workoutId && <Button variant="ghost" size="icon" disabled={busy} title={t("Byt namn", "Rename")} aria-label={`${t("Byt namn", "Rename")}: ${titleOf(g)}`} onClick={() => setRenaming({ id: g.workoutId!, title: titleOf(g) })}>
+                  <Pencil className="size-4" />
+                </Button>}
                 <Button
                   variant="ghost"
                   size="icon"
@@ -451,6 +467,15 @@ function LogPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <Drawer open={!!renaming} onOpenChange={(o) => { if (!o && !busy) setRenaming(null); }}>
+        <DrawerContent>
+          <div className="mx-auto w-full max-w-md space-y-3 px-4 pb-8">
+            <DrawerHeader className="px-0"><DrawerTitle className="font-display text-2xl">{t("Byt namn på passet", "Rename workout")}</DrawerTitle><DrawerDescription className="sr-only">{t("Byt namn", "Rename")}</DrawerDescription></DrawerHeader>
+            <Input autoFocus value={renaming?.title ?? ""} onChange={(e) => setRenaming((r) => r && { ...r, title: e.target.value })} onKeyDown={(e) => { if (e.key === "Enter") void saveRename(); }} />
+            <Button className="w-full" disabled={busy || !renaming?.title.trim()} onClick={() => void saveRename()}>{t("Spara", "Save")}</Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
       <LogSheet
         exercise={entry ? (byCode.get(entry.code) ?? null) : null}
         entry={entry}

@@ -2,7 +2,10 @@ import { isWorkoutFinished, workoutSetProgress } from "@/lib/circuit";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, Play, Circle, Trash2, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronRight, Play, Trash2, Sparkles, ArrowUp, ArrowDown, X, Plus, Dumbbell } from "lucide-react";
+import { ExercisePickList } from "@/components/gym/ExercisePickList";
+import { addPlannedExercise, moveRow, removePlannedRow } from "@/lib/workout-edit";
+import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { removableSuggestionIds } from "@/lib/workout-suggestions";
@@ -32,6 +35,7 @@ import {
   formatSet,
   todayISO,
   isProposalExpanded,
+  lastByCode,
 } from "@/lib/gym";
 
 /** Planned (suggested) workouts: encouragement and how-to, kept apart from the factual Log. */
@@ -42,6 +46,8 @@ export function PlannedWorkouts() {
   const { data: log } = useSuspenseQuery(logQuery);
   const { data: proposals } = useSuspenseQuery(suggestionsQuery);
   const { data: gyms } = useSuspenseQuery(gymsQuery);
+  const { data: links } = useSuspenseQuery(exerciseLocationsQuery);
+  const lastDone = lastByCode(log);
   const [guidedId, setGuidedId] = useState<string | null>(null);
   const [entry, setEntry] = useState<LogEntry | null>(null);
   const [expandedOverrides, setExpandedOverrides] = useState<Map<string, boolean>>(new Map());
@@ -97,6 +103,15 @@ export function PlannedWorkouts() {
     }
   }
   const [circuitId, setCircuitId] = useState<string | null>(null);
+  const [addingTo, setAddingTo] = useState<string | null>(null);
+  const [editBusy, setEditBusy] = useState(false);
+  async function edit(fn: () => Promise<unknown>) {
+    if (editBusy) return;
+    setEditBusy(true);
+    try { await fn(); await queryClient.invalidateQueries({ queryKey: ["workout-suggestions"] }); }
+    catch { toast.error(t("Kunde inte spara. Försök igen.", "Could not save. Try again.")); }
+    finally { setEditBusy(false); }
+  }
   return (
     <>
       {proposals.length > 0 && (
@@ -152,26 +167,29 @@ export function PlannedWorkouts() {
                   </Button>
                   <div id={`proposal-${id}`} hidden={!open} className="space-y-3">
                     <div className="divide-y divide-border">
-                      {rows.map((row) => (
+                      {rows.map((row, idx) => (
+                        <div key={row.id} data-category={categoryToken(byCode.get(row.code)?.category ?? "", categories)} className="category-theme flex items-center border-l-4 border-category-fill">
                         <Button
-                          key={row.id}
                           variant="ghost"
-                          data-category={categoryToken(byCode.get(row.code)?.category ?? "", categories)}
-                          className="category-theme grid h-auto min-h-12 w-full grid-cols-[1rem_2.5rem_minmax(0,1fr)] gap-x-2 gap-y-1 whitespace-normal border-l-4 border-category-fill px-2 py-3 text-left sm:grid-cols-[1rem_2.5rem_minmax(0,1fr)_auto]"
+                          className="grid h-auto min-h-12 min-w-0 flex-1 grid-cols-[2.5rem_minmax(0,1fr)] gap-x-2 gap-y-0.5 whitespace-normal px-2 py-2 text-left sm:grid-cols-[2.5rem_minmax(0,1fr)_auto]"
                           onClick={() => {
                             setGuidedId(null);
                             setEntry(row);
                           }}
                         >
-                          <Circle className="size-4 shrink-0 text-primary" />
                           <span className="font-bold text-category-ink">{row.code}</span>
                           <span className="min-w-0 break-words">{byCode.get(row.code)?.name}</span>
-                          <span className="col-span-2 col-start-2 min-w-0 break-words font-semibold sm:col-span-1 sm:col-start-auto">
+                          <span className="col-start-2 min-w-0 break-words text-sm font-semibold sm:col-start-auto">
                             {formatSet(row)}
                           </span>
                         </Button>
+                        <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={editBusy || idx === 0} aria-label={t("Flytta upp", "Move up")} onClick={() => void edit(() => moveRow(rows, row.id, -1))}><ArrowUp className="size-4" /></Button>
+                        <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={editBusy || idx === rows.length - 1} aria-label={t("Flytta ner", "Move down")} onClick={() => void edit(() => moveRow(rows, row.id, 1))}><ArrowDown className="size-4" /></Button>
+                        <Button variant="ghost" size="icon" className="size-8 shrink-0 text-destructive" disabled={editBusy} aria-label={`${t("Ta bort", "Remove")} ${row.code}`} onClick={() => { if (confirm(t(`Ta bort ${row.code} ur passet?`, `Remove ${row.code} from the workout?`))) void edit(() => removePlannedRow(row.id)); }}><X className="size-4" /></Button>
+                        </div>
                       ))}
                     </div>
+                    {addingTo === id && <ExercisePickList exercises={exercisesAtLocation(exercises.filter((e) => e.is_active), links, first.gym_id)} disabled={editBusy} onPick={(e) => void edit(async () => { await addPlannedExercise(id, e.code, rows, first.gym_id, lastDone.get(e.code)?.load ?? "", Math.max(1, ...rows.map((r) => r.sets)), lastDone.get(e.code)?.reps ?? 10); setAddingTo(null); })} />}
                     <div className="flex items-center justify-between gap-2">
                       <Button
                         className="min-w-0 flex-1 whitespace-normal sm:flex-none"
@@ -180,6 +198,7 @@ export function PlannedWorkouts() {
                         <Play className="size-4 shrink-0" />
                         {done ? t("Fortsätt passet", "Continue workout") : t("Starta passet", "Start workout")}
                       </Button>
+                      <Button variant="outline" className="shrink-0" aria-pressed={addingTo === id} aria-label={t("Lägg till övning", "Add exercise")} title={t("Lägg till övning", "Add exercise")} onClick={() => setAddingTo(addingTo === id ? null : id)}><Plus className="size-4" /><Dumbbell className="size-4" /></Button>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -239,7 +258,7 @@ export function PlannedWorkouts() {
         }}
       />
       {circuitId && (
-        <CircuitRunner rows={planned.get(circuitId) ?? []} names={byCode} onClose={() => setCircuitId(null)} />
+        <CircuitRunner workoutId={circuitId} onClose={() => setCircuitId(null)} />
       )}
     </>
   );

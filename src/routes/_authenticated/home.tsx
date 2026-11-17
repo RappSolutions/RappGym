@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { Play, Sparkles } from "lucide-react";
 import { WorkoutBuilder } from "@/components/gym/WorkoutBuilder";
 import { CircuitRunner } from "@/components/gym/CircuitRunner";
+import { SpontaneousButton } from "@/components/gym/SpontaneousButton";
 import { useSelectedGym } from "@/hooks/use-gym";
 import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
 import { StatsCorner } from "@/components/gym/StatsCorner";
@@ -63,14 +64,13 @@ function HomePage() {
     links,
     gym?.id ?? null,
   );
-  const [running, setRunning] = useState<LogEntry[] | null>(null);
+  const [running, setRunning] = useState<string | null>(null);
   const todaysPlans = new Map<string, LogEntry[]>();
   for (const r of proposals)
     if (r.date <= todayISO()) {
       const k = r.workout_id ?? r.id;
       todaysPlans.set(k, [...(todaysPlans.get(k) ?? []), r]);
     }
-  const names = new Map(exercises.map((e) => [e.code, localize(e)]));
   const s = dashboardStats(log, exercises, todayISO());
   const since =
     s.daysSinceLast === null ? "–" : s.daysSinceLast === 0 ? t("Idag", "Today") : `${s.daysSinceLast} ${t("d", "d")}`;
@@ -112,7 +112,7 @@ function HomePage() {
               size="lg"
               variant="secondary"
               className="h-auto min-h-12 w-full justify-start whitespace-normal text-left"
-              onClick={() => setRunning(rows)}
+              onClick={() => setRunning(id)}
             >
               <Play className="size-4 shrink-0" />
               <span className="min-w-0 flex-1">
@@ -132,9 +132,9 @@ function HomePage() {
             </Button>
           );
         })}
-        {gym && <WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} quickStart />}
+        {gym && <div className="flex gap-2"><div className="flex-1"><SpontaneousButton gymId={gym.id} size="lg" /></div><div className="flex-1"><WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} quickStart /></div></div>}
       </section>
-      {running && <CircuitRunner rows={running} names={names} onClose={() => setRunning(null)} />}
+      {running && <CircuitRunner workoutId={running} onClose={() => setRunning(null)} />}
       <div className="grid-cols-2 sm:grid-cols-3 md:grid-cols-6">
         <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-3">
           {kpis.map(([l, v]) => (
