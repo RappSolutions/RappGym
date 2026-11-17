@@ -9,7 +9,7 @@ export const aiHistoryQuery = queryOptions({
     const { data, error } = await supabase.from("training_ai_history").select("*").order("generated_at", { ascending: false });
     if (error) throw error;
     return data.map((row) => ({ id: row.id, generatedAt: row.generated_at, language: row.language, gymId: row.gym_id, today: row.today,
-      request: trainingRequestSchema.parse(row.request), question: trainingRequestSchema.parse(row.request).question, insights: trainingInsightsSchema.parse(row.insights) }));
+      request: trainingRequestSchema.parse(row.request), question: trainingRequestSchema.parse(row.request).question, insights: trainingInsightsSchema.parse(row.insights), inputTokens: row.input_tokens, outputTokens: row.output_tokens }));
   },
 });
 
