@@ -10,7 +10,7 @@ export const generateExerciseImage = createServerFn({ method: "POST" })
   .inputValidator(z.object({ exerciseId: z.string().uuid(), wishes: z.string().max(1000).default("") }))
   .handler(async ({ data, context }): Promise<{ path: string | null; error: string | null }> => {
     const { supabase, userId } = context;
-    const { data: ex } = await supabase.from("exercises").select("id,code,name,equipment,instructions,variant").eq("id", data.exerciseId).eq("user_id", userId).maybeSingle();
+    const { data: ex } = await supabase.from("exercises").select("id,code,name,equipment,instructions,variant").eq("id", data.exerciseId).maybeSingle();
     if (!ex) return { path: null, error: "Exercise not found." };
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) return { path: null, error: "AI is not configured." };
