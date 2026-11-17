@@ -14,3 +14,13 @@ describe("circuit", () => {
     expect(adjustLoad("1", -2.5)).toBe("0");
   });
 });
+
+import { remainingSteps as rs } from "@/lib/circuit";
+import { circuitSteps as cs } from "@/lib/circuit";
+describe("remainingSteps", () => {
+  it("resumes after already completed sets", () => {
+    const rows = [{ id: "a", code: "LE6", sets: 3 }, { id: "b", code: "PL1", sets: 3 }];
+    const left = rs(cs(rows), new Map([["LE6", 2], ["PL1", 1]]));
+    expect(left.map((s) => `${s.row.code}${s.lap}`)).toEqual(["PL12", "LE63", "PL13"]);
+  });
+});

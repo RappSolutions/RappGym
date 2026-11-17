@@ -65,16 +65,20 @@ function HomePage() {
   const cat30Total = cat30.reduce((n, [, v]) => n + v, 0);
 
   return <main className="space-y-4 px-4">
+    <div className="flex justify-center"><img src={rappgymLogo} alt="RappGym" width={240} height={240} className="h-28 w-28 object-contain md:h-48 md:w-48" /></div>
     <section className="space-y-2 rounded-xl border-2 border-primary bg-card p-4" aria-label={t("Träna nu", "Train now")}>
       <h2 className="text-xl font-bold uppercase">{t("Träna nu", "Train now")}{gym ? <span className="ml-2 text-sm font-normal normal-case text-muted-foreground">{gym.name}</span> : null}</h2>
-      {[...todaysPlans].map(([id, rows]) => <Button key={id} size="lg" variant="secondary" className="h-auto min-h-12 w-full justify-start whitespace-normal text-left" onClick={() => setRunning(rows)}><Play className="size-4 shrink-0" /><span className="min-w-0"><span className="block font-bold">{rows[0]?.proposal_title}</span><span className="block text-xs font-normal">{rows[0]?.date !== todayISO() ? `${formatDate(rows[0]?.date ?? "")} · ` : ""}{rows.map((r) => r.code).join(" · ")}</span></span></Button>)}
+      {[...todaysPlans].map(([id, rows]) => {
+        const doneSets = log.filter((e) => e.proposal_id === id).reduce((n, e) => n + Math.max(1, e.sets ?? 1), 0);
+        const planned = rows.reduce((n, r) => n + Math.max(1, r.sets ?? 1), 0);
+        const total = Math.max(planned, doneSets);
+        const ongoing = doneSets > 0;
+        return <Button key={id} size="lg" variant={ongoing ? "default" : "secondary"} className="h-auto min-h-12 w-full justify-start whitespace-normal text-left" onClick={() => setRunning(rows)}><Play className="size-4 shrink-0" /><span className="min-w-0 flex-1"><span className="block font-bold">{ongoing ? `${t("Pågående", "Ongoing")}: ` : ""}{rows[0]?.proposal_title}</span><span className="block text-xs font-normal">{rows[0]?.date !== todayISO() ? `${formatDate(rows[0]?.date ?? "")} · ` : ""}{rows.map((r) => r.code).join(" · ")}</span>{ongoing && <><span className="block text-xs font-semibold">{t(`${doneSets} av ${total} set klara – fortsätt`, `${doneSets} of ${total} sets done – continue`)}</span><span className="mt-1 block h-1.5 rounded bg-primary-foreground/30"><span className="block h-1.5 rounded bg-primary-foreground" style={{ width: `${(doneSets / total) * 100}%` }} /></span></>}</span></Button>;
+      })}
       {gym && <WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} quickStart />}
     </section>
     {running && <CircuitRunner rows={running} names={names} onClose={() => setRunning(null)} />}
     <div className="grid items-center gap-4 md:grid-cols-[15rem_minmax(0,1fr)] md:gap-6">
-      <div className="flex justify-center">
-        <img src={rappgymLogo} alt="RappGym" width={240} height={240} className="h-28 w-28 object-contain md:h-60 md:w-60" />
-      </div>
       <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-3">
         {kpis.map(([l, v]) => <div key={l} className="min-w-0 rounded-xl border bg-card p-4">
           <div className="text-3xl font-extrabold text-primary">{v}</div>

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ExerciseManager } from "@/components/gym/ExerciseManager";
+import { UsersManager } from "@/components/gym/UsersManager";
 import { LocationsManager } from "@/components/gym/LocationsManager";
 import { exerciseLocationsQuery } from "@/lib/exercise-locations";
 import { exercisesQuery, gymsQuery, logQuery } from "@/lib/gym";
@@ -31,6 +32,7 @@ function SettingsPage() {
     <main className="space-y-6 px-4">
       <LocationsManager />
       <ExerciseManager />
+      <UsersManager />
     </main>
   );
 }
