@@ -2,7 +2,10 @@
 ' RappGym data model (public schema). Keep in sync with drizzle/migrations.
 hide circle
 skinparam linetype ortho
-skinparam class { BackgroundColor #FFFFFF; BorderColor #0042AD; HeaderBackgroundColor #0063FF; FontColor #000000 }
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #0042AD
+}
 
 entity "auth.users" as users {
   * id : uuid <<PK>>
@@ -19,41 +22,63 @@ entity gyms {
   * id : uuid <<PK>>
   --
   * user_id : uuid
-  * name : text  description : text  created_at : timestamptz
+  * name : text
+  description : text
+  created_at : timestamptz
 }
 entity exercises {
   * id : uuid <<PK>>
   --
   * code : text <<UQ>>
   * name : text
-  * category : text  variant, focus, muscles, equipment, dose, instructions : text  image_urls : jsonb  translations : jsonb
-  * is_active : boolean  sort_order : int  gym_id : uuid <<DEPRECATED>>
+  * category : text
+  variant, focus, muscles, equipment, dose, instructions : text
+  image_urls : jsonb
+  translations : jsonb
+  * is_active : boolean
+  sort_order : int
+  gym_id : uuid <<DEPRECATED>>
   * user_id : uuid
 }
 entity exercise_locations {
   * exercise_id : uuid <<PK,FK>>
   * gym_id : uuid <<PK,FK>>
   --
-  * user_id : uuid  created_at : timestamptz
+  * user_id : uuid
+  created_at : timestamptz
 }
 entity workouts {
   * id : uuid <<PK>>
   --
   * user_id : uuid
   * title : text
-  * created_by : text (user|ai)  scheduled_date : date  gym_id : uuid <<FK>>
-  * is_circuit : boolean  ai_history_id : uuid <<FK>>  ai_workout_key : text  source_workout_id : uuid <<FK>>  note : text
+  * created_by : text (user|ai)
+  scheduled_date : date
+  gym_id : uuid <<FK>>
+  * is_circuit : boolean
+  ai_history_id : uuid <<FK>>
+  ai_workout_key : text
+  source_workout_id : uuid <<FK>>
+  note : text
   * created_at : timestamptz
 }
 entity log_entries {
   * id : uuid <<PK>>
   --
-  * user_id : uuid  workout_id : uuid <<FK>>  exercise_id : uuid <<FK>>
+  * user_id : uuid
+  workout_id : uuid <<FK>>
+  exercise_id : uuid <<FK>>
   * code : text
   * date : date
   * status : text (suggested|completed)
-  * sets : int  reps : int  load : text  note : text  gym_id : uuid <<FK>>  proposal_order : int
-  * created_at : timestamptz  proposal_id, proposal_title, ai_history_id, ai_workout_key <<DEPRECATED>>
+  * sets : int
+  reps : int
+  load : text
+  note : text
+  gym_id : uuid <<FK>>
+  proposal_order : int
+  * created_at : timestamptz
+  proposal_id, proposal_title, ai_history_id, ai_workout_key <<DEPRECATED>>
 }
 entity training_ai_history {
   * id : uuid <<PK>>
@@ -62,22 +87,31 @@ entity training_ai_history {
   * request : jsonb
   * insights : jsonb
   * language : text
-  * today : date  gym_id : uuid <<FK>>  model : text  input_tokens, output_tokens : int  cost_usd : numeric
+  * today : date
+  gym_id : uuid <<FK>>
+  model : text
+  input_tokens, output_tokens : int
+  cost_usd : numeric
   * generated_at : timestamptz
 }
 entity training_goals {
   * id : uuid <<PK>>
   --
   * user_id : uuid
-  * text : text  target_date : date
+  * text : text
+  target_date : date
   * status : text
   * created_at : timestamptz
 }
 entity training_profiles {
   * user_id : uuid <<PK>>
   --
-  birth_year, height_cm : int  weight_kg : numeric  experience, limitations, preferences, pace : text
-  * use_for_ai : boolean  age : int <<DEPRECATED>>  updated_at : timestamptz
+  birth_year, height_cm : int
+  weight_kg : numeric
+  experience, limitations, preferences, pace : text
+  * use_for_ai : boolean
+  age : int <<DEPRECATED>>
+  updated_at : timestamptz
 }
 
 users ||--o{ user_roles : "CASCADE"
