@@ -113,6 +113,13 @@
       "when": 1794901221630,
       "tag": "0015_exercise_images_shared_read",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1794906788548,
+      "tag": "0016_exercise_images_read_bound",
+      "breakpoints": true
     }
   ]
 }

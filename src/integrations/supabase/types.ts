@@ -364,6 +364,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_exercise_image: { Args: { _path: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user"
