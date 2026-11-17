@@ -1,6 +1,7 @@
 @startuml RappGym
 ' RappGym data model (public schema). Keep in sync with drizzle/migrations.
 hide circle
+hide empty methods
 skinparam linetype ortho
 skinparam class {
   BackgroundColor #FFFFFF
