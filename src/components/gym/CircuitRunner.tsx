@@ -8,15 +8,17 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/lib/i18n";
 import { todayISO, type LogEntry } from "@/lib/gym";
-import { adjustLoad, circuitSteps } from "@/lib/circuit";
+import { adjustLoad, circuitSteps, stationSteps } from "@/lib/circuit";
+import { Switch } from "@/components/ui/switch";
 
-/** Guided circuit: each lap logs one completed set per exercise with its own actual weight. */
+/** Guided workout runner: circuit (lap by lap) or station (all sets per exercise); each step logs one completed set with its actual weight. */
 export function CircuitRunner({ rows, names, onClose }: { rows: LogEntry[]; names: Map<string, { name: string }>; onClose: () => void }) {
   const { t } = useLanguage();
   const qc = useQueryClient();
   const ordered = useMemo(() => [...rows].sort((a, b) => (a.proposal_order ?? 0) - (b.proposal_order ?? 0)), [rows]);
-  const steps = useMemo(() => circuitSteps(ordered), [ordered]);
-  const laps = steps.at(-1)?.lap ?? 0;
+  const [circuit, setCircuit] = useState(true);
+  const steps = useMemo(() => (circuit ? circuitSteps(ordered) : stationSteps(ordered)), [ordered, circuit]);
+  const laps = Math.max(0, ...steps.map((s) => s.lap));
   const [i, setI] = useState(0);
   const [loads, setLoads] = useState(() => new Map(ordered.map((r) => [r.id, r.load ?? ""])));
   const [reps, setReps] = useState(() => new Map(ordered.map((r) => [r.id, r.reps ?? 10])));
@@ -60,9 +62,10 @@ export function CircuitRunner({ rows, names, onClose }: { rows: LogEntry[]; name
     <Dialog open onOpenChange={(o) => { if (!o) void finish(0); }}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-2xl">{t("Varv", "Lap")} {step?.lap ?? laps}/{laps}</DialogTitle>
+          <DialogTitle className="font-display text-2xl">{circuit ? t("Varv", "Lap") : t("Set", "Set")} {step?.lap ?? laps}/{circuit ? laps : step?.row.sets ?? laps}</DialogTitle>
           <DialogDescription>{t(`Steg ${i + 1} av ${steps.length} · ${done} set loggade`, `Step ${i + 1} of ${steps.length} · ${done} sets logged`)}</DialogDescription>
         </DialogHeader>
+        <label className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm"><span><span className="block font-medium">{t("Kör som cirkel", "Run as circuit")}</span><span className="block text-xs text-muted-foreground">{circuit ? t("Ett set per övning, varv för varv", "One set per exercise, lap by lap") : t("Alla set på en övning innan nästa", "All sets of one exercise before the next")}</span></span><Switch checked={circuit} disabled={i > 0 || busy} onCheckedChange={setCircuit} /></label>
         {r && <div className="space-y-4">
           <div><p className="font-bold text-primary">{r.code}</p><p className="text-xl font-bold">{names.get(r.code)?.name ?? r.code}</p>{r.note && <p className="text-sm text-muted-foreground">{r.note}</p>}</div>
           <div className="space-y-1"><p className="text-sm font-medium">{t("Vikt (kg)", "Weight (kg)")}</p>

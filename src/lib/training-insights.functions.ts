@@ -20,7 +20,7 @@ export const getTrainingInsights = createServerFn({ method: "POST" })
       log.push(...result.data);
       if (result.data.length < 1000) break;
     }
-    const { data: exercises, error } = await supabase.from("exercises").select("*").eq("user_id", userId);
+    const { data: exercises, error } = await supabase.from("exercises").select("*");
     if (error) throw new Error(error.message);
     const { data: goalRows, error: goalError } = await supabase.from("training_goals").select("text,target_date").eq("user_id", userId).eq("status", "active");
     if (goalError) throw new Error(goalError.message);
@@ -30,7 +30,7 @@ export const getTrainingInsights = createServerFn({ method: "POST" })
     const trainingProfile = profileForAI(profile, data.today);
     let location: { name: string; description: string } | null = null;
     if (data.gymId) {
-      const { data: gym } = await supabase.from("gyms").select("name,description").eq("id", data.gymId).eq("user_id", userId).maybeSingle();
+      const { data: gym } = await supabase.from("gyms").select("name,description").eq("id", data.gymId).maybeSingle();
       if (gym) location = { name: gym.name.slice(0, 120), description: gym.description.slice(0, 300) };
     }
     const fail = (message: string) => ({ insights: null, error: message, generatedAt: null });
@@ -39,7 +39,7 @@ export const getTrainingInsights = createServerFn({ method: "POST" })
     if (!key) return fail(data.language === "sv" ? "AI är inte konfigurerad ännu." : "AI is not configured yet.");
     let usable = exercises;
     if (data.gymId) {
-      const { data: links, error: linkError } = await supabase.from("exercise_locations").select("exercise_id").eq("user_id", userId).eq("gym_id", data.gymId);
+      const { data: links, error: linkError } = await supabase.from("exercise_locations").select("exercise_id").eq("gym_id", data.gymId);
       if (linkError) throw new Error(linkError.message);
       const ids = new Set(links.map((l) => l.exercise_id));
       usable = exercises.filter((e) => ids.has(e.id));

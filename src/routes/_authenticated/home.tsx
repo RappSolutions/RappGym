@@ -1,10 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { Play } from "lucide-react";
+import { WorkoutBuilder } from "@/components/gym/WorkoutBuilder";
+import { CircuitRunner } from "@/components/gym/CircuitRunner";
+import { useSelectedGym } from "@/hooks/use-gym";
+import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
 import { GoalsCard } from "@/components/gym/GoalsCard";
 import { Button } from "@/components/ui/button";
 import { dashboardStats } from "@/lib/dashboard";
 import { goalsQuery } from "@/lib/goals";
-import { categoriesOf, categoryToken, exercisesQuery, formatDate, logQuery, todayISO } from "@/lib/gym";
+import { categoriesOf, categoryToken, exercisesQuery, formatDate, gymsQuery, lastByCode, logQuery, suggestionsQuery, todayISO, type LogEntry } from "@/lib/gym";
 import { useLanguage } from "@/lib/i18n";
 import rappgymLogo from "@/assets/rappgym-logo-berlin.png";
 
@@ -23,14 +29,28 @@ export const Route = createFileRoute("/_authenticated/home")({
     context.queryClient.ensureQueryData(exercisesQuery),
     context.queryClient.ensureQueryData(logQuery),
     context.queryClient.ensureQueryData(goalsQuery),
+    context.queryClient.ensureQueryData(gymsQuery),
+    context.queryClient.ensureQueryData(suggestionsQuery),
+    context.queryClient.ensureQueryData(exerciseLocationsQuery),
   ]),
   component: HomePage,
 });
 
 function HomePage() {
-  const { t, language } = useLanguage();
+  const { t, localize } = useLanguage();
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
   const { data: log } = useSuspenseQuery(logQuery);
+  const { data: proposals } = useSuspenseQuery(suggestionsQuery);
+  const { data: gyms } = useSuspenseQuery(gymsQuery);
+  const { data: links } = useSuspenseQuery(exerciseLocationsQuery);
+  const [gymId] = useSelectedGym();
+  const gym = gyms.find((g) => g.id === gymId) ?? gyms[0];
+  const last = useMemo(() => lastByCode(log), [log]);
+  const atPlace = exercisesAtLocation(exercises.filter((e) => e.is_active), links, gym?.id ?? null);
+  const [running, setRunning] = useState<LogEntry[] | null>(null);
+  const todaysPlans = new Map<string, LogEntry[]>();
+  for (const r of proposals) if (r.date <= todayISO()) { const k = r.proposal_id ?? r.id; todaysPlans.set(k, [...(todaysPlans.get(k) ?? []), r]); }
+  const names = new Map(exercises.map((e) => [e.code, localize(e)]));
   const s = dashboardStats(log, exercises, todayISO());
   const since = s.daysSinceLast === null ? "–" : s.daysSinceLast === 0 ? t("Idag", "Today") : `${s.daysSinceLast} ${t("d", "d")}`;
   const kpis = [
@@ -45,6 +65,12 @@ function HomePage() {
   const cat30Total = cat30.reduce((n, [, v]) => n + v, 0);
 
   return <main className="space-y-4 px-4">
+    <section className="space-y-2 rounded-xl border-2 border-primary bg-card p-4" aria-label={t("Träna nu", "Train now")}>
+      <h2 className="text-xl font-bold uppercase">{t("Träna nu", "Train now")}{gym ? <span className="ml-2 text-sm font-normal normal-case text-muted-foreground">{gym.name}</span> : null}</h2>
+      {[...todaysPlans].map(([id, rows]) => <Button key={id} size="lg" variant="secondary" className="h-auto min-h-12 w-full justify-start whitespace-normal text-left" onClick={() => setRunning(rows)}><Play className="size-4 shrink-0" /><span className="min-w-0"><span className="block font-bold">{rows[0]?.proposal_title}</span><span className="block text-xs font-normal">{rows[0]?.date !== todayISO() ? `${formatDate(rows[0]?.date ?? "")} · ` : ""}{rows.map((r) => r.code).join(" · ")}</span></span></Button>)}
+      {gym && <WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} quickStart />}
+    </section>
+    {running && <CircuitRunner rows={running} names={names} onClose={() => setRunning(null)} />}
     <div className="grid items-center gap-4 md:grid-cols-[15rem_minmax(0,1fr)] md:gap-6">
       <div className="flex justify-center">
         <img src={rappgymLogo} alt="RappGym" width={240} height={240} className="h-28 w-28 object-contain md:h-60 md:w-60" />

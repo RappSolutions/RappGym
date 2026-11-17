@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ListPlus } from "lucide-react";
+import { ChevronDown, ChevronRight, ListPlus, Play } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/lib/i18n";
-import { todayISO, type Exercise, type LogEntry } from "@/lib/gym";
+import { categoriesOf, categoryToken, todayISO, type Exercise, type LogEntry } from "@/lib/gym";
+import { CircuitRunner } from "@/components/gym/CircuitRunner";
 
-/** Quick builder for an own planned workout, stored like AI plans (suggested rows) so it can be run as a circuit. */
-export function WorkoutBuilder({ exercises, last, gymId }: { exercises: Exercise[]; last: Map<string, LogEntry>; gymId: string }) {
+/** Builder for an own workout, stored like AI plans (suggested rows); can be planned for later or started right away. */
+export function WorkoutBuilder({ exercises, last, gymId, quickStart = false }: { exercises: Exercise[]; last: Map<string, LogEntry>; gymId: string; quickStart?: boolean }) {
   const { t, localize } = useLanguage();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -19,41 +20,61 @@ export function WorkoutBuilder({ exercises, last, gymId }: { exercises: Exercise
   const [reps, setReps] = useState(12);
   const [title, setTitle] = useState("");
   const [busy, setBusy] = useState(false);
+  const [openCats, setOpenCats] = useState<Set<string>>(new Set());
+  const [running, setRunning] = useState<LogEntry[] | null>(null);
+  const cats = categoriesOf(exercises);
+  const names = new Map(exercises.map((e) => [e.code, localize(e)]));
 
-  async function save() {
+  async function save(start: boolean) {
     if (!picked.length || busy) return;
     setBusy(true);
     const proposalId = crypto.randomUUID();
     const rows = picked.map((code, index) => ({ code, sets: Math.max(1, laps), reps, load: last.get(code)?.load ?? "", date: todayISO(), gym_id: gymId, status: "suggested", proposal_id: proposalId, proposal_title: title.trim() || t("Eget pass", "Own workout"), proposal_order: index }));
-    const { error } = await supabase.from("log_entries").insert(rows);
+    const { data, error } = await supabase.from("log_entries").insert(rows).select();
     setBusy(false);
     if (error) { toast.error(t("Kunde inte spara passet.", "Could not save the workout.")); return; }
     await qc.invalidateQueries({ queryKey: ["workout-suggestions"] });
-    toast.success(t("Passet är planerat", "Workout planned"));
     setOpen(false); setPicked([]); setTitle("");
+    if (start) setRunning(data);
+    else toast.success(t("Passet är planerat", "Workout planned"));
   }
 
   return (
     <>
-      <Button variant="outline" className="w-full" onClick={() => setOpen(true)}><ListPlus className="size-4" />{t("Skapa eget pass", "Create own workout")}</Button>
+      <Button variant={quickStart ? "default" : "outline"} size={quickStart ? "lg" : "default"} className="w-full" onClick={() => setOpen(true)}>{quickStart ? <Play className="size-4" /> : <ListPlus className="size-4" />}{quickStart ? t("Starta nytt pass", "Start a new workout") : t("Skapa eget pass", "Create own workout")}</Button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[90vh] max-w-md overflow-y-auto">
-          <DialogHeader><DialogTitle>{t("Skapa eget pass", "Create own workout")}</DialogTitle><DialogDescription>{t("Välj övningar i den ordning du vill köra dem. Vikten förifylls från senaste gången.", "Pick exercises in the order you want to do them. Weight is prefilled from last time.")}</DialogDescription></DialogHeader>
+        <DialogContent className="max-h-[90dvh] max-w-md overflow-y-auto">
+          <DialogHeader><DialogTitle>{quickStart ? t("Starta nytt pass", "Start a new workout") : t("Skapa eget pass", "Create own workout")}</DialogTitle><DialogDescription>{t("Välj övningar i den ordning du vill köra dem. Vikten förifylls från senaste gången.", "Pick exercises in the order you want to do them. Weight is prefilled from last time.")}</DialogDescription></DialogHeader>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("Namn (valfritt)", "Name (optional)")} />
           <div className="grid grid-cols-2 gap-2">
-            <label className="text-sm">{t("Varv", "Laps")}<Input type="number" min={1} value={laps} onChange={(e) => setLaps(Number(e.target.value) || 1)} /></label>
+            <label className="text-sm">{t("Antal set", "Sets")}<Input type="number" min={1} value={laps} onChange={(e) => setLaps(Number(e.target.value) || 1)} /></label>
             <label className="text-sm">{t("Reps", "Reps")}<Input type="number" min={1} value={reps} onChange={(e) => setReps(Number(e.target.value) || 1)} /></label>
           </div>
-          <div className="divide-y rounded-lg border">
-            {exercises.map((ex) => { const l = localize(ex); const n = picked.indexOf(ex.code); return (
-              <label key={ex.id} className="flex cursor-pointer items-center gap-3 px-3 py-2">
-                <input type="checkbox" className="size-4" checked={n >= 0} onChange={() => setPicked((p) => n >= 0 ? p.filter((c) => c !== ex.code) : [...p, ex.code])} />
-                <span className="w-10 font-bold">{l.code}</span><span className="flex-1 truncate">{l.name}</span>{n >= 0 && <span className="text-sm font-bold text-primary">#{n + 1}</span>}
-              </label>); })}
+          {picked.length > 0 && <p className="text-sm"><span className="font-semibold">{t("Ordning:", "Order:")}</span> {picked.join(" → ")}</p>}
+          <div className="space-y-2">
+            {cats.map((cat) => {
+              const list = exercises.filter((e) => e.category === cat);
+              const count = list.filter((e) => picked.includes(e.code)).length;
+              const isOpen = openCats.has(cat);
+              return <div key={cat} data-category={categoryToken(cat, cats)} className="category-theme overflow-hidden rounded-lg border border-l-4 border-l-category-fill">
+                <button type="button" aria-expanded={isOpen} className="flex min-h-11 w-full items-center gap-2 px-3 text-left font-bold text-category-ink" onClick={() => setOpenCats((s) => { const n = new Set(s); if (n.has(cat)) n.delete(cat); else n.add(cat); return n; })}>
+                  {isOpen ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}<span className="flex-1">{cat}</span>{count > 0 && <span className="text-sm text-primary">{count} {t("valda", "picked")}</span>}<span className="text-xs font-normal text-muted-foreground">{list.length}</span>
+                </button>
+                {isOpen && <div className="divide-y border-t">{list.map((ex) => { const l = localize(ex); const n = picked.indexOf(ex.code); return (
+                  <label key={ex.id} className="flex min-h-11 cursor-pointer items-center gap-3 px-3 py-2">
+                    <input type="checkbox" className="size-4" checked={n >= 0} onChange={() => setPicked((p) => n >= 0 ? p.filter((c) => c !== ex.code) : [...p, ex.code])} />
+                    <span className="w-10 font-bold">{l.code}</span><span className="flex-1 truncate">{l.name}</span>{n >= 0 && <span className="text-sm font-bold text-primary">#{n + 1}</span>}
+                  </label>); })}</div>}
+              </div>;
+            })}
           </div>
-          <Button disabled={!picked.length || busy} onClick={() => void save()}>{t(`Planera pass (${picked.length} övningar)`, `Plan workout (${picked.length} exercises)`)}</Button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button className="flex-1" disabled={!picked.length || busy} onClick={() => void save(true)}><Play className="size-4" />{t(`Starta nu (${picked.length})`, `Start now (${picked.length})`)}</Button>
+            <Button variant="outline" className="flex-1" disabled={!picked.length || busy} onClick={() => void save(false)}>{t("Spara som planerat", "Save as planned")}</Button>
+          </div>
         </DialogContent>
       </Dialog>
+      {running && <CircuitRunner rows={running} names={names} onClose={() => setRunning(null)} />}
     </>
   );
 }
