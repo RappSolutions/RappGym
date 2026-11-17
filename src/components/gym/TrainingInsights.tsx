@@ -266,11 +266,14 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
     );
   }
   return (
-    <section className="space-y-4 border-t border-border pt-5" aria-label={t("AI-sammanfattning", "AI summary")}>
+    <section
+      className="space-y-4 border-t border-border pt-5"
+      aria-label={t("AI - råd och planering", "AI - advice and strategy")}
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 text-2xl font-bold">
           <Sparkles className="size-5 text-primary" />
-          {t("AI-sammanfattning", "AI summary")}
+          {t("AI - råd och planering", "AI - advice and strategy")}
         </h2>
       </div>
       <form
@@ -280,14 +283,26 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
           if (!busy) void analyze();
         }}
       >
-        <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1" role="group" aria-label={t("Typ av AI-förslag", "AI request type")}>
-          {([["summary", t("Analys & frågor", "Analysis & questions")], ["plan", t("Planera pass", "Plan workouts")]] as const).map(([m, label]) => (
+        <div
+          className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1"
+          role="group"
+          aria-label={t("Typ av AI-förslag", "AI request type")}
+        >
+          {(
+            [
+              ["summary", t("Analys & frågor", "Analysis & questions")],
+              ["plan", t("Planera pass", "Plan workouts")],
+            ] as const
+          ).map(([m, label]) => (
             <button
               key={m}
               type="button"
               aria-pressed={mode === m}
               disabled={busy}
-              onClick={() => { setMode(m); setSelectedId(null); }}
+              onClick={() => {
+                setMode(m);
+                setSelectedId(null);
+              }}
               className={`h-11 rounded-lg text-sm font-semibold transition-colors ${mode === m ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
             >
               {label}
