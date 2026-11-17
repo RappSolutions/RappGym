@@ -120,6 +120,13 @@
       "when": 1794906788548,
       "tag": "0016_exercise_images_read_bound",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794912379718,
+      "tag": "0017_workouts_table",
+      "breakpoints": true
     }
   ]
 }
