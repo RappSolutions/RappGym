@@ -79,13 +79,13 @@ erDiagram
   USER_ROLES {
     uuid id PK
     uuid user_id FK
-    app_role role 
+    app_role role
   }
   GYMS {
     uuid id PK
     uuid user_id
     text name
-    text description 
+    text description
   }
   EXERCISES {
     uuid id PK
@@ -94,11 +94,11 @@ erDiagram
     text category
     jsonb image_urls
     jsonb translations
-    boolean is_active 
+    boolean is_active
   }
   EXERCISE_LOCATIONS {
     uuid exercise_id PK, FK
-    uuid gym_id PK, FK 
+    uuid gym_id PK, FK
   }
   WORKOUTS {
     uuid id PK
@@ -110,7 +110,7 @@ erDiagram
     boolean is_circuit
     uuid ai_history_id FK
     uuid source_workout_id FK
-    timestamptz created_at 
+    timestamptz created_at
   }
   LOG_ENTRIES {
     uuid id PK
@@ -123,7 +123,7 @@ erDiagram
     int reps
     text load
     text note
-    uuid gym_id FK 
+    uuid gym_id FK
   }
   TRAINING_AI_HISTORY {
     uuid id PK
@@ -133,7 +133,7 @@ erDiagram
     int input_tokens
     int output_tokens
     numeric cost_usd
-    timestamptz generated_at 
+    timestamptz generated_at
   }
   TRAINING_GOALS {
     uuid id PK
@@ -141,13 +141,13 @@ erDiagram
     text text
     date target_date
     text status
-    timestamptz created_at 
+    timestamptz created_at
   }
   TRAINING_PROFILES {
     uuid user_id PK
     int birth_year
     text pace
-    boolean use_for_ai 
+    boolean use_for_ai
   }
 ```
 
