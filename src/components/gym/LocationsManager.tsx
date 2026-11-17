@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -80,7 +81,7 @@ export function LocationsManager() {
     refresh();
   }
   async function remove(g: Gym) {
-    if (!confirm(t(`Ta bort ${g.name}?`, `Delete ${g.name}?`))) return;
+    if (!await confirmDialog(t(`Ta bort ${g.name}?`, `Delete ${g.name}?`))) return;
     const { error } = await supabase.from("gyms").delete().eq("id", g.id);
     if (error) {
       toast.error(error.code === "23503" ? t("Platsen finns i din logg och kan inte tas bort. Byt namn istället.", "This location is used in your log and can't be deleted. Rename it instead.") : error.message);

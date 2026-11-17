@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Camera, Loader2, Sparkles } from "lucide-react";
@@ -32,7 +33,7 @@ export function LocationPhotoScan({ gymId, onApply }: { gymId: string; onApply: 
       const res = await scan({ data: { gymId, image: src, language } });
       if (res.error) { toast.error(res.error); return; }
       if (!res.exerciseIds.length) { toast.error(t("AI hittade inga övningar som passar bilden.", "AI found no matching exercises in the photo.")); return; }
-      if (!confirm(t(`AI ser: ${res.equipment}\n\nSätt ${res.exerciseIds.length} övningar för platsen? Övriga kopplingar tas bort.`, `AI sees: ${res.equipment}\n\nSet ${res.exerciseIds.length} exercises for this location? Other links are removed.`))) return;
+      if (!await confirmDialog(t(`AI ser: ${res.equipment}\n\nSätt ${res.exerciseIds.length} övningar för platsen? Övriga kopplingar tas bort.`, `AI sees: ${res.equipment}\n\nSet ${res.exerciseIds.length} exercises for this location? Other links are removed.`))) return;
       await onApply(res.exerciseIds, res.equipment);
       setImage(null); setUrl("");
       toast.success(t("Övningar uppdaterade från bilden.", "Exercises updated from the photo."));

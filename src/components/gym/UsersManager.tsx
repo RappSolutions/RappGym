@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Ban, CheckCircle2, ShieldMinus, ShieldPlus, Trash2, Users } from "lucide-react";
@@ -20,7 +21,7 @@ export function UsersManager() {
   const { data: users = [], isLoading, error } = useQuery({ queryKey: ["admin-users"], queryFn: () => list() });
 
   async function act(userId: string, action: "makeAdmin" | "removeAdmin" | "disable" | "enable" | "delete", confirmText: string) {
-    if (!confirm(confirmText)) return;
+    if (!await confirmDialog(confirmText)) return;
     try { await manage({ data: { userId, action } }); toast.success(t("Klart", "Done")); }
     catch (e) { toast.error(e instanceof Error ? e.message : String(e)); }
     await qc.invalidateQueries({ queryKey: ["admin-users"] });

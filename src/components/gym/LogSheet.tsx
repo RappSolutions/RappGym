@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useLanguage } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -98,7 +99,7 @@ export function LogSheet({
 
   async function remove() {
     if (!entry) return;
-    if (!confirm(t("Ta bort denna rad ur loggen?", "Delete this log entry?"))) return;
+    if (!await confirmDialog(t("Ta bort denna rad ur loggen?", "Delete this log entry?"))) return;
     const { error } = await supabase.from("log_entries").delete().eq("id", entry.id);
     if (error) {
       toast.error(error.message);

@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { isWorkoutFinished, workoutSetProgress } from "@/lib/circuit";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -185,20 +186,20 @@ export function PlannedWorkouts() {
                         </Button>
                         <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={editBusy || idx === 0} aria-label={t("Flytta upp", "Move up")} onClick={() => void edit(() => moveRow(rows, row.id, -1))}><ArrowUp className="size-4" /></Button>
                         <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={editBusy || idx === rows.length - 1} aria-label={t("Flytta ner", "Move down")} onClick={() => void edit(() => moveRow(rows, row.id, 1))}><ArrowDown className="size-4" /></Button>
-                        <Button variant="ghost" size="icon" className="size-8 shrink-0 text-destructive" disabled={editBusy} aria-label={`${t("Ta bort", "Remove")} ${row.code}`} onClick={() => { if (confirm(t(`Ta bort ${row.code} ur passet?`, `Remove ${row.code} from the workout?`))) void edit(() => removePlannedRow(row.id)); }}><X className="size-4" /></Button>
+                        <Button variant="ghost" size="icon" className="size-8 shrink-0 text-destructive" disabled={editBusy} aria-label={`${t("Ta bort", "Remove")} ${row.code}`} onClick={async () => { if (await confirmDialog(t(`Ta bort ${row.code} ur passet?`, `Remove ${row.code} from the workout?`))) void edit(() => removePlannedRow(row.id)); }}><X className="size-4" /></Button>
                         </div>
                       ))}
                     </div>
                     {addingTo === id && <ExercisePickList exercises={exercisesAtLocation(exercises.filter((e) => e.is_active), links, first.gym_id)} disabled={editBusy} onPick={(e) => void edit(async () => { await addPlannedExercise(id, e.code, rows, first.gym_id, lastDone.get(e.code)?.load ?? "", Math.max(1, ...rows.map((r) => r.sets)), lastDone.get(e.code)?.reps ?? 10); setAddingTo(null); })} />}
                     <div className="flex items-center justify-between gap-2">
+                      <Button variant={addingTo === id ? "default" : "outline"} className="shrink-0" aria-pressed={addingTo === id} aria-label={t("Lägg till övning", "Add exercise")} title={t("Lägg till övning", "Add exercise")} onClick={() => setAddingTo(addingTo === id ? null : id)}><Plus className="size-4" /><Dumbbell className="size-4" /></Button>
                       <Button
-                        className="min-w-0 flex-1 whitespace-normal sm:flex-none"
+                        className="min-w-0 flex-1 whitespace-normal"
                         onClick={() => setCircuitId(id)}
                       >
                         <Play className="size-4 shrink-0" />
                         {done ? t("Fortsätt passet", "Continue workout") : t("Starta passet", "Start workout")}
                       </Button>
-                      <Button variant="outline" className="shrink-0" aria-pressed={addingTo === id} aria-label={t("Lägg till övning", "Add exercise")} title={t("Lägg till övning", "Add exercise")} onClick={() => setAddingTo(addingTo === id ? null : id)}><Plus className="size-4" /><Dumbbell className="size-4" /></Button>
                       <Button
                         variant="ghost"
                         size="icon"

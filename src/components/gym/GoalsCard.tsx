@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Flag, Pencil, Plus, RotateCcw, Target, Trash2 } from "lucide-react";
@@ -62,7 +63,7 @@ export function GoalsCard() {
       </DropdownMenuContent>
     </DropdownMenu>
     <Button size="icon" variant="ghost" aria-label={t("Redigera", "Edit")} onClick={() => edit(g)}><Pencil className="size-4" /></Button>
-    <Button size="icon" variant="ghost" aria-label={t("Ta bort", "Delete")} onClick={() => { if (confirm(t(`Ta bort målet "${g.text}"?`, `Delete the goal "${g.text}"?`))) void run(supabase.from("training_goals").delete().eq("id", g.id)); }}><Trash2 className="size-4" /></Button>
+    <Button size="icon" variant="ghost" aria-label={t("Ta bort", "Delete")} onClick={async () => { if (await confirmDialog(t(`Ta bort målet "${g.text}"?`, `Delete the goal "${g.text}"?`))) void run(supabase.from("training_goals").delete().eq("id", g.id)); }}><Trash2 className="size-4" /></Button>
   </li>;
 
   return <section className="space-y-3 rounded-xl border bg-card p-4" aria-label={t("Mina mål", "My goals")}>

@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -57,7 +58,7 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
     finally { setBusy(false); }
   }
   async function remove() {
-    if (!window.confirm(t("Radera dina träningsuppgifter? Loggar, mål och tidigare AI-svar behålls.", "Delete your training profile? Logs, goals and previous AI answers are kept."))) return;
+    if (!await confirmDialog(t("Radera dina träningsuppgifter? Loggar, mål och tidigare AI-svar behålls.", "Delete your training profile? Logs, goals and previous AI answers are kept."))) return;
     setBusy(true);
     try {
       const { error } = await supabase.from("training_profiles").delete().eq("user_id", user.id);

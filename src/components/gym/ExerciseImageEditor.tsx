@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ImagePlus, LoaderCircle, Sparkles, Trash2, Link as LinkIcon } from "lucide-react";
@@ -54,7 +55,7 @@ export function ExerciseImageEditor({ exercise }: { exercise: Exercise }) {
     setBusy(null);
   }
   async function remove(u: string) {
-    if (!confirm(t("Ta bort bilden?", "Remove this picture?"))) return;
+    if (!await confirmDialog(t("Ta bort bilden?", "Remove this picture?"))) return;
     if (!(await saveUrls(urls.filter((x) => x !== u)))) return;
     if (u.startsWith("storage:")) await supabase.storage.from("exercise-images").remove([u.slice(8)]);
   }

@@ -1,3 +1,4 @@
+import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useLanguage } from "@/lib/i18n";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Plus, Search, ChevronDown, ChevronRight } from "lucide-react";
@@ -39,7 +40,7 @@ export function ExerciseManager() {
     const { count, error: countError } = await supabase.from("log_entries").select("id", { count: "exact", head: true }).eq("exercise_id", ex.id);
     if (countError) { toast.error(countError.message); return; }
     if (count) {
-      if (!confirm(t(`${ex.code} ${ex.name} används i ${count} loggrader (genomförda eller föreslagna) och kan därför inte raderas. Den döljs istället och all historik behålls. Du kan återaktivera den under "Visa inaktiva". Dölj övningen?`, `${ex.code} ${ex.name} is used in ${count} log rows (completed or suggested), so it can't be deleted. It will be hidden instead and all history is kept. You can reactivate it under "Show inactive". Hide the exercise?`))) return;
+      if (!await confirmDialog(t(`${ex.code} ${ex.name} används i ${count} loggrader (genomförda eller föreslagna) och kan därför inte raderas. Den döljs istället och all historik behålls. Du kan återaktivera den under "Visa inaktiva". Dölj övningen?`, `${ex.code} ${ex.name} is used in ${count} log rows (completed or suggested), so it can't be deleted. It will be hidden instead and all history is kept. You can reactivate it under "Show inactive". Hide the exercise?`))) return;
       const { error } = await supabase.from("exercises").update({ is_active: false }).eq("id", ex.id);
       if (error) { toast.error(error.message); return; }
       toast.success(t("Övningen är dold", "Exercise hidden"));
@@ -47,7 +48,7 @@ export function ExerciseManager() {
       invalidate();
       return;
     }
-    if (!confirm(t(`Radera ${ex.code} ${ex.name} permanent? Den har aldrig använts i loggen.`, `Permanently delete ${ex.code} ${ex.name}? It has never been used in the log.`))) return;
+    if (!await confirmDialog(t(`Radera ${ex.code} ${ex.name} permanent? Den har aldrig använts i loggen.`, `Permanently delete ${ex.code} ${ex.name}? It has never been used in the log.`))) return;
     const { error } = await supabase.from("exercises").delete().eq("id", ex.id);
     if (error) {
       toast.error(error.message);
