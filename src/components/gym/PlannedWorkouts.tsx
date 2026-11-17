@@ -100,10 +100,7 @@ export function PlannedWorkouts() {
   return (
     <>
       {proposals.length > 0 && (
-        <section
-          className="space-y-3"
-          aria-label={t("Föreslagna pass", "Suggested workouts")}
-        >
+        <section className="space-y-3" aria-label={t("Föreslagna pass", "Suggested workouts")}>
           <div id="proposed-workouts" className="space-y-3">
             {[...planned].map(([id, rows]) => {
               const first = rows[0];
@@ -126,29 +123,31 @@ export function PlannedWorkouts() {
                         new Map(current).set(id, !isProposalExpanded(first.date, today, current, id)),
                       )
                     }
-                    className="h-auto min-h-12 w-full flex-wrap items-start justify-between gap-2 whitespace-normal px-0 py-1 text-left hover:bg-transparent"
+                    className="flex h-auto min-h-12 w-full items-start justify-start gap-2 whitespace-normal px-0 py-1 text-left hover:bg-transparent"
                   >
-                    <span className="flex min-w-0 items-start gap-2 text-left">
-                      {open ? (
-                        <ChevronDown className="mt-1.5 size-4 shrink-0" />
-                      ) : (
-                        <ChevronRight className="mt-1.5 size-4 shrink-0" />
-                      )}
-                      <span className="min-w-0">
-                        <span className="block text-xl font-bold">
-                          {first.workout?.title}
-                          {first.workout?.created_by === "ai" && (
-                            <Sparkles className="ml-1 inline size-4 text-primary" aria-label="AI" />
-                          )}
-                        </span>
-                        <span className="block text-sm">
+                    {open ? (
+                      <ChevronDown className="mt-1.5 size-4 shrink-0" />
+                    ) : (
+                      <ChevronRight className="mt-1.5 size-4 shrink-0" />
+                    )}
+
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-xl font-bold">
+                        {first.workout?.title}
+                        {first.workout?.created_by === "ai" && (
+                          <Sparkles className="ml-1 inline size-4 text-primary" aria-label="AI" />
+                        )}
+                      </span>
+
+                      <span className="mt-0.5 flex items-baseline justify-between gap-2 text-sm">
+                        <span className="min-w-0">
                           {formatDateWithWeekday(first.date, language)}
                           {gym ? ` · ${gym.name}` : ""}
                         </span>
+                        <span className="shrink-0 font-medium">
+                          {done}/{total} {t("set klara", "sets done")}
+                        </span>
                       </span>
-                    </span>
-                    <span className="text-sm font-medium">
-                      {done}/{total} {t("set klara", "sets done")}
                     </span>
                   </Button>
                   <div id={`proposal-${id}`} hidden={!open} className="space-y-3">
@@ -207,9 +206,7 @@ export function PlannedWorkouts() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {t("Ta bort föreslaget pass?", "Remove suggested workout?")}
-            </AlertDialogTitle>
+            <AlertDialogTitle>{t("Ta bort föreslaget pass?", "Remove suggested workout?")}</AlertDialogTitle>
             <AlertDialogDescription>
               {t(
                 "Ej genomförda övningar tas bort. Genomförda övningar och AI-svaret i historiken behålls.",
@@ -226,9 +223,7 @@ export function PlannedWorkouts() {
                 void deleteProposal();
               }}
             >
-              {deleting
-                ? t("Tar bort…", "Removing…")
-                : t("Ta bort förslag", "Remove suggestion")}
+              {deleting ? t("Tar bort…", "Removing…") : t("Ta bort förslag", "Remove suggestion")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
