@@ -62,7 +62,7 @@ function ExercisesPage() {
   if (!gym)
     return (
       <main className="px-4">
-        <GymPicker gyms={gyms} selected={gym?.id ?? null} onPick={(id) => setGym(id)} />
+        <GymPicker gyms={gyms} selected={null} onPick={(id) => setGym(id)} />
       </main>
     );
 
