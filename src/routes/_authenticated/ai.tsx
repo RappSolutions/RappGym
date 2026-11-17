@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_authenticated/ai")({
       context.queryClient.ensureQueryData(aiHistoryQuery),
       context.queryClient.ensureQueryData(acceptedAiQuery),
     ]),
-  validateSearch: (s: Record<string, unknown>): { mode?: "plan" } => (s.mode === "plan" ? { mode: "plan" } : {}),
+  validateSearch: (s: Record<string, unknown>): { mode?: "plan" } => (s["mode"] === "plan" ? { mode: "plan" } : {}),
   component: AiPage,
 });
 
