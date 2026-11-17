@@ -1,3 +1,4 @@
+import { isWorkoutFinished, workoutSetProgress } from "@/lib/circuit";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -71,8 +72,8 @@ function HomePage() {
       {[...todaysPlans].map(([id, rows]) => {
         const doneSets = log.filter((e) => e.proposal_id === id).reduce((n, e) => n + Math.max(1, e.sets ?? 1), 0);
         const planned = rows.reduce((n, r) => n + Math.max(1, r.sets ?? 1), 0);
-        const total = Math.max(planned, doneSets);
-        if (doneSets >= planned + doneSets - doneSets && doneSets >= total && rows.every((r) => r.status !== "suggested")) return null;
+        const total = planned;
+        if (isWorkoutFinished(doneSets, planned)) return null;
         const ongoing = doneSets > 0;
         return <Button key={id} size="lg" variant={ongoing ? "default" : "secondary"} className="h-auto min-h-12 w-full justify-start whitespace-normal text-left" onClick={() => setRunning(rows)}><Play className="size-4 shrink-0" /><span className="min-w-0 flex-1"><span className="block font-bold">{ongoing ? `${t("Pågående", "Ongoing")}: ` : ""}{rows[0]?.proposal_title}</span><span className="block text-xs font-normal">{rows[0]?.date !== todayISO() ? `${formatDate(rows[0]?.date ?? "")} · ` : ""}{rows.map((r) => r.code).join(" · ")}</span>{ongoing && <span className="block text-xs font-semibold">{t(`${doneSets}/${total} set klara – fortsätt`, `${doneSets}/${total} sets done – continue`)}</span>}</span></Button>;
       })}

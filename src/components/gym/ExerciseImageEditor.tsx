@@ -77,6 +77,7 @@ export function ExerciseImageEditor({ exercise }: { exercise: Exercise }) {
         {busy === "upload" ? <LoaderCircle className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}{t("Ladda upp från datorn/telefonen", "Upload from computer/phone")}
         <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void upload(f); }} />
       </Label>
+      <p className="text-xs text-muted-foreground">{t("Bilder i övningsbanken blir synliga för alla inloggade användare.", "Pictures in the exercise bank are visible to all signed-in users.")}</p>
       <div className="space-y-1">
         <Label>{t("Önskemål till AI-bilden (valfritt)", "Wishes for the AI picture (optional)")}</Label>
         <Textarea rows={2} value={wishes} onChange={(e) => setWishes(e.target.value)} placeholder={t("T.ex. visa från sidan, kvinna, gummiband i gult", "E.g. side view, female figure, yellow band")} />

@@ -54,7 +54,7 @@ export function GoalsCard() {
         {!isGoalOpen(g) && <> · <span className="font-semibold">{label[g.status as GoalStatus] ?? g.status}</span></>}
       </div>
     </div>
-    {!isGoalOpen(g) && <Button size="sm" variant="outline" onClick={() => void setStatus(g, "active")}><RotateCcw className="size-4" />{t("Återaktivera", "Reactivate")}</Button>}
+    {!isGoalOpen(g) && <Button size="icon" variant="ghost" aria-label={t("Återaktivera", "Reactivate")} title={t("Återaktivera", "Reactivate")} onClick={() => void setStatus(g, "active")}><RotateCcw className="size-4" /></Button>}
     <DropdownMenu>
       <DropdownMenuTrigger asChild><Button size="icon" variant="ghost" aria-label={t("Avsluta mål", "Finalize goal")}><Flag className="size-4" /></Button></DropdownMenuTrigger>
       <DropdownMenuContent align="end">

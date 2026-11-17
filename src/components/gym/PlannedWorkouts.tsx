@@ -1,3 +1,4 @@
+import { workoutSetProgress } from "@/lib/circuit";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -71,13 +72,13 @@ export function PlannedWorkouts() {
         {[...planned].map(([id, rows]) => {
           const first = rows[0];
           if (!first) return null;
-          const done = log.filter((row) => row.proposal_id === id).length;
+          const { done, total } = workoutSetProgress(id, rows, log);
           const gym = gyms.find((gym) => gym.id === first.gym_id);
           const open = isProposalExpanded(first.date, today, proposalOverrides, id);
           return <article key={id} className="space-y-3 rounded-lg border-2 border-dashed border-primary bg-secondary p-3">
             <Button variant="ghost" aria-expanded={open} aria-controls={`proposal-${id}`} onClick={() => setProposalOverrides((current) => new Map(current).set(id, !isProposalExpanded(first.date, today, current, id)))} className="h-auto min-h-12 w-full flex-wrap items-start justify-between gap-2 whitespace-normal px-0 py-1 text-left hover:bg-transparent">
               <span className="flex min-w-0 items-start gap-2 text-left">{open ? <ChevronDown className="mt-1.5 size-4 shrink-0" /> : <ChevronRight className="mt-1.5 size-4 shrink-0" />}<span className="min-w-0"><span className="block font-semibold text-primary">{t("Förslag", "Suggestion")}</span><span className="block text-xl font-bold">{first.proposal_title}</span><span className="block text-sm">{formatDateWithWeekday(first.date, language)}{gym ? ` · ${gym.name}` : ""}</span></span></span>
-              <span className="text-sm font-medium">{done}/{done + rows.length} {t("övningar genomförda", "exercises completed")}</span>
+              <span className="text-sm font-medium">{done}/{total} {t("set klara", "sets done")}</span>
             </Button>
             <div id={`proposal-${id}`} hidden={!open} className="space-y-3">
             <div className="divide-y divide-border">{rows.map((row) => <Button key={row.id} variant="ghost" data-category={categoryToken(byCode.get(row.code)?.category ?? "", categories)} className="category-theme grid h-auto min-h-12 w-full grid-cols-[1rem_2.5rem_minmax(0,1fr)] gap-x-2 gap-y-1 whitespace-normal border-l-4 border-category-fill px-2 py-3 text-left sm:grid-cols-[1rem_2.5rem_minmax(0,1fr)_auto]" onClick={() => { setGuidedId(null); setEntry(row); }}>
