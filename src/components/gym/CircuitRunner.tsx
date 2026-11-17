@@ -18,12 +18,12 @@ export function CircuitRunner({ rows, names, onClose }: { rows: LogEntry[]; name
   const qc = useQueryClient();
   const { data: allExercises = [] } = useQuery(exercisesQuery);
   const { data: log = [] } = useQuery(logQuery);
-  const proposalId = rows[0]?.proposal_id ?? null;
+  const proposalId = rows[0]?.workout_id ?? null;
   // Snapshot of sets already completed for this workout when the runner opened, so Continue resumes where you were.
-  const [prior] = useState(() => proposalId ? log.filter((e) => e.proposal_id === proposalId && e.status === "completed") : []);
+  const [prior] = useState(() => proposalId ? log.filter((e) => e.workout_id === proposalId && e.status === "completed") : []);
   const doneByCode = useMemo(() => { const m = new Map<string, number>(); for (const e of prior) m.set(e.code, (m.get(e.code) ?? 0) + Math.max(1, e.sets ?? 1)); return m; }, [prior]);
   const ordered = useMemo(() => [...rows].sort((a, b) => (a.proposal_order ?? 0) - (b.proposal_order ?? 0)), [rows]);
-  const [circuit, setCircuit] = useState(true);
+  const [circuit, setCircuit] = useState(rows[0]?.workout?.is_circuit ?? true);
   const allSteps = useMemo(() => (circuit ? circuitSteps(ordered) : stationSteps(ordered)), [ordered, circuit]);
   const steps = useMemo(() => remainingSteps(allSteps, doneByCode), [allSteps, doneByCode]);
   const total = allSteps.length;
@@ -53,7 +53,7 @@ export function CircuitRunner({ rows, names, onClose }: { rows: LogEntry[]; name
     try {
       if (log) {
         const r = step.row;
-        const { error } = await supabase.from("log_entries").insert({ code: r.code, sets: 1, reps: reps.get(r.id) ?? null, load: loads.get(r.id) ?? "", date: todayISO(), gym_id: r.gym_id, status: "completed", proposal_id: r.proposal_id, proposal_title: r.proposal_title, note: step.lap === 1 ? r.note : null });
+        const { error } = await supabase.from("log_entries").insert({ code: r.code, sets: 1, reps: reps.get(r.id) ?? null, load: loads.get(r.id) ?? "", date: todayISO(), gym_id: r.gym_id, status: "completed", workout_id: r.workout_id, note: step.lap === 1 ? r.note : null });
         if (error) throw error;
         count += 1;
         setDone(count);

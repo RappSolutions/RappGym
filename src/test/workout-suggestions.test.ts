@@ -13,14 +13,14 @@ const rows = [
 describe("saved suggestions", () => {
   it("removes only uncompleted exercises in the selected proposal", () => {
     expect(removableSuggestionIds([
-      { id: "pending", status: "suggested", proposal_id: "selected" },
-      { id: "done", status: "completed", proposal_id: "selected" },
-      { id: "other", status: "suggested", proposal_id: "other-plan" },
+      { id: "pending", status: "suggested", workout_id: "selected" },
+      { id: "done", status: "completed", workout_id: "selected" },
+      { id: "other", status: "suggested", workout_id: "other-plan" },
     ], "selected")).toEqual(["pending"]);
   });
   it("stores planned date, dose, suggestion status and exercise order without recording completed work", () => {
-    const result = suggestionRows([{ code: "A", sets: 2, reps: 12, load: "15", reason: "Balance" }], "2026-11-16", 3, "Workout", null, "plan-id");
-    expect(result[0]).toEqual({ code: "A", sets: 2, reps: 12, load: "15", note: "Balance", date: "2026-11-19", status: "suggested", gym_id: null, proposal_id: "plan-id", proposal_title: "Workout", proposal_order: 0 });
+    const result = suggestionRows([{ code: "A", sets: 2, reps: 12, load: "15", reason: "Balance" }], "2026-11-16", 3, null, "plan-id");
+    expect(result[0]).toEqual({ code: "A", sets: 2, reps: 12, load: "15", note: "Balance", date: "2026-11-19", status: "suggested", gym_id: null, workout_id: "plan-id", proposal_order: 0 });
   });
   it("counts only completed work in every statistical surface", () => {
     expect(computeStats(rows, []).totalSets).toBe(2);

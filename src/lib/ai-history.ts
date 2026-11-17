@@ -16,7 +16,7 @@ export const aiHistoryQuery = queryOptions({
 export const acceptedAiQuery = queryOptions({
   queryKey: ["accepted-ai-workouts"],
   queryFn: async () => {
-    const { data, error } = await supabase.from("log_entries").select("ai_history_id,ai_workout_key").not("ai_history_id", "is", null);
+    const { data, error } = await supabase.from("workouts").select("ai_history_id,ai_workout_key").not("ai_history_id", "is", null);
     if (error) throw error;
     return data;
   },

@@ -7,18 +7,17 @@ export function completedEntries<T extends { status?: string }>(rows: readonly T
 }
 
 /** Removing a proposal must never remove its already completed exercises. */
-export function removableSuggestionIds(rows: readonly { id: string; status: string; proposal_id: string | null }[], proposalId: string): string[] {
-  return rows.filter((row) => row.status === "suggested" && (row.proposal_id ?? row.id) === proposalId).map((row) => row.id);
+export function removableSuggestionIds(rows: readonly { id: string; status: string; workout_id: string | null }[], workoutId: string): string[] {
+  return rows.filter((row) => row.status === "suggested" && (row.workout_id ?? row.id) === workoutId).map((row) => row.id);
 }
 
-export function suggestionRows(items: TrainingInsights["exercises"], today: string, dayOffset: number, title: string, gymId: string | null, proposalId: string) {
+export function suggestionRows(items: TrainingInsights["exercises"], today: string, dayOffset: number, gymId: string | null, workoutId: string) {
   return items.map((item, index) => {
     const split = splitSuggestedLoad(item.load);
     return {
     code: item.code, sets: item.sets, reps: item.reps, load: split.load,
     date: plannedWorkoutDate(today, dayOffset), note: appendLoadAdvice(item.reason, split.advice) || null,
-    gym_id: gymId, status: "suggested" as const, proposal_id: proposalId,
-    proposal_title: title, proposal_order: index,
+    gym_id: gymId, status: "suggested" as const, workout_id: workoutId, proposal_order: index,
   }; });
 }
 
