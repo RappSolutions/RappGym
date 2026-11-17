@@ -25,7 +25,14 @@ import { useSelectedGym } from "@/hooks/use-gym";
 import { gymsQuery } from "@/lib/gym";
 import { LogDatePicker } from "./LogDatePicker";
 
-export function TrainingInsights({ exercises, hasLog, initialMode }: { exercises: Exercise[]; hasLog: boolean; initialMode?: "summary" | "plan" }) {
+type TrainingInsightsProps = {
+  exercises: Exercise[];
+  hasLog: boolean;
+  initialMode?: "summary" | "plan";
+};
+
+export function TrainingInsights(props: TrainingInsightsProps) {
+  const { exercises, hasLog } = props;
   const { t, language, localize } = useLanguage();
   const queryClient = useQueryClient();
   const generate = useServerFn(getTrainingInsights);
@@ -34,7 +41,7 @@ export function TrainingInsights({ exercises, hasLog, initialMode }: { exercises
   const [gymId] = useSelectedGym();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const id = useId();
-  const [mode, setMode] = useState<"summary" | "plan">(initialMode ?? "summary");
+  const [mode, setMode] = useState<"summary" | "plan">(props.initialMode ?? "summary");
   const [question, setQuestion] = useState("");
   const [workoutCount, setWorkoutCount] = useState("");
   const [periodDays, setPeriodDays] = useState("");
