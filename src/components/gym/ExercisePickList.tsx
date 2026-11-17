@@ -5,16 +5,17 @@ import { categoriesOf, categoryToken, type Exercise } from "@/lib/gym";
 
 /** Inline, category-collapsed exercise list; clicking an exercise adds it. */
 export function ExercisePickList({ exercises, onPick, disabled }: { exercises: Exercise[]; onPick: (ex: Exercise) => void; disabled?: boolean }) {
-  const { localize } = useLanguage();
+  const { localize, t } = useLanguage();
   const [open, setOpen] = useState<Set<string>>(new Set());
   const cats = categoriesOf(exercises);
   return (
-    <div className="space-y-1">
+    <div className="ml-3 space-y-1 rounded-md border border-dashed bg-muted/40 p-2">
+      <div className="flex items-center gap-1.5 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground"><Plus className="size-3.5" />{t("Lägg till övning", "Add exercise")}</div>
       {cats.map((cat) => {
         const list = exercises.filter((e) => e.category === cat);
         const isOpen = open.has(cat);
         return (
-          <div key={cat} data-category={categoryToken(cat, cats)} className="category-theme overflow-hidden rounded-md border border-l-4 border-l-category-fill">
+          <div key={cat} data-category={categoryToken(cat, cats)} className="category-theme overflow-hidden rounded-md border bg-background border-l-4 border-l-category-fill">
             <button type="button" aria-expanded={isOpen} className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-bold text-category-ink" onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(cat)) n.delete(cat); else n.add(cat); return n; })}>
               {isOpen ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
               <span className="flex-1">{list[0] ? localize(list[0]).category : cat}</span>
