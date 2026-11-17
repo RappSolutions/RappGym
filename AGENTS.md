@@ -61,3 +61,5 @@ use the editor.
 - Exercises used by any log row are hidden via exercises.is_active=false instead of deleted; Train, AI planning and photo scans offer active exercises only; exercises.gym_id is deprecated and unused.
 - Exercise pictures live in the private exercise-images storage bucket as "storage:<path>" refs resolved to signed URLs; AI pictures are generated only on explicit click via an authenticated server function.
 - Planned workouts (AI or own, status suggested) live on the Train page with circuit mode logging one completed set per exercise per lap; the Log page shows completed history only, keeping facts separate from plans.
+- Exercises, gyms and exercise_locations are a shared bank: all signed-in users read, only `has_role(uid,'admin')` (user_roles table) writes; Settings is admin-only, while logs, goals, profiles and AI history stay owner-scoped.
+- One workout runner (CircuitRunner) for every start path, with circuit vs station order as an in-runner setting, so planned, AI and quick-start workouts behave the same.
