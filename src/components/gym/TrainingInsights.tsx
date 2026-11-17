@@ -73,7 +73,8 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
     } finally { setBusy(false); }
   }
 
-  function reuseRequest(r: ReturnType<typeof trainingRequestSchema.parse>) {
+  function reuseRequest(r: ReturnType<typeof trainingRequestSchema.parse>, gym: string | null) {
+    if (r.mode === "plan") setPlanGym(gym);
     setMode(r.mode === "plan" ? "plan" : "summary");
     setQuestion(r.question ?? "");
     setWorkoutCount(r.workoutCount ? String(r.workoutCount) : "");
@@ -168,7 +169,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     <div aria-live="polite" aria-busy={busy}>
       {current && !busy && <div className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2"><p className="text-xs text-muted-foreground">{sections.plan ? t("Planerad", "Planned") : t("Analyserad", "Analyzed")} {analysisDateTime(current.generatedAt)}{"inputTokens" in current && current.inputTokens != null && current.outputTokens != null ? ` · ${formatAiCost(current.inputTokens, current.outputTokens, language)}` : ""}</p><Button type="button" size="sm" variant="ghost" onClick={() => reuseRequest(current.request)}><RotateCcw className="size-4" />{t("Fråga samma igen", "Ask the same again")}</Button></div>
+        <div className="flex flex-wrap items-center justify-between gap-2"><p className="text-xs text-muted-foreground">{sections.plan ? t("Planerad", "Planned") : t("Analyserad", "Analyzed")} {analysisDateTime(current.generatedAt)}{"inputTokens" in current && current.inputTokens != null && current.outputTokens != null ? ` · ${formatAiCost(current.inputTokens, current.outputTokens, language)}` : ""}</p><Button type="button" size="sm" variant="ghost" onClick={() => reuseRequest(current.request, current.gymId)}><RotateCcw className="size-4" />{t("Fråga samma igen", "Ask the same again")}</Button></div>
         {sections.analysis && <>
         {current.question && <p className="break-words border-l-4 border-brand-yellow pl-3 text-sm">{current.question}</p>}
         {current.insights.answer && <p className="whitespace-pre-line leading-relaxed">{current.insights.answer}</p>}
