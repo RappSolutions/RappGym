@@ -37,7 +37,6 @@ function ExercisesPage() {
   const allExercises = everyExercise.filter((e) => e.is_active);
   const { data: gyms } = useSuspenseQuery(gymsQuery);
   const [gymId, setGym] = useSelectedGym();
-  const [picking, setPicking] = useState(false);
   const gym = gyms.find((g) => g.id === gymId);
   const [q, setQ] = useState("");
   const { data: links } = useSuspenseQuery(exerciseLocationsQuery);
@@ -60,18 +59,15 @@ function ExercisesPage() {
   const s = q.trim().toLowerCase();
   const list = s ? exercises.filter((e) => { const l = localize(e); return [l.code, l.name, l.equipment, l.muscles, l.category].some((v) => v.toLowerCase().includes(s)); }) : exercises.filter((e) => e.category === active);
 
-  if (!gym || picking)
+  if (!gym)
     return (
       <main className="px-4">
-        <GymPicker gyms={gyms} selected={gym?.id ?? null} onPick={(id) => { setGym(id); setPicking(false); }} />
+        <GymPicker gyms={gyms} selected={gym?.id ?? null} onPick={(id) => setGym(id)} />
       </main>
     );
 
   return (
     <main className="space-y-4 px-4">
-      <Button variant="secondary" onClick={() => setPicking(true)} className="gap-1.5 rounded-full px-3 text-sm font-medium">
-        {gym.name} <span className="text-muted-foreground">· {t("byt", "change")}</span>
-      </Button>
       <p className="text-sm text-muted-foreground">{t("Välj en övning för att logga set. Lägg till och redigera övningar under Inställningar.", "Pick an exercise to log sets. Add and edit exercises under Settings.")}</p>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} className="size-4" />{t(`Visa alla övningar (${atPlace.length} av ${allExercises.length} finns här)`, `Show all exercises (${atPlace.length} of ${allExercises.length} available here)`)}</label>
       {!showAll && atPlace.length === 0 && <p className="text-sm text-muted-foreground">{t("Inga övningar kopplade till platsen ännu. Välj övningar under Inställningar → Platser.", "No exercises linked to this location yet. Choose them under Settings → Locations.")}</p>}

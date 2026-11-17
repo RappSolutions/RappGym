@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { User } from "@supabase/supabase-js";
-import { LogOut, Settings, UserRound, Save, Trash2, LoaderCircle, MapPin } from "lucide-react";
+import { LogOut, Settings, UserRound, Save, Trash2, LoaderCircle, MapPin, Check } from "lucide-react";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage, LanguagePicker } from "@/lib/i18n";
@@ -12,7 +13,7 @@ import { useSelectedGym } from "@/hooks/use-gym";
 import { useIsAdmin } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator} from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +28,7 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
   useEffect(() => { if (gyms.length > 0 && !currentGym) setGym(gyms[0]!.id); }, [gyms, currentGym, setGym]);
   const { isAdmin } = useIsAdmin();
   const [open, setOpen] = useState(false);
+  const [gymOpen, setGymOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [profile, setProfile] = useState<TrainingProfile>(emptyTrainingProfile);
@@ -66,8 +68,11 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
   }
   return <>
     <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label={t("Mitt konto", "My account")} title={t("Mitt konto", "My account")} className="shrink-0 rounded-full text-brand-yellow hover:bg-brand-royal hover:text-brand-yellow"><Avatar className="size-9 border-2 border-brand-yellow"><AvatarFallback className="bg-brand-royal text-sm font-semibold text-brand-yellow">{initials || <UserRound className="size-5" />}</AvatarFallback></Avatar></Button></DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 max-w-[calc(100vw-2rem)]"><DropdownMenuLabel><span className="block break-words">{name}</span>{user.email !== name && <span className="block break-words text-xs font-normal text-muted-foreground">{user.email}</span>}</DropdownMenuLabel><DropdownMenuSeparator />{gyms.length > 0 && <><DropdownMenuSub><DropdownMenuSubTrigger className="min-h-12"><MapPin /><span className="min-w-0"><span className="block text-xs text-muted-foreground">{t("Plats", "Location")}</span><span className="block truncate font-medium">{currentGym?.name ?? ""}</span></span></DropdownMenuSubTrigger><DropdownMenuSubContent className="max-h-[60dvh] w-56 max-w-[calc(100vw-2rem)] overflow-y-auto"><DropdownMenuRadioGroup value={gymId ?? ""} onValueChange={(value) => setGym(value)}>{gyms.map((g) => <DropdownMenuRadioItem key={g.id} value={g.id} className="min-h-11">{g.name}</DropdownMenuRadioItem>)}</DropdownMenuRadioGroup></DropdownMenuSubContent></DropdownMenuSub><DropdownMenuSeparator /></>}<DropdownMenuItem className="min-h-12" onSelect={() => void edit()}><UserRound />{t("Min träningsprofil", "My training profile")}</DropdownMenuItem>{isAdmin && <DropdownMenuItem asChild className="min-h-12"><Link to="/settings"><Settings />{t("Inställningar", "Settings")}</Link></DropdownMenuItem>}<DropdownMenuSeparator /><div className="px-2 py-2"><LanguagePicker flagsOnly /></div><DropdownMenuSeparator /><DropdownMenuItem className="min-h-12" onSelect={() => void onSignOut()}><LogOut />{t("Logga ut", "Sign out")}</DropdownMenuItem></DropdownMenuContent>
+      <DropdownMenuContent align="end" className="w-64 max-w-[calc(100vw-2rem)]"><DropdownMenuLabel><span className="block break-words">{name}</span>{user.email !== name && <span className="block break-words text-xs font-normal text-muted-foreground">{user.email}</span>}</DropdownMenuLabel><DropdownMenuSeparator />{gyms.length > 0 && <><DropdownMenuItem className="min-h-12" onSelect={() => setGymOpen(true)}><MapPin /><span className="min-w-0"><span className="block text-xs text-muted-foreground">{t("Plats", "Location")}</span><span className="block truncate font-medium">{currentGym?.name ?? ""}</span></span></DropdownMenuItem><DropdownMenuSeparator /></>}<DropdownMenuItem className="min-h-12" onSelect={() => void edit()}><UserRound />{t("Min träningsprofil", "My training profile")}</DropdownMenuItem>{isAdmin && <DropdownMenuItem asChild className="min-h-12"><Link to="/settings"><Settings />{t("Inställningar", "Settings")}</Link></DropdownMenuItem>}<DropdownMenuSeparator /><div className="px-2 py-2"><LanguagePicker flagsOnly /></div><DropdownMenuSeparator /><DropdownMenuItem className="min-h-12" onSelect={() => void onSignOut()}><LogOut />{t("Logga ut", "Sign out")}</DropdownMenuItem></DropdownMenuContent>
     </DropdownMenu>
+    <Drawer open={gymOpen} onOpenChange={setGymOpen}><DrawerContent><DrawerHeader><DrawerTitle>{t("Plats", "Location")}</DrawerTitle></DrawerHeader>
+      <div className="max-h-[60dvh] space-y-1 overflow-y-auto px-4 pb-6">{gyms.map((g) => <button key={g.id} type="button" onClick={() => { setGym(g.id); setGymOpen(false); }} className="flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-left hover:bg-muted" aria-pressed={g.id === gymId}><span className="min-w-0 flex-1"><span className="block truncate font-medium">{g.name}</span>{g.description && <span className="block truncate text-xs text-muted-foreground">{g.description}</span>}</span>{g.id === gymId && <Check className="size-5 shrink-0 text-primary" />}</button>)}</div>
+    </DrawerContent></Drawer>
     <Dialog open={open} onOpenChange={(value) => { if (!busy) setOpen(value); }}><DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] overflow-y-auto p-5"><DialogHeader><DialogTitle className="text-2xl">{t("Min träningsprofil", "My training profile")}</DialogTitle><DialogDescription>{t("Alla uppgifter är valfria och privata. Ange bara det du vill dela.", "All details are optional and private. Enter only what you want to share.")}</DialogDescription></DialogHeader>
       {!loaded ? <LoaderCircle className="size-6 animate-spin" /> : <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); if (!busy) void save(); }}>
         <div className="grid grid-cols-3 gap-3">{([['birth_year', t('Födelseår', 'Birth year'), 1900, new Date().getFullYear(), 1], ['height_cm', t('Längd (cm)', 'Height (cm)'), 30, 300, 0.1], ['weight_kg', t('Vikt (kg)', 'Weight (kg)'), 1, 500, 0.1]] as const).map(([field, label, min, max, step]) => <div key={field} className="space-y-1"><Label htmlFor={`profile-${field}`}>{label}</Label><Input id={`profile-${field}`} type="number" min={min} max={max} step={step} value={profile[field] ?? ""} disabled={busy} onChange={(event) => setProfile((old) => ({ ...old, [field]: event.target.value === "" ? null : Number(event.target.value) }))} /></div>)}</div>
