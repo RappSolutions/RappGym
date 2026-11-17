@@ -38,3 +38,4 @@
 - [x] Home dashboard with overview stats, soft goals and goal-aware AI next-workout suggestions
 - [x] Real exercise link on log rows, usage-aware delete with hide/reactivate, retire exercises.gym_id
 - [x] Exercise picture add/upload/remove and AI-generated pictures with user wishes
+- [x] Remove duplicate AI cost in history list; drop "Förslag" label; show workout creator/created time; copy workout from Log with name/date/location/circuit; schema.puml + English README
