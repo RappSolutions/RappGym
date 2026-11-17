@@ -34,7 +34,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
   const [gymId] = useSelectedGym();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const id = useId();
-  const [mode, setMode] = useState<"summary" | "plan">("summary");
+  const [mode, setMode] = useState<"summary" | "plan">(initialMode ?? "summary");
   const [question, setQuestion] = useState("");
   const [workoutCount, setWorkoutCount] = useState("");
   const [periodDays, setPeriodDays] = useState("");

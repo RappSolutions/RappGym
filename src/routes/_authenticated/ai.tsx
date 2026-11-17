@@ -23,15 +23,17 @@ export const Route = createFileRoute("/_authenticated/ai")({
       context.queryClient.ensureQueryData(aiHistoryQuery),
       context.queryClient.ensureQueryData(acceptedAiQuery),
     ]),
+  validateSearch: (s: Record<string, unknown>): { mode?: "plan" } => (s.mode === "plan" ? { mode: "plan" } : {}),
   component: AiPage,
 });
 
 function AiPage() {
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
   const { data: log } = useSuspenseQuery(logQuery);
+  const { mode } = Route.useSearch();
   return (
     <main className="px-4">
-      <TrainingInsights exercises={exercises} hasLog={log.length > 0} />
+      <TrainingInsights exercises={exercises} hasLog={log.length > 0} initialMode={mode === "plan" ? "plan" : "summary"} key={mode ?? "summary"} />
     </main>
   );
 }

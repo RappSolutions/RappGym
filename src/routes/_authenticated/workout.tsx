@@ -1,4 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/lib/i18n";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useSelectedGym } from "@/hooks/use-gym";
 import { useMemo } from "react";
@@ -34,11 +36,17 @@ function PassPage() {
   const { data: log } = useSuspenseQuery(logQuery);
   const last = useMemo(() => lastByCode(log), [log]);
 
+  const { t } = useLanguage();
   if (!gym) return null;
 
   return (
     <main className="space-y-4 px-4">
-      <WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} />
+      <div className="flex gap-2">
+        <div className="flex-1"><WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} /></div>
+        <Button asChild variant="outline" size="icon" aria-label={t("Planera pass med AI", "Plan workout with AI")} title={t("Planera pass med AI", "Plan workout with AI")}>
+          <Link to="/ai" search={{ mode: "plan" }}>✨</Link>
+        </Button>
+      </div>
       <PlannedWorkouts />
     </main>
   );
