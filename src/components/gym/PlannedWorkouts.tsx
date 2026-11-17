@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { useLanguage } from "@/lib/i18n";
 import { LogSheet } from "@/components/gym/LogSheet";
 import { CircuitRunner } from "@/components/gym/CircuitRunner";
+import { createdStamp } from "@/lib/workout-meta";
 import { categoriesOf, categoryToken, exercisesQuery, gymsQuery, suggestionsQuery, formatDateWithWeekday, logQuery, type LogEntry, formatSet, todayISO, isProposalExpanded } from "@/lib/gym";
 
 /** Planned (suggested) workouts: encouragement and how-to, kept apart from the factual Log. */
@@ -78,7 +79,7 @@ export function PlannedWorkouts() {
           const open = isProposalExpanded(first.date, today, proposalOverrides, id);
           return <article key={id} className="space-y-3 rounded-lg border-2 border-dashed border-primary bg-secondary p-3">
             <Button variant="ghost" aria-expanded={open} aria-controls={`proposal-${id}`} onClick={() => setProposalOverrides((current) => new Map(current).set(id, !isProposalExpanded(first.date, today, current, id)))} className="h-auto min-h-12 w-full flex-wrap items-start justify-between gap-2 whitespace-normal px-0 py-1 text-left hover:bg-transparent">
-              <span className="flex min-w-0 items-start gap-2 text-left">{open ? <ChevronDown className="mt-1.5 size-4 shrink-0" /> : <ChevronRight className="mt-1.5 size-4 shrink-0" />}<span className="min-w-0"><span className="block font-semibold text-primary">{t("Förslag", "Suggestion")}</span><span className="block text-xl font-bold">{first.workout?.title}</span><span className="block text-sm">{formatDateWithWeekday(first.date, language)}{gym ? ` · ${gym.name}` : ""}</span></span></span>
+              <span className="flex min-w-0 items-start gap-2 text-left">{open ? <ChevronDown className="mt-1.5 size-4 shrink-0" /> : <ChevronRight className="mt-1.5 size-4 shrink-0" />}<span className="min-w-0"><span className="block text-xl font-bold">{first.workout?.title}</span><span className="block text-sm">{formatDateWithWeekday(first.date, language)}{gym ? ` · ${gym.name}` : ""}<span className="text-xs text-muted-foreground"> · {first.workout?.created_by === "ai" ? "AI" : t("Du", "You")} {first.workout?.created_at ? createdStamp(first.workout.created_at) : ""}</span></span></span></span>
               <span className="text-sm font-medium">{done}/{total} {t("set klara", "sets done")}</span>
             </Button>
             <div id={`proposal-${id}`} hidden={!open} className="space-y-3">

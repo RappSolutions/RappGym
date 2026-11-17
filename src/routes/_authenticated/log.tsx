@@ -8,6 +8,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { useLanguage } from "@/lib/i18n";
 import { LogSheet } from "@/components/gym/LogSheet";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { LogDatePicker } from "@/components/gym/LogDatePicker";
+import { createdStamp } from "@/lib/workout-meta";
 import { groupLogByWorkout, replanRows } from "@/lib/log-workouts";
 import { categoriesOf, categoryToken, exercisesQuery, gymsQuery, formatDateWithWeekday, logQuery, type LogEntry, formatSet, todayISO, workoutRecordingOrder } from "@/lib/gym";
 
@@ -40,6 +46,8 @@ function LogPage() {
   const [overrides, setOverrides] = useState<Map<string, boolean>>(new Map());
   const [deleting, setDeleting] = useState<Group | null>(null);
   const [busy, setBusy] = useState(false);
+  const [copying, setCopying] = useState<Group | null>(null);
+  const [form, setForm] = useState({ title: "", date: "", gymId: "", circuit: true });
   const today = todayISO();
   const categories = categoriesOf(exercises);
   const byCode = new Map(exercises.map((e) => [e.code, localize(e)]));
@@ -47,18 +55,25 @@ function LogPage() {
   const titleOf = (g: Group) => g.entries[0]?.workout?.title ?? t("Enskilda övningar", "Single exercises");
   const isOpen = (g: Group) => overrides.get(g.key) ?? g.date === today;
 
-  async function replan(g: Group) {
-    if (busy) return;
+  function openCopy(g: Group) {
+    setForm({ title: g.workoutId ? titleOf(g) : `${t("Pass", "Workout")} ${g.date}`, date: today, gymId: g.entries.find((e) => e.gym_id)?.gym_id ?? "", circuit: g.entries[0]?.workout?.is_circuit ?? true });
+    setCopying(g);
+  }
+
+  async function replan() {
+    const g = copying;
+    if (busy || !g) return;
     setBusy(true);
     try {
-      const gymId = g.entries.find((e) => e.gym_id)?.gym_id ?? null;
-      const head = await supabase.from("workouts").insert({ title: g.workoutId ? titleOf(g) : `${t("Pass", "Workout")} ${g.date}`, created_by: "user", scheduled_date: today, gym_id: gymId, is_circuit: g.entries[0]?.workout?.is_circuit ?? true, source_workout_id: g.workoutId }).select("id").single();
+      const gymId = form.gymId || null;
+      const head = await supabase.from("workouts").insert({ title: form.title.trim(), created_by: "user", scheduled_date: form.date, gym_id: gymId, is_circuit: form.circuit, source_workout_id: g.workoutId }).select("id").single();
       if (head.error) throw head.error;
-      const rows = replanRows(g.entries).map((r, index) => ({ ...r, date: today, gym_id: gymId, status: "suggested", workout_id: head.data.id, proposal_order: index }));
+      const rows = replanRows(g.entries).map((r, index) => ({ ...r, date: form.date, gym_id: gymId, status: "suggested", workout_id: head.data.id, proposal_order: index }));
       const { error } = await supabase.from("log_entries").insert(rows);
       if (error) throw error;
       await queryClient.invalidateQueries({ queryKey: ["workout-suggestions"] });
-      toast.success(t("Passet är planerat för idag under Träna", "Workout planned for today under Train"));
+      setCopying(null);
+      toast.success(t(`Planerat ${form.date} under Träna`, `Planned ${form.date} under Train`));
       void navigate({ to: "/workout" });
     } catch { toast.error(t("Kunde inte planera passet igen.", "Could not plan the workout again.")); }
     finally { setBusy(false); }
@@ -86,6 +101,18 @@ function LogPage() {
       <p className="text-sm text-muted-foreground">{t("Logg: allt du har genomfört, pass för pass. Planerade pass finns under Träna.", "Log: everything you have completed, workout by workout. Planned workouts live under Train.")}</p>
       {log.length > 0 && <h2 className="flex items-center gap-2 font-display text-2xl font-bold"><CheckCircle2 className="size-5 text-primary" />{t("Genomförda pass", "Completed workouts")}<span className="ml-auto font-sans text-sm font-normal text-muted-foreground">{groups.length}</span></h2>}
       {!log.length && <p className="text-muted-foreground">{t("Inga pass ännu.", "No workouts yet.")}</p>}
+      <Drawer open={!!copying} onOpenChange={(o) => { if (!o && !busy) setCopying(null); }}>
+        <DrawerContent><div className="mx-auto w-full max-w-lg space-y-3 px-4 pb-6">
+          <DrawerHeader className="px-0"><DrawerTitle className="font-display text-2xl">{t("Planera igen", "Plan again")}</DrawerTitle><DrawerDescription>{t("Kopieras som planerat pass under Träna.", "Copied as a planned workout under Train.")}</DrawerDescription></DrawerHeader>
+          <div className="space-y-1"><Label htmlFor="copy-title">{t("Namn", "Name")}</Label><Input id="copy-title" className="h-12" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1"><Label htmlFor="log-date">{t("Datum", "Date")}</Label><LogDatePicker value={form.date} onChange={(date) => setForm({ ...form, date })} /></div>
+            <div className="space-y-1"><Label htmlFor="copy-gym">{t("Plats", "Location")}</Label><select id="copy-gym" className="h-12 w-full rounded-md border border-input bg-background px-3 text-sm" value={form.gymId} onChange={(e) => setForm({ ...form, gymId: e.target.value })}><option value="">{t("Ingen plats", "No location")}</option>{gyms.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}</select></div>
+          </div>
+          <label className="flex items-center justify-between gap-2 text-sm"><span>{t("Kör som cirkel", "Run as circuit")}</span><Switch checked={form.circuit} onCheckedChange={(circuit) => setForm({ ...form, circuit })} /></label>
+          <div className="flex justify-end gap-2"><Button variant="ghost" disabled={busy} onClick={() => setCopying(null)}>{t("Avbryt", "Cancel")}</Button><Button disabled={busy || !form.title.trim() || !form.date} onClick={() => void replan()}>{t("Planera", "Plan")}</Button></div>
+        </div></DrawerContent>
+      </Drawer>
       <div className="space-y-4">{groups.map((g) => {
         const entries = workoutRecordingOrder(g.entries);
         const cats = [...new Set(entries.map((e) => exercises.find((ex) => ex.code === e.code)?.category).filter((c): c is string => !!c))];
@@ -99,11 +126,11 @@ function LogPage() {
                 {open ? <ChevronDown className="mt-1 size-4 shrink-0 self-start" /> : <ChevronRight className="mt-1 size-4 shrink-0 self-start" />}
                 <span className="min-w-0 flex-1">
                   <span className="block font-display text-xl font-bold">{titleOf(g)}{g.entries[0]?.workout?.created_by === "ai" && <Sparkles className="ml-1 inline size-4 text-primary" aria-label="AI" />}</span>
-                  <span className="block text-sm">{formatDateWithWeekday(g.date, language)} · {sets} {t("set", "sets")} · <MapPin className="inline size-3" /> {places.join(", ")}</span>
+                  <span className="block text-sm">{formatDateWithWeekday(g.date, language)} · {sets} {t("set", "sets")} · <MapPin className="inline size-3" /> {places.join(", ")}{g.entries[0]?.workout && <span className="text-xs text-muted-foreground"> · {g.entries[0].workout.created_by === "ai" ? "AI" : t("Du", "You")} {createdStamp(g.entries[0].workout.created_at)}</span>}</span>
                   <span className="mt-1 flex flex-wrap gap-x-2 text-xs">{cats.map((cat) => { const ex = exercises.find((e) => e.category === cat); return <span key={cat} data-category={categoryToken(cat, categories)} className="category-theme inline-flex items-center gap-1 font-semibold text-category-ink"><span className="size-2 rounded-full bg-category-fill" />{ex ? localize(ex).category : cat}</span>; })}</span>
                 </span>
               </Button>
-              <Button variant="ghost" size="icon" disabled={busy} title={t("Planera igen", "Plan again")} aria-label={`${t("Planera igen", "Plan again")}: ${titleOf(g)}`} onClick={() => void replan(g)}><Repeat className="size-5" /></Button>
+              <Button variant="ghost" size="icon" disabled={busy} title={t("Planera igen", "Plan again")} aria-label={`${t("Planera igen", "Plan again")}: ${titleOf(g)}`} onClick={() => openCopy(g)}><Repeat className="size-5" /></Button>
               <Button variant="ghost" size="icon" disabled={busy} className="text-destructive" title={t("Ta bort pass", "Remove workout")} aria-label={`${t("Ta bort pass", "Remove workout")}: ${titleOf(g)}`} onClick={() => setDeleting(g)}><Trash2 className="size-5" /></Button>
             </div>
             <div id={`workout-${g.key}`} hidden={!open} className="divide-y border-t">
