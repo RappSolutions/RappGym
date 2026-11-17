@@ -16,7 +16,10 @@ export const Route = createFileRoute("/")({
       { title: "RappGym – log your workouts" },
       { name: "description", content: "Your workout diary and exercise bank. Sign in with Google or Microsoft." },
       { property: "og:title", content: "RappGym – log your workouts" },
-      { property: "og:description", content: "Your workout diary and exercise bank. Sign in with Google or Microsoft." },
+      {
+        property: "og:description",
+        content: "Your workout diary and exercise bank. Sign in with Google or Microsoft.",
+      },
     ],
   }),
   component: Index,
@@ -34,7 +37,9 @@ function Index() {
   async function social(provider: AuthProvider) {
     const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin });
     if (result.error) {
-      toast.error(result.error instanceof Error ? result.error.message : t("Inloggningen misslyckades", "Sign-in failed"));
+      toast.error(
+        result.error instanceof Error ? result.error.message : t("Inloggningen misslyckades", "Sign-in failed"),
+      );
       return;
     }
     if (result.redirected) return;
@@ -44,9 +49,7 @@ function Index() {
   return (
     <div className="app-sheet mx-auto flex min-h-screen max-w-2xl flex-col pb-12 md:max-w-4xl">
       <header className="app-masthead flex items-center justify-between gap-3 px-4 py-5">
-        <span className="brand-wordmark font-display text-2xl font-bold md:text-3xl">
-          Rapp<span className="text-brand-yellow">Gym</span>
-        </span>
+        <span className="brand-wordmark font-display text-2xl font-bold md:text-3xl">RappGym</span>
         <LanguagePicker flagsOnly />
       </header>
       <main className="landing-hero relative flex flex-1 flex-col items-center justify-center overflow-hidden px-6 py-12 text-center">
@@ -59,13 +62,18 @@ function Index() {
           className="landing-logo relative h-44 w-44 object-contain md:h-60 md:w-60"
         />
         <h1 className="landing-rise relative mt-6 font-display text-5xl font-bold text-brand-blue md:text-6xl">
-          Rapp<span className="text-brand-royal">Gym</span>
+          RappGym
         </h1>
         <p className="landing-rise relative mt-3 max-w-sm text-muted-foreground [animation-delay:120ms]">
           {t("Logga pass, följ cirklar, se din progress.", "Log workouts, run circuits, track your progress.")}
         </p>
         <div className="landing-rise relative mt-8 w-full max-w-sm space-y-3 [animation-delay:240ms]">
-          <Button variant="outline" type="button" onClick={() => social(authProviders[0])} className="google-btn landing-btn w-full">
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => social(authProviders[0])}
+            className="google-btn landing-btn w-full"
+          >
             <svg aria-hidden="true" width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
@@ -86,7 +94,12 @@ function Index() {
             </svg>
             {t("Fortsätt med Google", "Continue with Google")}
           </Button>
-          <Button variant="outline" type="button" onClick={() => social(authProviders[1])} className="google-btn landing-btn w-full">
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => social(authProviders[1])}
+            className="google-btn landing-btn w-full"
+          >
             <svg aria-hidden="true" width="18" height="18" viewBox="0 0 21 21">
               <rect x="1" y="1" width="9" height="9" fill="#F25022" />
               <rect x="11" y="1" width="9" height="9" fill="#7FBA00" />
