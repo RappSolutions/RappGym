@@ -125,7 +125,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
   const scopedHistory = history.filter((row) => row.request.mode === mode);
   const current =
     scopedHistory.find((row) => row.id === selectedId) ??
-    (result?.id === selectedId && result.request.mode === mode ? result : (scopedHistory[0] ?? null));
+    (result?.id === selectedId && result.request.mode === mode ? result : null);
   const sections = trainingResultSections(mode);
   const acceptedKeys = new Set(
     accepted.filter((row) => row.ai_history_id === current?.id).map((row) => row.ai_workout_key ?? ""),
@@ -229,9 +229,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
             : t("Acceptera passet som förslag", "Accept workout as suggestion")}
         </Button>
         {acceptedKeys.has(key) && (
-          <Link to="/workout" className="text-sm font-semibold text-primary underline">
-            {t("Gå till passet under Träna", "Open workout in Train")}
-          </Link>
+          <span className="text-sm text-muted-foreground">{t("Finns under Pass", "Listed under Workouts")}</span>
         )}
       </div>
     );
@@ -282,27 +280,19 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
           if (!busy) void analyze();
         }}
       >
-        <div className="flex flex-wrap gap-2" role="group" aria-label={t("Typ av AI-förslag", "AI request type")}>
-          <Button
-            type="button"
-            size="sm"
-            variant={mode === "summary" ? "default" : "outline"}
-            aria-pressed={mode === "summary"}
-            disabled={busy}
-            onClick={() => setMode("summary")}
-          >
-            {t("Analys & frågor", "Analysis & questions")}
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant={mode === "plan" ? "default" : "outline"}
-            aria-pressed={mode === "plan"}
-            disabled={busy}
-            onClick={() => setMode("plan")}
-          >
-            {t("Planera pass", "Plan workouts")}
-          </Button>
+        <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1" role="group" aria-label={t("Typ av AI-förslag", "AI request type")}>
+          {([["summary", t("Analys & frågor", "Analysis & questions")], ["plan", t("Planera pass", "Plan workouts")]] as const).map(([m, label]) => (
+            <button
+              key={m}
+              type="button"
+              aria-pressed={mode === m}
+              disabled={busy}
+              onClick={() => { setMode(m); setSelectedId(null); }}
+              className={`h-11 rounded-lg text-sm font-semibold transition-colors ${mode === m ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
         {mode === "summary" && (
           <div className="space-y-1">
@@ -482,8 +472,9 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
             className="h-12 w-full rounded-md border border-input bg-background px-3 text-sm"
             value={current?.id ?? ""}
             disabled={busy || saving !== null}
-            onChange={(event) => setSelectedId(event.target.value)}
+            onChange={(event) => setSelectedId(event.target.value || null)}
           >
+            <option value="">{t("Välj tidigare svar…", "Pick a previous answer…")}</option>
             {scopedHistory.map((row) => (
               <option key={row.id} value={row.id}>
                 {analysisDateTime(row.generatedAt)}

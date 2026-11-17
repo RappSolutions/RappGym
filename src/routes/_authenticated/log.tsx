@@ -120,7 +120,7 @@ function LogPage() {
       if (error) throw error;
       await queryClient.invalidateQueries({ queryKey: ["workout-suggestions"] });
       setCopying(null);
-      toast.success(t(`Planerat ${form.date} under Träna`, `Planned ${form.date} under Train`));
+      toast.success(t(`Planerat ${form.date} under Pass`, `Planned ${form.date} under Workouts`));
       void navigate({ to: "/workout" });
     } catch {
       toast.error(t("Kunde inte planera passet igen.", "Could not plan the workout again."));
@@ -175,7 +175,7 @@ function LogPage() {
             <DrawerHeader className="px-0">
               <DrawerTitle className="font-display text-2xl">{t("Planera igen", "Plan again")}</DrawerTitle>
               <DrawerDescription>
-                {t("Kopieras som planerat pass under Träna.", "Copied as a planned workout under Train.")}
+                {t("Kopieras som planerat pass under Pass.", "Copied as a planned workout under Workouts.")}
               </DrawerDescription>
             </DrawerHeader>
             <div className="space-y-1">

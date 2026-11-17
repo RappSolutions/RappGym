@@ -39,3 +39,7 @@
 - [x] Real exercise link on log rows, usage-aware delete with hide/reactivate, retire exercises.gym_id
 - [x] Exercise picture add/upload/remove and AI-generated pictures with user wishes
 - [x] Remove duplicate AI cost in history list; drop "Förslag" label; show workout creator/created time; copy workout from Log with name/date/location/circuit; schema.puml + English README
+- [x] Flikar Hem-AI-Övningar-Pass-Logg, nya ikoner
+- [x] Statistik som kollapsad del på Hem, ta bort sidan
+- [x] Dela Träna i Övningar + Pass
+- [x] AI: fullbredd lägesväljare, ingen historik vald, bort 'Gå till passet'

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { BarChart3, House, Dumbbell, History, Sparkles } from "lucide-react";
+import { House, Dumbbell, CalendarDays, ClipboardCheck, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/lib/i18n";
 import { ProfileMenu } from "@/components/gym/ProfileMenu";
@@ -16,19 +16,18 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 const tabs = [
-  { to: "/home", label: "Hem", icon: House },
-  { to: "/workout", label: "Träna", icon: Dumbbell },
-  { to: "/log", label: "Logg", icon: History },
-  { to: "/statistics", label: "Statistik", icon: BarChart3 },
-  { to: "/ai", label: "AI", icon: Sparkles },
+  { to: "/home", label: "Hem", en: "Home", icon: House },
+  { to: "/ai", label: "AI", en: "AI", icon: Sparkles },
+  { to: "/exercises", label: "Övningar", en: "Exercises", icon: Dumbbell },
+  { to: "/workout", label: "Pass", en: "Workouts", icon: CalendarDays },
+  { to: "/log", label: "Logg", en: "Log", icon: ClipboardCheck },
 ] as const;
 
 const pageLabels: [RegExp, string, string][] = [
   [/^\/home/, "Hem", "Home"],
-  [/^\/workout/, "Träna", "Train"],
+  [/^\/workout/, "Pass", "Workouts"],
   [/^\/exercises/, "Övningar", "Exercises"],
   [/^\/log/, "Logg", "Log"],
-  [/^\/statistics/, "Statistik", "Statistics"],
   [/^\/ai/, "AI", "AI"],
   [/^\/settings/, "Inställningar", "Settings"],
 ];
@@ -59,7 +58,7 @@ function AppLayout() {
       <Outlet />
       <nav className="app-navigation fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur">
         <div className="mx-auto grid max-w-2xl grid-cols-5">
-          {tabs.map(({ to, label, icon: Icon }) => (
+          {tabs.map(({ to, label, en, icon: Icon }) => (
             <Link
               key={to}
               to={to}
@@ -69,7 +68,7 @@ function AppLayout() {
               {({ isActive }) => (
                 <>
                   <Icon className={`h-6 w-6 ${isActive ? "text-brand-blue" : ""}`} />
-                   {t(label, to === "/home" ? "Home" : to === "/workout" ? "Train" : to === "/log" ? "Log" : to === "/ai" ? "AI" : "Statistics")}
+                   {t(label, en)}
                 </>
               )}
             </Link>

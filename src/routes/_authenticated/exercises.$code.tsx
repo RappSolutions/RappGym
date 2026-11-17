@@ -42,7 +42,7 @@ function ExercisePage() {
   const [entry, setEntry] = useState<LogEntry | null>(null);
   const original = exercises.find((e) => e.code === code);
   const ex = original ? localize(original) : undefined;
-  if (!ex) return <p className="p-4">{t("Övningen finns inte.", "Exercise not found.")} <Link to="/workout" className="underline">{t("Tillbaka", "Back")}</Link></p>;
+  if (!ex) return <p className="p-4">{t("Övningen finns inte.", "Exercise not found.")} <Link to="/exercises" className="underline">{t("Tillbaka", "Back")}</Link></p>;
   const cats = categoriesOf(exercises);
   const token = categoryToken(ex.category, cats);
   const history = log.filter((e) => e.code === code);
@@ -57,12 +57,12 @@ function ExercisePage() {
       return;
     }
     invalidate();
-    navigate({ to: "/workout" });
+    navigate({ to: "/exercises" });
   }
 
   return (
     <main data-category={token} className="category-theme space-y-5 px-4">
-      <Link to="/workout" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4" />{t("Träna", "Train")}</Link>
+      <Link to="/exercises" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4" />{t("Övningar", "Exercises")}</Link>
       <div>
         <div className="font-display text-lg font-bold uppercase text-category-ink">{ex.code} · {ex.category}</div>
         <h1 className="text-4xl font-extrabold uppercase leading-none">{ex.name}</h1>
