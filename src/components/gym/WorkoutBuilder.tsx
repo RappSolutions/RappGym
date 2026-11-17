@@ -41,7 +41,7 @@ export function WorkoutBuilder({ exercises, last, gymId, quickStart = false }: {
 
   return (
     <>
-      <Button variant={quickStart ? "default" : "outline"} size={quickStart ? "lg" : "default"} className="w-full" onClick={() => setOpen(true)}>{quickStart ? <Play className="size-4" /> : <ListPlus className="size-4" />}{quickStart ? t("Starta nytt pass", "Start a new workout") : t("Skapa eget pass", "Create own workout")}</Button>
+      <Button variant={quickStart ? "secondary" : "outline"} size={quickStart ? "lg" : "default"} className="w-full" onClick={() => setOpen(true)}>{quickStart ? <Play className="size-4" /> : <ListPlus className="size-4" />}{quickStart ? t("Starta nytt pass", "Start a new workout") : t("Skapa eget pass", "Create own workout")}</Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90dvh] max-w-md overflow-y-auto">
           <DialogHeader><DialogTitle>{quickStart ? t("Starta nytt pass", "Start a new workout") : t("Skapa eget pass", "Create own workout")}</DialogTitle><DialogDescription>{t("Välj övningar i den ordning du vill köra dem. Vikten förifylls från senaste gången.", "Pick exercises in the order you want to do them. Weight is prefilled from last time.")}</DialogDescription></DialogHeader>
