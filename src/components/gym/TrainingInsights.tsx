@@ -90,9 +90,14 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
         historyId = data.id;
         setSelectedId(historyId);
       }
-      const rows = workouts.filter((workout) => keys.includes(workout.key) && !acceptedKeys.has(workout.key)).flatMap((workout) => suggestionRows(workout.exercises, planStartDate(current.request, current.today), workout.dayOffset, workout.title, current.gymId, crypto.randomUUID()).map((row) => ({ ...row, ai_history_id: historyId, ai_workout_key: workout.key })));
-      const { error } = await supabase.from("log_entries").upsert(rows, { onConflict: "user_id,ai_history_id,ai_workout_key,proposal_order", ignoreDuplicates: true });
-      if (error) throw error;
+      for (const workout of workouts.filter((item) => keys.includes(item.key) && !acceptedKeys.has(item.key))) {
+        const date = plannedWorkoutDate(planStartDate(current.request, current.today), workout.dayOffset);
+        const head = await supabase.from("workouts").insert({ title: workout.title, created_by: "ai", scheduled_date: date, gym_id: current.gymId, ai_history_id: historyId, ai_workout_key: workout.key, is_circuit: true }).select("id").single();
+        if (head.error) { if (head.error.code === "23505") continue; throw head.error; }
+        const { error } = await supabase.from("log_entries").insert(suggestionRows(workout.exercises, planStartDate(current.request, current.today), workout.dayOffset, current.gymId, head.data.id));
+        if (error) throw error;
+      }
+
       setSaved((previous) => new Set([...previous, ...keys.map((key) => `${historyId}:${key}`)]));
       await Promise.all([queryClient.invalidateQueries({ queryKey: ["workout-suggestions"] }), queryClient.invalidateQueries({ queryKey: ["accepted-ai-workouts"] }), queryClient.invalidateQueries({ queryKey: ["ai-history"] })]);
     } catch (error) { setError(error instanceof Error ? error.message : t("Passet kunde inte sparas", "Could not save workout")); }
