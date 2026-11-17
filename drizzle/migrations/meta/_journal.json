@@ -127,6 +127,13 @@
       "when": 1794912379718,
       "tag": "0017_workouts_table",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794931693495,
+      "tag": "0018_gyms_read_signed_in_only",
+      "breakpoints": true
     }
   ]
 }
