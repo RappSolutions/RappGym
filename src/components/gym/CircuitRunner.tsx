@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ExerciseImages } from "@/components/gym/ExerciseImages";
 import { Minus, Plus, Check, SkipForward } from "lucide-react";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -71,13 +71,14 @@ export function CircuitRunner({ rows, names, onClose }: { rows: LogEntry[]; name
   const rawEx = r ? allExercises.find((e) => e.code === r.code) : undefined;
   const ex = rawEx ? localize(rawEx) : undefined;
   return (
-    <Dialog open onOpenChange={(o) => { if (!o) void finish(0); }}>
-      <DialogContent className="max-h-[95dvh] max-w-lg overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="font-display text-2xl">{circuit ? t(`Varv ${step?.lap ?? laps} av ${laps}`, `Lap ${step?.lap ?? laps} of ${laps}`) : t(`Set ${step?.lap ?? 1} av ${step?.row.sets ?? 1}`, `Set ${step?.lap ?? 1} of ${step?.row.sets ?? 1}`)} · {t(`Steg ${before + i + 1} av ${total}`, `Step ${before + i + 1} of ${total}`)}</DialogTitle>
-          <DialogDescription>{t(`${prior.length + done} set loggade`, `${prior.length + done} sets logged`)}</DialogDescription>
+    <Drawer open onOpenChange={(o) => { if (!o) void finish(0); }}>
+      <DrawerContent>
+        <div className="mx-auto max-h-[85vh] w-full max-w-md space-y-4 overflow-y-auto px-4 pb-8">
+        <DrawerHeader className="px-0">
+          <DrawerTitle className="font-display text-2xl">{circuit ? t(`Varv ${step?.lap ?? laps}/${laps}`, `Lap ${step?.lap ?? laps}/${laps}`) : `Set ${step?.lap ?? 1}/${step?.row.sets ?? 1}`} · {t(`Steg ${before + i + 1}/${total}`, `Step ${before + i + 1}/${total}`)}</DrawerTitle>
+          <DrawerDescription>{`${before + done}/${total} set`}</DrawerDescription>
           <div className="h-2 rounded bg-muted"><div className="h-2 rounded bg-primary" style={{ width: `${total ? ((before + i) / total) * 100 : 0}%` }} /></div>
-        </DialogHeader>
+        </DrawerHeader>
         <label className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm"><span><span className="block font-medium">{t("Kör som cirkel", "Run as circuit")}</span><span className="block text-xs text-muted-foreground">{circuit ? t("Ett set per övning, varv för varv", "One set per exercise, lap by lap") : t("Alla set på en övning innan nästa", "All sets of one exercise before the next")}</span></span><Switch checked={circuit} disabled={i > 0 || prior.length > 0 || busy} onCheckedChange={setCircuit} /></label>
         {r && <div className="space-y-4">
           <div><p className="font-bold text-primary">{r.code}</p><p className="text-xl font-bold">{ex?.name ?? names.get(r.code)?.name ?? r.code}</p>{(ex?.variant || ex?.muscles) && <p className="text-sm text-muted-foreground">{[ex?.variant, ex?.muscles].filter(Boolean).join(" · ")}</p>}{r.note && <p className="text-sm text-muted-foreground">{r.note}</p>}</div>
@@ -92,7 +93,8 @@ export function CircuitRunner({ rows, names, onClose }: { rows: LogEntry[]; name
           <div className="flex gap-2"><Button variant="ghost" disabled={busy} onClick={() => void next(false)}><SkipForward className="size-4" />{t("Hoppa över", "Skip")}</Button><Button className="h-12 flex-1 text-lg" disabled={busy} onClick={() => void next(true)}><Check />{t("Klar", "Done")}</Button></div>
           <Button variant="outline" className="w-full" disabled={busy} onClick={() => void finish(done + prior.length)}>{t("Avsluta passet nu", "End workout now")}</Button>
         </div>}
-      </DialogContent>
-    </Dialog>
+      </div>
+      </DrawerContent>
+    </Drawer>
   );
 }
