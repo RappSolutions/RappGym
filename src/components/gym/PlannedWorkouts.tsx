@@ -46,8 +46,6 @@ export function PlannedWorkouts() {
   const [entry, setEntry] = useState<LogEntry | null>(null);
   const [expandedOverrides, setExpandedOverrides] = useState<Map<string, boolean>>(new Map());
   const [proposalOverrides, setProposalOverrides] = useState<Map<string, boolean>>(new Map());
-  const [proposalsExpanded, setProposalsExpanded] = useState(true);
-  const [completedExpanded, setCompletedExpanded] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const today = todayISO();
@@ -73,10 +71,7 @@ export function PlannedWorkouts() {
 
   async function deleteProposal() {
     if (!deletingId || deleting) return;
-    const all = deletingId === "__all__";
-    const ids = all
-      ? proposals.filter((row) => row.status === "suggested").map((row) => row.id)
-      : removableSuggestionIds(proposals, deletingId);
+    const ids = removableSuggestionIds(proposals, deletingId);
     if (!ids.length) {
       setDeletingId(null);
       return;
@@ -85,7 +80,7 @@ export function PlannedWorkouts() {
     try {
       const { error } = await supabase.from("log_entries").delete().in("id", ids).eq("status", "suggested");
       if (error) throw error;
-      if (all || guidedId === deletingId) {
+      if (guidedId === deletingId) {
         setGuidedId(null);
         setEntry(null);
       }
@@ -94,9 +89,7 @@ export function PlannedWorkouts() {
         queryClient.invalidateQueries({ queryKey: ["accepted-ai-workouts"] }),
       ]);
       setDeletingId(null);
-      toast.success(
-        all ? t("Alla förslag borttagna", "All suggestions removed") : t("Förslaget borttaget", "Suggestion removed"),
-      );
+      toast.success(t("Förslaget borttaget", "Suggestion removed"));
     } catch {
       toast.error(t("Förslaget kunde inte tas bort. Försök igen.", "Could not remove suggestion. Try again."));
     } finally {
@@ -108,32 +101,10 @@ export function PlannedWorkouts() {
     <>
       {proposals.length > 0 && (
         <section
-          className="space-y-3 border-b border-border pb-5"
+          className="space-y-3"
           aria-label={t("Föreslagna pass", "Suggested workouts")}
         >
-          <Button
-            variant="ghost"
-            className="h-auto min-h-12 w-full justify-start gap-2 whitespace-normal px-0 text-left"
-            aria-expanded={proposalsExpanded}
-            aria-controls="proposed-workouts"
-            onClick={() => setProposalsExpanded(!proposalsExpanded)}
-          >
-            {proposalsExpanded ? (
-              <ChevronDown className="size-4 shrink-0" />
-            ) : (
-              <ChevronRight className="size-4 shrink-0" />
-            )}
-            <Circle className="size-5 shrink-0 text-primary" />
-            <span className="font-display text-2xl font-bold">{t("Planerade pass", "Planned workouts")}</span>
-            <span className="ml-auto text-sm text-muted-foreground">{planned.size}</span>
-          </Button>
-          {proposalsExpanded && (
-            <Button variant="outline" size="sm" className="text-destructive" onClick={() => setDeletingId("__all__")}>
-              <Trash2 className="size-4" />
-              {t("Ta bort alla förslag", "Delete all suggestions")}
-            </Button>
-          )}
-          <div id="proposed-workouts" hidden={!proposalsExpanded} className="space-y-3">
+          <div id="proposed-workouts" className="space-y-3">
             {[...planned].map(([id, rows]) => {
               const first = rows[0];
               if (!first) return null;
@@ -237,9 +208,7 @@ export function PlannedWorkouts() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {deletingId === "__all__"
-                ? t(`Ta bort alla ${planned.size} föreslagna pass?`, `Remove all ${planned.size} suggested workouts?`)
-                : t("Ta bort föreslaget pass?", "Remove suggested workout?")}
+              {t("Ta bort föreslaget pass?", "Remove suggested workout?")}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {t(
@@ -259,9 +228,7 @@ export function PlannedWorkouts() {
             >
               {deleting
                 ? t("Tar bort…", "Removing…")
-                : deletingId === "__all__"
-                  ? t("Ta bort alla", "Delete all")
-                  : t("Ta bort förslag", "Remove suggestion")}
+                : t("Ta bort förslag", "Remove suggestion")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
