@@ -18,3 +18,8 @@ export function adjustLoad(load: string, delta: number): string {
 export function stationSteps<T extends { id: string; sets: number }>(rows: readonly T[]): { lap: number; row: T }[] {
   return rows.flatMap((row) => Array.from({ length: Math.max(1, row.sets) }, (_, k) => ({ lap: k + 1, row })));
 }
+
+/** Steps still to do: drop the first N laps of each exercise where N = sets already completed for it in this workout. */
+export function remainingSteps<T extends { row: { code: string }; lap: number }>(steps: readonly T[], doneByCode: ReadonlyMap<string, number>): T[] {
+  return steps.filter((s) => s.lap > (doneByCode.get(s.row.code) ?? 0));
+}
