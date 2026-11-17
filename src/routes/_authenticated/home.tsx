@@ -2,7 +2,7 @@ import { isWorkoutFinished, workoutSetProgress } from "@/lib/circuit";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Play } from "lucide-react";
+import { Play, Sparkles } from "lucide-react";
 import { WorkoutBuilder } from "@/components/gym/WorkoutBuilder";
 import { CircuitRunner } from "@/components/gym/CircuitRunner";
 import { useSelectedGym } from "@/hooks/use-gym";
@@ -73,7 +73,7 @@ function HomePage() {
         const { done: doneSets, total } = workoutSetProgress(id, rows, log);
         if (isWorkoutFinished(doneSets, total)) return null;
         const ongoing = doneSets > 0;
-        return <Button key={id} size="lg" variant="secondary" className="h-auto min-h-12 w-full justify-start whitespace-normal text-left" onClick={() => setRunning(rows)}><Play className="size-4 shrink-0" /><span className="min-w-0 flex-1"><span className="block font-bold">{ongoing ? `${t("Pågående", "Ongoing")}: ` : ""}{rows[0]?.workout?.title}</span><span className="block text-xs font-normal">{rows[0]?.date !== todayISO() ? `${formatDate(rows[0]?.date ?? "")} · ` : ""}{rows.map((r) => r.code).join(" · ")}{ongoing ? ` (${doneSets}/${total} ${t("klara", "done")})` : ""}</span></span></Button>;
+        return <Button key={id} size="lg" variant="secondary" className="h-auto min-h-12 w-full justify-start whitespace-normal text-left" onClick={() => setRunning(rows)}><Play className="size-4 shrink-0" /><span className="min-w-0 flex-1"><span className="block font-bold">{ongoing ? `${t("Pågående", "Ongoing")}: ` : ""}{rows[0]?.workout?.title}{rows[0]?.workout?.created_by === "ai" && <Sparkles className="ml-1 inline size-4 text-primary" aria-label="AI" />}</span><span className="block text-xs font-normal">{rows[0]?.date !== todayISO() ? `${formatDate(rows[0]?.date ?? "")} · ` : ""}{rows.map((r) => r.code).join(" · ")}{ongoing ? ` (${doneSets}/${total} ${t("klara", "done")})` : ""}</span></span></Button>;
       })}
       {gym && <WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} quickStart />}
     </section>

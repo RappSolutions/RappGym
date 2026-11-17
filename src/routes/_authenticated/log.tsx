@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, CheckCircle2, Trash2, MapPin, Repeat, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronRight, CheckCircle2, Trash2, Repeat, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
@@ -126,7 +126,7 @@ function LogPage() {
                 {open ? <ChevronDown className="mt-1 size-4 shrink-0 self-start" /> : <ChevronRight className="mt-1 size-4 shrink-0 self-start" />}
                 <span className="min-w-0 flex-1">
                   <span className="block font-display text-xl font-bold">{titleOf(g)}{g.entries[0]?.workout?.created_by === "ai" && <Sparkles className="ml-1 inline size-4 text-primary" aria-label="AI" />}</span>
-                  <span className="block text-sm">{formatDateWithWeekday(g.date, language)} · {sets} {t("set", "sets")} · <MapPin className="inline size-3" /> {places.join(", ")}{g.entries[0]?.workout && <span className="text-xs text-muted-foreground"> · {g.entries[0].workout.created_by === "ai" ? "AI" : t("Du", "You")} {createdStamp(g.entries[0].workout.created_at)}</span>}</span>
+                  <span className="block text-sm">{formatDateWithWeekday(g.date, language)} · {sets} {t("set", "sets")} · {places.join(", ")}{g.entries[0]?.workout && <span className="text-xs text-muted-foreground"> · {createdStamp(g.entries[0].workout.created_at)}</span>}</span>
                   <span className="mt-1 flex flex-wrap gap-x-2 text-xs">{cats.map((cat) => { const ex = exercises.find((e) => e.category === cat); return <span key={cat} data-category={categoryToken(cat, categories)} className="category-theme inline-flex items-center gap-1 font-semibold text-category-ink"><span className="size-2 rounded-full bg-category-fill" />{ex ? localize(ex).category : cat}</span>; })}</span>
                 </span>
               </Button>
