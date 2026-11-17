@@ -58,8 +58,8 @@ function Index() {
           height={240}
           className="landing-logo relative h-44 w-44 object-contain md:h-60 md:w-60"
         />
-        <h1 className="landing-rise relative mt-6 font-display text-5xl font-bold uppercase text-brand-blue md:text-6xl">
-          Rapp<span className="landing-gym">Gym</span>
+        <h1 className="landing-rise relative mt-6 font-display text-5xl font-bold text-brand-blue md:text-6xl">
+          Rapp<span className="text-brand-royal">Gym</span>
         </h1>
         <p className="landing-rise relative mt-3 max-w-sm text-muted-foreground [animation-delay:120ms]">
           {t("Logga pass, följ cirklar, se din progress.", "Log workouts, run circuits, track your progress.")}

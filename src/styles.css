@@ -223,7 +223,6 @@ body { background: var(--page-surround); }
 .landing-glow { position: absolute; inset: auto; top: 10%; width: 28rem; height: 28rem; border-radius: 9999px; background: radial-gradient(circle, color-mix(in oklch, var(--brand-yellow) 45%, transparent), transparent 65%); filter: blur(30px); animation: landing-pulse 6s ease-in-out infinite; pointer-events: none; }
 .landing-logo { filter: drop-shadow(0 18px 30px color-mix(in oklch, var(--brand-royal) 35%, transparent)); animation: landing-pop .7s cubic-bezier(.2,.9,.3,1.3) both, landing-float 5s ease-in-out .7s infinite; }
 .landing-rise { animation: landing-rise .6s ease-out both; }
-.landing-gym { color: var(--brand-royal); background: var(--brand-yellow); padding-inline: .15em; border-radius: .15em; }
 .landing-btn { height: 3rem; transition: transform .15s ease, box-shadow .15s ease; }
 .landing-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px color-mix(in oklch, var(--brand-blue) 25%, transparent); }
 @keyframes landing-pop { from { opacity: 0; transform: scale(.6) rotate(-12deg); } to { opacity: 1; transform: none; } }
