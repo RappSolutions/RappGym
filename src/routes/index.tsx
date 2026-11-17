@@ -33,7 +33,7 @@ function Index() {
         <Dumbbell className="h-10 w-10" />
       </div>
       <LanguagePicker />
-      <h1 className="text-5xl font-extrabold uppercase">{"RappGym"}</h1>
+      <h1 className="text-8xl font-extrabold uppercase">{"RappGym"}</h1>
       <p className="max-w-sm text-muted-foreground">
         {t("Din träningsdagbok och övningsbank.", "Your workout diary and exercise bank.")}
       </p>
