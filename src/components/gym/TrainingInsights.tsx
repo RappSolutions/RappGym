@@ -25,7 +25,7 @@ import { useSelectedGym } from "@/hooks/use-gym";
 import { gymsQuery } from "@/lib/gym";
 import { LogDatePicker } from "./LogDatePicker";
 
-export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[]; hasLog: boolean }) {
+export function TrainingInsights({ exercises, hasLog, initialMode }: { exercises: Exercise[]; hasLog: boolean; initialMode?: "summary" | "plan" }) {
   const { t, language, localize } = useLanguage();
   const queryClient = useQueryClient();
   const generate = useServerFn(getTrainingInsights);
