@@ -47,6 +47,12 @@ export const manageUser = createServerFn({ method: "POST" })
     if (data.action === "removeAdmin") ({ error } = await a.from("user_roles").delete().eq("user_id", data.userId).eq("role", "admin"));
     if (data.action === "disable") ({ error } = await a.auth.admin.updateUserById(data.userId, { ban_duration: "876000h" }));
     if (data.action === "enable") ({ error } = await a.auth.admin.updateUserById(data.userId, { ban_duration: "none" }));
+    if (data.action === "delete") {
+      for (const table of ["log_entries", "training_goals", "training_profiles", "training_ai_history"] as const) {
+        const r = await a.from(table).delete().eq("user_id", data.userId);
+        if (r.error) throw new Error(r.error.message);
+      }
+    }
     if (data.action === "delete") ({ error } = await a.auth.admin.deleteUser(data.userId));
     if (error) throw new Error(error.message);
     return { ok: true };
