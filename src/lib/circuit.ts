@@ -23,3 +23,13 @@ export function stationSteps<T extends { id: string; sets: number }>(rows: reado
 export function remainingSteps<T extends { row: { code: string }; lap: number }>(steps: readonly T[], doneByCode: ReadonlyMap<string, number>): T[] {
   return steps.filter((s) => s.lap > (doneByCode.get(s.row.code) ?? 0));
 }
+
+/** Done vs planned sets for one planned workout: completed rows' sets against the suggested rows' planned sets. */
+export function workoutSetProgress(proposalId: string, rows: readonly { sets: number | null }[], log: readonly { proposal_id: string | null; status: string; sets: number | null }[]): { done: number; total: number } {
+  const total = rows.reduce((n, r) => n + Math.max(1, r.sets ?? 1), 0);
+  const done = log.filter((e) => e.proposal_id === proposalId && e.status === "completed").reduce((n, e) => n + Math.max(1, e.sets ?? 1), 0);
+  return { done: Math.min(done, total), total };
+}
+
+/** A planned workout is finished once every planned set has been logged. */
+export function isWorkoutFinished(done: number, total: number): boolean { return total > 0 && done >= total; }

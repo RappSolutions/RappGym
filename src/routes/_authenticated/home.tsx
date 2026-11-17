@@ -1,3 +1,4 @@
+import { isWorkoutFinished, workoutSetProgress } from "@/lib/circuit";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -69,11 +70,10 @@ function HomePage() {
     <section className="space-y-2 rounded-xl border-2 border-primary bg-card p-4" aria-label={t("Träna nu", "Train now")}>
       <h2 className="text-xl font-bold uppercase">{t("Träna nu", "Train now")}{gym ? <span className="ml-2 text-sm font-normal normal-case text-muted-foreground">{gym.name}</span> : null}</h2>
       {[...todaysPlans].map(([id, rows]) => {
-        const doneSets = log.filter((e) => e.proposal_id === id).reduce((n, e) => n + Math.max(1, e.sets ?? 1), 0);
-        const planned = rows.reduce((n, r) => n + Math.max(1, r.sets ?? 1), 0);
-        const total = Math.max(planned, doneSets);
+        const { done: doneSets, total } = workoutSetProgress(id, rows, log);
+        if (isWorkoutFinished(doneSets, total)) return null;
         const ongoing = doneSets > 0;
-        return <Button key={id} size="lg" variant={ongoing ? "default" : "secondary"} className="h-auto min-h-12 w-full justify-start whitespace-normal text-left" onClick={() => setRunning(rows)}><Play className="size-4 shrink-0" /><span className="min-w-0 flex-1"><span className="block font-bold">{ongoing ? `${t("Pågående", "Ongoing")}: ` : ""}{rows[0]?.proposal_title}</span><span className="block text-xs font-normal">{rows[0]?.date !== todayISO() ? `${formatDate(rows[0]?.date ?? "")} · ` : ""}{rows.map((r) => r.code).join(" · ")}</span>{ongoing && <><span className="block text-xs font-semibold">{t(`${doneSets} av ${total} set klara – fortsätt`, `${doneSets} of ${total} sets done – continue`)}</span><span className="mt-1 block h-1.5 rounded bg-primary-foreground/30"><span className="block h-1.5 rounded bg-primary-foreground" style={{ width: `${(doneSets / total) * 100}%` }} /></span></>}</span></Button>;
+        return <Button key={id} size="lg" variant={ongoing ? "default" : "secondary"} className="h-auto min-h-12 w-full justify-start whitespace-normal text-left" onClick={() => setRunning(rows)}><Play className="size-4 shrink-0" /><span className="min-w-0 flex-1"><span className="block font-bold">{ongoing ? `${t("Pågående", "Ongoing")}: ` : ""}{rows[0]?.proposal_title}</span><span className="block text-xs font-normal">{rows[0]?.date !== todayISO() ? `${formatDate(rows[0]?.date ?? "")} · ` : ""}{rows.map((r) => r.code).join(" · ")}</span>{ongoing && <span className="block text-xs font-semibold">{t(`${doneSets}/${total} set klara – fortsätt`, `${doneSets}/${total} sets done – continue`)}</span>}</span></Button>;
       })}
       {gym && <WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} quickStart />}
     </section>
