@@ -173,7 +173,6 @@ export function PlannedWorkouts() {
                         <span className="block text-sm">
                           {formatDateWithWeekday(first.date, language)}
                           {gym ? ` · ${gym.name}` : ""}
-                          <span className="text-xs text-muted-foreground"></span>
                         </span>
                       </span>
                     </span>
