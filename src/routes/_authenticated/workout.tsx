@@ -1,7 +1,7 @@
 import { useLanguage } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { MapPin, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { GymPicker } from "@/components/gym/GymPicker";
 import { useSelectedGym } from "@/hooks/use-gym";
@@ -72,7 +72,7 @@ function PassPage() {
   return (
     <main className="space-y-4 px-4">
       <Button variant="secondary" onClick={() => setPicking(true)} className="gap-1.5 rounded-full px-3 text-sm font-medium">
-        <MapPin className="h-4 w-4 text-primary" /> {gym.name} <span className="text-muted-foreground">· {t("byt", "change")}</span>
+        {gym.name} <span className="text-muted-foreground">· {t("byt", "change")}</span>
       </Button>
       <PlannedWorkouts />
       <WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} />
