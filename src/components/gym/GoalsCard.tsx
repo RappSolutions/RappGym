@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { Flag, Pencil, Plus, Target, Trash2 } from "lucide-react";
+import { Flag, Pencil, Plus, RotateCcw, Target, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +54,7 @@ export function GoalsCard() {
         {!isGoalOpen(g) && <> · <span className="font-semibold">{label[g.status as GoalStatus] ?? g.status}</span></>}
       </div>
     </div>
+    {!isGoalOpen(g) && <Button size="sm" variant="outline" onClick={() => void setStatus(g, "active")}><RotateCcw className="size-4" />{t("Återaktivera", "Reactivate")}</Button>}
     <DropdownMenu>
       <DropdownMenuTrigger asChild><Button size="icon" variant="ghost" aria-label={t("Avsluta mål", "Finalize goal")}><Flag className="size-4" /></Button></DropdownMenuTrigger>
       <DropdownMenuContent align="end">

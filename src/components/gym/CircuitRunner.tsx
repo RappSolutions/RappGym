@@ -90,7 +90,7 @@ export function CircuitRunner({ rows, names, onClose }: { rows: LogEntry[]; name
             <div className="flex items-center gap-2"><Button variant="outline" size="icon" className="size-12" aria-label="-1" onClick={() => r && setReps((m) => new Map(m).set(r.id, Math.max(0, rep - 1)))}><Minus /></Button><Input inputMode="numeric" value={rep} onChange={(e) => r && setReps((m) => new Map(m).set(r.id, Number(e.target.value) || 0))} className="h-12 text-center text-xl font-bold" /><Button variant="outline" size="icon" className="size-12" aria-label="+1" onClick={() => r && setReps((m) => new Map(m).set(r.id, rep + 1))}><Plus /></Button></div></div>
           <p className="text-xs text-muted-foreground">{t("Vikten du väljer följer med till nästa varv.", "The weight you choose carries over to the next lap.")}</p>
           <div className="flex gap-2"><Button variant="ghost" disabled={busy} onClick={() => void next(false)}><SkipForward className="size-4" />{t("Hoppa över", "Skip")}</Button><Button className="h-12 flex-1 text-lg" disabled={busy} onClick={() => void next(true)}><Check />{t("Klar", "Done")}</Button></div>
-          <Button variant="outline" className="w-full" disabled={busy} onClick={() => void finish(done)}>{t("Avsluta passet nu", "End workout now")}</Button>
+          <Button variant="outline" className="w-full" disabled={busy} onClick={() => void finish(done + prior.length)}>{t("Avsluta passet nu", "End workout now")}</Button>
         </div>}
       </DialogContent>
     </Dialog>
