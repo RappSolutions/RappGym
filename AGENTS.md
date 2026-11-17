@@ -34,7 +34,7 @@ use the editor.
 - Use the shared ISO log date picker with an interactive Shadcn calendar inside the drawer, so selecting dates is independent of native browser picker support.
 - Keep AI analysis/planning/history on the dedicated authenticated AI route; shared navigation provides access without crowding dashboard or statistics.
 - Progress exercise selection uses searchable, database-derived category groups; log proposal deletion targets suggested rows only and preserves completed work and AI history.
-- Keep supported OAuth methods in a shared auth-provider module used by the sign-in page and tested, so authentication restrictions stay consistent.
+- Keep OAuth methods in a tested shared auth-provider module; sign-in lives only on "/" (/auth redirects), so restrictions stay consistent.
 - Generate training insights only on an explicit request through an authenticated server function, with user-scoped reads and server-only streamed AI Gateway Responses calls; keep computed facts separate from AI advice to protect log accuracy and avoid automatic billing.
 - Validate custom training requests and normalize multi-workout plans in a shared pure module; scope cached results by request, language and gym to avoid showing another plan as the current answer.
 - Workouts are rows in `workouts`; log_entries.workout_id is an optional FK, status separates plans from facts; proposal_id/proposal_title/ai_* on log_entries are deprecated, never write them.

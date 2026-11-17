@@ -9,7 +9,7 @@ export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
-    if (!data.user) throw redirect({ to: "/auth" });
+    if (!data.user) throw redirect({ to: "/" });
     return { user: data.user };
   },
   component: AppLayout,
@@ -45,7 +45,7 @@ function AppLayout() {
     await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    navigate({ to: "/", replace: true });
   }
   return (
     <div className="app-sheet mx-auto min-h-screen max-w-2xl pb-24 md:max-w-4xl">
