@@ -10,9 +10,9 @@ export const Route = createFileRoute("/")({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: "RappGym – logga dina gympass" },
+      { title: "RappGym – log your workouts" },
       { name: "description", content: "Snabb loggning av set, vikt och reps med din egen övningsbank." },
-      { property: "og:title", content: "RappGym – logga dina gympass" },
+      { property: "og:title", content: "RappGym – log your workouts" },
       { property: "og:description", content: "Snabb loggning av set, vikt och reps med din egen övningsbank." },
     ],
   }),
