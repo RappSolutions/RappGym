@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, CheckCircle2, Trash2, Repeat, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronRight, CheckCircle2, Trash2, Repeat, Sparkles, LayoutList, Rows3 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -72,6 +72,12 @@ function LogPage() {
   const [busy, setBusy] = useState(false);
   const [copying, setCopying] = useState<Group | null>(null);
   const [form, setForm] = useState({ title: "", date: "", gymId: "", circuit: true });
+  const [compact, setCompact] = useState(false);
+  useEffect(() => setCompact(localStorage.getItem("rappgym-log-view") === "compact"), []);
+  function chooseView(c: boolean) {
+    setCompact(c);
+    localStorage.setItem("rappgym-log-view", c ? "compact" : "cards");
+  }
   const today = todayISO();
   const categories = categoriesOf(exercises);
   const byCode = new Map(exercises.map((e) => [e.code, localize(e)]));
@@ -224,7 +230,30 @@ function LogPage() {
           </div>
         </DrawerContent>
       </Drawer>
-      <div className="space-y-4">
+      {!!log.length && (
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>
+            {groups.length} {t("pass", "workouts")} · {log.reduce((n, x) => n + (x.sets ?? 1), 0)} {t("set", "sets")}
+          </span>
+          <span className="flex gap-1">
+            {[false, true].map((c) => (
+              <Button
+                key={String(c)}
+                variant="ghost"
+                size="icon"
+                aria-pressed={compact === c}
+                aria-label={c ? t("Kompakt lista", "Compact list") : t("Kort", "Cards")}
+                title={c ? t("Kompakt lista", "Compact list") : t("Kort", "Cards")}
+                className={compact === c ? "bg-muted text-foreground" : ""}
+                onClick={() => chooseView(c)}
+              >
+                {c ? <Rows3 className="size-4" /> : <LayoutList className="size-4" />}
+              </Button>
+            ))}
+          </span>
+        </div>
+      )}
+      <div className={compact ? "divide-y rounded-xl border bg-card" : "space-y-4"}>
         {groups.map((g) => {
           const entries = workoutRecordingOrder(g.entries);
           const cats = [
@@ -239,6 +268,61 @@ function LogPage() {
             ),
           ];
           const sets = entries.reduce((n, x) => n + (x.sets ?? 1), 0);
+          if (compact)
+            return (
+              <section key={g.key}>
+                <button
+                  type="button"
+                  aria-expanded={open}
+                  onClick={() => setOverrides((m) => new Map(m).set(g.key, !open))}
+                  className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-muted/50"
+                >
+                  <span className="w-24 shrink-0 tabular-nums text-muted-foreground">{g.date}</span>
+                  <span className="min-w-0 flex-1 truncate">
+                    {titleOf(g)}
+                    {g.entries[0]?.workout?.created_by === "ai" && (
+                      <Sparkles className="ml-1 inline size-3 text-primary" aria-label="AI" />
+                    )}
+                  </span>
+                  <span className="flex shrink-0 gap-1">
+                    {cats.map((cat) => (
+                      <span
+                        key={cat}
+                        title={cat}
+                        data-category={categoryToken(cat, categories)}
+                        className="category-theme size-2.5 rounded-full bg-category-fill"
+                      />
+                    ))}
+                  </span>
+                </button>
+                {open && (
+                  <div className="border-t bg-muted/20 text-sm">
+                    {entries.map((e) => (
+                      <button
+                        type="button"
+                        key={e.id}
+                        onClick={() => setEntry(e)}
+                        data-category={categoryToken(exercises.find((ex) => ex.code === e.code)?.category ?? "", categories)}
+                        className="category-theme flex w-full items-center gap-3 border-l-4 border-category-fill px-3 py-1.5 text-left"
+                      >
+                        <span className="w-12 shrink-0 font-semibold text-category-ink">{e.code}</span>
+                        <span className="min-w-0 flex-1 truncate">{byCode.get(e.code)?.name ?? t("Okänd övning", "Unknown exercise")}</span>
+                        <span className="font-semibold">{formatSet(e)}</span>
+                      </button>
+                    ))}
+                    <div className="flex items-center justify-end gap-1 px-2 py-1 text-xs text-muted-foreground">
+                      <span className="mr-auto">{sets} {t("set", "sets")} · {places.join(", ")}</span>
+                      <Button variant="ghost" size="icon" disabled={busy} title={t("Planera igen", "Plan again")} aria-label={`${t("Planera igen", "Plan again")}: ${titleOf(g)}`} onClick={() => openCopy(g)}>
+                        <Repeat className="size-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" disabled={busy} className="text-destructive" title={t("Ta bort pass", "Remove workout")} aria-label={`${t("Ta bort pass", "Remove workout")}: ${titleOf(g)}`} onClick={() => setDeleting(g)}>
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </section>
+            );
           return (
             <section key={g.key} className="rounded-xl border bg-card">
               <div className="flex items-start gap-1 p-2">
