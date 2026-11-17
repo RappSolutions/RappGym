@@ -1,7 +1,7 @@
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, Play, Circle, Trash2, Repeat } from "lucide-react";
+import { ChevronDown, ChevronRight, Play, Circle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { removableSuggestionIds } from "@/lib/workout-suggestions";
@@ -83,7 +83,7 @@ export function PlannedWorkouts() {
             <div className="divide-y divide-border">{rows.map((row) => <Button key={row.id} variant="ghost" data-category={categoryToken(byCode.get(row.code)?.category ?? "", categories)} className="category-theme grid h-auto min-h-12 w-full grid-cols-[1rem_2.5rem_minmax(0,1fr)] gap-x-2 gap-y-1 whitespace-normal border-l-4 border-category-fill px-2 py-3 text-left sm:grid-cols-[1rem_2.5rem_minmax(0,1fr)_auto]" onClick={() => { setGuidedId(null); setEntry(row); }}>
               <Circle className="size-4 shrink-0 text-primary" /><span className="font-bold text-category-ink">{row.code}</span><span className="min-w-0 break-words">{byCode.get(row.code)?.name}</span><span className="col-span-2 col-start-2 min-w-0 break-words font-semibold sm:col-span-1 sm:col-start-auto">{formatSet(row)}</span>
             </Button>)}</div>
-             <div className="flex items-center justify-between gap-2"><Button className="min-w-0 whitespace-normal sm:w-auto" onClick={() => { setGuidedId(id); setEntry(first); }}><Play className="size-4 shrink-0" />{done ? t("Fortsätt passet", "Continue workout") : t("Gå igenom passet", "Start workout")}</Button><Button variant="secondary" className="min-w-0 whitespace-normal" onClick={() => setCircuitId(id)}><Repeat className="size-4 shrink-0" />{t("Kör som cirkel", "Run as circuit")}</Button><Button variant="ghost" size="icon" className="shrink-0 text-destructive" aria-label={`${t("Ta bort förslag", "Remove suggestion")}: ${first.proposal_title}`} title={t("Ta bort förslag", "Remove suggestion")} onClick={() => setDeletingId(id)}><Trash2 className="size-5" /></Button></div>
+             <div className="flex items-center justify-between gap-2"><Button className="min-w-0 flex-1 whitespace-normal sm:flex-none" onClick={() => setCircuitId(id)}><Play className="size-4 shrink-0" />{done ? t("Fortsätt passet", "Continue workout") : t("Starta passet", "Start workout")}</Button><Button variant="ghost" size="icon" className="shrink-0 text-destructive" aria-label={`${t("Ta bort förslag", "Remove suggestion")}: ${first.proposal_title}`} title={t("Ta bort förslag", "Remove suggestion")} onClick={() => setDeletingId(id)}><Trash2 className="size-5" /></Button></div>
             </div>
           </article>;
         })}
