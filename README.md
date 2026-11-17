@@ -86,6 +86,7 @@ erDiagram
     uuid user_id
     text name
     text description
+    boolean is_public
   }
   EXERCISES {
     uuid id PK

@@ -134,6 +134,13 @@
       "when": 1794931693495,
       "tag": "0018_gyms_read_signed_in_only",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1794935470732,
+      "tag": "0019_gyms_is_public",
+      "breakpoints": true
     }
   ]
 }

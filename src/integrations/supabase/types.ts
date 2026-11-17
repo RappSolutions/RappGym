@@ -123,6 +123,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          is_public: boolean
           name: string
           user_id: string
         }
@@ -130,6 +131,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          is_public?: boolean
           name: string
           user_id?: string
         }
@@ -137,6 +139,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          is_public?: boolean
           name?: string
           user_id?: string
         }

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Check, ChevronDown, ChevronRight, Dumbbell, MapPin, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Dumbbell, MapPin, Pencil, Plus, Trash2, X , Globe, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -74,6 +74,11 @@ export function LocationsManager() {
     setEditing(null);
     refresh();
   }
+  async function togglePublic(g: Gym) {
+    const { error } = await supabase.from("gyms").update({ is_public: !g.is_public }).eq("id", g.id);
+    if (error) { toast.error(error.message); return; }
+    refresh();
+  }
   async function remove(g: Gym) {
     if (!confirm(t(`Ta bort ${g.name}?`, `Delete ${g.name}?`))) return;
     const { error } = await supabase.from("gyms").delete().eq("id", g.id);
@@ -106,6 +111,7 @@ export function LocationsManager() {
             <div className="font-semibold">{g.name}</div>
             {g.description && <div className="text-sm text-muted-foreground">{g.description}</div>}
           </div>
+          <Button size="icon" variant="ghost" onClick={() => void togglePublic(g)} aria-pressed={g.is_public} title={g.is_public ? t("Delad med alla användare", "Shared with all users") : t("Endast ägare och admin", "Owner and admin only")} aria-label={g.is_public ? t("Delad med alla användare", "Shared with all users") : t("Endast ägare och admin", "Owner and admin only")}>{g.is_public ? <Globe className="text-primary" /> : <Lock className="text-muted-foreground" />}</Button>
           <Button size="icon" variant="ghost" onClick={() => { setEditing(g.id); setDraft({ name: g.name, description: g.description }); }} aria-label={t("Redigera", "Edit")}><Pencil /></Button>
           <Button size="icon" variant="ghost" onClick={() => void remove(g)} aria-label={t("Ta bort", "Delete")}><Trash2 /></Button>
         </div>
