@@ -2,7 +2,8 @@ import { useId, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Sparkles, LoaderCircle, Send, CalendarPlus, Check } from "lucide-react";
+import { Sparkles, LoaderCircle, Send, CalendarPlus, Check, RotateCcw } from "lucide-react";
+import { estimateUsage, formatAiCost } from "@/lib/ai-cost";
 import { supabase } from "@/integrations/supabase/client";
 import { analysisDateTime, suggestionRows } from "@/lib/workout-suggestions";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
   const [minutes, setMinutes] = useState("");
   const { data: gyms } = useSuspenseQuery(gymsQuery);
   const [planGym, setPlanGym] = useState<string | null | undefined>(undefined);
-  const [startDate, setStartDate] = useState(todayISO());
+  const [startDate, setStartDate] = useState("");
   const requestGym = mode === "plan" && planGym !== undefined ? planGym : gymId;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,13 +46,14 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
   const [result, setResult] = useState<{ id: string; insights: Insights; generatedAt: string; language: string; gymId: string | null; today: string; question: string; request: ReturnType<typeof trainingRequestSchema.parse> } | null>(null);
 
   async function analyze() {
-    const parsed = trainingRequestSchema.safeParse({ mode, question: mode === "plan" ? "" : question, workoutCount: workoutCount ? Number(workoutCount) : null, periodDays: periodDays ? Number(periodDays) : null, sessionMinutes: mode === "plan" && minutes ? Number(minutes) : null, purpose, startDate: mode === "plan" ? startDate : null });
+    const parsed = trainingRequestSchema.safeParse({ mode, question: mode === "plan" ? "" : question, workoutCount: workoutCount ? Number(workoutCount) : null, periodDays: periodDays ? Number(periodDays) : null, sessionMinutes: mode === "plan" && minutes ? Number(minutes) : null, purpose, startDate: mode === "plan" && startDate ? startDate : null });
     if (!parsed.success) {
       setError(t("Kontrollera antal pass och dagar: högst ett pass per dag, 1–14 pass, 1–90 dagar och 5–240 minuter per pass.", "Check workouts and days: at most one workout per day, 1–14 workouts, 1–90 days and 5–240 minutes per workout."));
       return;
     }
     setBusy(true);
     setError(null);
+    setResult(null);
     try {
       const gymId = mode === "plan" ? requestGym : getSelectedGym();
       const today = todayISO();
@@ -71,6 +73,17 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
     } finally { setBusy(false); }
   }
 
+  function reuseRequest(r: ReturnType<typeof trainingRequestSchema.parse>, gym: string | null) {
+    if (r.mode === "plan") setPlanGym(gym);
+    setMode(r.mode === "plan" ? "plan" : "summary");
+    setQuestion(r.question ?? "");
+    setWorkoutCount(r.workoutCount ? String(r.workoutCount) : "");
+    setPeriodDays(r.periodDays ? String(r.periodDays) : "");
+    setPurpose(r.purpose ?? "");
+    setMinutes(r.sessionMinutes ? String(r.sessionMinutes) : "");
+    setStartDate("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
   const scopedHistory = history.filter((row) => row.request.mode === mode);
   const current = scopedHistory.find((row) => row.id === selectedId) ?? (result?.id === selectedId && result.request.mode === mode ? result : scopedHistory[0] ?? null);
   const sections = trainingResultSections(mode);
@@ -90,9 +103,14 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
         historyId = data.id;
         setSelectedId(historyId);
       }
-      const rows = workouts.filter((workout) => keys.includes(workout.key) && !acceptedKeys.has(workout.key)).flatMap((workout) => suggestionRows(workout.exercises, planStartDate(current.request, current.today), workout.dayOffset, workout.title, current.gymId, crypto.randomUUID()).map((row) => ({ ...row, ai_history_id: historyId, ai_workout_key: workout.key })));
-      const { error } = await supabase.from("log_entries").upsert(rows, { onConflict: "user_id,ai_history_id,ai_workout_key,proposal_order", ignoreDuplicates: true });
-      if (error) throw error;
+      for (const workout of workouts.filter((item) => keys.includes(item.key) && !acceptedKeys.has(item.key))) {
+        const date = plannedWorkoutDate(planStartDate(current.request, current.today), workout.dayOffset);
+        const head = await supabase.from("workouts").insert({ title: workout.title, created_by: "ai", scheduled_date: date, gym_id: current.gymId, ai_history_id: historyId, ai_workout_key: workout.key, is_circuit: true }).select("id").single();
+        if (head.error) { if (head.error.code === "23505") continue; throw head.error; }
+        const { error } = await supabase.from("log_entries").insert(suggestionRows(workout.exercises, planStartDate(current.request, current.today), workout.dayOffset, current.gymId, head.data.id));
+        if (error) throw error;
+      }
+
       setSaved((previous) => new Set([...previous, ...keys.map((key) => `${historyId}:${key}`)]));
       await Promise.all([queryClient.invalidateQueries({ queryKey: ["workout-suggestions"] }), queryClient.invalidateQueries({ queryKey: ["accepted-ai-workouts"] }), queryClient.invalidateQueries({ queryKey: ["ai-history"] })]);
     } catch (error) { setError(error instanceof Error ? error.message : t("Passet kunde inte sparas", "Could not save workout")); }
@@ -102,7 +120,7 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
     return <div className="flex flex-wrap items-center gap-3 pt-2"><Button type="button" variant="outline" disabled={busy || saving !== null || acceptedKeys.has(key) || !items.length} onClick={() => void saveWorkouts([key])}>
       {saving === key ? <LoaderCircle className="size-4 animate-spin" /> : acceptedKeys.has(key) ? <Check className="size-4" /> : <CalendarPlus className="size-4" />}
       {acceptedKeys.has(key) ? t("Passet accepterat som förslag", "Workout accepted as suggestion") : t("Acceptera passet som förslag", "Accept workout as suggestion")}
-    </Button>{acceptedKeys.has(key) && <Link to="/log" className="text-sm font-semibold text-primary underline">{t("Gå till passet i Logg", "Open workout in Log")}</Link>}</div>;
+    </Button>{acceptedKeys.has(key) && <Link to="/workout" className="text-sm font-semibold text-primary underline">{t("Gå till passet under Träna", "Open workout in Train")}</Link>}</div>;
   }
   const categories = categoriesOf(exercises);
   function suggestions(items: Insights["exercises"]) {
@@ -137,20 +155,21 @@ export function TrainingInsights({ exercises, hasLog }: { exercises: Exercise[];
       {mode === "plan" && <div className="space-y-1"><label htmlFor={`${id}-minutes`} className="text-sm font-medium">{t("Ungefärlig längd per pass (min)", "Approximate length per workout (min)")}</label><div className="flex flex-wrap gap-2">{[15, 30, 45, 60, 75, 90].map((m) => <Button key={m} type="button" size="sm" variant={minutes === String(m) ? "default" : "outline"} aria-pressed={minutes === String(m)} disabled={busy} onClick={() => setMinutes(minutes === String(m) ? "" : String(m))}>{m}</Button>)}<Input id={`${id}-minutes`} type="number" min={5} max={240} step={5} placeholder={t("Annat", "Other")} value={minutes} disabled={busy} onChange={(event) => setMinutes(event.target.value)} className="h-9 w-24" /></div></div>}
       {mode === "plan" && <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1"><label htmlFor={`${id}-gym`} className="text-sm font-medium">{t("Plats", "Location")}</label><select id={`${id}-gym`} className="h-12 w-full rounded-md border border-input bg-background px-3 text-sm" value={requestGym ?? ""} disabled={busy} onChange={(event) => setPlanGym(event.target.value || null)}><option value="">{t("Ingen särskild plats", "No specific location")}</option>{gyms.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}</select></div>
-        <div className="space-y-1"><label htmlFor="log-date" className="text-sm font-medium">{t("Startdatum", "Start date")}</label><LogDatePicker value={startDate} onChange={setStartDate} /></div>
+        <div className="space-y-1"><label htmlFor="log-date" className="text-sm font-medium">{t("Startdatum", "Start date")}</label><LogDatePicker value={startDate} onChange={setStartDate} placeholder={t(`Idag (${todayISO()})`, `Today (${todayISO()})`)} /></div>
       </div>}
       {mode === "plan" && <p className="text-sm text-muted-foreground">{t("Antal pass och dagar är valfria — tomt ger 4 pass under 7 dagar. Ditt träningstempo i profilen används också.", "Workouts and days are optional — empty means 4 workouts over 7 days. Your profile training pace is also used.")}</p>}
       <Button type="submit" disabled={busy || !hasLog} className="w-full sm:w-auto">
         {busy ? <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" /> : <Send className="size-4" />}
         {busy ? t("Tänker…", "Thinking…") : mode === "plan" ? t("Ge mig passförslag", "Suggest workouts") : question.trim() ? t("Fråga om min träning", "Ask about my training") : current ? t("Uppdatera analys", "Update analysis") : t("Analysera mina pass", "Analyze my workouts")}
       </Button>
+      {(() => { const e = estimateUsage(mode, history.map((h) => ({ mode: h.request.mode, inputTokens: h.inputTokens, outputTokens: h.outputTokens }))); return <p className="text-xs text-muted-foreground">{t("Uppskattad kostnad", "Estimated cost")}: {formatAiCost(e.input, e.output, language, true)}</p>; })()}
     </form>
-    {scopedHistory.length > 0 && <div className="space-y-1"><label htmlFor={`${id}-history`} className="text-sm font-semibold">{t("AI-historik", "AI history")}</label><select id={`${id}-history`} className="h-12 w-full rounded-md border border-input bg-background px-3 text-sm" value={current?.id ?? ""} disabled={busy || saving !== null} onChange={(event) => setSelectedId(event.target.value)}>{scopedHistory.map((row) => <option key={row.id} value={row.id}>{analysisDateTime(row.generatedAt)}{row.gymId ? ` · ${gyms.find((g) => g.id === row.gymId)?.name ?? ""}` : ""}{row.request.purpose || row.question ? ` · ${(row.request.purpose || row.question).slice(0, 70)}` : ""}</option>)}</select></div>}
+    {scopedHistory.length > 0 && <div className="space-y-1"><label htmlFor={`${id}-history`} className="text-sm font-semibold">{t("AI-historik", "AI history")}</label><select id={`${id}-history`} className="h-12 w-full rounded-md border border-input bg-background px-3 text-sm" value={current?.id ?? ""} disabled={busy || saving !== null} onChange={(event) => setSelectedId(event.target.value)}>{scopedHistory.map((row) => <option key={row.id} value={row.id}>{analysisDateTime(row.generatedAt)}{row.gymId ? ` · ${gyms.find((g) => g.id === row.gymId)?.name ?? ""}` : ""}{row.request.purpose || row.question ? ` · ${(row.request.purpose || row.question).slice(0, 70)}` : ""}{row.inputTokens != null && row.outputTokens != null ? ` · ${formatAiCost(row.inputTokens, row.outputTokens, language)}` : ""}</option>)}</select></div>}
     {!hasLog && <p className="text-sm text-muted-foreground">{t("Inga träningsloggar ännu.", "No workouts logged yet.")}</p>}
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     <div aria-live="polite" aria-busy={busy}>
-      {current && <div className="space-y-4">
-        <p className="text-xs text-muted-foreground">{sections.plan ? t("Planerad", "Planned") : t("Analyserad", "Analyzed")} {analysisDateTime(current.generatedAt)}</p>
+      {current && !busy && <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2"><p className="text-xs text-muted-foreground">{sections.plan ? t("Planerad", "Planned") : t("Analyserad", "Analyzed")} {analysisDateTime(current.generatedAt)}{(() => { const u = history.find((h) => h.id === current.id); return u && u.inputTokens != null && u.outputTokens != null ? ` · ${formatAiCost(u.inputTokens, u.outputTokens, language)}` : ""; })()}</p><Button type="button" size="sm" variant="ghost" onClick={() => reuseRequest(current.request, current.gymId)}><RotateCcw className="size-4" />{t("Fråga samma igen", "Ask the same again")}</Button></div>
         {sections.analysis && <>
         {current.question && <p className="break-words border-l-4 border-brand-yellow pl-3 text-sm">{current.question}</p>}
         {current.insights.answer && <p className="whitespace-pre-line leading-relaxed">{current.insights.answer}</p>}

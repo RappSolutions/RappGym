@@ -35,11 +35,11 @@ export function PlannedWorkouts() {
   for (const e of log) days.set(e.date, [...(days.get(e.date) ?? []), e]);
   const planned = new Map<string, LogEntry[]>();
   for (const row of proposals) {
-    const key = row.proposal_id ?? row.id;
+    const key = row.workout_id ?? row.id;
     planned.set(key, [...(planned.get(key) ?? []), row]);
   }
   const guidedRows = guidedId ? planned.get(guidedId) ?? [] : [];
-  const guidedDone = guidedId ? log.filter((row) => row.proposal_id === guidedId).length : 0;
+  const guidedDone = guidedId ? log.filter((row) => row.workout_id === guidedId).length : 0;
   function nextExercise() {
     const next = guidedRows.find((row) => row.id !== entry?.id);
     if (next) setEntry(next);
@@ -78,14 +78,14 @@ export function PlannedWorkouts() {
           const open = isProposalExpanded(first.date, today, proposalOverrides, id);
           return <article key={id} className="space-y-3 rounded-lg border-2 border-dashed border-primary bg-secondary p-3">
             <Button variant="ghost" aria-expanded={open} aria-controls={`proposal-${id}`} onClick={() => setProposalOverrides((current) => new Map(current).set(id, !isProposalExpanded(first.date, today, current, id)))} className="h-auto min-h-12 w-full flex-wrap items-start justify-between gap-2 whitespace-normal px-0 py-1 text-left hover:bg-transparent">
-              <span className="flex min-w-0 items-start gap-2 text-left">{open ? <ChevronDown className="mt-1.5 size-4 shrink-0" /> : <ChevronRight className="mt-1.5 size-4 shrink-0" />}<span className="min-w-0"><span className="block font-semibold text-primary">{t("Förslag", "Suggestion")}</span><span className="block text-xl font-bold">{first.proposal_title}</span><span className="block text-sm">{formatDateWithWeekday(first.date, language)}{gym ? ` · ${gym.name}` : ""}</span></span></span>
+              <span className="flex min-w-0 items-start gap-2 text-left">{open ? <ChevronDown className="mt-1.5 size-4 shrink-0" /> : <ChevronRight className="mt-1.5 size-4 shrink-0" />}<span className="min-w-0"><span className="block font-semibold text-primary">{t("Förslag", "Suggestion")}</span><span className="block text-xl font-bold">{first.workout?.title}</span><span className="block text-sm">{formatDateWithWeekday(first.date, language)}{gym ? ` · ${gym.name}` : ""}</span></span></span>
               <span className="text-sm font-medium">{done}/{total} {t("set klara", "sets done")}</span>
             </Button>
             <div id={`proposal-${id}`} hidden={!open} className="space-y-3">
             <div className="divide-y divide-border">{rows.map((row) => <Button key={row.id} variant="ghost" data-category={categoryToken(byCode.get(row.code)?.category ?? "", categories)} className="category-theme grid h-auto min-h-12 w-full grid-cols-[1rem_2.5rem_minmax(0,1fr)] gap-x-2 gap-y-1 whitespace-normal border-l-4 border-category-fill px-2 py-3 text-left sm:grid-cols-[1rem_2.5rem_minmax(0,1fr)_auto]" onClick={() => { setGuidedId(null); setEntry(row); }}>
               <Circle className="size-4 shrink-0 text-primary" /><span className="font-bold text-category-ink">{row.code}</span><span className="min-w-0 break-words">{byCode.get(row.code)?.name}</span><span className="col-span-2 col-start-2 min-w-0 break-words font-semibold sm:col-span-1 sm:col-start-auto">{formatSet(row)}</span>
             </Button>)}</div>
-             <div className="flex items-center justify-between gap-2"><Button className="min-w-0 flex-1 whitespace-normal sm:flex-none" onClick={() => setCircuitId(id)}><Play className="size-4 shrink-0" />{done ? t("Fortsätt passet", "Continue workout") : t("Starta passet", "Start workout")}</Button><Button variant="ghost" size="icon" className="shrink-0 text-destructive" aria-label={`${t("Ta bort förslag", "Remove suggestion")}: ${first.proposal_title}`} title={t("Ta bort förslag", "Remove suggestion")} onClick={() => setDeletingId(id)}><Trash2 className="size-5" /></Button></div>
+             <div className="flex items-center justify-between gap-2"><Button className="min-w-0 flex-1 whitespace-normal sm:flex-none" onClick={() => setCircuitId(id)}><Play className="size-4 shrink-0" />{done ? t("Fortsätt passet", "Continue workout") : t("Starta passet", "Start workout")}</Button><Button variant="ghost" size="icon" className="shrink-0 text-destructive" aria-label={`${t("Ta bort förslag", "Remove suggestion")}: ${first.workout?.title}`} title={t("Ta bort förslag", "Remove suggestion")} onClick={() => setDeletingId(id)}><Trash2 className="size-5" /></Button></div>
             </div>
           </article>;
         })}

@@ -50,7 +50,7 @@ function HomePage() {
   const atPlace = exercisesAtLocation(exercises.filter((e) => e.is_active), links, gym?.id ?? null);
   const [running, setRunning] = useState<LogEntry[] | null>(null);
   const todaysPlans = new Map<string, LogEntry[]>();
-  for (const r of proposals) if (r.date <= todayISO()) { const k = r.proposal_id ?? r.id; todaysPlans.set(k, [...(todaysPlans.get(k) ?? []), r]); }
+  for (const r of proposals) if (r.date <= todayISO()) { const k = r.workout_id ?? r.id; todaysPlans.set(k, [...(todaysPlans.get(k) ?? []), r]); }
   const names = new Map(exercises.map((e) => [e.code, localize(e)]));
   const s = dashboardStats(log, exercises, todayISO());
   const since = s.daysSinceLast === null ? "–" : s.daysSinceLast === 0 ? t("Idag", "Today") : `${s.daysSinceLast} ${t("d", "d")}`;
@@ -73,7 +73,7 @@ function HomePage() {
         const { done: doneSets, total } = workoutSetProgress(id, rows, log);
         if (isWorkoutFinished(doneSets, total)) return null;
         const ongoing = doneSets > 0;
-        return <Button key={id} size="lg" variant="secondary" className="h-auto min-h-12 w-full justify-start whitespace-normal text-left" onClick={() => setRunning(rows)}><Play className="size-4 shrink-0" /><span className="min-w-0 flex-1"><span className="block font-bold">{ongoing ? `${t("Pågående", "Ongoing")}: ` : ""}{rows[0]?.proposal_title}</span><span className="block text-xs font-normal">{rows[0]?.date !== todayISO() ? `${formatDate(rows[0]?.date ?? "")} · ` : ""}{rows.map((r) => r.code).join(" · ")}{ongoing ? ` (${doneSets}/${total} ${t("klara", "done")})` : ""}</span></span></Button>;
+        return <Button key={id} size="lg" variant="secondary" className="h-auto min-h-12 w-full justify-start whitespace-normal text-left" onClick={() => setRunning(rows)}><Play className="size-4 shrink-0" /><span className="min-w-0 flex-1"><span className="block font-bold">{ongoing ? `${t("Pågående", "Ongoing")}: ` : ""}{rows[0]?.workout?.title}</span><span className="block text-xs font-normal">{rows[0]?.date !== todayISO() ? `${formatDate(rows[0]?.date ?? "")} · ` : ""}{rows.map((r) => r.code).join(" · ")}{ongoing ? ` (${doneSets}/${total} ${t("klara", "done")})` : ""}</span></span></Button>;
       })}
       {gym && <WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} quickStart />}
     </section>

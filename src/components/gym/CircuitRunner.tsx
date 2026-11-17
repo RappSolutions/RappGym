@@ -18,12 +18,12 @@ export function CircuitRunner({ rows, names, onClose }: { rows: LogEntry[]; name
   const qc = useQueryClient();
   const { data: allExercises = [] } = useQuery(exercisesQuery);
   const { data: log = [] } = useQuery(logQuery);
-  const proposalId = rows[0]?.proposal_id ?? null;
+  const proposalId = rows[0]?.workout_id ?? null;
   // Snapshot of sets already completed for this workout when the runner opened, so Continue resumes where you were.
-  const [prior] = useState(() => proposalId ? log.filter((e) => e.proposal_id === proposalId && e.status === "completed") : []);
+  const [prior] = useState(() => proposalId ? log.filter((e) => e.workout_id === proposalId && e.status === "completed") : []);
   const doneByCode = useMemo(() => { const m = new Map<string, number>(); for (const e of prior) m.set(e.code, (m.get(e.code) ?? 0) + Math.max(1, e.sets ?? 1)); return m; }, [prior]);
   const ordered = useMemo(() => [...rows].sort((a, b) => (a.proposal_order ?? 0) - (b.proposal_order ?? 0)), [rows]);
-  const [circuit, setCircuit] = useState(true);
+  const [circuit, setCircuit] = useState(rows[0]?.workout?.is_circuit ?? true);
   const allSteps = useMemo(() => (circuit ? circuitSteps(ordered) : stationSteps(ordered)), [ordered, circuit]);
   const steps = useMemo(() => remainingSteps(allSteps, doneByCode), [allSteps, doneByCode]);
   const total = allSteps.length;
@@ -53,7 +53,7 @@ export function CircuitRunner({ rows, names, onClose }: { rows: LogEntry[]; name
     try {
       if (log) {
         const r = step.row;
-        const { error } = await supabase.from("log_entries").insert({ code: r.code, sets: 1, reps: reps.get(r.id) ?? null, load: loads.get(r.id) ?? "", date: todayISO(), gym_id: r.gym_id, status: "completed", proposal_id: r.proposal_id, proposal_title: r.proposal_title, note: step.lap === 1 ? r.note : null });
+        const { error } = await supabase.from("log_entries").insert({ code: r.code, sets: 1, reps: reps.get(r.id) ?? null, load: loads.get(r.id) ?? "", date: todayISO(), gym_id: r.gym_id, status: "completed", workout_id: r.workout_id, note: step.lap === 1 ? r.note : null });
         if (error) throw error;
         count += 1;
         setDone(count);
@@ -79,7 +79,7 @@ export function CircuitRunner({ rows, names, onClose }: { rows: LogEntry[]; name
           <DrawerDescription>{`${before + done}/${total} set`}</DrawerDescription>
           <div className="h-2 rounded bg-muted"><div className="h-2 rounded bg-primary" style={{ width: `${total ? ((before + i) / total) * 100 : 0}%` }} /></div>
         </DrawerHeader>
-        <label className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm"><span><span className="block font-medium">{t("Kör som cirkel", "Run as circuit")}</span><span className="block text-xs text-muted-foreground">{circuit ? t("Ett set per övning, varv för varv", "One set per exercise, lap by lap") : t("Alla set på en övning innan nästa", "All sets of one exercise before the next")}</span></span><Switch checked={circuit} disabled={i > 0 || prior.length > 0 || busy} onCheckedChange={setCircuit} /></label>
+        <label className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm"><span><span className="block font-medium">{t("Kör som cirkel", "Run as circuit")}</span><span className="block text-xs text-muted-foreground">{circuit ? t("Ett set per övning, varv för varv", "One set per exercise, lap by lap") : t("Alla set på en övning innan nästa", "All sets of one exercise before the next")}</span></span><Switch checked={circuit} disabled={i > 0 || prior.length > 0 || busy} onCheckedChange={(value) => { setCircuit(value); if (proposalId) void supabase.from("workouts").update({ is_circuit: value }).eq("id", proposalId); }} /></label>
         {r && <div className="space-y-4">
           <div><p className="font-bold text-primary">{r.code}</p><p className="text-xl font-bold">{ex?.name ?? names.get(r.code)?.name ?? r.code}</p>{(ex?.variant || ex?.muscles) && <p className="text-sm text-muted-foreground">{[ex?.variant, ex?.muscles].filter(Boolean).join(" · ")}</p>}{r.note && <p className="text-sm text-muted-foreground">{r.note}</p>}</div>
           {ex && <ExerciseImages exercise={ex} />}

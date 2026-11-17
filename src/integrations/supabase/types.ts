@@ -161,6 +161,7 @@ export type Database = {
           sets: number
           status: string
           user_id: string
+          workout_id: string | null
         }
         Insert: {
           ai_history_id?: string | null
@@ -180,6 +181,7 @@ export type Database = {
           sets?: number
           status?: string
           user_id?: string
+          workout_id?: string | null
         }
         Update: {
           ai_history_id?: string | null
@@ -199,6 +201,7 @@ export type Database = {
           sets?: number
           status?: string
           user_id?: string
+          workout_id?: string | null
         }
         Relationships: [
           {
@@ -222,35 +225,54 @@ export type Database = {
             referencedRelation: "gyms"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "log_entries_workout_id_fkey"
+            columns: ["workout_id"]
+            isOneToOne: false
+            referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
         ]
       }
       training_ai_history: {
         Row: {
+          cost_usd: number | null
           generated_at: string
           gym_id: string | null
           id: string
+          input_tokens: number | null
           insights: Json
           language: string
+          model: string | null
+          output_tokens: number | null
           request: Json
           today: string
           user_id: string
         }
         Insert: {
+          cost_usd?: number | null
           generated_at?: string
           gym_id?: string | null
           id?: string
+          input_tokens?: number | null
           insights: Json
           language: string
+          model?: string | null
+          output_tokens?: number | null
           request: Json
           today: string
           user_id?: string
         }
         Update: {
+          cost_usd?: number | null
           generated_at?: string
           gym_id?: string | null
           id?: string
+          input_tokens?: number | null
           insights?: Json
           language?: string
+          model?: string | null
+          output_tokens?: number | null
           request?: Json
           today?: string
           user_id?: string
@@ -351,6 +373,73 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      workouts: {
+        Row: {
+          ai_history_id: string | null
+          ai_workout_key: string | null
+          created_at: string
+          created_by: string
+          gym_id: string | null
+          id: string
+          is_circuit: boolean
+          note: string | null
+          scheduled_date: string | null
+          source_workout_id: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          ai_history_id?: string | null
+          ai_workout_key?: string | null
+          created_at?: string
+          created_by?: string
+          gym_id?: string | null
+          id?: string
+          is_circuit?: boolean
+          note?: string | null
+          scheduled_date?: string | null
+          source_workout_id?: string | null
+          title: string
+          user_id?: string
+        }
+        Update: {
+          ai_history_id?: string | null
+          ai_workout_key?: string | null
+          created_at?: string
+          created_by?: string
+          gym_id?: string | null
+          id?: string
+          is_circuit?: boolean
+          note?: string | null
+          scheduled_date?: string | null
+          source_workout_id?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workouts_ai_history_id_fkey"
+            columns: ["ai_history_id"]
+            isOneToOne: false
+            referencedRelation: "training_ai_history"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workouts_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workouts_source_workout_id_fkey"
+            columns: ["source_workout_id"]
+            isOneToOne: false
+            referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

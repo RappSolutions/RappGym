@@ -4,7 +4,10 @@ import type { Tables } from "@/integrations/supabase/types";
 import { completedEntries } from "@/lib/workout-suggestions";
 
 export type Exercise = Tables<"exercises">;
-export type LogEntry = Tables<"log_entries">;
+export type Workout = Tables<"workouts">;
+/** Log row with its optional workout header (title, circuit, origin). */
+export type LogEntry = Tables<"log_entries"> & { workout?: Pick<Workout, "id" | "title" | "created_by" | "is_circuit" | "scheduled_date" | "created_at"> | null };
+const ENTRY_SELECT = "*, workout:workouts(id,title,created_by,is_circuit,scheduled_date,created_at)";
 
 export const exercisesQuery = queryOptions({
   queryKey: ["exercises"],
@@ -26,13 +29,13 @@ export const logQuery = queryOptions({
     for (let from = 0; ; from += 1000) {
       const { data, error } = await supabase
         .from("log_entries")
-        .select("*")
+        .select(ENTRY_SELECT)
         .eq("status", "completed")
         .order("date", { ascending: false })
         .order("created_at", { ascending: false })
         .range(from, from + 999);
       if (error) throw error;
-      all.push(...data);
+      all.push(...(data as LogEntry[]));
       if (data.length < 1000) break;
     }
     return all;
@@ -44,9 +47,9 @@ export const suggestionsQuery = queryOptions({
   queryFn: async () => {
     const all: LogEntry[] = [];
     for (let from = 0; ; from += 1000) {
-      const { data, error } = await supabase.from("log_entries").select("*").eq("status", "suggested").order("date").order("proposal_order").range(from, from + 999);
+      const { data, error } = await supabase.from("log_entries").select(ENTRY_SELECT).eq("status", "suggested").order("date").order("proposal_order").range(from, from + 999);
       if (error) throw error;
-      all.push(...data);
+      all.push(...(data as LogEntry[]));
       if (data.length < 1000) break;
     }
     return all;

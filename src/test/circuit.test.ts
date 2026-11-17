@@ -29,7 +29,7 @@ import { workoutSetProgress, isWorkoutFinished } from "@/lib/circuit";
 describe("workout set progress", () => {
   it("counts completed sets against planned sets", () => {
     const rows = [{ sets: 3 }, { sets: 3 }, { sets: 2 }];
-    const log = [{ proposal_id: "p", status: "completed", sets: 1 }, { proposal_id: "p", status: "completed", sets: 1 }, { proposal_id: "x", status: "completed", sets: 1 }];
+    const log = [{ workout_id: "p", status: "completed", sets: 1 }, { workout_id: "p", status: "completed", sets: 1 }, { workout_id: "x", status: "completed", sets: 1 }];
     expect(workoutSetProgress("p", rows, log)).toEqual({ done: 2, total: 8 });
   });
   it("is finished at 10/10", () => { expect(isWorkoutFinished(10, 10)).toBe(true); expect(isWorkoutFinished(9, 10)).toBe(false); });

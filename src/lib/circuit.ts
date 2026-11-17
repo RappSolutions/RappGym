@@ -25,9 +25,9 @@ export function remainingSteps<T extends { row: { code: string }; lap: number }>
 }
 
 /** Done vs planned sets for one planned workout: completed rows' sets against the suggested rows' planned sets. */
-export function workoutSetProgress(proposalId: string, rows: readonly { sets: number | null }[], log: readonly { proposal_id: string | null; status: string; sets: number | null }[]): { done: number; total: number } {
+export function workoutSetProgress(workoutId: string, rows: readonly { sets: number | null }[], log: readonly { workout_id: string | null; status: string; sets: number | null }[]): { done: number; total: number } {
   const total = rows.reduce((n, r) => n + Math.max(1, r.sets ?? 1), 0);
-  const done = log.filter((e) => e.proposal_id === proposalId && e.status === "completed").reduce((n, e) => n + Math.max(1, e.sets ?? 1), 0);
+  const done = log.filter((e) => e.workout_id === workoutId && e.status === "completed").reduce((n, e) => n + Math.max(1, e.sets ?? 1), 0);
   return { done: Math.min(done, total), total };
 }
 
