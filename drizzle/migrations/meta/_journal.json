@@ -99,6 +99,13 @@
       "when": 1794855572252,
       "tag": "0013_exercise_images_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1794901198361,
+      "tag": "0014_global_admin_and_goal_status",
+      "breakpoints": true
     }
   ]
 }
