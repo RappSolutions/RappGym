@@ -62,6 +62,3 @@ use the editor.
 - Exercise pictures live in the private exercise-images storage bucket as "storage:<path>" refs resolved to signed URLs; AI pictures are generated only on explicit click via an authenticated server function.
 - Planned workouts (AI or own, status suggested) live on the Train page with circuit mode logging one completed set per exercise per lap; the Log page shows completed history only, keeping facts separate from plans.
 - Exercise bank: all read, admin (user_roles) writes; one CircuitRunner with circuit toggle.
-
-- Log groups per workout (src/lib/log-workouts.ts); "plan again" clones via source_workout_id, never mutating history.
-- AI token usage is stored per run; cost maths lives only in src/lib/ai-cost.ts.
