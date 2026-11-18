@@ -1,6 +1,7 @@
 import { useLanguage, LanguagePicker } from "@/lib/i18n";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { parseAuthCallbackError, type AuthCallbackError } from "@/lib/auth-callback-error";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,13 +29,21 @@ export const Route = createFileRoute("/")({
 function Index() {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const [authError, setAuthError] = useState<AuthCallbackError | null>(null);
   useEffect(() => {
+    const err = parseAuthCallbackError(window.location.hash, window.location.search);
+    if (err) {
+      setAuthError(err);
+      window.history.replaceState(null, "", window.location.pathname);
+      return;
+    }
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/home", replace: true });
     });
   }, [navigate]);
 
   async function social(provider: AuthProvider) {
+    setAuthError(null);
     const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin });
     if (result.error) {
       toast.error(
@@ -68,6 +77,26 @@ function Index() {
           {t("Logga pass, följ cirklar, se din progress.", "Log workouts, run circuits, track your progress.")}
         </p>
         <div className="landing-rise relative mt-8 w-full max-w-sm space-y-3 [animation-delay:240ms]">
+          {authError && (
+            <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-left text-sm text-destructive">
+              <p className="font-semibold">
+                {authError.kind === "rejected"
+                  ? t("Inloggningen nekades", "Sign-in was rejected")
+                  : authError.kind === "cancelled"
+                    ? t("Inloggningen avbröts", "Sign-in was cancelled")
+                    : t("Inloggningen misslyckades", "Sign-in failed")}
+              </p>
+              {authError.kind === "rejected" && (
+                <p className="mt-1">
+                  {t(
+                    "Kontot kan vara inaktiverat. Kontakta administratören om du tror att det är fel.",
+                    "The account may be disabled. Contact the administrator if you think this is wrong.",
+                  )}
+                </p>
+              )}
+              <p className="mt-1 text-xs opacity-80">{authError.description}</p>
+            </div>
+          )}
           <Button
             variant="outline"
             type="button"
