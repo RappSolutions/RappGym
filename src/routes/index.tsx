@@ -72,15 +72,17 @@ function Index() {
       </header>
       <main className="landing-hero relative flex flex-1 flex-col items-center justify-center overflow-hidden px-6 py-12 text-center">
         <div className="landing-glow" aria-hidden="true" />
-        <img
-          src={rappgymLogo}
-          alt="RappGym"
-          width={240}
-          height={240}
-          onClick={() => !waiting && setSpinning(true)}
-          onAnimationEnd={(e) => e.animationName === "landing-spin-hop" && setSpinning(false)}
-          className={`landing-logo relative h-44 w-44 object-contain md:h-60 md:w-60 ${waiting ? "is-waiting" : spinning ? "is-spinning cursor-pointer" : "cursor-pointer"}`}
-        />
+        <div className="landing-logo-shell relative">
+          <img
+            src={rappgymLogo}
+            alt="RappGym"
+            width={240}
+            height={240}
+            onClick={() => !waiting && setSpinning(true)}
+            onAnimationEnd={(e) => e.animationName === "landing-spin-hop" && setSpinning(false)}
+            className={`landing-logo relative block h-44 w-44 object-contain md:h-60 md:w-60 ${waiting ? "is-waiting" : spinning ? "is-spinning cursor-pointer" : "cursor-pointer"}`}
+          />
+        </div>
         <h1 className="landing-rise relative mt-6 font-display text-5xl font-bold text-brand-blue md:text-6xl">
           RappGym
         </h1>
