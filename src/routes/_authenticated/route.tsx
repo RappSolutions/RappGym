@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/lib/i18n";
 import { CategoryStyles } from "@/components/gym/CategoryStyles";
 import { ProfileMenu } from "@/components/gym/ProfileMenu";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -24,8 +25,9 @@ const tabs = [
   { to: "/log", label: "Logg", en: "Log", icon: ClipboardCheck },
 ] as const;
 
-// Active-tab marker style for the bottom navigation.
-const NAV_STYLE: "line" | "pill" = (typeof window !== "undefined" && window.localStorage.getItem("navStyle") === "line") ? "line" : "pill";
+// Active-tab marker style for the bottom navigation: "chip" (default) or "block".
+const NAV_STYLE: "chip" | "block" =
+  typeof window !== "undefined" && window.localStorage.getItem("navStyle") === "block" ? "block" : "chip";
 
 const pageLabels: [RegExp, string, string][] = [
   [/^\/home/, "Hem", "Home"],
@@ -68,24 +70,43 @@ function AppLayout() {
               key={to}
               to={to}
               data-nav-style={NAV_STYLE}
-              className="nav-tab group relative flex flex-col items-center gap-1 py-2.5 text-xs font-medium text-muted-foreground transition-colors"
-              activeProps={{ className: "is-active font-semibold text-foreground" }}
-            >
-              {({ isActive }) => (
-                <>
-                  {NAV_STYLE === "line" && isActive && (
-                    <span aria-hidden className="absolute inset-x-1/4 -top-[3px] h-[3px] bg-brand-yellow" />
-                  )}
-                  <span
-                    className={`flex items-center justify-center rounded-full transition-colors ${
-                      NAV_STYLE === "pill" ? "h-8 w-14" : "h-8 w-8"
-                    } ${NAV_STYLE === "pill" && isActive ? "bg-brand-yellow/30" : ""}`}
-                  >
-                    <Icon className={`h-6 w-6 ${isActive ? "text-brand-blue" : ""}`} />
-                  </span>
-                  {t(label, en)}
-                </>
+              className={cn(
+                "nav-tab group relative flex flex-col items-center text-xs font-medium transition-colors",
+                NAV_STYLE === "block" ? "p-1.5" : "gap-1 py-2 text-muted-foreground",
               )}
+              activeProps={{ className: "is-active" }}
+            >
+              {({ isActive }) =>
+                NAV_STYLE === "block" ? (
+                  <span
+                    className={cn(
+                      "flex w-full flex-col items-center gap-1 rounded-2xl py-2 transition-colors",
+                      isActive
+                        ? "bg-brand-blue text-primary-foreground shadow-sm"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    <Icon className="h-6 w-6" />
+                    {t(label, en)}
+                  </span>
+                ) : (
+                  <>
+                    <span
+                      className={cn(
+                        "flex h-9 w-16 items-center justify-center rounded-full transition-colors",
+                        isActive ? "bg-brand-blue" : "bg-transparent",
+                      )}
+                    >
+                      <Icon
+                        className={cn("h-6 w-6", isActive ? "text-primary-foreground" : "text-muted-foreground")}
+                      />
+                    </span>
+                    <span className={cn(isActive ? "font-semibold text-brand-blue" : "text-muted-foreground")}>
+                      {t(label, en)}
+                    </span>
+                  </>
+                )
+              }
             </Link>
           ))}
         </div>
