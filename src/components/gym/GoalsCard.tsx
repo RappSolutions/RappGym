@@ -142,7 +142,7 @@ export function GoalsCard() {
       {expanded && (
         <>
           <h2 className="flex items-center gap-2 text-xl font-bold uppercase">
-            <Target className="size-5 text-primary" />
+            <Target className="size-3 text-primary" />
             {t("Mina mål", "My goals")}
           </h2>
           <p className="text-sm text-muted-foreground">
