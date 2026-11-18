@@ -187,8 +187,8 @@ export function GoalsCard() {
           </form>
           <p className="text-sm text-muted-foreground">
             {t(
-              "Mjuka mål, t.ex. ”Åka skidor i januari”. AI-förslagen tar hänsyn till aktiva mål.",
-              "Soft goals, e.g. “Go skiing in January”. AI suggestions take active goals into account.",
+              "Dessa mål och din profil används för AI-genererade förslag.",
+              "These goals and your profile are used for AI-generated suggestions.",
             )}
           </p>
           {closed.length > 0 && (
