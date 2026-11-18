@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_tiers: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean
+          monthly_ai_quota: number | null
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          is_default?: boolean
+          monthly_ai_quota?: number | null
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          monthly_ai_quota?: number | null
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       exercise_categories: {
         Row: {
           code_prefix: string
@@ -424,6 +451,47 @@ export type Database = {
         }
         Relationships: []
       }
+      user_ai_quotas: {
+        Row: {
+          custom_quota: number | null
+          is_blocked: boolean
+          notes: string | null
+          tier_id: string
+          updated_at: string
+          updated_by: string | null
+          user_id: string
+          valid_until: string | null
+        }
+        Insert: {
+          custom_quota?: number | null
+          is_blocked?: boolean
+          notes?: string | null
+          tier_id: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
+          valid_until?: string | null
+        }
+        Update: {
+          custom_quota?: number | null
+          is_blocked?: boolean
+          notes?: string | null
+          tier_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_ai_quotas_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "ai_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -514,6 +582,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ai_quota_status: {
+        Args: { _user_id: string }
+        Returns: {
+          is_admin: boolean
+          is_blocked: boolean
+          period_end: string
+          period_start: string
+          quota: number
+          source: string
+          tier_id: string
+          tier_name: string
+          used: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

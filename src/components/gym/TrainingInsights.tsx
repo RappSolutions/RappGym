@@ -1,7 +1,9 @@
 import { useEffect, useId, useState } from "react";
 import { useBlocker } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { getMyAiQuota } from "@/lib/ai-quota.functions";
+import { quotaAllowed, quotaRemaining } from "@/lib/ai-quota";
 import { Link } from "@tanstack/react-router";
 import { Sparkles, LoaderCircle, Send, CalendarPlus, Check, RotateCcw, Square } from "lucide-react";
 import { estimateUsage, formatAiCost } from "@/lib/ai-cost";
@@ -51,6 +53,9 @@ export function TrainingInsights(props: TrainingInsightsProps) {
   const { t, language, localize } = useLanguage();
   const queryClient = useQueryClient();
   const generate = useServerFn(getTrainingInsights);
+  const fetchQuota = useServerFn(getMyAiQuota);
+  const { data: quota } = useQuery({ queryKey: ["ai-quota", "me"], queryFn: () => fetchQuota() });
+  const quotaOk = !quota || quotaAllowed(quota);
   const { data: history } = useSuspenseQuery(aiHistoryQuery);
   const { data: accepted } = useSuspenseQuery(acceptedAiQuery);
   const [gymId] = useSelectedGym();
@@ -162,6 +167,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
     })();
     pendingRun = { controller, promise, mode: runMode };
     const id = await promise;
+    void queryClient.invalidateQueries({ queryKey: ["ai-quota"] });
     if (pendingRun?.controller === controller) {
       pendingRun = null;
       if (id) finishedRun = { id, mode: runMode };
@@ -508,7 +514,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
             )}
           </p>
         )}
-        <Button type="submit" disabled={busy || !hasLog} className="w-full sm:w-auto">
+        <Button type="submit" disabled={busy || !hasLog || !quotaOk} className="w-full sm:w-auto">
           {busy ? (
             <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" />
           ) : (
@@ -524,6 +530,19 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                   ? t("Uppdatera analys", "Update analysis")
                   : t("Analysera mina pass", "Analyze my workouts")}
         </Button>
+        {quota && (
+          <p className={`text-xs ${quotaOk ? "text-muted-foreground" : "text-destructive"}`}>
+            {quota.isAdmin
+              ? t("AI-kvot: obegränsad (admin)", "AI quota: unlimited (admin)")
+              : quota.isBlocked
+                ? t("AI-förslag är avstängda för ditt konto.", "AI suggestions are disabled for your account.")
+                : quota.quota === null
+                  ? t(`AI-kvot: obegränsad (${quota.tierName}) · ${quota.used} denna månad`, `AI quota: unlimited (${quota.tierName}) · ${quota.used} this month`)
+                  : quotaOk
+                    ? t(`Kvar denna månad: ${quotaRemaining(quota)} av ${quota.quota} · Återställs ${quota.periodEnd}`, `Left this month: ${quotaRemaining(quota)} of ${quota.quota} · Resets ${quota.periodEnd}`)
+                    : t(`Månadens kvot är nådd (${quota.used}/${quota.quota}). Återställs ${quota.periodEnd}. Egna pass kan du skapa och logga som vanligt.`, `This month's quota is used (${quota.used}/${quota.quota}). Resets ${quota.periodEnd}. You can still create and log your own workouts.`)}
+          </p>
+        )}
         {busy && (
           <Button type="button" variant="outline" className="ml-2" onClick={cancel}>
             <Square className="size-4" />

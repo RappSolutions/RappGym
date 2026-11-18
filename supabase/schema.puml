@@ -97,6 +97,25 @@ entity log_entries {
   * created_at : timestamptz
   proposal_id, proposal_title, ai_history_id, ai_workout_key <<DEPRECATED>>
 }
+entity ai_tiers {
+  * id : text <<PK>>
+  --
+  * name : text
+  monthly_ai_quota : integer (NULL = unlimited)
+  * is_default : boolean (unique when true)
+}
+
+entity user_ai_quotas {
+  * user_id : uuid <<PK>>
+  --
+  * tier_id : text <<FK ai_tiers RESTRICT>>
+  custom_quota : integer (0 = throttled)
+  * is_blocked : boolean
+  valid_until : date
+  notes : text
+  updated_by : uuid
+}
+
 entity training_ai_history {
   * id : uuid <<PK>>
   --
@@ -136,6 +155,8 @@ users ||..o{ gyms
 users ||..o{ workouts
 users ||..o{ log_entries
 users ||..o{ training_ai_history
+users ||..o| user_ai_quotas
+ai_tiers ||--o{ user_ai_quotas : "RESTRICT"
 users ||..o{ training_goals
 users ||..o| training_profiles
 exercises ||--o{ exercise_locations : "CASCADE"

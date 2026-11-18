@@ -8,6 +8,7 @@ import type { LogEntry } from "@/lib/gym";
 import type { TrainingInsights } from "@/lib/training-insights-schema";
 import { normalizeTrainingPlan, trainingRequestSchema } from "@/lib/training-request";
 import { profileForAI } from "@/lib/training-profile";
+import { mapQuotaRow, quotaAllowed } from "@/lib/ai-quota";
 
 const MODEL = "openai/gpt-6-astra";
 
@@ -16,6 +17,17 @@ export const getTrainingInsights = createServerFn({ method: "POST" })
   .inputValidator(z.object({ language: z.enum(["sv", "en"]), gymId: z.string().uuid().nullable(), today: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), request: trainingRequestSchema.optional() }))
   .handler(async ({ data, context }): Promise<{ insights: TrainingInsights | null; error: string | null; generatedAt: string | null; historyId?: string }> => {
     const { supabase, userId } = context;
+    // Quota is enforced server-side before any paid AI call; only saved answers count.
+    const { data: quotaRows, error: quotaError } = await supabase.rpc("ai_quota_status", { _user_id: userId });
+    if (quotaError || !quotaRows?.[0]) throw new Error(quotaError?.message ?? "Quota unavailable");
+    const quota = mapQuotaRow(quotaRows[0]);
+    if (!quotaAllowed(quota)) {
+      const sv = data.language === "sv";
+      const msg = quota.isBlocked
+        ? (sv ? "AI-förslag är avstängda för ditt konto. Kontakta administratören." : "AI suggestions are disabled for your account. Contact the administrator.")
+        : (sv ? `Månadens kvot för AI-förslag är nådd (${quota.used}/${quota.quota}). Återställs ${quota.periodEnd}. Du kan fortfarande skapa och logga egna pass.` : `This month's AI quota is used (${quota.used}/${quota.quota}). Resets ${quota.periodEnd}. You can still create and log your own workouts.`);
+      return { insights: null, error: msg, generatedAt: null };
+    }
     const log: LogEntry[] = [];
     for (let from = 0; ; from += 1000) {
       const result = await supabase.from("log_entries").select("*").eq("user_id", userId).eq("status", "completed").order("date", { ascending: false }).range(from, from + 999);

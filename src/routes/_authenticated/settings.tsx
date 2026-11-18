@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ExerciseManager } from "@/components/gym/ExerciseManager";
 import { UsersManager } from "@/components/gym/UsersManager";
+import { AiUsageManager } from "@/components/gym/AiUsageManager";
 import { RefsManager } from "@/components/gym/RefsManager";
 import { SettingsBlock } from "@/components/gym/SettingsBlock";
 import { LocationsManager } from "@/components/gym/LocationsManager";
@@ -33,6 +34,7 @@ function SettingsPage() {
   return (
     <main className="space-y-3 px-4">
       <SettingsBlock title={t("Användare", "Users")}><UsersManager /></SettingsBlock>
+      <SettingsBlock title={t("AI-kvoter & förbrukning", "AI quotas & usage")}><AiUsageManager /></SettingsBlock>
       <SettingsBlock title={t("Platser", "Locations")}><LocationsManager /></SettingsBlock>
       <SettingsBlock title={t("Kategorier", "Categories")}><RefsManager only="cat" /></SettingsBlock>
       <SettingsBlock title={t("Redskap", "Equipment")}><RefsManager only="eq" /></SettingsBlock>
