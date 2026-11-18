@@ -21,7 +21,7 @@ export function SpontaneousButton({ gymId, size = "default" }: { gymId: string; 
   }
   return (
     <>
-      <Button variant="secondary" size={size} className="w-full" disabled={busy} onClick={() => void start()}><Zap className="size-4" />{t("Spontanpass", "Spontaneous")}</Button>
+      <Button variant="secondary" size={size} className="w-full px-4" disabled={busy} onClick={() => void start()}><Zap className="size-4" />{t("Spontanpass", "Spontaneous")}</Button>
       {id && <CircuitRunner workoutId={id} onClose={() => setId(null)} />}
     </>
   );

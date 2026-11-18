@@ -132,7 +132,7 @@ function HomePage() {
             </Button>
           );
         })}
-        {gym && <div className="flex gap-2"><div className="flex-1"><SpontaneousButton gymId={gym.id} size="lg" /></div><div className="flex-1"><WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} quickStart /></div></div>}
+        {gym && <div className="flex flex-wrap gap-2"><div className="min-w-fit grow basis-0"><SpontaneousButton gymId={gym.id} size="lg" /></div><div className="min-w-fit grow basis-0"><WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} quickStart /></div></div>}
       </section>
       {running && <CircuitRunner workoutId={running} onClose={() => setRunning(null)} />}
       <div className="grid-cols-2 sm:grid-cols-3 md:grid-cols-6">

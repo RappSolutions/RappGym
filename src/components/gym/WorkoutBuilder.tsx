@@ -42,10 +42,10 @@ export function WorkoutBuilder({ exercises, last, gymId, quickStart = false }: {
 
   return (
     <>
-      <Button variant={quickStart ? "secondary" : "outline"} size={quickStart ? "lg" : "default"} className="w-full" onClick={() => setOpen(true)}>{quickStart ? <Play className="size-4" /> : <ListPlus className="size-4" />}{quickStart ? t("Starta nytt pass", "Start a new workout") : t("Skapa nytt pass", "Create new workout")}</Button>
+      <Button variant={quickStart ? "secondary" : "outline"} size={quickStart ? "lg" : "default"} className="w-full px-4" onClick={() => setOpen(true)}>{quickStart ? <Play className="size-4" /> : <ListPlus className="size-4" />}{quickStart ? t("Skapa pass", "Create workout") : t("Skapa nytt pass", "Create new workout")}</Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90dvh] max-w-md overflow-y-auto">
-          <DialogHeader><DialogTitle>{quickStart ? t("Starta nytt pass", "Start a new workout") : t("Skapa nytt pass", "Create new workout")}</DialogTitle><DialogDescription>{t("Välj övningar i den ordning du vill köra dem. Vikten förifylls från senaste gången.", "Pick exercises in the order you want to do them. Weight is prefilled from last time.")}</DialogDescription></DialogHeader>
+          <DialogHeader><DialogTitle>{quickStart ? t("Skapa pass", "Create workout") : t("Skapa nytt pass", "Create new workout")}</DialogTitle><DialogDescription>{t("Välj övningar i den ordning du vill köra dem. Vikten förifylls från senaste gången.", "Pick exercises in the order you want to do them. Weight is prefilled from last time.")}</DialogDescription></DialogHeader>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("Namn (valfritt)", "Name (optional)")} />
           <div className="grid grid-cols-2 gap-2">
             <label className="text-sm">{t("Antal set", "Sets")}<Input type="number" min={1} value={laps} onChange={(e) => setLaps(Number(e.target.value) || 1)} /></label>
