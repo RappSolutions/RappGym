@@ -1,8 +1,9 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
+import { useBlocker } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Sparkles, LoaderCircle, Send, CalendarPlus, Check, RotateCcw } from "lucide-react";
+import { Sparkles, LoaderCircle, Send, CalendarPlus, Check, RotateCcw, Square } from "lucide-react";
 import { estimateUsage, formatAiCost } from "@/lib/ai-cost";
 import { supabase } from "@/integrations/supabase/client";
 import { analysisDateTime, suggestionRows } from "@/lib/workout-suggestions";
@@ -24,6 +25,20 @@ import { aiHistoryQuery, acceptedAiQuery, unacceptedWorkoutKeys } from "@/lib/ai
 import { useSelectedGym } from "@/hooks/use-gym";
 import { gymsQuery } from "@/lib/gym";
 import { LogDatePicker } from "./LogDatePicker";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+/** In-flight AI request survives page navigation (module scope), so leaving the AI page can keep it running. */
+let pendingRun: { controller: AbortController; promise: Promise<string | null>; mode: "summary" | "plan" } | null = null;
+let finishedRun: { id: string; mode: "summary" | "plan" } | null = null;
 
 type TrainingInsightsProps = {
   exercises: Exercise[];
@@ -51,7 +66,27 @@ export function TrainingInsights(props: TrainingInsightsProps) {
   const [planGym, setPlanGym] = useState<string | null | undefined>(undefined);
   const [startDate, setStartDate] = useState("");
   const requestGym = mode === "plan" && planGym !== undefined ? planGym : gymId;
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState(() => pendingRun !== null);
+  useEffect(() => {
+    const run = pendingRun;
+    if (run) {
+      setMode(run.mode);
+      void run.promise.then((id) => {
+        setBusy(false);
+        if (id) setSelectedId(id);
+      });
+    } else if (finishedRun) {
+      setMode(finishedRun.mode);
+      setSelectedId(finishedRun.id);
+    }
+    finishedRun = null;
+  }, []);
+  const blocker = useBlocker({ shouldBlockFn: () => pendingRun !== null, enableBeforeUnload: () => pendingRun !== null, withResolver: true });
+  function cancel() {
+    pendingRun?.controller.abort();
+    pendingRun = null;
+    setBusy(false);
+  }
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState<string | null>(null);
@@ -88,32 +123,48 @@ export function TrainingInsights(props: TrainingInsightsProps) {
     setBusy(true);
     setError(null);
     setResult(null);
-    try {
-      const gymId = mode === "plan" ? requestGym : getSelectedGym();
-      const today = todayISO();
-      const request = parsed.data;
-      const response = await generate({ data: { language, gymId, today, request } });
-      if (response.insights && response.generatedAt) {
-        const next = {
-          id: response.historyId ?? crypto.randomUUID(),
-          insights: response.insights,
-          generatedAt: response.generatedAt,
-          language,
-          gymId,
-          today,
-          question: request.question,
-          request,
-        };
-        setResult(next);
-        setSelectedId(next.id);
-        setError(response.error);
-        setSaved(new Set());
+    setSelectedId(null);
+    const controller = new AbortController();
+    const runMode = mode;
+    const promise = (async (): Promise<string | null> => {
+      try {
+        const gymId = mode === "plan" ? requestGym : getSelectedGym();
+        const today = todayISO();
+        const request = parsed.data;
+        const response = await generate({ data: { language, gymId, today, request }, signal: controller.signal });
+        if (controller.signal.aborted) return null;
         await queryClient.invalidateQueries({ queryKey: ["ai-history"] });
-        queryClient.setQueryData(["training-insights", language, gymId, request], next);
-      } else setError(response.error);
-    } catch (error) {
-      setError(error instanceof Error ? error.message : t("Analysen misslyckades", "Analysis failed"));
-    } finally {
+        if (response.insights && response.generatedAt) {
+          const next = {
+            id: response.historyId ?? crypto.randomUUID(),
+            insights: response.insights,
+            generatedAt: response.generatedAt,
+            language,
+            gymId,
+            today,
+            question: request.question,
+            request,
+          };
+          setResult(next);
+          setSelectedId(next.id);
+          setError(response.error);
+          setSaved(new Set());
+          queryClient.setQueryData(["training-insights", language, gymId, request], next);
+          return next.id;
+        }
+        setError(response.error);
+        return null;
+      } catch (error) {
+        if (!controller.signal.aborted)
+          setError(error instanceof Error ? error.message : t("Analysen misslyckades", "Analysis failed"));
+        return null;
+      }
+    })();
+    pendingRun = { controller, promise, mode: runMode };
+    const id = await promise;
+    if (pendingRun?.controller === controller) {
+      pendingRun = null;
+      if (id) finishedRun = { id, mode: runMode };
       setBusy(false);
     }
   }
@@ -262,6 +313,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                 {suggestion.code} · {localize(exercise).name}
               </Link>
               <p className="text-sm font-medium">
+                {exercise.equipment ? <span className="text-muted-foreground">{exercise.equipment} · </span> : null}
                 {suggestion.sets} × {suggestion.reps} {t("reps", "reps")}
                 {suggestion.load ? ` @ ${suggestion.load}` : ""}
               </p>
@@ -472,6 +524,29 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                   ? t("Uppdatera analys", "Update analysis")
                   : t("Analysera mina pass", "Analyze my workouts")}
         </Button>
+        {busy && (
+          <Button type="button" variant="outline" className="ml-2" onClick={cancel}>
+            <Square className="size-4" />
+            {t("Avbryt", "Cancel")}
+          </Button>
+        )}
+        {blocker.status === "blocked" && (
+          <AlertDialog open onOpenChange={(o) => { if (!o) blocker.reset?.(); }}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t("AI tänker fortfarande", "AI is still thinking")}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("Ska den fortsätta i bakgrunden? Svaret sparas i AI-historiken.", "Keep it running in the background? The answer is saved in AI history.")}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => blocker.reset?.()}>{t("Stanna kvar", "Stay")}</AlertDialogCancel>
+                <Button variant="outline" onClick={() => { cancel(); blocker.proceed?.(); }}>{t("Avbryt AI och lämna", "Stop AI and leave")}</Button>
+                <AlertDialogAction onClick={() => blocker.proceed?.()}>{t("Fortsätt i bakgrunden", "Keep running")}</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
         {(() => {
           const e = estimateUsage(
             mode,

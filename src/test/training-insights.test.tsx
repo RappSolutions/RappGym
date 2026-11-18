@@ -12,6 +12,7 @@ vi.mock("@tanstack/react-query", async (importOriginal) => ({
   useQueryClient: () => ({}),
 }));
 vi.mock("@/hooks/use-gym", () => ({ useSelectedGym: () => [null] }));
+vi.mock("@tanstack/react-router", async (importOriginal) => ({ ...(await importOriginal<object>()), useBlocker: () => ({ status: "idle" }) }));
 
 afterEach(cleanup);
 beforeEach(() => {
@@ -23,25 +24,25 @@ describe("TrainingInsights initial request mode", () => {
   it("submits a plan when opened from the workout AI shortcut", async () => {
     render(<TrainingInsights exercises={[]} hasLog initialMode="plan" />);
     fireEvent.click(screen.getByRole("button", { name: "Ge mig passförslag" }));
-    await waitFor(() => expect(generate).toHaveBeenCalledWith({
+    await waitFor(() => expect(generate).toHaveBeenCalledWith(expect.objectContaining({
       data: expect.objectContaining({ request: expect.objectContaining({ mode: "plan", question: "" }) }),
-    }));
+    })));
   });
 
   it("defaults to analysis without an initial mode", async () => {
     render(<TrainingInsights exercises={[]} hasLog />);
     fireEvent.click(screen.getByRole("button", { name: "Analysera mina pass" }));
-    await waitFor(() => expect(generate).toHaveBeenCalledWith({
+    await waitFor(() => expect(generate).toHaveBeenCalledWith(expect.objectContaining({
       data: expect.objectContaining({ request: expect.objectContaining({ mode: "summary" }) }),
-    }));
+    })));
   });
 
   it("allows switching to analysis after opening in planning mode", async () => {
     render(<TrainingInsights exercises={[]} hasLog initialMode="plan" />);
     fireEvent.click(screen.getByRole("button", { name: "Analys & frågor" }));
     fireEvent.click(screen.getByRole("button", { name: "Analysera mina pass" }));
-    await waitFor(() => expect(generate).toHaveBeenCalledWith({
+    await waitFor(() => expect(generate).toHaveBeenCalledWith(expect.objectContaining({
       data: expect.objectContaining({ request: expect.objectContaining({ mode: "summary" }) }),
-    }));
+    })));
   });
 });

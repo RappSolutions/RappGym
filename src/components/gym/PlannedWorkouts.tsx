@@ -181,6 +181,7 @@ export function PlannedWorkouts() {
                           <span className="font-bold text-category-ink">{row.code}</span>
                           <span className="min-w-0 break-words">{byCode.get(row.code)?.name}</span>
                           <span className="col-start-2 min-w-0 break-words text-sm font-semibold sm:col-start-auto">
+                            {byCode.get(row.code)?.equipment ? <span className="font-normal text-muted-foreground">{byCode.get(row.code)?.equipment} · </span> : null}
                             {formatSet(row)}
                           </span>
                         </Button>

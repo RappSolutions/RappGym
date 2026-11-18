@@ -21,8 +21,8 @@ export function trainingResultSections(mode: TrainingRequest["mode"]) {
 
 export function normalizeTrainingPlan(insights: TrainingInsights, request: TrainingRequest, allowedCodes: string[]) {
   const allowed = new Set(allowedCodes);
-  const clean = (items: TrainingInsights["exercises"]) => items.filter((item) => allowed.has(item.code)).slice(0, 5).map((item) => ({
-    ...item, sets: Math.max(1, Math.min(5, Math.round(item.sets))), reps: Math.max(1, Math.min(30, Math.round(item.reps))),
+  const clean = (items: TrainingInsights["exercises"]) => items.filter((item) => allowed.has(item.code)).slice(0, 20).map((item) => ({
+    ...item, sets: Math.max(1, Math.min(8, Math.round(item.sets))), reps: Math.max(1, Math.min(30, Math.round(item.reps))),
   }));
   const workouts = request.mode === "plan" ? insights.workouts.slice(0, 14).map((workout) => ({
     ...workout, exercises: clean(workout.exercises),

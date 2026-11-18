@@ -45,3 +45,16 @@ describe("Personal training requests", () => {
     expect(normalizeTrainingPlan(insights, bare, ["DB-EX"]).workouts).toHaveLength(4);
   });
 });
+import { normalizeTrainingPlan as normalizeLong } from "@/lib/training-request";
+import { describe as d2, expect as e2, it as i2 } from "vitest";
+d2("long sessions", () => {
+  i2("keeps more than 5 exercises so long sessions can fill the requested time", () => {
+    const ex = Array.from({ length: 10 }, (_, i) => ({ code: `X${i}`, sets: 4, reps: 10, load: "", reason: "" }));
+    const out = normalizeLong(
+      { summary: "", weightDevelopment: "", setDevelopment: "", recommendation: "", exercises: [], answer: "", goalNotes: "", caution: "", workouts: [{ title: "A", dayOffset: 0, focus: "", exercises: ex }] },
+      { mode: "plan", question: "", workoutCount: 1, periodDays: 1, sessionMinutes: 75, purpose: "", startDate: null },
+      ex.map((e) => e.code),
+    );
+    e2(out.workouts[0]!.exercises).toHaveLength(10);
+  });
+});
