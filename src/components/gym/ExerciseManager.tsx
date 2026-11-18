@@ -1,7 +1,7 @@
 import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useLanguage } from "@/lib/i18n";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { Plus, Search, ChevronDown, ChevronRight, Pencil, Trash2, EyeOff } from "lucide-react";
+import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { Plus, Search, ChevronDown, ChevronRight, Pencil, Trash2, EyeOff, Eye } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ export function ExerciseManager() {
   const exercises = sourceExercises.filter((e) => showInactive || e.is_active).map(localize);
   const { data: log } = useSuspenseQuery(logQuery);
   const invalidate = useInvalidateGym();
+  const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [adding, setAdding] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -28,7 +29,19 @@ export function ExerciseManager() {
   const [editing, setEditing] = useState<Exercise | null>(null);
   const [logging, setLogging] = useState<{ exercise: Exercise; entry: LogEntry | null } | null>(null);
   const cats = categoriesOf(exercises);
-  const used = useMemo(() => new Set(log.map((e) => e.code)), [log]);
+  // Any log row (completed or planned) blocks deletion via FK RESTRICT, so decide on the same data.
+  const { data: usedIds = [] } = useQuery({ queryKey: ["log", "used-exercise-ids"], queryFn: async () => {
+    const ids: string[] = [];
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabase.from("log_entries").select("exercise_id").not("exercise_id", "is", null).range(from, from + 999);
+      if (error) throw error;
+      ids.push(...data.map((r) => r.exercise_id as string));
+      if (data.length < 1000) break;
+    }
+    return ids;
+  } });
+  const used = useMemo(() => new Set(usedIds), [usedIds]);
+  const countOf = (cat: string) => { const all = sourceExercises.map(localize).filter((e) => e.category === cat); const active = all.filter((e) => e.is_active).length; return active === all.length ? `${active}` : `${active}/${all.length - active}`; };
   const s = q.toLowerCase();
   const hits = exercises.filter((e) =>
     [e.code, e.name, e.equipment, e.category].some((v) => v.toLowerCase().includes(s)),
@@ -40,7 +53,7 @@ export function ExerciseManager() {
     const { count, error: countError } = await supabase.from("log_entries").select("id", { count: "exact", head: true }).eq("exercise_id", ex.id);
     if (countError) { toast.error(countError.message); return; }
     if (count) {
-      if (!await confirmDialog(t(`${ex.code} ${ex.name} används i ${count} loggrader (genomförda eller föreslagna) och kan därför inte raderas. Den döljs istället och all historik behålls. Du kan återaktivera den under "Visa inaktiva". Dölj övningen?`, `${ex.code} ${ex.name} is used in ${count} log rows (completed or suggested), so it can't be deleted. It will be hidden instead and all history is kept. You can reactivate it under "Show inactive". Hide the exercise?`))) return;
+      if (!await confirmDialog(t(`${ex.code} ${ex.name} används i ${count} loggrader (genomförda eller föreslagna) . Inaktivera den? Den döljs i Träna och AI-planering, all historik behålls och du kan återaktivera den med ögat.`, `${ex.code} ${ex.name} is used in ${count} log rows (completed or suggested), . Deactivate it? It is hidden in Train and AI planning, all history is kept and you can reactivate it with the eye.`))) return;
       const { error } = await supabase.from("exercises").update({ is_active: false }).eq("id", ex.id);
       if (error) { toast.error(error.message); return; }
       toast.success(t("Övningen är dold", "Exercise hidden"));
@@ -56,6 +69,7 @@ export function ExerciseManager() {
     }
     if (openId === ex.id) setOpenId(null);
     invalidate();
+    void qc.invalidateQueries({ queryKey: ["log", "used-exercise-ids"] });
   }
 
   async function reactivate(ex: Exercise) {
@@ -66,8 +80,7 @@ export function ExerciseManager() {
   }
 
   return (
-    <section className="space-y-4 rounded-xl border bg-card p-4">
-      <h2 className="font-display text-2xl font-bold uppercase">{t("Övningar", "Exercises")}</h2>
+    <section className="space-y-4">
       <div className="flex items-center justify-between gap-2">
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="size-4" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />{t(`Visa inaktiva (${inactiveCount})`, `Show inactive (${inactiveCount})`)}</label>
         <Button onClick={() => setAdding(true)} className="font-semibold"><Plus className="h-4 w-4" />{t("Ny", "New")}</Button>
@@ -82,18 +95,18 @@ export function ExerciseManager() {
         return (
           <section key={c} data-category={categoryToken(c, cats)} className="category-theme space-y-2">
             <Button variant="ghost" aria-expanded={expanded.has(c)} onClick={() => setExpanded((current) => { const next = new Set(current); if (next.has(c)) next.delete(c); else next.add(c); return next; })} className="h-14 w-full justify-start border-l-4 border-category-fill bg-category-fill/10 px-3 font-display text-xl font-bold uppercase text-category-ink hover:bg-category-fill/20 hover:text-category-ink">
-              {expanded.has(c) ? <ChevronDown /> : <ChevronRight />}{c} <span className="text-muted-foreground">({list.length})</span>
+              {expanded.has(c) ? <ChevronDown /> : <ChevronRight />}<span className="size-4 shrink-0 rounded-full bg-category-fill" aria-hidden />{c} <span className="text-muted-foreground">({countOf(c)})</span>
             </Button>
             {(expanded.has(c) || !!q.trim()) && <div className="ml-2 space-y-2 border-l-2 border-category-fill/40 pl-3">{list.map((ex) => (
               <div key={ex.id} className="space-y-2">
                 <ExerciseCard ex={ex} hideLast token={categoryToken(c, cats)}
                   action={<div className="flex shrink-0 items-center gap-1 pr-2">
                     <Button size="icon" variant="ghost" onClick={() => setEditing(live(ex))} aria-label={t("Redigera", "Edit")} title={t("Redigera", "Edit")}><Pencil className="h-4 w-4" /></Button>
-                    {used.has(ex.code)
-                      ? ex.is_active
+                    {!ex.is_active
+                      ? <Button size="icon" variant="ghost" onClick={() => void reactivate(live(ex))} aria-label={t("Återaktivera", "Reactivate")} title={t("Inaktiv – återaktivera", "Inactive – reactivate")}><Eye className="h-4 w-4" /></Button>
+                      : used.has(ex.id)
                         ? <Button size="icon" variant="ghost" onClick={() => void remove(live(ex))} aria-label={t("Inaktivera", "Deactivate")} title={t("Används i Logg/Pass – inaktivera istället", "Used in Log/Workouts – deactivate instead")}><EyeOff className="h-4 w-4" /></Button>
-                        : <Button size="icon" variant="ghost" disabled aria-label={t("Ta bort", "Delete")} title={t("Används i Logg/Pass – kan inte raderas", "Used in Log/Workouts – can't be deleted")}><Trash2 className="h-4 w-4" /></Button>
-                      : <Button size="icon" variant="ghost" onClick={() => void remove(live(ex))} aria-label={t("Ta bort", "Delete")} title={t("Ta bort", "Delete")}><Trash2 className="h-4 w-4" /></Button>}
+                        : <Button size="icon" variant="ghost" onClick={() => void remove(live(ex))} aria-label={t("Ta bort", "Delete")} title={t("Ta bort", "Delete")}><Trash2 className="h-4 w-4" /></Button>}
                   </div>}
                   expanded={openId === ex.id}
                   onClick={() => setOpenId(openId === ex.id ? null : ex.id)}>
@@ -103,7 +116,6 @@ export function ExerciseManager() {
                     onLog={(entry) => setLogging({ exercise: live(ex), entry: entry ?? null })}
                   />
                 </ExerciseCard>
-                {!ex.is_active && <div className="flex items-center justify-between gap-2 rounded-md border border-dashed px-3 py-2 text-sm"><span className="font-semibold text-muted-foreground">{t("Inaktiv – dold i Övningar och AI-planering", "Inactive – hidden in Exercises and AI planning")}</span><Button size="sm" variant="outline" onClick={() => void reactivate(live(ex))}>{t("Återaktivera", "Reactivate")}</Button></div>}
               </div>
             ))}</div>}
           </section>

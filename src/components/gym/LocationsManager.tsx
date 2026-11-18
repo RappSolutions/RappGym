@@ -92,8 +92,7 @@ export function LocationsManager() {
   }
 
   return (
-    <section className="space-y-3 rounded-xl border bg-card p-4">
-      <h2 className="font-display text-2xl font-bold uppercase">{t("Platser", "Locations")}</h2>
+    <section className="space-y-3">
       <p className="text-sm text-muted-foreground">{t("Var du tränar. Varje loggat set sparar platsen.", "Where you train. Every logged set remembers the location.")}</p>
       {gyms.map((g) => editing === g.id ? (
         <div key={g.id} className="grid gap-2 rounded-lg border p-2 sm:grid-cols-[1fr_1fr_auto]">

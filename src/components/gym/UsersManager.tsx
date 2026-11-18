@@ -27,8 +27,7 @@ export function UsersManager() {
     await qc.invalidateQueries({ queryKey: ["admin-users"] });
   }
 
-  return <section className="space-y-3 rounded-xl border bg-card p-4" aria-label={t("Användare", "Users")}>
-    <h2 className="flex items-center gap-2 font-display text-2xl font-bold"><Users className="size-5 text-primary" />{t("Användare", "Users")}</h2>
+  return <section className="space-y-3" aria-label={t("Användare", "Users")}>
     {isLoading && <p className="text-sm text-muted-foreground">{t("Laddar…", "Loading…")}</p>}
     {error && <p className="text-sm text-destructive">{error.message}</p>}
     <ul className="divide-y divide-border">{users.map((u) => {

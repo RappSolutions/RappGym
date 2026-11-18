@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ExerciseManager } from "@/components/gym/ExerciseManager";
 import { UsersManager } from "@/components/gym/UsersManager";
 import { RefsManager } from "@/components/gym/RefsManager";
+import { SettingsBlock } from "@/components/gym/SettingsBlock";
 import { LocationsManager } from "@/components/gym/LocationsManager";
 import { exerciseLocationsQuery } from "@/lib/exercise-locations";
 import { exercisesQuery, gymsQuery, logQuery } from "@/lib/gym";
@@ -30,11 +31,12 @@ function SettingsPage() {
   if (isLoading) return null;
   if (!isAdmin) return <main className="px-4"><p className="rounded-xl border bg-card p-4">{t("Inställningar hanteras av administratören.", "Settings are managed by the administrator.")}</p></main>;
   return (
-    <main className="space-y-6 px-4">
-      <LocationsManager />
-      <ExerciseManager />
-      <RefsManager />
-      <UsersManager />
+    <main className="space-y-3 px-4">
+      <SettingsBlock title={t("Användare", "Users")}><UsersManager /></SettingsBlock>
+      <SettingsBlock title={t("Platser", "Locations")}><LocationsManager /></SettingsBlock>
+      <SettingsBlock title={t("Kategorier", "Categories")}><RefsManager only="cat" /></SettingsBlock>
+      <SettingsBlock title={t("Redskap", "Equipment")}><RefsManager only="eq" /></SettingsBlock>
+      <SettingsBlock title={t("Övningar", "Exercises")}><ExerciseManager /></SettingsBlock>
     </main>
   );
 }

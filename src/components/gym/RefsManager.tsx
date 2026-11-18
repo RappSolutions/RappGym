@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQueryClient, useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Check, ChevronDown, ChevronRight, Pencil, Trash2, X } from "lucide-react";
+import { Check, Pencil, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,14 +13,13 @@ import { tokenToHex } from "@/lib/category-color";
 type Draft = { id: string; name: string; prefix: string; color: string };
 
 /** Admin CRUD for the category and equipment lookup tables; used rows are protected by FK RESTRICT. */
-export function RefsManager() {
+export function RefsManager({ only }: { only: "cat" | "eq" }) {
   const { t } = useLanguage();
   const qc = useQueryClient();
   const invalidate = useInvalidateGym();
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
   const { data: categories = [] } = useQuery(exerciseCategoriesQuery);
   const { data: equipment = [] } = useQuery(exerciseEquipmentQuery);
-  const [open, setOpen] = useState<"cat" | "eq" | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
   const catCount = (id: string) => exercises.filter((e) => e.category_id === id).length;
   const eqCount = (id: string) => exercises.filter((e) => e.equipment_id === id).length;
@@ -47,11 +46,6 @@ export function RefsManager() {
     await refresh();
   }
 
-  const header = (key: "cat" | "eq", label: string, n: number) => (
-    <Button variant="ghost" aria-expanded={open === key} onClick={() => { setOpen(open === key ? null : key); setDraft(null); }} className="h-10 w-full justify-start px-2 font-semibold">
-      {open === key ? <ChevronDown /> : <ChevronRight />}{label} <span className="text-muted-foreground">({n})</span>
-    </Button>
-  );
   const actions = (onEdit: () => void, onDelete: () => void, used: number) => (
     <><span className="w-8 text-right text-xs tabular-nums text-muted-foreground" title={t("Övningar", "Exercises")}>{used}</span>
       <Button size="icon" variant="ghost" className="size-8" aria-label={t("Ändra", "Edit")} onClick={onEdit}><Pencil className="size-4" /></Button>
@@ -63,10 +57,8 @@ export function RefsManager() {
   );
 
   return (
-    <section className="space-y-1 rounded-xl border bg-card p-4">
-      <h2 className="mb-2 font-display text-2xl font-bold uppercase">{t("Kategorier & redskap", "Categories & equipment")}</h2>
-      {header("cat", t("Kategorier", "Categories"), categories.length)}
-      {open === "cat" && <div className="ml-2 space-y-1 border-l-2 pl-3">{categories.map((c) => {
+    <section className="space-y-1">
+      {only === "cat" && <div className="space-y-1">{categories.map((c) => {
         const used = catCount(c.id);
         const ed = draft?.id === c.id ? draft : null;
         return <div key={c.id} data-category={c.color_token} className="category-theme flex items-center gap-2 py-0.5">
@@ -83,8 +75,7 @@ export function RefsManager() {
           </>}
         </div>;
       })}</div>}
-      {header("eq", t("Redskap", "Equipment"), equipment.length)}
-      {open === "eq" && <div className="ml-2 space-y-1 border-l-2 pl-3">{equipment.map((q) => {
+      {only === "eq" && <div className="space-y-1">{equipment.map((q) => {
         const used = eqCount(q.id);
         const ed = draft?.id === q.id ? draft : null;
         return <div key={q.id} className="flex items-center gap-2 py-0.5">
