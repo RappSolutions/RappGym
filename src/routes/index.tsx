@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { authProviders, type AuthProvider } from "@/lib/auth-providers";
 import rappgymLogo from "@/assets/rappgym-logo-berlin.png";
+import rappSolutionsLogo from "@/assets/RappSolutionsAB_200x112.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -162,8 +163,17 @@ function Index() {
           </p>
         </div>
       </main>
-      <footer className="pb-4 pt-6 text-center text-[11px] tracking-wide text-muted-foreground">
-        Provided by <span className="font-semibold text-foreground/80">Rapp Solutions AB</span> · Sweden
+      <footer className="flex flex-col items-center gap-2 pb-4 pt-6 text-center text-[11px] tracking-wide text-muted-foreground">
+        <img
+          src={rappSolutionsLogo}
+          alt="Rapp Solutions AB"
+          width={200}
+          height={112}
+          className="h-10 w-auto rounded-md ring-1 ring-foreground/10"
+        />
+        <span>
+          Provided by <span className="font-semibold text-foreground/80">Rapp Solutions AB</span> · Sweden
+        </span>
       </footer>
     </div>
   );
