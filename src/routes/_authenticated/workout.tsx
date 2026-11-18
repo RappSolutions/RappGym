@@ -70,30 +70,6 @@ function PassPage() {
           </Link>
         </Button>
       </div>
-<!--
-
-      <div className="flex gap-3">
-        <div className="flex-1">
-          <SpontaneousButton gymId={gym.id} />
-        </div>
-        <div className="flex-1">
-          <WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} />
-        </div>
-        <Button
-          asChild
-          variant="outline"
-          size="icon"
-          aria-label={t("Planera pass med AI", "Plan workout with AI")}
-          title={t("Planera pass med AI", "Plan workout with AI")}
-        >
-          <Link to="/ai" search={{ mode: "plan" }}>
-            ✨ AI
-          </Link>
-        </Button>
-      </div>
-      <PlannedWorkouts />
-
-  -->
     </main>
   );
 }
