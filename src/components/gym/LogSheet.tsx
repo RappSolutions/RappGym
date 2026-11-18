@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { gymsQuery, todayISO, useInvalidateGym, formatSet, doseText, type Exercise, type LogEntry } from "@/lib/gym";
+import { gymsQuery, todayISO, useInvalidateGym, formatSet, type Exercise, type LogEntry } from "@/lib/gym";
 import { ExerciseImages } from "./ExerciseImages";
 import { LogDatePicker } from "./LogDatePicker";
 import { appendLoadAdvice, splitSuggestedLoad } from "@/lib/suggested-load";
@@ -119,8 +119,7 @@ export function LogSheet({
               <span className="text-primary">{shown?.code}</span> {shown?.name}
             </DrawerTitle>
             <DrawerDescription>
-              {doseText(shown?.dose)}
-              {last && !entry && ` · ${t("Senast", "Last")}: ${formatSet({ ...last, sets: 1 })}`}
+              {last && !entry && `${t("Senast", "Last")}: ${formatSet({ ...last, sets: 1 })}`}
             </DrawerDescription>
           </DrawerHeader>
           {shown && <ExerciseImages exercise={shown} />}

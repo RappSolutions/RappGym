@@ -1,0 +1,1 @@
+ALTER TABLE public.exercises ALTER COLUMN category_id SET NOT NULL;

@@ -67,6 +67,8 @@
   --color-cat-3: var(--cat-3);
   --color-cat-4: var(--cat-4);
   --color-cat-5: var(--cat-5);
+  --color-cat-6: var(--cat-6);
+  --color-cat-7: var(--cat-7);
   --color-category-fill: var(--category-fill);
   --color-category-ink: var(--category-ink);
   --color-category-on: var(--category-on);
@@ -122,6 +124,10 @@
   --cat-3: var(--brand-yellow);
   --cat-4: oklch(0.65 0.22 25);
   --cat-5: var(--brand-royal);
+  --cat-6: oklch(0.66 0.2 330);
+  --cat-7: oklch(0.68 0.15 155);
+  --cat-6-ink: oklch(0.48 0.18 330);
+  --cat-7-ink: oklch(0.45 0.12 155);
   --cat-2-ink: oklch(0.43 0.08 205);
   --cat-3-ink: oklch(0.72 0.15 95);
   --cat-4-ink: oklch(0.5 0.19 25);
@@ -160,7 +166,7 @@
   }
 }
 
-@source inline("bg-cat-1 bg-cat-2 bg-cat-3 bg-cat-4 bg-cat-5 text-cat-1 text-cat-2 text-cat-3 text-cat-4 text-cat-5 border-cat-1 border-cat-2 border-cat-3 border-cat-4 border-cat-5");
+@source inline("bg-cat-1 bg-cat-2 bg-cat-3 bg-cat-4 bg-cat-5 text-cat-1 text-cat-2 text-cat-3 text-cat-4 text-cat-5 border-cat-1 border-cat-2 border-cat-3 border-cat-4 border-cat-5 bg-cat-6 bg-cat-7 text-cat-6 text-cat-7 border-cat-6 border-cat-7");
 
 /* Separate vivid category fills from readable text, especially on yellow. */
 .category-theme {
@@ -189,6 +195,16 @@
 .category-theme[data-category="cat-5"] {
   --category-fill: var(--cat-5);
   --category-chart: var(--brand-royal);
+}
+.category-theme[data-category="cat-6"] {
+  --category-fill: var(--cat-6);
+  --category-ink: var(--cat-6-ink);
+  --category-chart: var(--cat-6-ink);
+}
+.category-theme[data-category="cat-7"] {
+  --category-fill: var(--cat-7);
+  --category-ink: var(--cat-7-ink);
+  --category-chart: var(--cat-7-ink);
 }
 
 @utility google-btn {

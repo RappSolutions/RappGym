@@ -29,10 +29,10 @@ export function ExerciseDetails({
 
   return (
     <div className="space-y-3">
-      {(ex.variant || ex.muscles) && <p className="text-sm text-muted-foreground">{[ex.variant, ex.muscles].filter(Boolean).join(" · ")}</p>}
+      
       <ExerciseImages exercise={ex} />
-      {ex.instructions && <p className="leading-relaxed">{ex.instructions}</p>}
-      {ex.focus && <p className="border-l-4 border-category-fill pl-3"><b>{t("Fokus:", "Focus:")}</b> {ex.focus}</p>}
+      {ex.instructions && <p className="whitespace-pre-line leading-relaxed">{ex.instructions}</p>}
+      
       <div className="flex gap-2">
         <Button variant="secondary" className="h-12 flex-1" onClick={onEdit} aria-label={t("Redigera", "Edit")}><Pencil className="h-5 w-5" /></Button>
         <Button variant="secondary" className="h-12" onClick={onDelete} aria-label={t("Ta bort", "Delete")}><Trash2 className="h-5 w-5" /></Button>

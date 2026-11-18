@@ -1,3 +1,4 @@
+import { EXERCISE_SELECT, normalizeExercise } from "@/lib/exercise-refs";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
@@ -22,8 +23,9 @@ export const getTrainingInsights = createServerFn({ method: "POST" })
       log.push(...result.data);
       if (result.data.length < 1000) break;
     }
-    const { data: exercises, error } = await supabase.from("exercises").select("*");
+    const { data: exerciseRows, error } = await supabase.from("exercises").select(EXERCISE_SELECT);
     if (error) throw new Error(error.message);
+    const exercises = (exerciseRows as unknown as Parameters<typeof normalizeExercise>[0][]).map(normalizeExercise);
     const { data: goalRows, error: goalError } = await supabase.from("training_goals").select("text,target_date").eq("user_id", userId).eq("status", "active");
     if (goalError) throw new Error(goalError.message);
     const goals = goalRows.map((g) => ({ goal: g.text.slice(0, 300), targetDate: g.target_date }));

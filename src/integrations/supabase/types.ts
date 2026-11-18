@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      exercise_categories: {
+        Row: {
+          code_prefix: string
+          color_token: string
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          code_prefix: string
+          color_token?: string
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          code_prefix?: string
+          color_token?: string
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      exercise_equipment: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       exercise_locations: {
         Row: {
           created_at: string
@@ -53,10 +98,12 @@ export type Database = {
       exercises: {
         Row: {
           category: string
+          category_id: string
           code: string
           created_at: string
           dose: string
           equipment: string
+          equipment_id: string | null
           focus: string
           gym_id: string | null
           id: string
@@ -71,11 +118,13 @@ export type Database = {
           variant: string
         }
         Insert: {
-          category: string
+          category?: string
+          category_id: string
           code: string
           created_at?: string
           dose?: string
           equipment?: string
+          equipment_id?: string | null
           focus?: string
           gym_id?: string | null
           id?: string
@@ -91,10 +140,12 @@ export type Database = {
         }
         Update: {
           category?: string
+          category_id?: string
           code?: string
           created_at?: string
           dose?: string
           equipment?: string
+          equipment_id?: string | null
           focus?: string
           gym_id?: string | null
           id?: string
@@ -109,6 +160,20 @@ export type Database = {
           variant?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "exercises_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exercises_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_equipment"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "exercises_gym_id_fkey"
             columns: ["gym_id"]

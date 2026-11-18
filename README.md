@@ -70,6 +70,8 @@ erDiagram
   EXERCISES ||--o{ EXERCISE_LOCATIONS : "available at"
   GYMS ||--o{ EXERCISE_LOCATIONS : offers
   EXERCISES ||--o{ LOG_ENTRIES : "RESTRICT"
+  EXERCISE_CATEGORIES ||--o{ EXERCISES : "RESTRICT"
+  EXERCISE_EQUIPMENT |o--o{ EXERCISES : "RESTRICT"
   WORKOUTS |o--o{ LOG_ENTRIES : "SET NULL"
   GYMS |o--o{ LOG_ENTRIES : "performed at"
   GYMS |o--o{ WORKOUTS : "planned at"
@@ -92,10 +94,23 @@ erDiagram
     uuid id PK
     text code UK
     text name
-    text category
+    uuid category_id FK
+    uuid equipment_id FK
+    text instructions
     jsonb image_urls
     jsonb translations
     boolean is_active
+  }
+  EXERCISE_CATEGORIES {
+    uuid id PK
+    text name UK
+    text code_prefix UK
+    text color_token
+    int sort_order
+  }
+  EXERCISE_EQUIPMENT {
+    uuid id PK
+    text name UK
   }
   EXERCISE_LOCATIONS {
     uuid exercise_id PK, FK

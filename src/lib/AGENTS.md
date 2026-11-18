@@ -1,1 +1,2 @@
 - Home dashboard numbers come from the pure `src/lib/dashboard.ts` module (tested); soft training goals live in the owner-scoped `training_goals` table and are passed to the AI insight call as untrusted data, so AI advice can reflect goals without trusting them as instructions.
+- Exercise categories (name, code prefix, colour token) and equipment are FK lookup tables read via EXERCISE_SELECT/normalizeExercise in `src/lib/exercise-refs.ts`; new codes come from the category's DB prefix, never from code constants, so admins own the vocabulary.

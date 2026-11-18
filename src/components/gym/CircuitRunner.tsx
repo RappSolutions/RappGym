@@ -146,10 +146,10 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
           </div>}
 
           {r && <div className="space-y-3">
-            <div><p className="font-bold text-primary">{r.code}</p><p className="text-xl font-bold">{ex?.name ?? r.code}</p>{(ex?.variant || ex?.muscles) && <p className="text-sm text-muted-foreground">{[ex?.variant, ex?.muscles].filter(Boolean).join(" · ")}</p>}{r.note && <p className="text-sm text-muted-foreground">{r.note}</p>}</div>
+            <div><p className="font-bold text-primary">{r.code}</p><p className="text-xl font-bold">{ex?.name ?? r.code}</p>{r.note && <p className="text-sm text-muted-foreground">{r.note}</p>}</div>
             {ex && <ExerciseImages exercise={ex} />}
             {ex?.instructions && <p className="text-sm leading-relaxed">{ex.instructions}</p>}
-            {ex?.focus && <p className="border-l-4 border-primary pl-3 text-sm"><b>{t("Fokus:", "Focus:")}</b> {ex.focus}</p>}
+            
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1"><p className="text-sm font-medium">{t("Vikt (kg)", "Weight (kg)")}</p>
                 <div className="flex items-center gap-1"><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="-5 kg" onClick={() => setLoad(adjustLoad(load, -5))}><Minus /></Button><Input inputMode="decimal" value={load} onChange={(e) => setLoad(e.target.value)} className="h-10 min-w-0 px-1 text-center text-lg font-bold" /><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="+5 kg" onClick={() => setLoad(adjustLoad(load, 5))}><Plus /></Button></div></div>

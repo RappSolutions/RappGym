@@ -57,7 +57,7 @@ function ExercisesPage() {
   }, [log, today, gym?.id]);
   const [open, setOpen] = useState<Exercise | null>(null);
   const s = q.trim().toLowerCase();
-  const list = s ? exercises.filter((e) => { const l = localize(e); return [l.code, l.name, l.equipment, l.muscles, l.category].some((v) => v.toLowerCase().includes(s)); }) : exercises.filter((e) => e.category === active);
+  const list = s ? exercises.filter((e) => { const l = localize(e); return [l.code, l.name, l.equipment, l.category].some((v) => v.toLowerCase().includes(s)); }) : exercises.filter((e) => e.category === active);
 
   if (!gym)
     return (

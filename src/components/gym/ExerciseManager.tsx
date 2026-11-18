@@ -31,7 +31,7 @@ export function ExerciseManager() {
   const last = useMemo(() => lastByCode(log), [log]);
   const s = q.toLowerCase();
   const hits = exercises.filter((e) =>
-    [e.code, e.name, e.equipment, e.muscles, e.category].some((v) => v.toLowerCase().includes(s)),
+    [e.code, e.name, e.equipment, e.category].some((v) => v.toLowerCase().includes(s)),
   );
 
   const live = (ex: Exercise) => sourceExercises.find((e) => e.id === ex.id) ?? ex;

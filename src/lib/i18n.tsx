@@ -22,7 +22,7 @@ export function localizeExercise(ex: Exercise, language: Language): Exercise {
   const translation = ex.translations[language];
   if (!translation || typeof translation !== "object" || Array.isArray(translation)) return ex;
   const result = { ...ex };
-  for (const key of ["name", "equipment", "variant", "muscles", "instructions", "dose", "focus"] as const) {
+  for (const key of ["name", "instructions"] as const) {
     const value = translation[key];
     if (typeof value === "string" && value) result[key] = value;
   }

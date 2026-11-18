@@ -1,3 +1,4 @@
+import { EXERCISE_SELECT, normalizeExercise } from "@/lib/exercise-refs";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
@@ -14,8 +15,9 @@ export const scanLocationPhoto = createServerFn({ method: "POST" })
     const fail = (error: string) => ({ exerciseIds: [], equipment: "", error });
     const { data: gym } = await supabase.from("gyms").select("id").eq("id", data.gymId).maybeSingle();
     if (!gym) return fail(sv ? "Platsen hittades inte." : "Location not found.");
-    const { data: exercises, error } = await supabase.from("exercises").select("id,code,name,equipment,category").eq("is_active", true);
+    const { data: exerciseRows, error } = await supabase.from("exercises").select(EXERCISE_SELECT).eq("is_active", true);
     if (error) throw new Error(error.message);
+    const exercises = (exerciseRows as unknown as Parameters<typeof normalizeExercise>[0][]).map(normalizeExercise);
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) return fail(sv ? "AI är inte konfigurerad ännu." : "AI is not configured yet.");
     try {

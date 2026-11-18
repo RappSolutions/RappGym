@@ -1,5 +1,4 @@
 import { useLanguage } from "@/lib/i18n";
-import { doseText } from "@/lib/gym";
 import type { Exercise, LogEntry } from "@/lib/gym";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight } from "lucide-react";
@@ -24,9 +23,9 @@ export function ExerciseCard({
             <span className="truncate font-display text-lg font-semibold uppercase">{ex.name}</span>
           </div>
           <div className="mt-0.5 text-sm text-muted-foreground">
-            {ex.equipment}{ex.dose && ` · ${doseText(ex.dose)}`}
+            {ex.equipment}
           </div>
-          {ex.focus && !expanded && <div className="mt-1 line-clamp-1 text-xs text-muted-foreground/80">{t("Fokus:", "Focus:")} {ex.focus}</div>}
+          
         </div>
         <div className="shrink-0 text-right">
           {last ? (

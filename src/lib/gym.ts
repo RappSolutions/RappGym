@@ -2,8 +2,9 @@ import { queryOptions, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { completedEntries } from "@/lib/workout-suggestions";
+import { EXERCISE_SELECT, normalizeExercise, type ExerciseCategory, type ExerciseEquipment, type ExerciseRow } from "@/lib/exercise-refs";
 
-export type Exercise = Tables<"exercises">;
+export type Exercise = ExerciseRow;
 export type Workout = Tables<"workouts">;
 /** Log row with its optional workout header (title, circuit, origin). */
 export type LogEntry = Tables<"log_entries"> & { workout?: Pick<Workout, "id" | "title" | "created_by" | "is_circuit" | "scheduled_date" | "created_at"> | null };
@@ -14,9 +15,30 @@ export const exercisesQuery = queryOptions({
   queryFn: async () => {
     const { data, error } = await supabase
       .from("exercises")
-      .select("*")
+      .select(EXERCISE_SELECT)
       .order("sort_order")
       .order("code");
+    if (error) throw error;
+    const rows = (data as unknown as Parameters<typeof normalizeExercise>[0][]).map(normalizeExercise);
+    for (const r of rows) if (r.category) TOKEN_BY_CATEGORY.set(r.category, r.category_token);
+    return rows;
+  },
+});
+
+export const exerciseCategoriesQuery = queryOptions({
+  queryKey: ["exercise-categories"],
+  queryFn: async (): Promise<ExerciseCategory[]> => {
+    const { data, error } = await supabase.from("exercise_categories").select("*").order("sort_order").order("name");
+    if (error) throw error;
+    for (const c of data) TOKEN_BY_CATEGORY.set(c.name, c.color_token);
+    return data;
+  },
+});
+
+export const exerciseEquipmentQuery = queryOptions({
+  queryKey: ["exercise-equipment"],
+  queryFn: async (): Promise<ExerciseEquipment[]> => {
+    const { data, error } = await supabase.from("exercise_equipment").select("*").order("name");
     if (error) throw error;
     return data;
   },
@@ -62,12 +84,16 @@ export function useInvalidateGym() {
     qc.invalidateQueries({ queryKey: ["log"] });
     qc.invalidateQueries({ queryKey: ["workout-suggestions"] });
     qc.invalidateQueries({ queryKey: ["exercises"] });
+    qc.invalidateQueries({ queryKey: ["exercise-categories"] });
+    qc.invalidateQueries({ queryKey: ["exercise-equipment"] });
   };
 }
 
-/** Unique categories in the order they first appear in the exercise bank. */
-export function categoriesOf(exercises: Exercise[]): string[] {
-  return [...new Set(exercises.map((e) => e.category))];
+/** Unique categories ordered by the category table's sort order (then first appearance). */
+export function categoriesOf(exercises: Pick<Exercise, "category">[]): string[] {
+  const sort = new Map<string, number>();
+  exercises.forEach((e, i) => { if (!sort.has(e.category)) sort.set(e.category, ((e as Partial<Exercise>).category_sort ?? 9999) * 10000 + i); });
+  return [...sort.keys()].sort((a, b) => sort.get(a)! - sort.get(b)!);
 }
 
 /** Latest log entry per exercise code (log must be sorted newest first). */
@@ -96,8 +122,12 @@ export function workoutRecordingOrder<T extends { created_at: string }>(entries:
   return [...entries].sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
 }
 
-const CAT_TOKENS = ["cat-1", "cat-2", "cat-3", "cat-4", "cat-5"];
+const CAT_TOKENS = ["cat-1", "cat-2", "cat-3", "cat-4", "cat-5", "cat-6", "cat-7"];
+/** Colour tokens loaded from exercise_categories.color_token; index fallback only before data arrives. */
+const TOKEN_BY_CATEGORY = new Map<string, string>();
 export function categoryToken(category: string, categories: string[]): string {
+  const stored = TOKEN_BY_CATEGORY.get(category);
+  if (stored) return stored;
   const i = categories.indexOf(category);
   return CAT_TOKENS[(i < 0 ? 0 : i) % CAT_TOKENS.length] ?? "cat-1";
 }
@@ -168,4 +198,3 @@ export function formatSet(e: { sets: number | null; reps: number | null; load: s
   return (e.sets ?? 1) > 1 ? `${e.sets} × ${base}` : base;
 }
 
-export const doseText = (d: string | null | undefined) => (d ?? "").replace(/varv/gi, "set");

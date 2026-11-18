@@ -11,7 +11,7 @@ import { ExerciseForm } from "@/components/gym/ExerciseForm";
 import { LogSheet } from "@/components/gym/LogSheet";
 import { ExerciseImages } from "@/components/gym/ExerciseImages";
 import { supabase } from "@/integrations/supabase/client";
-import { categoriesOf, categoryToken, exercisesQuery, formatDate, logQuery, todayISO, useInvalidateGym, type LogEntry, formatSet, doseText } from "@/lib/gym";
+import { categoriesOf, categoryToken, exercisesQuery, formatDate, logQuery, todayISO, useInvalidateGym, type LogEntry, formatSet } from "@/lib/gym";
 
 export const Route = createFileRoute("/_authenticated/exercises/$code")({
   head: ({ params }) => ({
@@ -67,12 +67,10 @@ function ExercisePage() {
       <div>
         <div className="font-display text-lg font-bold uppercase text-category-ink">{ex.code} · {ex.category}</div>
         <h1 className="text-4xl font-extrabold uppercase leading-none">{ex.name}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{[ex.equipment, ex.variant, ex.muscles].filter(Boolean).join(" · ")}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{ex.equipment}</p>
       </div>
-      {ex.dose && <div className="rounded-xl bg-secondary p-4 text-2xl font-bold">{doseText(ex.dose)}</div>}
       <ExerciseImages exercise={ex} />
-      {ex.instructions && <p className="leading-relaxed">{ex.instructions}</p>}
-      {ex.focus && <p className="border-l-4 border-category-fill pl-3"><b>{t("Fokus:", "Focus:")}</b> {ex.focus}</p>}
+      {ex.instructions && <p className="whitespace-pre-line leading-relaxed">{ex.instructions}</p>}
       <div className="flex gap-2">
         <Button onClick={() => { setEntry(null); setLogging(true); }} className="h-12 flex-1 font-bold uppercase"><Plus className="h-5 w-5" />{t("Logga set", "Log sets")}</Button>
         <Button variant="secondary" className="h-12" onClick={() => setEditing(true)} aria-label={t("Redigera", "Edit")}><Pencil className="h-5 w-5" /></Button>

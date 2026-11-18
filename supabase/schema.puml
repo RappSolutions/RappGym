@@ -33,14 +33,29 @@ entity exercises {
   --
   * code : text <<UQ>>
   * name : text
-  * category : text
-  variant, focus, muscles, equipment, dose, instructions : text
+  * category_id : uuid <<FK>>
+  equipment_id : uuid <<FK>>
+  instructions : text
+  category, equipment, variant, focus, muscles, dose : text <<DEPRECATED>>
   image_urls : jsonb
   translations : jsonb
   * is_active : boolean
   sort_order : int
   gym_id : uuid <<DEPRECATED>>
   * user_id : uuid
+}
+entity exercise_categories {
+  * id : uuid <<PK>>
+  --
+  * name : text <<UQ>>
+  * code_prefix : text <<UQ>>
+  * color_token : text
+  sort_order : int
+}
+entity exercise_equipment {
+  * id : uuid <<PK>>
+  --
+  * name : text <<UQ>>
 }
 entity exercise_locations {
   * exercise_id : uuid <<PK,FK>>
@@ -126,6 +141,8 @@ users ||..o| training_profiles
 exercises ||--o{ exercise_locations : "CASCADE"
 gyms ||--o{ exercise_locations : "CASCADE"
 exercises ||--o{ log_entries : "RESTRICT"
+exercise_categories ||--o{ exercises : "RESTRICT"
+exercise_equipment |o--o{ exercises : "RESTRICT"
 workouts |o--o{ log_entries : "SET NULL"
 gyms |o--o{ log_entries : "SET NULL"
 gyms |o--o{ workouts : "SET NULL"

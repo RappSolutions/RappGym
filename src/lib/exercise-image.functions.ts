@@ -10,14 +10,14 @@ export const generateExerciseImage = createServerFn({ method: "POST" })
   .inputValidator(z.object({ exerciseId: z.string().uuid(), wishes: z.string().max(1000).default("") }))
   .handler(async ({ data, context }): Promise<{ path: string | null; error: string | null }> => {
     const { supabase, userId } = context;
-    const { data: ex } = await supabase.from("exercises").select("id,code,name,equipment,instructions,variant").eq("id", data.exerciseId).maybeSingle();
+    const { data: ex } = await supabase.from("exercises").select("id,code,name,instructions,eq:exercise_equipment(name)").eq("id", data.exerciseId).maybeSingle();
     if (!ex) return { path: null, error: "Exercise not found." };
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) return { path: null, error: "AI is not configured." };
     const prompt = [
       "Clean instructional fitness illustration on a plain white background, two panels side by side showing the start position and the end position of the exercise.",
       "Simple flat vector style, one neutral athletic figure, clear body posture, subtle arrows showing the movement, no text, no logos.",
-      `Exercise: ${ex.name}. Equipment: ${ex.equipment || "none"}. Variation: ${ex.variant || "standard"}.`,
+      `Exercise: ${ex.name}. Equipment: ${(ex.eq as { name: string } | null)?.name || "none"}.`,
       ex.instructions ? `How it is performed: ${ex.instructions}` : "",
       data.wishes.trim() ? `User wishes (follow if reasonable): ${data.wishes.trim()}` : "",
     ].filter(Boolean).join("\n");
