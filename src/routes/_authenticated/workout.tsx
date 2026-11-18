@@ -48,7 +48,7 @@ function PassPage() {
 
   return (
     <main className="space-y-4 px-4">
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         <div className="flex-1">
           <SpontaneousButton gymId={gym.id} />
         </div>
