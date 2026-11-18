@@ -1,7 +1,7 @@
 import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { Flag, Pencil, Plus, RotateCcw, Target, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Flag, Pencil, Plus, RotateCcw, Target, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,7 @@ export function GoalsCard() {
   const { t } = useLanguage();
   const qc = useQueryClient();
   const { data: goals } = useSuspenseQuery(goalsQuery);
-  const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [text, setText] = useState("");
   const [date, setDate] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
@@ -133,13 +133,13 @@ export function GoalsCard() {
       <Button
         variant="ghost"
         className="w-full justify-start gap-2 px-0"
-        aria-expanded={open}
-        onClick={() => setOpen(!open)}
+        aria-expanded={expanded}
+        onClick={() => setExpanded(!expanded)}
       >
-        {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+        {expanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
         <span className="font-display text-xl font-bold">{t("Mina mål", "My goals")}</span>
       </Button>
-      {open && (
+      {expanded && (
         <>
           <h2 className="flex items-center gap-2 text-xl font-bold uppercase">
             <Target className="size-5 text-primary" />
