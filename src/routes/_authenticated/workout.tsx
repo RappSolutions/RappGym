@@ -22,7 +22,13 @@ export const Route = createFileRoute("/_authenticated/workout")({
     ],
   }),
   loader: ({ context }) =>
-    Promise.all([context.queryClient.ensureQueryData(gymsQuery), context.queryClient.ensureQueryData(exercisesQuery), context.queryClient.ensureQueryData(logQuery), context.queryClient.ensureQueryData(exerciseLocationsQuery), context.queryClient.ensureQueryData(suggestionsQuery)]),
+    Promise.all([
+      context.queryClient.ensureQueryData(gymsQuery),
+      context.queryClient.ensureQueryData(exercisesQuery),
+      context.queryClient.ensureQueryData(logQuery),
+      context.queryClient.ensureQueryData(exerciseLocationsQuery),
+      context.queryClient.ensureQueryData(suggestionsQuery),
+    ]),
   component: PassPage,
 });
 
@@ -43,10 +49,22 @@ function PassPage() {
   return (
     <main className="space-y-4 px-4">
       <div className="flex gap-2">
-        <div className="flex-1"><SpontaneousButton gymId={gym.id} /></div>
-        <div className="flex-1"><WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} /></div>
-        <Button asChild variant="outline" size="icon" aria-label={t("Planera pass med AI", "Plan workout with AI")} title={t("Planera pass med AI", "Plan workout with AI")}>
-          <Link to="/ai" search={{ mode: "plan" }}>✨</Link>
+        <div className="flex-1">
+          <SpontaneousButton gymId={gym.id} />
+        </div>
+        <div className="flex-1">
+          <WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} />
+        </div>
+        <Button
+          asChild
+          variant="outline"
+          size="icon"
+          aria-label={t("Planera pass med AI", "Plan workout with AI")}
+          title={t("Planera pass med AI", "Plan workout with AI")}
+        >
+          <Link to="/ai" search={{ mode: "plan" }}>
+            ✨ AI
+          </Link>
         </Button>
       </div>
       <PlannedWorkouts />
