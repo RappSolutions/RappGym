@@ -164,15 +164,15 @@ function Index() {
         </div>
       </main>
       <footer className="flex flex-col items-center gap-2 pb-4 pt-6 text-center text-[11px] tracking-wide text-muted-foreground">
-        <img
+        <a href="https://rappsol.com" target="_blank" rel="noopener noreferrer" aria-label="Rapp Solutions AB" className="rounded-md transition-opacity hover:opacity-80"><img
           src={rappSolutionsLogo}
           alt="Rapp Solutions AB"
           width={200}
           height={112}
           className="h-12 w-auto rounded-md ring-1 ring-foreground/10"
-        />
+        /></a>
         <span>
-          Provided by <span className="font-semibold text-foreground/80">Rapp Solutions AB</span> · Sweden
+          Provided by <a href="https://rappsol.com" target="_blank" rel="noopener noreferrer" className="font-semibold text-foreground/80 hover:underline">Rapp Solutions AB</a> · Sweden
         </span>
       </footer>
     </div>
