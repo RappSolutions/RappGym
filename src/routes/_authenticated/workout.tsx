@@ -4,6 +4,7 @@ import { useLanguage } from "@/lib/i18n";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useSelectedGym } from "@/hooks/use-gym";
 import { useMemo } from "react";
+import { Sparkles } from "lucide-react";
 import { PlannedWorkouts } from "@/components/gym/PlannedWorkouts";
 import { SpontaneousButton } from "@/components/gym/SpontaneousButton";
 import { WorkoutBuilder } from "@/components/gym/WorkoutBuilder";
