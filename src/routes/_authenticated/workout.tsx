@@ -70,6 +70,7 @@ function PassPage() {
           </Link>
         </Button>
       </div>
+<!--
 
       <div className="flex gap-3">
         <div className="flex-1">
@@ -91,6 +92,8 @@ function PassPage() {
         </Button>
       </div>
       <PlannedWorkouts />
+
+  -->
     </main>
   );
 }
