@@ -71,8 +71,8 @@ function AppLayout() {
               to={to}
               data-nav-style={NAV_STYLE}
               className={cn(
-                "nav-tab group relative flex flex-col items-center text-xs font-medium transition-colors",
-                NAV_STYLE === "block" ? "p-1.5" : "gap-1 py-2 text-muted-foreground",
+                "nav-tab group relative flex h-[72px] flex-col items-center text-xs font-medium transition-colors",
+                NAV_STYLE === "block" ? "justify-center p-2" : "justify-center gap-1 text-muted-foreground",
               )}
               activeProps={{ className: "is-active" }}
             >
@@ -80,14 +80,16 @@ function AppLayout() {
                 NAV_STYLE === "block" ? (
                   <span
                     className={cn(
-                      "flex w-full flex-col items-center gap-1 rounded-2xl py-2 transition-colors",
+                      "flex h-full w-full flex-col items-center justify-center gap-1 rounded-2xl transition-colors",
                       isActive
                         ? "bg-brand-blue text-primary-foreground shadow-sm"
                         : "text-muted-foreground",
                     )}
                   >
-                    <Icon className="h-6 w-6" />
-                    {t(label, en)}
+                    <span className="flex h-9 items-center justify-center">
+                      <Icon className="h-6 w-6" />
+                    </span>
+                    <span data-navlabel>{t(label, en)}</span>
                   </span>
                 ) : (
                   <>
@@ -101,7 +103,7 @@ function AppLayout() {
                         className={cn("h-6 w-6", isActive ? "text-primary-foreground" : "text-muted-foreground")}
                       />
                     </span>
-                    <span className={cn(isActive ? "font-semibold text-brand-blue" : "text-muted-foreground")}>
+                    <span data-navlabel className={cn(isActive ? "font-semibold text-brand-blue" : "text-muted-foreground")}>
                       {t(label, en)}
                     </span>
                   </>
