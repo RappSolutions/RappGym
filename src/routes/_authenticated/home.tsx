@@ -154,7 +154,7 @@ function HomePage() {
           ))}
         </div>
       </div>
-      {s.recentDates.length > 0 && (
+      {s.recentDates.length > 0 && false && (
         <section className="space-y-2 rounded-xl border bg-card p-4">
           <h2 className="text-xl font-bold uppercase">{t("Senaste pass", "Recent workouts")}</h2>
           <ul className="divide-y divide-border">
