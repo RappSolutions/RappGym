@@ -30,22 +30,31 @@ function Index() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [authError, setAuthError] = useState<AuthCallbackError | null>(null);
+  const [pending, setPending] = useState<AuthProvider | null>(null);
+  const [checking, setChecking] = useState(true);
+  const [spinning, setSpinning] = useState(false);
+  const waiting = checking || pending !== null;
   useEffect(() => {
     const err = parseAuthCallbackError(window.location.hash, window.location.search);
     if (err) {
       setAuthError(err);
       window.history.replaceState(null, "", window.location.pathname);
+      setChecking(false);
       return;
     }
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/home", replace: true });
+      else setChecking(false);
     });
   }, [navigate]);
 
   async function social(provider: AuthProvider) {
+    if (pending) return;
     setAuthError(null);
+    setPending(provider);
     const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin });
     if (result.error) {
+      setPending(null);
       toast.error(
         result.error instanceof Error ? result.error.message : t("Inloggningen misslyckades", "Sign-in failed"),
       );
@@ -56,7 +65,7 @@ function Index() {
   }
 
   return (
-    <div className="app-sheet mx-auto flex min-h-screen max-w-2xl flex-col pb-12 md:max-w-4xl">
+    <div aria-busy={waiting} className={`app-sheet mx-auto flex min-h-screen${waiting ? " cursor-wait" : ""} max-w-2xl flex-col pb-12 md:max-w-4xl`}>
       <header className="app-masthead flex items-center justify-between gap-3 px-4 py-5">
         <span className="brand-wordmark font-display text-2xl font-bold md:text-3xl">RappGym</span>
         <LanguagePicker flagsOnly />
@@ -68,7 +77,9 @@ function Index() {
           alt="RappGym"
           width={240}
           height={240}
-          className="landing-logo relative h-44 w-44 object-contain md:h-60 md:w-60"
+          onClick={() => !waiting && setSpinning(true)}
+          onAnimationEnd={(e) => e.animationName === "landing-spin-hop" && setSpinning(false)}
+          className={`landing-logo relative h-44 w-44 object-contain md:h-60 md:w-60 ${waiting ? "is-waiting" : spinning ? "is-spinning cursor-pointer" : "cursor-pointer"}`}
         />
         <h1 className="landing-rise relative mt-6 font-display text-5xl font-bold text-brand-blue md:text-6xl">
           RappGym
@@ -77,6 +88,11 @@ function Index() {
           {t("Logga pass, följ cirklar, se din progress.", "Log workouts, run circuits, track your progress.")}
         </p>
         <div className="landing-rise relative mt-8 w-full max-w-sm space-y-3 [animation-delay:240ms]">
+          {waiting && (
+            <p role="status" className="text-sm font-medium text-muted-foreground">
+              {checking ? t("Loggar in…", "Signing in…") : t(`Ansluter till ${pending === authProviders[0] ? "Google" : "Microsoft"}…`, `Connecting to ${pending === authProviders[0] ? "Google" : "Microsoft"}…`)}
+            </p>
+          )}
           {authError && (
             <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-left text-sm text-destructive">
               <p className="font-semibold">
@@ -100,6 +116,7 @@ function Index() {
           <Button
             variant="outline"
             type="button"
+            disabled={waiting}
             onClick={() => social(authProviders[0])}
             className="google-btn landing-btn w-full"
           >
@@ -126,6 +143,7 @@ function Index() {
           <Button
             variant="outline"
             type="button"
+            disabled={waiting}
             onClick={() => social(authProviders[1])}
             className="google-btn landing-btn w-full"
           >
