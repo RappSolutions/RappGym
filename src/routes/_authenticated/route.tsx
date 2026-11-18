@@ -24,6 +24,9 @@ const tabs = [
   { to: "/log", label: "Logg", en: "Log", icon: ClipboardCheck },
 ] as const;
 
+// Active-tab marker style for the bottom navigation.
+const NAV_STYLE: "line" | "pill" = (typeof window !== "undefined" && window.localStorage.getItem("navStyle") === "line") ? "line" : "pill";
+
 const pageLabels: [RegExp, string, string][] = [
   [/^\/home/, "Hem", "Home"],
   [/^\/workout/, "Pass", "Workouts"],
@@ -64,13 +67,23 @@ function AppLayout() {
             <Link
               key={to}
               to={to}
-              className="flex flex-col items-center gap-1 py-3 text-xs font-medium text-muted-foreground"
-              activeProps={{ className: "bg-brand-yellow font-bold text-brand-royal" }}
+              data-nav-style={NAV_STYLE}
+              className="nav-tab group relative flex flex-col items-center gap-1 py-2.5 text-xs font-medium text-muted-foreground transition-colors"
+              activeProps={{ className: "is-active font-semibold text-foreground" }}
             >
               {({ isActive }) => (
                 <>
-                  <Icon className={`h-6 w-6 ${isActive ? "text-brand-blue" : ""}`} />
-                   {t(label, en)}
+                  {NAV_STYLE === "line" && isActive && (
+                    <span aria-hidden className="absolute inset-x-1/4 -top-[3px] h-[3px] bg-brand-yellow" />
+                  )}
+                  <span
+                    className={`flex items-center justify-center rounded-full transition-colors ${
+                      NAV_STYLE === "pill" ? "h-8 w-14" : "h-8 w-8"
+                    } ${NAV_STYLE === "pill" && isActive ? "bg-brand-yellow/30" : ""}`}
+                  >
+                    <Icon className={`h-6 w-6 ${isActive ? "text-brand-blue" : ""}`} />
+                  </span>
+                  {t(label, en)}
                 </>
               )}
             </Link>
