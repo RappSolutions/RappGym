@@ -71,6 +71,7 @@ function PassPage() {
           </Link>
         </Button>
       </div>
+      <PlannedWorkouts />
     </main>
   );
 }
