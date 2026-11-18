@@ -129,7 +129,7 @@ export function GoalsCard() {
   );
 
   return (
-    <section className="space-y-3 rounded-xl border bg-card p-4" aria-label={t("Mina mål", "My goals")}>
+    <section className="space-y-4 border-t pt-3" aria-label={t("Mina mål", "My goals")}>
       <Button
         variant="ghost"
         className="w-full justify-start gap-2 px-0"
