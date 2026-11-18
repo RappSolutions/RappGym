@@ -1,5 +1,4 @@
 import { useLanguage } from "@/lib/i18n";
-import { Pencil, Trash2 } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { ExerciseImages } from "@/components/gym/ExerciseImages";
@@ -10,14 +9,10 @@ export function ExerciseDetails({
   exercise,
   log,
   onLog,
-  onEdit,
-  onDelete,
 }: {
   exercise: Exercise;
   log: LogEntry[];
   onLog: (entry?: LogEntry | null) => void;
-  onEdit: () => void;
-  onDelete: () => void;
 }) {
   const { t, localize } = useLanguage();
   const ex = localize(exercise);
@@ -33,10 +28,6 @@ export function ExerciseDetails({
       <ExerciseImages exercise={ex} />
       {ex.instructions && <p className="whitespace-pre-line leading-relaxed">{ex.instructions}</p>}
       
-      <div className="flex gap-2">
-        <Button variant="secondary" className="h-12 flex-1" onClick={onEdit} aria-label={t("Redigera", "Edit")}><Pencil className="h-5 w-5" /></Button>
-        <Button variant="secondary" className="h-12" onClick={onDelete} aria-label={t("Ta bort", "Delete")}><Trash2 className="h-5 w-5" /></Button>
-      </div>
       {chart.length > 1 && (
         <div className="h-40 rounded-xl border bg-card p-2">
           <ResponsiveContainer>

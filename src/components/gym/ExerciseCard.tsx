@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 export function ExerciseCard({
-  ex, last, doneToday, token, onClick, action, expanded, children,
+  ex, last, doneToday, token, onClick, action, expanded, children, hideLast,
 }: {
-  ex: Exercise; last?: LogEntry | undefined; doneToday?: number | undefined; token: string; onClick?: () => void; action?: React.ReactNode; expanded?: boolean; children?: React.ReactNode;
+  ex: Exercise; last?: LogEntry | undefined; doneToday?: number | undefined; token: string; onClick?: () => void; action?: React.ReactNode; expanded?: boolean; children?: React.ReactNode; hideLast?: boolean;
 }) {
   const { t, language, localize } = useLanguage();
   ex = localize(ex);
@@ -27,7 +27,7 @@ export function ExerciseCard({
           </div>
           
         </div>
-        <div className="shrink-0 text-right">
+        {!hideLast && <div className="shrink-0 text-right">
           {last ? (
             <>
               <div className="text-xl font-bold">{last.load || "–"}<span className="text-sm text-muted-foreground"> × {last.reps ?? "–"}</span></div>
@@ -37,7 +37,7 @@ export function ExerciseCard({
             <div className="text-xs text-muted-foreground">{t("ny", "new")}</div>
           )}
           {!!doneToday && <div className="mt-1 rounded bg-primary px-1.5 text-xs font-bold text-primary-foreground">{doneToday} {t("idag", "today")}</div>}
-        </div>
+        </div>}
       </Button>
       {action}
       </div>

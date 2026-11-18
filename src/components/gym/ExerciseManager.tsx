@@ -1,7 +1,7 @@
 import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useLanguage } from "@/lib/i18n";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Plus, Search, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Search, ChevronDown, ChevronRight, Pencil, Trash2, EyeOff } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { ExerciseDetails } from "@/components/gym/ExerciseDetails";
 import { ExerciseForm } from "@/components/gym/ExerciseForm";
 import { LogSheet } from "@/components/gym/LogSheet";
 import { supabase } from "@/integrations/supabase/client";
-import { categoriesOf, categoryToken, exercisesQuery, lastByCode, logQuery, useInvalidateGym, type Exercise, type LogEntry } from "@/lib/gym";
+import { categoriesOf, categoryToken, exercisesQuery, logQuery, useInvalidateGym, type Exercise, type LogEntry } from "@/lib/gym";
 
 export function ExerciseManager() {
   const { t, localize } = useLanguage();
@@ -28,7 +28,7 @@ export function ExerciseManager() {
   const [editing, setEditing] = useState<Exercise | null>(null);
   const [logging, setLogging] = useState<{ exercise: Exercise; entry: LogEntry | null } | null>(null);
   const cats = categoriesOf(exercises);
-  const last = useMemo(() => lastByCode(log), [log]);
+  const used = useMemo(() => new Set(log.map((e) => e.code)), [log]);
   const s = q.toLowerCase();
   const hits = exercises.filter((e) =>
     [e.code, e.name, e.equipment, e.category].some((v) => v.toLowerCase().includes(s)),
@@ -86,15 +86,21 @@ export function ExerciseManager() {
             </Button>
             {(expanded.has(c) || !!q.trim()) && <div className="ml-2 space-y-2 border-l-2 border-category-fill/40 pl-3">{list.map((ex) => (
               <div key={ex.id} className="space-y-2">
-                <ExerciseCard ex={ex} last={last.get(ex.code)} token={categoryToken(c, cats)}
+                <ExerciseCard ex={ex} hideLast token={categoryToken(c, cats)}
+                  action={<div className="flex shrink-0 items-center gap-1 pr-2">
+                    <Button size="icon" variant="ghost" onClick={() => setEditing(live(ex))} aria-label={t("Redigera", "Edit")} title={t("Redigera", "Edit")}><Pencil className="h-4 w-4" /></Button>
+                    {used.has(ex.code)
+                      ? ex.is_active
+                        ? <Button size="icon" variant="ghost" onClick={() => void remove(live(ex))} aria-label={t("Inaktivera", "Deactivate")} title={t("Används i Logg/Pass – inaktivera istället", "Used in Log/Workouts – deactivate instead")}><EyeOff className="h-4 w-4" /></Button>
+                        : <Button size="icon" variant="ghost" disabled aria-label={t("Ta bort", "Delete")} title={t("Används i Logg/Pass – kan inte raderas", "Used in Log/Workouts – can't be deleted")}><Trash2 className="h-4 w-4" /></Button>
+                      : <Button size="icon" variant="ghost" onClick={() => void remove(live(ex))} aria-label={t("Ta bort", "Delete")} title={t("Ta bort", "Delete")}><Trash2 className="h-4 w-4" /></Button>}
+                  </div>}
                   expanded={openId === ex.id}
                   onClick={() => setOpenId(openId === ex.id ? null : ex.id)}>
                   <ExerciseDetails
                     exercise={live(ex)}
                     log={log}
                     onLog={(entry) => setLogging({ exercise: live(ex), entry: entry ?? null })}
-                    onEdit={() => setEditing(live(ex))}
-                    onDelete={() => void remove(live(ex))}
                   />
                 </ExerciseCard>
                 {!ex.is_active && <div className="flex items-center justify-between gap-2 rounded-md border border-dashed px-3 py-2 text-sm"><span className="font-semibold text-muted-foreground">{t("Inaktiv – dold i Övningar och AI-planering", "Inactive – hidden in Exercises and AI planning")}</span><Button size="sm" variant="outline" onClick={() => void reactivate(live(ex))}>{t("Återaktivera", "Reactivate")}</Button></div>}
