@@ -137,14 +137,13 @@ export function GoalsCard() {
         onClick={() => setExpanded(!expanded)}
       >
         {expanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
-        <span className="font-display text-xl font-bold">{t("Mina mål", "My goals")}</span>
+        <span className="font-display text-xl font-bold">
+          <Target className="size-5 text-primary" />
+          {t("Mina mål", "My goals")}
+        </span>
       </Button>
       {expanded && (
         <>
-          <h2 className="flex items-center gap-2 text-xl font-bold uppercase">
-            <Target className="size-3 text-primary" />
-            {t("Mina mål", "My goals")}
-          </h2>
           <p className="text-sm text-muted-foreground">
             {t(
               "Mjuka mål, t.ex. ”Åka skidor i januari”. AI-förslagen tar hänsyn till aktiva mål.",
