@@ -144,12 +144,6 @@ export function GoalsCard() {
       </Button>
       {expanded && (
         <>
-          <p className="text-sm text-muted-foreground">
-            {t(
-              "Mjuka mål, t.ex. ”Åka skidor i januari”. AI-förslagen tar hänsyn till aktiva mål.",
-              "Soft goals, e.g. “Go skiing in January”. AI suggestions take active goals into account.",
-            )}
-          </p>
           <ul className="divide-y divide-border">{open.map(row)}</ul>
           <form
             className="flex flex-wrap gap-2"
@@ -191,6 +185,12 @@ export function GoalsCard() {
               </Button>
             )}
           </form>
+          <p className="text-sm text-muted-foreground">
+            {t(
+              "Mjuka mål, t.ex. ”Åka skidor i januari”. AI-förslagen tar hänsyn till aktiva mål.",
+              "Soft goals, e.g. “Go skiing in January”. AI suggestions take active goals into account.",
+            )}
+          </p>
           {closed.length > 0 && (
             <Button variant="ghost" size="sm" onClick={() => setShowClosed(!showClosed)}>
               {showClosed
