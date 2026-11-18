@@ -91,6 +91,8 @@ function HomePage() {
           alt="RappGym"
           width={240}
           height={240}
+          onClick={() => !waiting && setSpinning(true)}
+          onAnimationEnd={(e) => e.animationName === "landing-spin-hop" && setSpinning(false)}
           className="h-28 w-28 object-contain md:h-48 md:w-48"
         />
       </div>
