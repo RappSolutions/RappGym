@@ -48,6 +48,29 @@ function PassPage() {
 
   return (
     <main className="space-y-4 px-4">
+      <div className="flex items-center gap-2">
+        {/* De här två delar exakt lika på resten av bredden */}
+        <div className="min-w-0 flex-1">
+          <SpontaneousButton gymId={gym.id} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <WorkoutBuilder exercises={atPlace} last={last} gymId={gym.id} />
+        </div>
+
+        {/* AI-knappen tar bara det utrymme som behövs för ikon + text */}
+        <Button
+          asChild
+          variant="outline"
+          className="shrink-0 px-3"
+          aria-label={t("Planera pass med AI", "Plan workout with AI")}
+        >
+          <Link to="/ai" search={{ mode: "plan" }} className="flex items-center gap-1.5">
+            <Sparkles className="size-4 text-primary" />
+            <span>AI</span>
+          </Link>
+        </Button>
+      </div>
+
       <div className="flex gap-3">
         <div className="flex-1">
           <SpontaneousButton gymId={gym.id} />
