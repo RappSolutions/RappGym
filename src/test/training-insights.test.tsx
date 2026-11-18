@@ -5,11 +5,13 @@ import { TrainingInsights } from "@/components/gym/TrainingInsights";
 const { generate } = vi.hoisted(() => ({ generate: vi.fn() }));
 
 vi.mock("@/lib/training-insights.functions", () => ({ getTrainingInsights: vi.fn() }));
+vi.mock("@/lib/ai-quota.functions", () => ({ getMyAiQuota: vi.fn() }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: () => generate }));
 vi.mock("@tanstack/react-query", async (importOriginal) => ({
   ...await importOriginal<typeof import("@tanstack/react-query")>(),
   useSuspenseQuery: () => ({ data: [] }),
-  useQueryClient: () => ({}),
+  useQuery: () => ({ data: undefined }),
+  useQueryClient: () => ({ invalidateQueries: () => Promise.resolve() }),
 }));
 vi.mock("@/hooks/use-gym", () => ({ useSelectedGym: () => [null] }));
 vi.mock("@tanstack/react-router", async (importOriginal) => ({ ...(await importOriginal<object>()), useBlocker: () => ({ status: "idle" }) }));
