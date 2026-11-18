@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { exerciseCategoriesQuery, exerciseEquipmentQuery, useInvalidateGym, type Exercise } from "@/lib/gym";
-import { CATEGORY_COLOR_TOKENS, nextExerciseCode } from "@/lib/exercise-refs";
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { gymsQuery } from "@/lib/gym";
 import { exerciseLocationsQuery } from "@/lib/exercise-locations";
@@ -32,7 +32,6 @@ export function ExerciseForm({
   const { t, language } = useLanguage();
   const invalidate = useInvalidateGym();
   const [f, setF] = useState(empty);
-  const [codeTouched, setCodeTouched] = useState(false);
   const qc = useQueryClient();
   const { data: gyms = [] } = useQuery(gymsQuery);
   const { data: links = [] } = useQuery(exerciseLocationsQuery);
@@ -47,7 +46,7 @@ export function ExerciseForm({
   }, [open, exercise?.id]);
   const [textLanguage, setTextLanguage] = useState<"sv" | "en">(language);
   useEffect(() => {
-    if (open) { setTextLanguage(language); setCodeTouched(!!exercise); setNewCat(null); setNewEq(null); }
+    if (open) { setTextLanguage(language); setNewCat(null); setNewEq(null); }
   }, [open, language, exercise]);
   useEffect(() => {
     if (!open) return;
@@ -55,21 +54,19 @@ export function ExerciseForm({
     setF(ex ? { code: ex.code, category_id: ex.category_id ?? "", equipment_id: ex.equipment_id ?? "", name: ex.name, instructions: ex.instructions } : { ...empty });
   }, [open, exercise, textLanguage]);
   const set = (k: "code" | "name" | "instructions") => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    if (k === "code") setCodeTouched(true);
     setF({ ...f, [k]: e.target.value });
   };
   function pickCategory(id: string) {
-    if (id === NEW) { setNewCat({ name: "", prefix: "", color: CATEGORY_COLOR_TOKENS[categories.length % CATEGORY_COLOR_TOKENS.length] ?? "cat-1" }); return; }
-    const cat = categories.find((c) => c.id === id);
-    setF((cur) => ({ ...cur, category_id: id, code: !codeTouched && cat ? nextExerciseCode(cat.code_prefix, all.map((e) => e.code)) : cur.code }));
+    if (id === NEW) { setNewCat({ name: "", prefix: "", color: "#0063ff" }); return; }
+    setF((cur) => ({ ...cur, category_id: id }));
   }
   async function addCategory() {
     if (!newCat) return;
-    const { data, error } = await supabase.from("exercise_categories").insert({ name: newCat.name.trim(), code_prefix: newCat.prefix.trim().toUpperCase(), color_token: newCat.color, sort_order: categories.length + 1 }).select().single();
+    const { data, error } = await supabase.from("exercise_categories").insert({ name: newCat.name.trim(), code_prefix: newCat.prefix.trim().toUpperCase(), color_token: newCat.color.toLowerCase(), sort_order: categories.length + 1 }).select().single();
     if (error) { toast.error(error.code === "23505" ? t("Namn eller prefix finns redan", "Name or prefix already exists") : error.message); return; }
     await qc.invalidateQueries({ queryKey: ["exercise-categories"] });
     setNewCat(null);
-    setF((cur) => ({ ...cur, category_id: data.id, code: !codeTouched ? nextExerciseCode(data.code_prefix, all.map((e) => e.code)) : cur.code }));
+    setF((cur) => ({ ...cur, category_id: data.id }));
   }
   async function addEquipment() {
     if (!newEq?.trim()) return;
@@ -126,13 +123,13 @@ export function ExerciseForm({
                 <option value={NEW}>{t("+ Ny kategori…", "+ New category…")}</option>
               </select>
             </div>
-            <div className="space-y-1"><Label htmlFor="ex-code">{t("Kod", "Code")}</Label><Input id="ex-code" required value={f.code} onChange={set("code")} placeholder="PU11" /></div>
+            <div className="space-y-1"><Label htmlFor="ex-code">{t("Kod", "Code")}</Label><Input id="ex-code" required value={f.code} onChange={set("code")} /></div>
           </div>
           {newCat && <div className="grid grid-cols-[1fr_5rem_6rem_auto] items-end gap-2 rounded-md border border-dashed bg-muted/40 p-2">
             <div className="space-y-1"><Label className="text-xs">{t("Namn", "Name")}</Label><Input value={newCat.name} onChange={(e) => setNewCat({ ...newCat, name: e.target.value })} /></div>
             <div className="space-y-1"><Label className="text-xs">{t("Prefix", "Prefix")}</Label><Input value={newCat.prefix} maxLength={4} onChange={(e) => setNewCat({ ...newCat, prefix: e.target.value.toUpperCase().replace(/[^A-Z]/g, "") })} /></div>
             <div className="space-y-1"><Label className="text-xs">{t("Färg", "Colour")}</Label>
-              <select value={newCat.color} onChange={(e) => setNewCat({ ...newCat, color: e.target.value })} className={selectCls}>{CATEGORY_COLOR_TOKENS.map((c) => <option key={c} value={c}>{c}</option>)}</select></div>
+              <input type="color" value={newCat.color} onChange={(e) => setNewCat({ ...newCat, color: e.target.value })} className="h-10 w-full cursor-pointer rounded-md border bg-background p-1" /></div>
             <div className="flex gap-1"><Button type="button" size="sm" variant="secondary" disabled={!newCat.name.trim() || !newCat.prefix} onClick={addCategory}>{t("Lägg till", "Add")}</Button><Button type="button" size="sm" variant="ghost" onClick={() => setNewCat(null)}>✕</Button></div>
           </div>}
           <div className="space-y-1"><Label htmlFor="ex-name">{t("Namn", "Name")}</Label><Input id="ex-name" required value={f.name} onChange={set("name")} /></div>

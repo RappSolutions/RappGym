@@ -84,7 +84,7 @@ export function ExerciseManager() {
             <Button variant="ghost" aria-expanded={expanded.has(c)} onClick={() => setExpanded((current) => { const next = new Set(current); if (next.has(c)) next.delete(c); else next.add(c); return next; })} className="h-14 w-full justify-start border-l-4 border-category-fill bg-category-fill/10 px-3 font-display text-xl font-bold uppercase text-category-ink hover:bg-category-fill/20 hover:text-category-ink">
               {expanded.has(c) ? <ChevronDown /> : <ChevronRight />}{c} <span className="text-muted-foreground">({list.length})</span>
             </Button>
-            {(expanded.has(c) || !!q.trim()) && list.map((ex) => (
+            {(expanded.has(c) || !!q.trim()) && <div className="ml-2 space-y-2 border-l-2 border-category-fill/40 pl-3">{list.map((ex) => (
               <div key={ex.id} className="space-y-2">
                 <ExerciseCard ex={ex} last={last.get(ex.code)} token={categoryToken(c, cats)}
                   expanded={openId === ex.id}
@@ -99,7 +99,7 @@ export function ExerciseManager() {
                 </ExerciseCard>
                 {!ex.is_active && <div className="flex items-center justify-between gap-2 rounded-md border border-dashed px-3 py-2 text-sm"><span className="font-semibold text-muted-foreground">{t("Inaktiv – dold i Övningar och AI-planering", "Inactive – hidden in Exercises and AI planning")}</span><Button size="sm" variant="outline" onClick={() => void reactivate(live(ex))}>{t("Återaktivera", "Reactivate")}</Button></div>}
               </div>
-            ))}
+            ))}</div>}
           </section>
         );
       })}
