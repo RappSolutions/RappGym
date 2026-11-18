@@ -169,7 +169,7 @@ function Index() {
           alt="Rapp Solutions AB"
           width={200}
           height={112}
-          className="h-10 w-auto rounded-md ring-1 ring-foreground/10"
+          className="h-12 w-auto rounded-md ring-1 ring-foreground/10"
         />
         <span>
           Provided by <span className="font-semibold text-foreground/80">Rapp Solutions AB</span> · Sweden
