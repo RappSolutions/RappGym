@@ -162,6 +162,9 @@ function Index() {
           </p>
         </div>
       </main>
+      <footer className="pb-4 pt-6 text-center text-[11px] tracking-wide text-muted-foreground">
+        Provided by <span className="font-semibold text-foreground/80">Rapp Solutions AB</span> · Sweden
+      </footer>
     </div>
   );
 }
