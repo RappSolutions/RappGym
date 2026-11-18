@@ -137,7 +137,8 @@ export function GoalsCard() {
         onClick={() => setExpanded(!expanded)}
       >
         {expanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
-        <span className="font-display text-xl font-bold">
+
+        <span className="inline-flex items-center gap-2 font-display text-xl font-bold">
           <Target className="size-5 text-primary" />
           {t("Mina mål", "My goals")}
         </span>
