@@ -92,9 +92,9 @@ function HomePage() {
           alt="RappGym"
           width={240}
           height={240}
-          onClick={() => !waiting && setSpinning(true)}
+          onClick={() => setSpinning(true)}
           onAnimationEnd={(e) => e.animationName === "landing-spin-hop" && setSpinning(false)}
-          className="h-28 w-28 object-contain md:h-48 md:w-48"
+          className={`h-28 w-28 cursor-pointer object-contain md:h-48 md:w-48 ${spinning ? "is-spinning" : ""}`}
         />
       </div>
       <section
