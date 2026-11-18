@@ -57,6 +57,7 @@ function HomePage() {
   const { data: gyms } = useSuspenseQuery(gymsQuery);
   const { data: links } = useSuspenseQuery(exerciseLocationsQuery);
   const [gymId] = useSelectedGym();
+  const [spinning, setSpinning] = useState(false);
   const gym = gyms.find((g) => g.id === gymId) ?? gyms[0];
   const last = useMemo(() => lastByCode(log), [log]);
   const atPlace = exercisesAtLocation(
