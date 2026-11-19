@@ -50,7 +50,7 @@ export const getTrainingInsights = createServerFn({ method: "POST" })
       if (gym) location = { name: gym.name.slice(0, 120), description: gym.description.slice(0, 300) };
     }
     const fail = (message: string) => ({ insights: null, error: message, generatedAt: null });
-    if (!log.length) return fail(data.language === "sv" ? "Logga ett pass först." : "Log a workout first.");
+    if (!log.length && data.request?.mode !== "plan") return fail(data.language === "sv" ? "Logga ett pass först." : "Log a workout first.");
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) return fail(data.language === "sv" ? "AI är inte konfigurerad ännu." : "AI is not configured yet.");
     let usable = exercises;

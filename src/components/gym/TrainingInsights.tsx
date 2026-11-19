@@ -514,7 +514,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
             )}
           </p>
         )}
-        <Button type="submit" disabled={busy || !hasLog || !quotaOk} className="w-full sm:w-auto">
+        <Button type="submit" disabled={busy || (mode !== "plan" && !hasLog) || !quotaOk} className="w-full sm:w-auto">
           {busy ? (
             <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" />
           ) : (
@@ -601,7 +601,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
           </select>
         </div>
       )}
-      {!hasLog && (
+      {!hasLog && mode !== "plan" && (
         <p className="text-sm text-muted-foreground">{t("Inga träningsloggar ännu.", "No workouts logged yet.")}</p>
       )}
       {error && (
