@@ -118,6 +118,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
 
   const rawEx = r ? allExercises.find((e) => e.code === r.code) : undefined;
   const ex = rawEx ? localize(rawEx) : undefined;
+  const nameByCode = useMemo(() => { const m = new Map<string, string>(); for (const e of allExercises) m.set(e.code, localize(e).name); return m; }, [allExercises, localize]);
   const stepNo = Math.min(total, doneCount + 1);
   return (
     <Drawer open onOpenChange={(o) => { if (!o) void close(false); }}>
@@ -140,7 +141,8 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
               {phases.map((ph) => { const ps = allSteps.filter((s) => s.phase === ph); const lapNos = [...new Set(ps.map((s) => s.lap))]; return <div key={ph} className="flex gap-1.5" style={{ flex: ps.length }}>{lapNos.map((lap) => { const ls = ps.filter((s) => s.lap === lap); return <div key={lap} className="flex gap-0.5 border-b-2 border-muted-foreground/30 pb-0.5" style={{ flex: ls.length }}>{ls.map((s) => {
                 const isDone = s.set <= (doneByCode.get(s.row.code) ?? 0);
                 const isCurrent = step && keyOf(s) === keyOf(step);
-                return <button type="button" key={keyOf(s)} aria-label={`${s.row.code} · ${lap}`} title={`${t(`phase.${ph}`)} · ${t("circuitRunner.lap", { v0: lap, laps: lapNos.length })} · ${s.row.code}`} onClick={() => setCursor(keyOf(s))} data-category={catOf(s.row.code)} className={`category-theme h-3.5 min-w-0 flex-1 cursor-pointer rounded-sm bg-category-fill hover:opacity-100 ${isCurrent ? "animate-pulse ring-2 ring-foreground" : isDone ? "" : "opacity-25"}`} />;
+                const name = nameByCode.get(s.row.code) ?? s.row.code;
+                return <button type="button" key={keyOf(s)} aria-label={`${name} · ${s.row.code} · ${lap}`} title={`${t(`phase.${ph}`)} · ${t("circuitRunner.lap", { v0: lap, laps: lapNos.length })} · ${s.row.code} · ${name}`} onClick={() => setCursor(keyOf(s))} data-category={catOf(s.row.code)} className={`category-theme h-3.5 min-w-0 flex-1 cursor-pointer rounded-sm bg-category-fill hover:opacity-100 ${isCurrent ? "animate-pulse ring-2 ring-foreground" : isDone ? "" : "opacity-25"}`} />;
               })}</div>; })}</div>; })}
             </div>}
           </DrawerHeader>
