@@ -35,6 +35,7 @@ entity exercises {
   * name : text
   * category_id : uuid <<FK>>
   equipment_id : uuid <<FK>>
+  * reps_unit : text  -- reps|sec|min
   instructions : text
   category, equipment, variant, focus, muscles, dose : text <<DEPRECATED>>
   image_urls : jsonb
@@ -73,6 +74,7 @@ entity workouts {
   scheduled_date : date
   gym_id : uuid <<FK>>
   * is_circuit : boolean
+  * is_spontaneous : boolean
   ai_history_id : uuid <<FK>>
   ai_workout_key : text
   source_workout_id : uuid <<FK>>

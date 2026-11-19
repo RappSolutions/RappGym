@@ -96,7 +96,8 @@
     "newEquipment": "+ New equipment…",
     "newExercise": "New exercise",
     "none": "None",
-    "prefix": "Prefix"
+    "prefix": "Prefix",
+    "unit": "Unit"
   },
   "exerciseImageEditor": {
     "createPictureWithAi": "Create picture with AI",
@@ -470,5 +471,15 @@
     "intro": "Intro",
     "main": "Main",
     "outro": "Outro"
+  },
+  "repsUnit": {
+    "reps": "Reps",
+    "sec": "Sec",
+    "min": "Min"
+  },
+  "repsUnitOption": {
+    "reps": "Count",
+    "sec": "Seconds",
+    "min": "Minutes"
   }
 }

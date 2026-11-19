@@ -96,7 +96,8 @@
     "newEquipment": "+ Nytt redskap…",
     "newExercise": "Ny övning",
     "none": "Inget",
-    "prefix": "Prefix"
+    "prefix": "Prefix",
+    "unit": "Enhet"
   },
   "exerciseImageEditor": {
     "createPictureWithAi": "Skapa bild med AI",
@@ -470,5 +471,15 @@
     "intro": "Intro",
     "main": "Main",
     "outro": "Outro"
+  },
+  "repsUnit": {
+    "reps": "Reps",
+    "sec": "Sek",
+    "min": "Min"
+  },
+  "repsUnitOption": {
+    "reps": "Antal",
+    "sec": "Sekunder",
+    "min": "Minuter"
   }
 }

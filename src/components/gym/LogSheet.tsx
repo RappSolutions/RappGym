@@ -1,3 +1,5 @@
+import { AdminExerciseEdit } from "@/components/gym/AdminExerciseEdit";
+import { repsUnit } from "@/lib/reps-unit";
 import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useLanguage } from "@/lib/i18n";
 import { useEffect, useState } from "react";
@@ -116,7 +118,7 @@ export function LogSheet({
           <DrawerHeader className="px-0">
             {entry?.status === "suggested" && <p className="font-semibold text-primary">{t("logSheet.suggestion")}{progress ? ` · ${progress}` : ""}</p>}
             <DrawerTitle className="font-display text-2xl uppercase">
-              <span className="text-primary">{shown?.code}</span> {shown?.name}
+              <span className="text-primary">{shown?.code}</span> {shown?.name}<AdminExerciseEdit exercise={exercise} />
             </DrawerTitle>
             <DrawerDescription>
               {last && !entry && `${t("logSheet.last")}: ${formatSet({ ...last, sets: 1 })}`}
@@ -125,7 +127,7 @@ export function LogSheet({
           {shown && <ExerciseImages exercise={shown} />}
           <div className="grid grid-cols-2 gap-3">
             <Stepper label={t("logSheet.numberOfSets")} value={round} onChange={setRound} />
-            <Stepper label={t("logSheet.repsSec")} value={reps} onChange={setReps} />
+            <Stepper label={t(`repsUnit.${repsUnit(exercise)}`)} value={reps} onChange={setReps} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">

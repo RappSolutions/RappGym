@@ -14,7 +14,7 @@ export function SpontaneousButton({ gymId, size = "default" }: { gymId: string; 
   const [busy, setBusy] = useState(false);
   async function start() {
     setBusy(true);
-    const { data, error } = await supabase.from("workouts").insert({ title: `${t("spontaneousButton.spontaneousWorkout")} ${todayISO()}`, created_by: "user", scheduled_date: todayISO(), gym_id: gymId, is_circuit: true }).select("id").single();
+    const { data, error } = await supabase.from("workouts").insert({ title: `${t("spontaneousButton.spontaneousWorkout")} ${todayISO()}`, created_by: "user", scheduled_date: todayISO(), gym_id: gymId, is_circuit: true, is_spontaneous: true }).select("id").single();
     setBusy(false);
     if (error) { toast.error(t("spontaneousButton.couldNotStartTheWorkout")); return; }
     setId(data.id);

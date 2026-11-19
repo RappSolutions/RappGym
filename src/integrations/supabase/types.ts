@@ -139,6 +139,7 @@ export type Database = {
           is_active: boolean
           muscles: string
           name: string
+          reps_unit: string
           sort_order: number
           translations: Json
           user_id: string
@@ -160,6 +161,7 @@ export type Database = {
           is_active?: boolean
           muscles?: string
           name: string
+          reps_unit?: string
           sort_order?: number
           translations?: Json
           user_id?: string
@@ -181,6 +183,7 @@ export type Database = {
           is_active?: boolean
           muscles?: string
           name?: string
+          reps_unit?: string
           sort_order?: number
           translations?: Json
           user_id?: string
@@ -522,6 +525,7 @@ export type Database = {
           gym_id: string | null
           id: string
           is_circuit: boolean
+          is_spontaneous: boolean
           note: string | null
           scheduled_date: string | null
           source_workout_id: string | null
@@ -536,6 +540,7 @@ export type Database = {
           gym_id?: string | null
           id?: string
           is_circuit?: boolean
+          is_spontaneous?: boolean
           note?: string | null
           scheduled_date?: string | null
           source_workout_id?: string | null
@@ -550,6 +555,7 @@ export type Database = {
           gym_id?: string | null
           id?: string
           is_circuit?: boolean
+          is_spontaneous?: boolean
           note?: string | null
           scheduled_date?: string | null
           source_workout_id?: string | null

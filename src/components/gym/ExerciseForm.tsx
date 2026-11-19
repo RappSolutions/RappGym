@@ -13,8 +13,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { gymsQuery } from "@/lib/gym";
 import { exerciseLocationsQuery } from "@/lib/exercise-locations";
 import { ExerciseImageEditor } from "@/components/gym/ExerciseImageEditor";
+import { REPS_UNITS, repsUnit, type RepsUnit } from "@/lib/reps-unit";
 
-const empty = { code: "", category_id: "", equipment_id: "", name: "", instructions: "" };
+const empty = { code: "", category_id: "", equipment_id: "", reps_unit: "reps" as RepsUnit, name: "", instructions: "" };
+type Texts = Record<"sv" | "en", { name: string; instructions: string }>;
 const selectCls = "h-10 w-full rounded-md border bg-background px-3 text-sm";
 const NEW = "__new__";
 
@@ -48,13 +50,23 @@ export function ExerciseForm({
   useEffect(() => {
     if (open) { setTextLanguage(language); setNewCat(null); setNewEq(null); }
   }, [open, language, exercise]);
+  // Both languages are drafted side by side, so switching language never drops unsaved edits.
+  const [texts, setTexts] = useState<Texts>({ sv: { name: "", instructions: "" }, en: { name: "", instructions: "" } });
   useEffect(() => {
     if (!open) return;
-    const ex = exercise ? localizeExercise(exercise, textLanguage) : null;
-    setF(ex ? { code: ex.code, category_id: ex.category_id ?? "", equipment_id: ex.equipment_id ?? "", name: ex.name, instructions: ex.instructions } : { ...empty });
-  }, [open, exercise, textLanguage]);
-  const set = (k: "code" | "name" | "instructions") => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const pick = (lang: "sv" | "en") => { const l = exercise ? localizeExercise(exercise, lang) : null; return { name: l?.name ?? "", instructions: l?.instructions ?? "" }; };
+    const tr = exercise?.translations as Record<string, unknown> | null | undefined;
+    const hasEn = !!(tr && typeof tr === "object" && tr["en"]);
+    setTexts({ sv: pick("sv"), en: hasEn ? pick("en") : { name: "", instructions: "" } });
+    setF(exercise ? { code: exercise.code, category_id: exercise.category_id ?? "", equipment_id: exercise.equipment_id ?? "", reps_unit: repsUnit(exercise), name: "", instructions: "" } : { ...empty });
+  }, [open, exercise]);
+  const text = texts[textLanguage];
+  const set = (k: "code") => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setF({ ...f, [k]: e.target.value });
+  };
+  const setText = (k: "name" | "instructions") => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const v = e.target.value;
+    setTexts((cur) => ({ ...cur, [textLanguage]: { ...cur[textLanguage], [k]: v } }));
   };
   function pickCategory(id: string) {
     if (id === NEW) { setNewCat({ name: "", prefix: "", color: "#0063ff" }); return; }
@@ -80,16 +92,15 @@ export function ExerciseForm({
   async function save(e: React.FormEvent) {
     e.preventDefault();
     if (!f.category_id) { toast.error(t("exerciseForm.chooseACategory")); return; }
-    const row = { code: f.code.trim().toUpperCase(), category_id: f.category_id, equipment_id: f.equipment_id || null, name: f.name.trim(), instructions: f.instructions };
-    const texts = { name: row.name, instructions: row.instructions };
+    const sv = { name: (texts.sv.name || texts.en.name).trim(), instructions: texts.sv.instructions || texts.en.instructions };
+    if (!sv.name) { toast.error(t("common.name")); return; }
     const existing = exercise?.translations;
     const translations = existing && typeof existing === "object" && !Array.isArray(existing) ? existing : {};
-    const update = textLanguage === "en" && exercise
-      ? { code: row.code, category_id: row.category_id, equipment_id: row.equipment_id, translations: { ...translations, en: texts } }
-      : row;
+    const en = texts.en.name.trim() || texts.en.instructions.trim() ? { name: texts.en.name.trim(), instructions: texts.en.instructions } : null;
+    const row = { code: f.code.trim().toUpperCase(), category_id: f.category_id, equipment_id: f.equipment_id || null, reps_unit: f.reps_unit, name: sv.name, instructions: sv.instructions, translations: en ? { ...translations, en } : translations };
     const res = exercise
-      ? await supabase.from("exercises").update(update).eq("id", exercise.id).select().single()
-      : await supabase.from("exercises").insert({ ...row, ...(textLanguage === "en" ? { translations: { en: texts } } : {}), sort_order: all.length }).select().single();
+      ? await supabase.from("exercises").update(row).eq("id", exercise.id).select().single()
+      : await supabase.from("exercises").insert({ ...row, sort_order: all.length }).select().single();
     if (res.error) {
       toast.error(res.error.code === "23505" ? t("exerciseForm.codeAlreadyExists") : res.error.message);
       return;
@@ -114,6 +125,7 @@ export function ExerciseForm({
         </DialogHeader>
         <form onSubmit={save} className="space-y-3">
           <div className="space-y-1"><Label>{t("exerciseForm.exerciseTextLanguage")}</Label><select aria-label={t("exerciseForm.exerciseTextLanguage")} value={textLanguage} onChange={(e) => setTextLanguage(e.target.value === "en" ? "en" : "sv")} className="h-10 w-full rounded-md border bg-background px-3"><option value="sv">Svenska</option><option value="en">English</option></select></div>
+          <div className="space-y-1"><Label htmlFor="ex-name">{t("common.name")}</Label><Input id="ex-name" required={textLanguage === "sv" || !texts.sv.name} value={text.name} onChange={setText("name")} /></div>
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-2 space-y-1">
               <Label htmlFor="ex-cat">{t("common.category")}</Label>
@@ -132,8 +144,8 @@ export function ExerciseForm({
               <input type="color" value={newCat.color} onChange={(e) => setNewCat({ ...newCat, color: e.target.value })} className="h-10 w-full cursor-pointer rounded-md border bg-background p-1" /></div>
             <div className="flex gap-1"><Button type="button" size="sm" variant="secondary" disabled={!newCat.name.trim() || !newCat.prefix} onClick={addCategory}>{t("common.add")}</Button><Button type="button" size="sm" variant="ghost" onClick={() => setNewCat(null)}>✕</Button></div>
           </div>}
-          <div className="space-y-1"><Label htmlFor="ex-name">{t("common.name")}</Label><Input id="ex-name" required value={f.name} onChange={set("name")} /></div>
-          <div className="space-y-1">
+          <div className="grid grid-cols-3 gap-3">
+          <div className="col-span-2 space-y-1">
             <Label htmlFor="ex-eq">{t("common.equipment")}</Label>
             <select id="ex-eq" value={newEq !== null ? NEW : f.equipment_id} onChange={(e) => e.target.value === NEW ? setNewEq("") : setF({ ...f, equipment_id: e.target.value })} className={selectCls}>
               <option value="">{t("exerciseForm.none")}</option>
@@ -141,11 +153,13 @@ export function ExerciseForm({
               <option value={NEW}>{t("exerciseForm.newEquipment")}</option>
             </select>
           </div>
+            <div className="space-y-1"><Label htmlFor="ex-unit">{t("exerciseForm.unit")}</Label><select id="ex-unit" value={f.reps_unit} onChange={(e) => setF({ ...f, reps_unit: e.target.value as RepsUnit })} className={selectCls}>{REPS_UNITS.map((u) => <option key={u} value={u}>{t(`repsUnitOption.${u}`)}</option>)}</select></div>
+          </div>
           {newEq !== null && <div className="flex items-end gap-2 rounded-md border border-dashed bg-muted/40 p-2">
             <Input value={newEq} onChange={(e) => setNewEq(e.target.value)} placeholder={t("common.name")} />
             <Button type="button" size="sm" variant="secondary" disabled={!newEq.trim()} onClick={addEquipment}>{t("common.add")}</Button><Button type="button" size="sm" variant="ghost" onClick={() => setNewEq(null)}>✕</Button>
           </div>}
-          <div className="space-y-1"><Label htmlFor="ex-ins">{t("exerciseForm.instructionsTips")}</Label><Textarea id="ex-ins" rows={5} value={f.instructions} onChange={set("instructions")} /></div>
+          <div className="space-y-1"><Label htmlFor="ex-ins">{t("exerciseForm.instructionsTips")}</Label><Textarea id="ex-ins" rows={5} value={text.instructions} onChange={setText("instructions")} /></div>
           {gyms.length > 0 && <fieldset className="space-y-1"><legend className="text-sm font-medium">{t("exerciseForm.locationsWhereThisExerciseIs")}</legend>
             <label className="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" className="size-4" checked={places.size === gyms.length} onChange={() => setPlaces(places.size === gyms.length ? new Set() : new Set(gyms.map((g) => g.id)))} />{t("common.allLocations")}</label>
             <div className="grid gap-1 pl-6 sm:grid-cols-2">{gyms.map((g) => <label key={g.id} className="flex items-center gap-2 text-sm"><input type="checkbox" className="size-4" checked={places.has(g.id)} onChange={() => { const n = new Set(places); if (n.has(g.id)) n.delete(g.id); else n.add(g.id); setPlaces(n); }} />{g.name}</label>)}</div>

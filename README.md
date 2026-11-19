@@ -96,6 +96,7 @@ erDiagram
     text name
     uuid category_id FK
     uuid equipment_id FK
+    text reps_unit "reps|sec|min"
     text instructions
     jsonb image_urls
     jsonb translations
@@ -124,6 +125,7 @@ erDiagram
     date scheduled_date
     uuid gym_id FK
     boolean is_circuit
+    boolean is_spontaneous
     uuid ai_history_id FK
     uuid source_workout_id FK
     timestamptz created_at
