@@ -1,11 +1,12 @@
 import { confirmDialog } from "@/components/gym/ConfirmHost";
-import { isWorkoutFinished, workoutSetProgress } from "@/lib/circuit";
+import { groupByPhase, isWorkoutFinished, workoutSetProgress } from "@/lib/circuit";
+import { PhaseSelect } from "@/components/gym/PhaseSelect";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight, Play, Trash2, Sparkles, ArrowUp, ArrowDown, X, Plus, Dumbbell } from "lucide-react";
 import { ExercisePickList } from "@/components/gym/ExercisePickList";
-import { addPlannedExercise, moveRow, removePlannedRow } from "@/lib/workout-edit";
+import { addPlannedExercise, moveRow, removePlannedRow, setRowPhase } from "@/lib/workout-edit";
 import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -167,8 +168,10 @@ export function PlannedWorkouts() {
                     </span>
                   </Button>
                   <div id={`proposal-${id}`} hidden={!open} className="space-y-3">
+                    {groupByPhase(rows).map((g, gi, all) => <div key={g.phase}>
+                    {all.length > 1 && <p className="border-b pb-0.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t(`phase.${g.phase}`)} · {g.rows.reduce((n, r) => n + Math.max(1, r.sets), 0)} set</p>}
                     <div className="divide-y divide-border">
-                      {rows.map((row, idx) => (
+                      {g.rows.map((row) => { const idx = rows.indexOf(row); return (
                         <div key={row.id} data-category={categoryToken(byCode.get(row.code)?.category ?? "", categories)} className="category-theme flex items-center border-l-4 border-category-fill">
                         <Button
                           variant="ghost"
@@ -185,12 +188,14 @@ export function PlannedWorkouts() {
                             {formatSet(row)}
                           </span>
                         </Button>
+                        <PhaseSelect value={row.phase} disabled={editBusy} onChange={(ph) => void edit(() => setRowPhase(row.id, ph))} />
                         <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={editBusy || idx === 0} aria-label={t("common.moveUp")} onClick={() => void edit(() => moveRow(rows, row.id, -1))}><ArrowUp className="size-4" /></Button>
                         <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={editBusy || idx === rows.length - 1} aria-label={t("common.moveDown")} onClick={() => void edit(() => moveRow(rows, row.id, 1))}><ArrowDown className="size-4" /></Button>
                         <Button variant="ghost" size="icon" className="size-8 shrink-0 text-destructive" disabled={editBusy} aria-label={`${t("common.remove")} ${row.code}`} onClick={async () => { if (await confirmDialog(t("plannedWorkouts.removeFromTheWorkout", { code: row.code }))) void edit(() => removePlannedRow(row.id)); }}><X className="size-4" /></Button>
                         </div>
-                      ))}
+                      ); })}
                     </div>
+                    </div>)}
                     {addingTo === id && <ExercisePickList exercises={exercisesAtLocation(exercises.filter((e) => e.is_active), links, first.gym_id)} disabled={editBusy} onPick={(e) => void edit(async () => { await addPlannedExercise(id, e.code, rows, first.gym_id, lastDone.get(e.code)?.load ?? "", Math.max(1, ...rows.map((r) => r.sets)), lastDone.get(e.code)?.reps ?? 10); setAddingTo(null); })} />}
                     <div className="flex items-center justify-between gap-2">
                       <Button variant={addingTo === id ? "default" : "outline"} className="shrink-0" aria-pressed={addingTo === id} aria-label={t("common.addExercise")} title={t("common.addExercise")} onClick={() => setAddingTo(addingTo === id ? null : id)}><Plus className="size-4" /><Dumbbell className="size-4" /></Button>

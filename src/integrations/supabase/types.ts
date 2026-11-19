@@ -249,6 +249,7 @@ export type Database = {
           id: string
           load: string
           note: string | null
+          phase: string
           proposal_id: string | null
           proposal_order: number | null
           proposal_title: string | null
@@ -269,6 +270,7 @@ export type Database = {
           id?: string
           load?: string
           note?: string | null
+          phase?: string
           proposal_id?: string | null
           proposal_order?: number | null
           proposal_title?: string | null
@@ -289,6 +291,7 @@ export type Database = {
           id?: string
           load?: string
           note?: string | null
+          phase?: string
           proposal_id?: string | null
           proposal_order?: number | null
           proposal_title?: string | null

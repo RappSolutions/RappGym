@@ -34,3 +34,18 @@ describe("workout set progress", () => {
   });
   it("is finished at 10/10", () => { expect(isWorkoutFinished(10, 10)).toBe(true); expect(isWorkoutFinished(9, 10)).toBe(false); });
 });
+
+import { workoutSteps, spreadLap } from "@/lib/circuit";
+describe("phases and spread", () => {
+  it("runs intro, main, outro in order, each as its own circuit", () => {
+    const rows = [{ id: "O", sets: 1, phase: "outro" }, { id: "M1", sets: 2, phase: "main" }, { id: "I", sets: 1, phase: "intro" }, { id: "M2", sets: 2, phase: "main" }];
+    expect(workoutSteps(rows, true).map((s) => s.row.id)).toEqual(["I", "M1", "M2", "M1", "M2", "O"]);
+  });
+  it("spreads 2 sets over 4 laps to laps 1 and 3", () => {
+    expect([0, 1].map((i) => spreadLap(i, 2, 4))).toEqual([1, 3]);
+  });
+  it("mixes a shorter exercise into later laps", () => {
+    const steps = workoutSteps([{ id: "A", sets: 4 }, { id: "B", sets: 2 }], true);
+    expect(steps.map((s) => `${s.lap}${s.row.id}`)).toEqual(["1A", "1B", "2A", "3A", "3B", "4A"]);
+  });
+});

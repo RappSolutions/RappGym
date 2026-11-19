@@ -176,6 +176,13 @@
       "when": 1795107949508,
       "tag": "0024_ai_tiers_scoped_read",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1795112959316,
+      "tag": "0025_log_entries_phase",
+      "breakpoints": true
     }
   ]
 }

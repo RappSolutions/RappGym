@@ -463,5 +463,12 @@
     "theAnswerCouldNotBe": "The answer could not be saved in history. Keep this page open and try saving again.",
     "locationNotFound": "Location not found.",
     "thePhotoCouldNotBe": "The photo could not be analysed. Make sure the link points directly to an image."
+  },
+  "phase": {
+    "phase": "Phase",
+    "phases": "Phases",
+    "intro": "Intro",
+    "main": "Main",
+    "outro": "Outro"
   }
 }

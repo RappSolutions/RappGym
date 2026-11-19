@@ -34,3 +34,9 @@ export async function removePlannedRow(id: string) {
   const { error } = await supabase.from("log_entries").delete().eq("id", id).eq("status", "suggested");
   if (error) throw error;
 }
+
+/** Move a planned row to another phase (intro/main/outro); completed rows are never touched. */
+export async function setRowPhase(id: string, phase: "intro" | "main" | "outro") {
+  const { error } = await supabase.from("log_entries").update({ phase }).eq("id", id).eq("status", "suggested");
+  if (error) throw error;
+}

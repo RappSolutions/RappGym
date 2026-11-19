@@ -463,5 +463,12 @@
     "theAnswerCouldNotBe": "Svaret kunde inte sparas i historiken. Behåll sidan öppen och försök spara igen.",
     "locationNotFound": "Platsen hittades inte.",
     "thePhotoCouldNotBe": "Bilden kunde inte analyseras. Kontrollera att länken går direkt till en bild."
+  },
+  "phase": {
+    "phase": "Fas",
+    "phases": "Faser",
+    "intro": "Intro",
+    "main": "Main",
+    "outro": "Outro"
   }
 }
