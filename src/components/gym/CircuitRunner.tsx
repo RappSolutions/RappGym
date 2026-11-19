@@ -43,8 +43,15 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
   const allSteps = useMemo(() => workoutSteps(rows, circuit), [rows, circuit]);
   const [skipped, setSkipped] = useState<Set<string>>(new Set());
   const steps = useMemo(() => remainingSteps(allSteps, doneByCode).filter((s) => !skipped.has(`${s.row.id}:${s.set}`)), [allSteps, doneByCode, skipped]);
-  const [focus, setFocus] = useState<Phase | null>(null);
-  const step = steps.find((s) => s.phase === focus) ?? steps[0];
+  const keyOf = (s: { row: { id: string }; set: number }) => `${s.row.id}:${s.set}`;
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [fromIdx, setFromIdx] = useState(-1);
+  const remainingKeys = useMemo(() => new Set(steps.map(keyOf)), [steps]);
+  const step = (cursor ? allSteps.find((s) => keyOf(s) === cursor) : undefined)
+    ?? allSteps.find((s, i) => i > fromIdx && remainingKeys.has(keyOf(s))) ?? steps[0];
+  const stepIdx = step ? allSteps.findIndex((s) => keyOf(s) === keyOf(step)) : -1;
+  const advance = () => { setCursor(null); setFromIdx(stepIdx); };
+  const jumpPhase = (ph: Phase) => { setCursor(null); setFromIdx(allSteps.findIndex((s) => s.phase === ph) - 1); };
   const total = allSteps.length;
   const doneCount = Math.min(total, allSteps.filter((s) => s.set <= (doneByCode.get(s.row.code) ?? 0)).length);
   const laps = Math.max(0, ...allSteps.filter((s) => s.phase === (step?.phase ?? "main")).map((s) => s.lap));
@@ -89,6 +96,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
     if (!step || !r) return;
     const { error } = await supabase.from("log_entries").insert({ code: r.code, sets: 1, reps: rep, load, date: todayISO(), gym_id: r.gym_id, status: "completed", workout_id: workoutId, phase: step.phase, note: step.set === 1 ? r.note : null });
     if (error) throw error;
+    advance();
     await refresh();
   });
 
@@ -125,15 +133,15 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
               {phases.map((ph, i) => {
                 const active = step?.phase === ph;
                 const finished = !active && phaseDone(ph);
-                return <span key={ph} className="flex items-center gap-1">{i > 0 && <span className="text-muted-foreground">→</span>}<button type="button" disabled={finished || active} onClick={() => setFocus(ph)} className={`rounded-full border px-2 py-0.5 cursor-pointer hover:border-primary disabled:cursor-not-allowed disabled:hover:border-transparent font-semibold uppercase tracking-wider ${active ? "border-primary bg-primary text-primary-foreground" : finished ? "border-transparent text-muted-foreground" : "border-border text-muted-foreground"}`}>{finished ? "✓ " : ""}{t(`phase.${ph}`)}{active && showLaps ? ` · ${step?.lap}/${laps}` : ""}</button></span>;
+                return <span key={ph} className="flex items-center gap-1">{i > 0 && <span className="text-muted-foreground">→</span>}<button type="button" disabled={finished || active} onClick={() => jumpPhase(ph)} className={`rounded-full border px-2 py-0.5 cursor-pointer hover:border-primary disabled:cursor-not-allowed disabled:hover:border-transparent font-semibold uppercase tracking-wider ${active ? "border-primary bg-primary text-primary-foreground" : finished ? "border-transparent text-muted-foreground" : "border-border text-muted-foreground"}`}>{finished ? "✓ " : ""}{t(`phase.${ph}`)}{active && showLaps ? ` · ${step?.lap}/${laps}` : ""}</button></span>;
               })}
             </div>}
-            {total > 0 && <div className="flex h-2 gap-2" aria-label={`${doneCount}/${total} set`}>
-              {phases.map((ph) => <div key={ph} className="flex gap-0.5" style={{ flex: allSteps.filter((s) => s.phase === ph).length }}>{allSteps.filter((s) => s.phase === ph).map((s) => {
+            {total > 0 && <div className="flex gap-3" aria-label={`${doneCount}/${total} set`}>
+              {phases.map((ph) => { const ps = allSteps.filter((s) => s.phase === ph); const lapNos = [...new Set(ps.map((s) => s.lap))]; return <div key={ph} className="flex gap-1.5" style={{ flex: ps.length }}>{lapNos.map((lap) => { const ls = ps.filter((s) => s.lap === lap); return <div key={lap} className="flex gap-0.5 border-b-2 border-muted-foreground/30 pb-0.5" style={{ flex: ls.length }}>{ls.map((s) => {
                 const isDone = s.set <= (doneByCode.get(s.row.code) ?? 0);
-                const isCurrent = step && s.row.id === step.row.id && s.set === step.set;
-                return <span key={`${s.row.id}:${s.set}`} title={`${s.row.code} · ${s.lap}`} data-category={catOf(s.row.code)} className={`category-theme flex-1 rounded-sm bg-category-fill ${isDone ? "" : isCurrent ? "animate-pulse ring-1 ring-foreground" : "opacity-25"}`} />;
-              })}</div>)}
+                const isCurrent = step && keyOf(s) === keyOf(step);
+                return <button type="button" key={keyOf(s)} aria-label={`${s.row.code} · ${lap}`} title={`${t(`phase.${ph}`)} · ${t("circuitRunner.lap", { v0: lap, laps: lapNos.length })} · ${s.row.code}`} onClick={() => setCursor(keyOf(s))} data-category={catOf(s.row.code)} className={`category-theme h-3.5 min-w-0 flex-1 cursor-pointer rounded-sm bg-category-fill hover:opacity-100 ${isCurrent ? "animate-pulse ring-2 ring-foreground" : isDone ? "" : "opacity-25"}`} />;
+              })}</div>; })}</div>; })}
             </div>}
           </DrawerHeader>
 
@@ -171,7 +179,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
               <div className="space-y-1"><p className="text-sm font-medium">{t(`repsUnitLong.${repsUnit(rawEx)}`)}</p>
                 <div className="flex items-center gap-1"><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="-1" onClick={() => setRep(rep - 1)}><Minus /></Button><Input inputMode="numeric" value={rep} onChange={(e) => setRep(Number(e.target.value) || 0)} className="h-10 min-w-0 px-1 text-center text-lg font-bold" /><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="+1" onClick={() => setRep(rep + 1)}><Plus /></Button></div></div>
             </div>
-            <div className="flex gap-2"><Button variant="ghost" disabled={busy} onClick={() => step && setSkipped((s) => new Set(s).add(`${step.row.id}:${step.set}`))}><SkipForward className="size-4" />{t("circuitRunner.skip")}</Button><Button className="h-12 flex-1 text-lg" disabled={busy} onClick={() => void logStep()}><Check />{t("circuitRunner.done")}</Button></div>
+            <div className="flex gap-2"><Button variant="ghost" disabled={busy} onClick={() => { if (step) { setSkipped((s) => new Set(s).add(keyOf(step))); advance(); } }}><SkipForward className="size-4" />{t("circuitRunner.skip")}</Button><Button className="h-12 flex-1 text-lg" disabled={busy} onClick={() => void logStep()}><Check />{t("circuitRunner.done")}</Button></div>
           </div>}
           {!r && total > 0 && <p className="text-sm text-muted-foreground">{t("circuitRunner.allSetsDoneAddThe")}</p>}
           <div className="flex gap-2">
