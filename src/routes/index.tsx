@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { authProviders, type AuthProvider } from "@/lib/auth-providers";
-import rappgymLogo from "@/assets/RappGym_150.png";
+import rappgymLogo from "@/assets/RappGym_1024.png";
 import rappSolutionsLogo from "@/assets/RappSolutionsAB_200x112.png";
 
 export const Route = createFileRoute("/")({

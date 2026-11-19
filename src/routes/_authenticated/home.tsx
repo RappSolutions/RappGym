@@ -24,7 +24,7 @@ import {
   type LogEntry,
 } from "@/lib/gym";
 import { useLanguage } from "@/lib/i18n";
-import rappgymLogo from "@/assets/RappGym_150.png";
+import rappgymLogo from "@/assets/RappGym_1024.png";
 
 export const Route = createFileRoute("/_authenticated/home")({
   head: () => ({
