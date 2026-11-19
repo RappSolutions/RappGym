@@ -43,7 +43,7 @@ export async function moveRow(rows: LogEntry[], id: string, dir: -1 | 1) {
 }
 
 export async function addPlannedExercise(workoutId: string, code: string, rows: LogEntry[], gymId: string | null, lastLoad: string, sets: number, reps: number, phase: Phase = "main") {
-  const { error } = await supabase.from("log_entries").insert({ code, sets: Math.max(1, sets), reps, load: lastLoad, date: todayISO(), gym_id: gymId, status: "suggested", workout_id: workoutId, proposal_order: nextOrder(rows), phase });
+  const { error } = await supabase.from("log_entries").insert({ code, sets: Math.max(1, sets), reps, load: lastLoad, date: rows[0]?.date ?? todayISO(), gym_id: gymId, status: "suggested", workout_id: workoutId, proposal_order: nextOrder(rows), phase });
   if (error) throw error;
 }
 

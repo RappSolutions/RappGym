@@ -193,8 +193,8 @@ export function subscribeGym(l: () => void) {
 }
 
 
-export function formatSet(e: { sets: number | null; reps: number | null; load: string | null }) {
-  const base = `${e.reps ?? "–"}${e.load ? ` @ ${e.load}` : ""}`;
+export function formatSet(e: { sets: number | null; reps: number | null; load: string | null }, unit = "") {
+  const base = `${e.reps ?? "–"}${unit ? ` ${unit}` : ""}${e.load ? ` @ ${e.load}` : ""}`;
   return (e.sets ?? 1) > 1 ? `${e.sets} × ${base}` : base;
 }
 

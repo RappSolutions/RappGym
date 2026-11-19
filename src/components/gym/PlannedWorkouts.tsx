@@ -1,5 +1,6 @@
 import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { groupByPhase, isWorkoutFinished, workoutSetProgress } from "@/lib/circuit";
+import { repsUnit } from "@/lib/reps-unit";
 import { PhaseSelect } from "@/components/gym/PhaseSelect";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -186,7 +187,7 @@ export function PlannedWorkouts() {
                           <span className="min-w-0 break-words">{byCode.get(row.code)?.name}</span>
                           <span className="col-start-2 min-w-0 break-words text-sm font-semibold sm:col-start-auto">
                             {byCode.get(row.code)?.equipment ? <span className="font-normal text-muted-foreground">{byCode.get(row.code)?.equipment} · </span> : null}
-                            {formatSet(row)}
+                            {formatSet(row, repsUnit(exercises.find((e) => e.code === row.code)) === "reps" ? "" : t(`repsUnit.${repsUnit(exercises.find((e) => e.code === row.code))}`).toLowerCase())}
                           </span>
                         </Button>
                         <PhaseSelect value={row.phase} disabled={editBusy} onChange={(ph) => void edit(() => setRowPhase(row.id, ph))} />

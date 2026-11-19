@@ -481,5 +481,10 @@
     "reps": "Antal",
     "sec": "Sekunder",
     "min": "Minuter"
+  },
+  "repsUnitLong": {
+    "reps": "Reps",
+    "sec": "Sekunder",
+    "min": "Minuter"
   }
 }

@@ -481,5 +481,10 @@
     "reps": "Count",
     "sec": "Seconds",
     "min": "Minutes"
+  },
+  "repsUnitLong": {
+    "reps": "Reps",
+    "sec": "Seconds",
+    "min": "Minutes"
   }
 }

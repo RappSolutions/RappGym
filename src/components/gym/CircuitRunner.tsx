@@ -43,7 +43,8 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
   const allSteps = useMemo(() => workoutSteps(rows, circuit), [rows, circuit]);
   const [skipped, setSkipped] = useState<Set<string>>(new Set());
   const steps = useMemo(() => remainingSteps(allSteps, doneByCode).filter((s) => !skipped.has(`${s.row.id}:${s.set}`)), [allSteps, doneByCode, skipped]);
-  const step = steps[0];
+  const [focus, setFocus] = useState<Phase | null>(null);
+  const step = steps.find((s) => s.phase === focus) ?? steps[0];
   const total = allSteps.length;
   const doneCount = Math.min(total, allSteps.filter((s) => s.set <= (doneByCode.get(s.row.code) ?? 0)).length);
   const laps = Math.max(0, ...allSteps.filter((s) => s.phase === (step?.phase ?? "main")).map((s) => s.lap));
@@ -124,11 +125,11 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
               {phases.map((ph, i) => {
                 const active = step?.phase === ph;
                 const finished = !active && phaseDone(ph);
-                return <span key={ph} className="flex items-center gap-1">{i > 0 && <span className="text-muted-foreground">→</span>}<span className={`rounded-full border px-2 py-0.5 font-semibold uppercase tracking-wider ${active ? "border-primary bg-primary text-primary-foreground" : finished ? "border-transparent text-muted-foreground" : "border-border text-muted-foreground"}`}>{finished ? "✓ " : ""}{t(`phase.${ph}`)}{active && showLaps ? ` · ${step?.lap}/${laps}` : ""}</span></span>;
+                return <span key={ph} className="flex items-center gap-1">{i > 0 && <span className="text-muted-foreground">→</span>}<button type="button" disabled={finished || active} onClick={() => setFocus(ph)} className={`rounded-full border px-2 py-0.5 disabled:cursor-default font-semibold uppercase tracking-wider ${active ? "border-primary bg-primary text-primary-foreground" : finished ? "border-transparent text-muted-foreground" : "border-border text-muted-foreground"}`}>{finished ? "✓ " : ""}{t(`phase.${ph}`)}{active && showLaps ? ` · ${step?.lap}/${laps}` : ""}</button></span>;
               })}
             </div>}
             {total > 0 && <div className="flex h-2 gap-2" aria-label={`${doneCount}/${total} set`}>
-              {phases.map((ph) => <div key={ph} className="flex flex-1 gap-0.5">{allSteps.filter((s) => s.phase === ph).map((s) => {
+              {phases.map((ph) => <div key={ph} className="flex gap-0.5" style={{ flex: allSteps.filter((s) => s.phase === ph).length }}>{allSteps.filter((s) => s.phase === ph).map((s) => {
                 const isDone = s.set <= (doneByCode.get(s.row.code) ?? 0);
                 const isCurrent = step && s.row.id === step.row.id && s.set === step.set;
                 return <span key={`${s.row.id}:${s.set}`} title={`${s.row.code} · ${s.lap}`} data-category={catOf(s.row.code)} className={`category-theme flex-1 rounded-sm bg-category-fill ${isDone ? "" : isCurrent ? "animate-pulse ring-1 ring-foreground" : "opacity-25"}`} />;
@@ -167,7 +168,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1"><p className="text-sm font-medium">{t("common.weightKg")}</p>
                 <div className="flex items-center gap-1"><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="-5 kg" onClick={() => setLoad(adjustLoad(load, -5))}><Minus /></Button><Input inputMode="decimal" value={load} onChange={(e) => setLoad(e.target.value)} className="h-10 min-w-0 px-1 text-center text-lg font-bold" /><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="+5 kg" onClick={() => setLoad(adjustLoad(load, 5))}><Plus /></Button></div></div>
-              <div className="space-y-1"><p className="text-sm font-medium">{t(`repsUnit.${repsUnit(rawEx)}`)}</p>
+              <div className="space-y-1"><p className="text-sm font-medium">{t(`repsUnitLong.${repsUnit(rawEx)}`)}</p>
                 <div className="flex items-center gap-1"><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="-1" onClick={() => setRep(rep - 1)}><Minus /></Button><Input inputMode="numeric" value={rep} onChange={(e) => setRep(Number(e.target.value) || 0)} className="h-10 min-w-0 px-1 text-center text-lg font-bold" /><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="+1" onClick={() => setRep(rep + 1)}><Plus /></Button></div></div>
             </div>
             <div className="flex gap-2"><Button variant="ghost" disabled={busy} onClick={() => step && setSkipped((s) => new Set(s).add(`${step.row.id}:${step.set}`))}><SkipForward className="size-4" />{t("circuitRunner.skip")}</Button><Button className="h-12 flex-1 text-lg" disabled={busy} onClick={() => void logStep()}><Check />{t("circuitRunner.done")}</Button></div>
