@@ -169,6 +169,13 @@
       "when": 1795037728979,
       "tag": "0023_ai_quotas",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1795107949508,
+      "tag": "0024_ai_tiers_scoped_read",
+      "breakpoints": true
     }
   ]
 }
