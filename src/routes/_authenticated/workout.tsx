@@ -63,7 +63,7 @@ function PassPage() {
           asChild
           variant="outline"
           className="shrink-0 px-3"
-          aria-label={t("Planera pass med AI", "Plan workout with AI")}
+          aria-label={t("workout.planWorkoutWithAi")}
         >
           <Link to="/ai" search={{ mode: "plan" }} className="flex items-center gap-1.5">
             <Sparkles className="size-4 text-primary" />

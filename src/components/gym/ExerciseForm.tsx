@@ -63,7 +63,7 @@ export function ExerciseForm({
   async function addCategory() {
     if (!newCat) return;
     const { data, error } = await supabase.from("exercise_categories").insert({ name: newCat.name.trim(), code_prefix: newCat.prefix.trim().toUpperCase(), color_token: newCat.color.toLowerCase(), sort_order: categories.length + 1 }).select().single();
-    if (error) { toast.error(error.code === "23505" ? t("Namn eller prefix finns redan", "Name or prefix already exists") : error.message); return; }
+    if (error) { toast.error(error.code === "23505" ? t("common.nameOrPrefixAlreadyExists") : error.message); return; }
     await qc.invalidateQueries({ queryKey: ["exercise-categories"] });
     setNewCat(null);
     setF((cur) => ({ ...cur, category_id: data.id }));
@@ -71,7 +71,7 @@ export function ExerciseForm({
   async function addEquipment() {
     if (!newEq?.trim()) return;
     const { data, error } = await supabase.from("exercise_equipment").insert({ name: newEq.trim() }).select().single();
-    if (error) { toast.error(error.code === "23505" ? t("Redskapet finns redan", "Equipment already exists") : error.message); return; }
+    if (error) { toast.error(error.code === "23505" ? t("common.equipmentAlreadyExists") : error.message); return; }
     await qc.invalidateQueries({ queryKey: ["exercise-equipment"] });
     setNewEq(null);
     setF((cur) => ({ ...cur, equipment_id: data.id }));
@@ -79,7 +79,7 @@ export function ExerciseForm({
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    if (!f.category_id) { toast.error(t("Välj kategori", "Choose a category")); return; }
+    if (!f.category_id) { toast.error(t("exerciseForm.chooseACategory")); return; }
     const row = { code: f.code.trim().toUpperCase(), category_id: f.category_id, equipment_id: f.equipment_id || null, name: f.name.trim(), instructions: f.instructions };
     const texts = { name: row.name, instructions: row.instructions };
     const existing = exercise?.translations;
@@ -91,7 +91,7 @@ export function ExerciseForm({
       ? await supabase.from("exercises").update(update).eq("id", exercise.id).select().single()
       : await supabase.from("exercises").insert({ ...row, ...(textLanguage === "en" ? { translations: { en: texts } } : {}), sort_order: all.length }).select().single();
     if (res.error) {
-      toast.error(res.error.code === "23505" ? t("Koden finns redan", "Code already exists") : res.error.message);
+      toast.error(res.error.code === "23505" ? t("exerciseForm.codeAlreadyExists") : res.error.message);
       return;
     }
     const before = new Set(exercise ? links.filter((l) => l.exercise_id === exercise.id).map((l) => l.gym_id) : []);
@@ -102,7 +102,7 @@ export function ExerciseForm({
     void qc.invalidateQueries({ queryKey: ["exercise-locations"] });
     // Log rows follow the exercise by id; the database keeps their code in sync.
     invalidate();
-    toast.success(t("Övning sparad", "Exercise saved"));
+    toast.success(t("exerciseForm.exerciseSaved"));
     onClose(res.data as Exercise);
   }
 
@@ -110,48 +110,48 @@ export function ExerciseForm({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-display text-2xl uppercase">{exercise ? t("Redigera övning", "Edit exercise") : t("Ny övning", "New exercise")}</DialogTitle>
+          <DialogTitle className="font-display text-2xl uppercase">{exercise ? t("exerciseForm.editExercise") : t("exerciseForm.newExercise")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={save} className="space-y-3">
-          <div className="space-y-1"><Label>{t("Övningstexternas språk", "Exercise text language")}</Label><select aria-label={t("Övningstexternas språk", "Exercise text language")} value={textLanguage} onChange={(e) => setTextLanguage(e.target.value === "en" ? "en" : "sv")} className="h-10 w-full rounded-md border bg-background px-3"><option value="sv">Svenska</option><option value="en">English</option></select></div>
+          <div className="space-y-1"><Label>{t("exerciseForm.exerciseTextLanguage")}</Label><select aria-label={t("exerciseForm.exerciseTextLanguage")} value={textLanguage} onChange={(e) => setTextLanguage(e.target.value === "en" ? "en" : "sv")} className="h-10 w-full rounded-md border bg-background px-3"><option value="sv">Svenska</option><option value="en">English</option></select></div>
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-2 space-y-1">
-              <Label htmlFor="ex-cat">{t("Kategori", "Category")}</Label>
+              <Label htmlFor="ex-cat">{t("common.category")}</Label>
               <select id="ex-cat" required value={newCat ? NEW : f.category_id} onChange={(e) => pickCategory(e.target.value)} className={selectCls}>
-                <option value="" disabled>{t("Välj…", "Choose…")}</option>
+                <option value="" disabled>{t("exerciseForm.choose")}</option>
                 {categories.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.code_prefix})</option>)}
-                <option value={NEW}>{t("+ Ny kategori…", "+ New category…")}</option>
+                <option value={NEW}>{t("exerciseForm.newCategory")}</option>
               </select>
             </div>
-            <div className="space-y-1"><Label htmlFor="ex-code">{t("Kod", "Code")}</Label><Input id="ex-code" required value={f.code} onChange={set("code")} /></div>
+            <div className="space-y-1"><Label htmlFor="ex-code">{t("exerciseForm.code")}</Label><Input id="ex-code" required value={f.code} onChange={set("code")} /></div>
           </div>
           {newCat && <div className="grid grid-cols-[1fr_5rem_6rem_auto] items-end gap-2 rounded-md border border-dashed bg-muted/40 p-2">
-            <div className="space-y-1"><Label className="text-xs">{t("Namn", "Name")}</Label><Input value={newCat.name} onChange={(e) => setNewCat({ ...newCat, name: e.target.value })} /></div>
-            <div className="space-y-1"><Label className="text-xs">{t("Prefix", "Prefix")}</Label><Input value={newCat.prefix} maxLength={4} onChange={(e) => setNewCat({ ...newCat, prefix: e.target.value.toUpperCase().replace(/[^A-Z]/g, "") })} /></div>
-            <div className="space-y-1"><Label className="text-xs">{t("Färg", "Colour")}</Label>
+            <div className="space-y-1"><Label className="text-xs">{t("common.name")}</Label><Input value={newCat.name} onChange={(e) => setNewCat({ ...newCat, name: e.target.value })} /></div>
+            <div className="space-y-1"><Label className="text-xs">{t("exerciseForm.prefix")}</Label><Input value={newCat.prefix} maxLength={4} onChange={(e) => setNewCat({ ...newCat, prefix: e.target.value.toUpperCase().replace(/[^A-Z]/g, "") })} /></div>
+            <div className="space-y-1"><Label className="text-xs">{t("common.colour")}</Label>
               <input type="color" value={newCat.color} onChange={(e) => setNewCat({ ...newCat, color: e.target.value })} className="h-10 w-full cursor-pointer rounded-md border bg-background p-1" /></div>
-            <div className="flex gap-1"><Button type="button" size="sm" variant="secondary" disabled={!newCat.name.trim() || !newCat.prefix} onClick={addCategory}>{t("Lägg till", "Add")}</Button><Button type="button" size="sm" variant="ghost" onClick={() => setNewCat(null)}>✕</Button></div>
+            <div className="flex gap-1"><Button type="button" size="sm" variant="secondary" disabled={!newCat.name.trim() || !newCat.prefix} onClick={addCategory}>{t("common.add")}</Button><Button type="button" size="sm" variant="ghost" onClick={() => setNewCat(null)}>✕</Button></div>
           </div>}
-          <div className="space-y-1"><Label htmlFor="ex-name">{t("Namn", "Name")}</Label><Input id="ex-name" required value={f.name} onChange={set("name")} /></div>
+          <div className="space-y-1"><Label htmlFor="ex-name">{t("common.name")}</Label><Input id="ex-name" required value={f.name} onChange={set("name")} /></div>
           <div className="space-y-1">
-            <Label htmlFor="ex-eq">{t("Redskap", "Equipment")}</Label>
+            <Label htmlFor="ex-eq">{t("common.equipment")}</Label>
             <select id="ex-eq" value={newEq !== null ? NEW : f.equipment_id} onChange={(e) => e.target.value === NEW ? setNewEq("") : setF({ ...f, equipment_id: e.target.value })} className={selectCls}>
-              <option value="">{t("Inget", "None")}</option>
+              <option value="">{t("exerciseForm.none")}</option>
               {equipment.map((q) => <option key={q.id} value={q.id}>{q.name}</option>)}
-              <option value={NEW}>{t("+ Nytt redskap…", "+ New equipment…")}</option>
+              <option value={NEW}>{t("exerciseForm.newEquipment")}</option>
             </select>
           </div>
           {newEq !== null && <div className="flex items-end gap-2 rounded-md border border-dashed bg-muted/40 p-2">
-            <Input value={newEq} onChange={(e) => setNewEq(e.target.value)} placeholder={t("Namn", "Name")} />
-            <Button type="button" size="sm" variant="secondary" disabled={!newEq.trim()} onClick={addEquipment}>{t("Lägg till", "Add")}</Button><Button type="button" size="sm" variant="ghost" onClick={() => setNewEq(null)}>✕</Button>
+            <Input value={newEq} onChange={(e) => setNewEq(e.target.value)} placeholder={t("common.name")} />
+            <Button type="button" size="sm" variant="secondary" disabled={!newEq.trim()} onClick={addEquipment}>{t("common.add")}</Button><Button type="button" size="sm" variant="ghost" onClick={() => setNewEq(null)}>✕</Button>
           </div>}
-          <div className="space-y-1"><Label htmlFor="ex-ins">{t("Utförande & tips", "Instructions & tips")}</Label><Textarea id="ex-ins" rows={5} value={f.instructions} onChange={set("instructions")} /></div>
-          {gyms.length > 0 && <fieldset className="space-y-1"><legend className="text-sm font-medium">{t("Platser där övningen finns", "Locations where this exercise is available")}</legend>
-            <label className="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" className="size-4" checked={places.size === gyms.length} onChange={() => setPlaces(places.size === gyms.length ? new Set() : new Set(gyms.map((g) => g.id)))} />{t("Alla platser", "All locations")}</label>
+          <div className="space-y-1"><Label htmlFor="ex-ins">{t("exerciseForm.instructionsTips")}</Label><Textarea id="ex-ins" rows={5} value={f.instructions} onChange={set("instructions")} /></div>
+          {gyms.length > 0 && <fieldset className="space-y-1"><legend className="text-sm font-medium">{t("exerciseForm.locationsWhereThisExerciseIs")}</legend>
+            <label className="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" className="size-4" checked={places.size === gyms.length} onChange={() => setPlaces(places.size === gyms.length ? new Set() : new Set(gyms.map((g) => g.id)))} />{t("common.allLocations")}</label>
             <div className="grid gap-1 pl-6 sm:grid-cols-2">{gyms.map((g) => <label key={g.id} className="flex items-center gap-2 text-sm"><input type="checkbox" className="size-4" checked={places.has(g.id)} onChange={() => { const n = new Set(places); if (n.has(g.id)) n.delete(g.id); else n.add(g.id); setPlaces(n); }} />{g.name}</label>)}</div>
           </fieldset>}
           {exercise && <ExerciseImageEditor exercise={exercise} />}
-          <Button type="submit" className="h-12 w-full font-bold uppercase">{t("Spara", "Save")}</Button>
+          <Button type="submit" className="h-12 w-full font-bold uppercase">{t("common.save")}</Button>
         </form>
       </DialogContent>
     </Dialog>

@@ -26,5 +26,5 @@ export function ExerciseImages({ exercise }: { exercise: Exercise }) {
   const { t } = useLanguage();
   const urls = imageUrlsOf(exercise);
   if (!urls.length) return null;
-  return <div className="space-y-2">{urls.map((url) => <ExerciseImage key={url} url={url} alt={`${exercise.code} ${exercise.name} — ${t("start- och slutposition", "start and end position")}`} className="mx-auto block w-full max-w-sm rounded-md border" />)}</div>;
+  return <div className="space-y-2">{urls.map((url) => <ExerciseImage key={url} url={url} alt={`${exercise.code} ${exercise.name} — ${t("exerciseImages.startAndEndPosition")}`} className="mx-auto block w-full max-w-sm rounded-md border" />)}</div>;
 }

@@ -43,7 +43,7 @@ function ExercisePage() {
   const [entry, setEntry] = useState<LogEntry | null>(null);
   const original = exercises.find((e) => e.code === code);
   const ex = original ? localize(original) : undefined;
-  if (!ex) return <p className="p-4">{t("Övningen finns inte.", "Exercise not found.")} <Link to="/exercises" className="underline">{t("Tillbaka", "Back")}</Link></p>;
+  if (!ex) return <p className="p-4">{t("exercisesDetail.exerciseNotFound")} <Link to="/exercises" className="underline">{t("exercisesDetail.back")}</Link></p>;
   const cats = categoriesOf(exercises);
   const token = categoryToken(ex.category, cats);
   const history = log.filter((e) => e.code === code);
@@ -51,7 +51,7 @@ function ExercisePage() {
 
   async function remove() {
     if (!ex) return;
-    if (!await confirmDialog(`${t("Ta bort", "Delete")} ${ex.code} ${ex.name}? ${t("Loggade set behålls.", "Logged sets are kept.")}`)) return;
+    if (!await confirmDialog(`${t("common.delete")} ${ex.code} ${ex.name}? ${t("exercisesDetail.loggedSetsAreKept")}`)) return;
     const { error } = await supabase.from("exercises").delete().eq("id", ex.id);
     if (error) {
       toast.error(error.message);
@@ -63,7 +63,7 @@ function ExercisePage() {
 
   return (
     <main data-category={token} className="category-theme space-y-5 px-4">
-      <Link to="/exercises" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4" />{t("Övningar", "Exercises")}</Link>
+      <Link to="/exercises" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4" />{t("common.exercises")}</Link>
       <div>
         <div className="font-display text-lg font-bold uppercase text-category-ink">{ex.code} · {ex.category}</div>
         <h1 className="text-4xl font-extrabold uppercase leading-none">{ex.name}</h1>
@@ -72,9 +72,9 @@ function ExercisePage() {
       <ExerciseImages exercise={ex} />
       {ex.instructions && <p className="whitespace-pre-line leading-relaxed">{ex.instructions}</p>}
       <div className="flex gap-2">
-        <Button onClick={() => { setEntry(null); setLogging(true); }} className="h-12 flex-1 font-bold uppercase"><Plus className="h-5 w-5" />{t("Logga set", "Log sets")}</Button>
-        <Button variant="secondary" className="h-12" onClick={() => setEditing(true)} aria-label={t("Redigera", "Edit")}><Pencil className="h-5 w-5" /></Button>
-        <Button variant="secondary" className="h-12" onClick={remove} aria-label={t("Ta bort", "Delete")}><Trash2 className="h-5 w-5" /></Button>
+        <Button onClick={() => { setEntry(null); setLogging(true); }} className="h-12 flex-1 font-bold uppercase"><Plus className="h-5 w-5" />{t("common.logSets")}</Button>
+        <Button variant="secondary" className="h-12" onClick={() => setEditing(true)} aria-label={t("common.edit")}><Pencil className="h-5 w-5" /></Button>
+        <Button variant="secondary" className="h-12" onClick={remove} aria-label={t("common.delete")}><Trash2 className="h-5 w-5" /></Button>
       </div>
       {chart.length > 1 && (
         <div className="h-48 rounded-xl border bg-card p-2">
@@ -83,14 +83,14 @@ function ExercisePage() {
               <XAxis dataKey="d" stroke="var(--muted-foreground)" fontSize={11} />
               <YAxis stroke="var(--muted-foreground)" fontSize={11} width={30} />
               <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)" }} />
-              <Line dataKey="v" name={t("Belastning", "Load")} stroke="var(--primary)" strokeWidth={3} dot />
+              <Line dataKey="v" name={t("common.load")} stroke="var(--primary)" strokeWidth={3} dot />
             </LineChart>
           </ResponsiveContainer>
         </div>
       )}
       <section className="space-y-2">
-        <h2 className="text-xl font-bold uppercase">{t("Historik", "History")}</h2>
-        {!history.length && <p className="text-muted-foreground">{t("Inga loggade set ännu.", "No sets logged yet.")}</p>}
+        <h2 className="text-xl font-bold uppercase">{t("common.history")}</h2>
+        {!history.length && <p className="text-muted-foreground">{t("common.noSetsLoggedYet")}</p>}
         {history.map((e) => (
           <button key={e.id} onClick={() => { setEntry(e); setLogging(true); }} className="flex w-full items-center justify-between rounded-lg border bg-card px-4 py-3 text-left">
             <span className="text-sm text-muted-foreground">{formatDate(e.date)}</span>

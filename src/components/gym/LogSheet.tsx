@@ -81,14 +81,14 @@ export function LogSheet({
       return;
     }
     const code = exercise.code;
-    toast.success(`${code} ${t("sparad", "saved")}${row.sets > 1 ? ` (${row.sets} ${t("set", "sets")})` : ""}`, entry ? undefined : {
+    toast.success(`${code} ${t("logSheet.saved")}${row.sets > 1 ? ` (${row.sets} ${t("common.sets")})` : ""}`, entry ? undefined : {
       duration: 8000,
       action: {
-        label: t("+1 likadant set", "+1 identical set"),
+        label: t("logSheet.1IdenticalSet"),
         onClick: async () => {
           const { error: e2 } = await supabase.from("log_entries").insert({ ...row, sets: 1 });
           if (e2) toast.error(e2.message);
-          else { toast.success(`${code}: ${t("ett set till", "one more set")}`); invalidate(); }
+          else { toast.success(`${code}: ${t("logSheet.oneMoreSet")}`); invalidate(); }
         },
       },
     });
@@ -99,7 +99,7 @@ export function LogSheet({
 
   async function remove() {
     if (!entry) return;
-    if (!await confirmDialog(t("Ta bort denna rad ur loggen?", "Delete this log entry?"))) return;
+    if (!await confirmDialog(t("logSheet.deleteThisLogEntry"))) return;
     const { error } = await supabase.from("log_entries").delete().eq("id", entry.id);
     if (error) {
       toast.error(error.message);
@@ -114,46 +114,46 @@ export function LogSheet({
       <DrawerContent>
         <div className="mx-auto max-h-[85vh] w-full max-w-md space-y-4 overflow-y-auto px-4 pb-8">
           <DrawerHeader className="px-0">
-            {entry?.status === "suggested" && <p className="font-semibold text-primary">{t("Förslag", "Suggestion")}{progress ? ` · ${progress}` : ""}</p>}
+            {entry?.status === "suggested" && <p className="font-semibold text-primary">{t("logSheet.suggestion")}{progress ? ` · ${progress}` : ""}</p>}
             <DrawerTitle className="font-display text-2xl uppercase">
               <span className="text-primary">{shown?.code}</span> {shown?.name}
             </DrawerTitle>
             <DrawerDescription>
-              {last && !entry && `${t("Senast", "Last")}: ${formatSet({ ...last, sets: 1 })}`}
+              {last && !entry && `${t("logSheet.last")}: ${formatSet({ ...last, sets: 1 })}`}
             </DrawerDescription>
           </DrawerHeader>
           {shown && <ExerciseImages exercise={shown} />}
           <div className="grid grid-cols-2 gap-3">
-            <Stepper label={t("Antal set", "Number of sets")} value={round} onChange={setRound} />
-            <Stepper label={t("Reps / sek", "Reps / sec")} value={reps} onChange={setReps} />
+            <Stepper label={t("logSheet.numberOfSets")} value={round} onChange={setRound} />
+            <Stepper label={t("logSheet.repsSec")} value={reps} onChange={setReps} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="log-load">{t("Belastning (kg / band)", "Load (kg / band)")}</Label>
-              <Input id="log-load" value={load} onChange={(e) => setLoad(e.target.value)} className="h-12 text-lg font-semibold" placeholder={t("t.ex. 25 eller Orange", "e.g. 25 or Orange")} />
+              <Label htmlFor="log-load">{t("logSheet.loadKgBand")}</Label>
+              <Input id="log-load" value={load} onChange={(e) => setLoad(e.target.value)} className="h-12 text-lg font-semibold" placeholder={t("logSheet.eG25OrOrange")} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="log-date">{t("Datum", "Date")}</Label>
+              <Label htmlFor="log-date">{t("common.date")}</Label>
               <LogDatePicker value={date} onChange={setDate} />
             </div>
           </div>
           {gyms.length > 0 && <div className="space-y-2">
-            <Label htmlFor="log-place">{t("Plats", "Location")}</Label>
+            <Label htmlFor="log-place">{t("common.location")}</Label>
             <select id="log-place" value={place} onChange={(e) => setPlace(e.target.value)} className="h-12 w-full rounded-md border border-input bg-background px-3">
-              <option value="">{t("Ingen plats", "No location")}</option>
+              <option value="">{t("common.noLocation")}</option>
               {gyms.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
             </select>
           </div>}
           <div className="space-y-2">
-            <Label htmlFor="log-note">{t("Notering & känsla", "Notes & feel")}</Label>
+            <Label htmlFor="log-note">{t("logSheet.notesFeel")}</Label>
             <Textarea id="log-note" value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
           </div>
           <Button onClick={() => void save()} disabled={busy} className="h-14 w-full text-lg font-bold uppercase">
-            {entry?.status === "suggested" ? t("Bekräfta genomfört", "Confirm completed") : entry ? t("Spara ändring", "Save changes") : t("Logga set", "Log sets")}
+            {entry?.status === "suggested" ? t("logSheet.confirmCompleted") : entry ? t("logSheet.saveChanges") : t("common.logSets")}
           </Button>
-          {entry?.status === "suggested" && <Button variant="outline" disabled={busy} className="w-full" onClick={() => void save(false)}>{t("Spara justerat förslag", "Save adjusted suggestion")}</Button>}
+          {entry?.status === "suggested" && <Button variant="outline" disabled={busy} className="w-full" onClick={() => void save(false)}>{t("logSheet.saveAdjustedSuggestion")}</Button>}
           {entry && (
-            <Button variant="ghost" disabled={busy} onClick={remove} className="w-full text-destructive">{t("Ta bort", "Delete")}</Button>
+            <Button variant="ghost" disabled={busy} onClick={remove} className="w-full text-destructive">{t("common.delete")}</Button>
           )}
         </div>
       </DrawerContent>

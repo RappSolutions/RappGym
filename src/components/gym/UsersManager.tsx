@@ -22,30 +22,30 @@ export function UsersManager() {
 
   async function act(userId: string, action: "makeAdmin" | "removeAdmin" | "disable" | "enable" | "delete", confirmText: string) {
     if (!await confirmDialog(confirmText)) return;
-    try { await manage({ data: { userId, action } }); toast.success(t("Klart", "Done")); }
+    try { await manage({ data: { userId, action } }); toast.success(t("usersManager.done")); }
     catch (e) { toast.error(e instanceof Error ? e.message : String(e)); }
     await qc.invalidateQueries({ queryKey: ["admin-users"] });
   }
 
-  return <section className="space-y-3" aria-label={t("Användare", "Users")}>
-    {isLoading && <p className="text-sm text-muted-foreground">{t("Laddar…", "Loading…")}</p>}
+  return <section className="space-y-3" aria-label={t("common.users")}>
+    {isLoading && <p className="text-sm text-muted-foreground">{t("common.loading")}</p>}
     {error && <p className="text-sm text-destructive">{error.message}</p>}
     <ul className="divide-y divide-border">{users.map((u) => {
       const self = u.id === me;
       const who = u.name || u.email;
       return <li key={u.id} className="space-y-2 py-3">
         <div className={u.disabled ? "text-muted-foreground" : ""}>
-          <div className="font-medium">{who}{u.isAdmin && <span className="ml-2 rounded bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">Admin</span>}{u.disabled && <span className="ml-2 rounded bg-destructive px-1.5 py-0.5 text-xs text-destructive-foreground">{t("Inaktiverad", "Disabled")}</span>}{self && <span className="ml-2 text-xs text-muted-foreground">({t("du", "you")})</span>}</div>
-          <div className="text-xs text-muted-foreground">{u.email} · {u.provider} · {t("Skapad", "Created")} {formatDate(u.createdAt.slice(0, 10))}{u.lastSignIn ? ` · ${t("Senast inloggad", "Last sign-in")} ${formatDate(u.lastSignIn.slice(0, 10))}` : ""}</div>
+          <div className="font-medium">{who}{u.isAdmin && <span className="ml-2 rounded bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">Admin</span>}{u.disabled && <span className="ml-2 rounded bg-destructive px-1.5 py-0.5 text-xs text-destructive-foreground">{t("usersManager.disabled")}</span>}{self && <span className="ml-2 text-xs text-muted-foreground">({t("usersManager.you")})</span>}</div>
+          <div className="text-xs text-muted-foreground">{u.email} · {u.provider} · {t("usersManager.created")} {formatDate(u.createdAt.slice(0, 10))}{u.lastSignIn ? ` · ${t("usersManager.lastSignIn")} ${formatDate(u.lastSignIn.slice(0, 10))}` : ""}</div>
         </div>
         {!self && <div className="flex flex-wrap gap-2">
           {u.isAdmin
-            ? <Button size="sm" variant="outline" onClick={() => void act(u.id, "removeAdmin", t(`Ta bort admin för ${who}?`, `Remove admin from ${who}?`))}><ShieldMinus className="size-4" />{t("Ta bort admin", "Remove admin")}</Button>
-            : <Button size="sm" variant="outline" onClick={() => void act(u.id, "makeAdmin", t(`Gör ${who} till admin?`, `Make ${who} an admin?`))}><ShieldPlus className="size-4" />{t("Gör till admin", "Make admin")}</Button>}
+            ? <Button size="sm" variant="outline" onClick={() => void act(u.id, "removeAdmin", t("usersManager.removeAdminFrom", { who }))}><ShieldMinus className="size-4" />{t("usersManager.removeAdmin")}</Button>
+            : <Button size="sm" variant="outline" onClick={() => void act(u.id, "makeAdmin", t("usersManager.makeAnAdmin", { who }))}><ShieldPlus className="size-4" />{t("usersManager.makeAdmin")}</Button>}
           {u.disabled
-            ? <Button size="sm" variant="outline" onClick={() => void act(u.id, "enable", t(`Aktivera ${who} igen?`, `Enable ${who} again?`))}><CheckCircle2 className="size-4" />{t("Aktivera", "Enable")}</Button>
-            : <Button size="sm" variant="outline" onClick={() => void act(u.id, "disable", t(`Inaktivera ${who}? Personen kan inte logga in.`, `Disable ${who}? They can no longer sign in.`))}><Ban className="size-4" />{t("Inaktivera", "Disable")}</Button>}
-          <Button size="sm" variant="outline" className="text-destructive" onClick={() => void act(u.id, "delete", t(`Ta bort ${who} permanent, med all deras träningsdata?`, `Permanently delete ${who} and all their training data?`))}><Trash2 className="size-4" />{t("Ta bort", "Delete")}</Button>
+            ? <Button size="sm" variant="outline" onClick={() => void act(u.id, "enable", t("usersManager.enableAgain", { who }))}><CheckCircle2 className="size-4" />{t("usersManager.enable")}</Button>
+            : <Button size="sm" variant="outline" onClick={() => void act(u.id, "disable", t("usersManager.disableTheyCanNoLonger", { who }))}><Ban className="size-4" />{t("usersManager.disable")}</Button>}
+          <Button size="sm" variant="outline" className="text-destructive" onClick={() => void act(u.id, "delete", t("usersManager.permanentlyDeleteAndAllTheir", { who }))}><Trash2 className="size-4" />{t("common.delete")}</Button>
         </div>}
       </li>;
     })}</ul>

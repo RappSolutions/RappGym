@@ -42,7 +42,7 @@ export function ExerciseImageEditor({ exercise }: { exercise: Exercise }) {
     await saveUrls([...urls, `storage:${path}`]);
   }
   async function addUrl() {
-    if (!/^https:\/\//i.test(url.trim())) { toast.error(t("Länken måste börja med https://", "The link must start with https://")); return; }
+    if (!/^https:\/\//i.test(url.trim())) { toast.error(t("exerciseImageEditor.theLinkMustStartWith")); return; }
     if (await saveUrls([...urls, url.trim()])) setUrl("");
   }
   async function ai() {
@@ -50,39 +50,39 @@ export function ExerciseImageEditor({ exercise }: { exercise: Exercise }) {
     try {
       const res = await generate({ data: { exerciseId: exercise.id, wishes } });
       if (res.error || !res.path) toast.error(res.error ?? "AI error");
-      else { await saveUrls([...urls, res.path]); toast.success(t("Ny bild skapad", "New picture created")); }
+      else { await saveUrls([...urls, res.path]); toast.success(t("exerciseImageEditor.newPictureCreated")); }
     } catch (e) { toast.error(e instanceof Error ? e.message : String(e)); }
     setBusy(null);
   }
   async function remove(u: string) {
-    if (!await confirmDialog(t("Ta bort bilden?", "Remove this picture?"))) return;
+    if (!await confirmDialog(t("exerciseImageEditor.removeThisPicture"))) return;
     if (!(await saveUrls(urls.filter((x) => x !== u)))) return;
     if (u.startsWith("storage:")) await supabase.storage.from("exercise-images").remove([u.slice(8)]);
   }
 
   return (
     <fieldset className="space-y-3 rounded-md border p-3">
-      <legend className="px-1 text-sm font-medium">{t("Bilder", "Pictures")}</legend>
-      {urls.length === 0 && <p className="text-sm text-muted-foreground">{t("Inga bilder ännu.", "No pictures yet.")}</p>}
+      <legend className="px-1 text-sm font-medium">{t("exerciseImageEditor.pictures")}</legend>
+      {urls.length === 0 && <p className="text-sm text-muted-foreground">{t("exerciseImageEditor.noPicturesYet")}</p>}
       <div className="grid gap-2 sm:grid-cols-2">{urls.map((u) => (
         <div key={u} className="relative">
           <ExerciseImage url={u} alt={exercise.name} className="w-full rounded-md border" />
-          <Button type="button" size="icon" variant="destructive" className="absolute right-1 top-1 size-9" aria-label={t("Ta bort bild", "Remove picture")} onClick={() => void remove(u)}><Trash2 /></Button>
+          <Button type="button" size="icon" variant="destructive" className="absolute right-1 top-1 size-9" aria-label={t("exerciseImageEditor.removePicture")} onClick={() => void remove(u)}><Trash2 /></Button>
         </div>))}
       </div>
       <div className="flex gap-2">
-        <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…/bild.jpg" aria-label={t("Bildlänk", "Picture link")} />
-        <Button type="button" variant="outline" onClick={() => void addUrl()} disabled={!url.trim()}><LinkIcon />{t("Lägg till", "Add")}</Button>
+        <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…/bild.jpg" aria-label={t("exerciseImageEditor.pictureLink")} />
+        <Button type="button" variant="outline" onClick={() => void addUrl()} disabled={!url.trim()}><LinkIcon />{t("common.add")}</Button>
       </div>
       <Label className="flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md border text-sm font-medium hover:bg-accent">
-        {busy === "upload" ? <LoaderCircle className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}{t("Ladda upp från datorn/telefonen", "Upload from computer/phone")}
+        {busy === "upload" ? <LoaderCircle className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}{t("exerciseImageEditor.uploadFromComputerPhone")}
         <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void upload(f); }} />
       </Label>
-      <p className="text-xs text-muted-foreground">{t("Bilder i övningsbanken blir synliga för alla inloggade användare.", "Pictures in the exercise bank are visible to all signed-in users.")}</p>
+      <p className="text-xs text-muted-foreground">{t("exerciseImageEditor.picturesInTheExerciseBank")}</p>
       <div className="space-y-1">
-        <Label>{t("Önskemål till AI-bilden (valfritt)", "Wishes for the AI picture (optional)")}</Label>
-        <Textarea rows={2} value={wishes} onChange={(e) => setWishes(e.target.value)} placeholder={t("T.ex. visa från sidan, kvinna, gummiband i gult", "E.g. side view, female figure, yellow band")} />
-        <Button type="button" className="w-full" disabled={busy !== null} onClick={() => void ai()}>{busy === "ai" ? <LoaderCircle className="animate-spin" /> : <Sparkles />}{busy === "ai" ? t("Skapar bild… (kan ta en minut)", "Creating picture… (may take a minute)") : t("Skapa bild med AI", "Create picture with AI")}</Button>
+        <Label>{t("exerciseImageEditor.wishesForTheAiPicture")}</Label>
+        <Textarea rows={2} value={wishes} onChange={(e) => setWishes(e.target.value)} placeholder={t("exerciseImageEditor.eGSideViewFemale")} />
+        <Button type="button" className="w-full" disabled={busy !== null} onClick={() => void ai()}>{busy === "ai" ? <LoaderCircle className="animate-spin" /> : <Sparkles />}{busy === "ai" ? t("exerciseImageEditor.creatingPictureMayTakeA") : t("exerciseImageEditor.createPictureWithAi")}</Button>
       </div>
     </fieldset>
   );

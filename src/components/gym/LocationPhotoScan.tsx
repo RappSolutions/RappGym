@@ -32,32 +32,32 @@ export function LocationPhotoScan({ gymId, onApply }: { gymId: string; onApply: 
     try {
       const res = await scan({ data: { gymId, image: src, language } });
       if (res.error) { toast.error(res.error); return; }
-      if (!res.exerciseIds.length) { toast.error(t("AI hittade inga övningar som passar bilden.", "AI found no matching exercises in the photo.")); return; }
-      if (!await confirmDialog(t(`AI ser: ${res.equipment}\n\nSätt ${res.exerciseIds.length} övningar för platsen? Övriga kopplingar tas bort.`, `AI sees: ${res.equipment}\n\nSet ${res.exerciseIds.length} exercises for this location? Other links are removed.`))) return;
+      if (!res.exerciseIds.length) { toast.error(t("locationPhotoScan.aiFoundNoMatchingExercises")); return; }
+      if (!await confirmDialog(t("locationPhotoScan.aiSeesSetExercisesFor", { equipment: res.equipment, length: res.exerciseIds.length }))) return;
       await onApply(res.exerciseIds, res.equipment);
       setImage(null); setUrl("");
-      toast.success(t("Övningar uppdaterade från bilden.", "Exercises updated from the photo."));
+      toast.success(t("locationPhotoScan.exercisesUpdatedFromThePhoto"));
     } catch {
-      toast.error(t("Bilden kunde inte analyseras.", "The photo could not be analysed."));
+      toast.error(t("locationPhotoScan.thePhotoCouldNotBe"));
     } finally { setBusy(false); }
   }
 
   return (
     <div className="space-y-2 rounded-lg bg-muted/50 p-3">
-      <div className="flex items-center gap-2 text-sm font-semibold"><Sparkles className="size-4 text-primary" />{t("Koppla övningar från en bild med AI", "Match exercises from a photo with AI")}</div>
+      <div className="flex items-center gap-2 text-sm font-semibold"><Sparkles className="size-4 text-primary" />{t("locationPhotoScan.matchExercisesFromAPhoto")}</div>
       <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
-        <Input value={url} disabled={busy || !!image} onChange={(e) => setUrl(e.target.value)} placeholder={t("Klistra in bildadress (https://…jpg)", "Paste image address (https://…jpg)")} />
+        <Input value={url} disabled={busy || !!image} onChange={(e) => setUrl(e.target.value)} placeholder={t("locationPhotoScan.pasteImageAddressHttpsJpg")} />
         <Button asChild variant="outline" disabled={busy}>
-          <label className="cursor-pointer"><Camera />{image ? t("Bild vald", "Photo chosen") : t("Ladda upp", "Upload")}
+          <label className="cursor-pointer"><Camera />{image ? t("locationPhotoScan.photoChosen") : t("locationPhotoScan.upload")}
             <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (f) setImage(await fileToDataUrl(f)); }} />
           </label>
         </Button>
       </div>
       {image && <img src={image} alt="" className="max-h-40 rounded" />}
       <Button size="sm" disabled={busy || (!image && !url.trim())} onClick={() => void run()}>
-        {busy ? <Loader2 className="animate-spin" /> : <Sparkles />}{busy ? t("Analyserar…", "Analysing…") : t("Analysera bilden", "Analyse photo")}
+        {busy ? <Loader2 className="animate-spin" /> : <Sparkles />}{busy ? t("locationPhotoScan.analysing") : t("locationPhotoScan.analysePhoto")}
       </Button>
-      <p className="text-xs text-muted-foreground">{t("Körs bara när du trycker (cirka 1 AI-krediter).", "Runs only when you press it (about 1 AI credit).")}</p>
+      <p className="text-xs text-muted-foreground">{t("locationPhotoScan.runsOnlyWhenYouPress")}</p>
     </div>
   );
 }

@@ -17,25 +17,27 @@ export const Route = createFileRoute("/_authenticated")({
   component: AppLayout,
 });
 
+type NavLabelKey = `nav.tabs.${"home" | "ai" | "exercises" | "workout" | "log" | "settings"}`;
+
 const tabs = [
-  { to: "/home", label: "Hem", en: "Home", icon: House },
-  { to: "/ai", label: "AI", en: "AI", icon: Sparkles },
-  { to: "/exercises", label: "Övningar", en: "Exercises", icon: Dumbbell },
-  { to: "/workout", label: "Pass", en: "Workouts", icon: CalendarDays },
-  { to: "/log", label: "Logg", en: "Log", icon: ClipboardCheck },
+  { to: "/home", label: "nav.tabs.home" as NavLabelKey, icon: House },
+  { to: "/ai", label: "nav.tabs.ai" as NavLabelKey, icon: Sparkles },
+  { to: "/exercises", label: "nav.tabs.exercises" as NavLabelKey, icon: Dumbbell },
+  { to: "/workout", label: "nav.tabs.workout" as NavLabelKey, icon: CalendarDays },
+  { to: "/log", label: "nav.tabs.log" as NavLabelKey, icon: ClipboardCheck },
 ] as const;
 
 // Active-tab marker style for the bottom navigation: "chip" (default) or "block".
 const NAV_STYLE: "chip" | "block" =
   typeof window !== "undefined" && window.localStorage.getItem("navStyle") === "block" ? "block" : "chip";
 
-const pageLabels: [RegExp, string, string][] = [
-  [/^\/home/, "Hem", "Home"],
-  [/^\/workout/, "Pass", "Workouts"],
-  [/^\/exercises/, "Övningar", "Exercises"],
-  [/^\/log/, "Logg", "Log"],
-  [/^\/ai/, "AI", "AI"],
-  [/^\/settings/, "Inställningar", "Settings"],
+const pageLabels: [RegExp, NavLabelKey][] = [
+  [/^\/home/, "nav.tabs.home"],
+  [/^\/workout/, "nav.tabs.workout"],
+  [/^\/exercises/, "nav.tabs.exercises"],
+  [/^\/log/, "nav.tabs.log"],
+  [/^\/ai/, "nav.tabs.ai"],
+  [/^\/settings/, "nav.tabs.settings"],
 ];
 
 function AppLayout() {
@@ -45,7 +47,7 @@ function AppLayout() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const match = pageLabels.find(([re]) => re.test(pathname));
-  const page = match ? t(match[1], match[2]) : "";
+  const page = match ? t(match[1]) : "";
   async function signOut() {
     await qc.cancelQueries();
     qc.clear();
@@ -55,7 +57,7 @@ function AppLayout() {
   return (
     <div className="app-sheet mx-auto min-h-screen max-w-2xl pb-24 md:max-w-4xl">
       <header className="app-masthead mb-6 flex items-center justify-between gap-3 px-4 py-5">
-        <Link to="/home" aria-label={t("Till Hem", "Go to Home")} className="brand-wordmark min-w-0 truncate font-display text-2xl font-bold no-underline hover:opacity-90 md:text-3xl">
+        <Link to="/home" aria-label={t("nav.goToHome")} className="brand-wordmark min-w-0 truncate font-display text-2xl font-bold no-underline hover:opacity-90 md:text-3xl">
           Rapp<span className="text-brand-yellow">Gym</span>
           {page && <span className="ml-2 text-brand-yellow">– {page}</span>}
         </Link>
@@ -65,7 +67,7 @@ function AppLayout() {
       <Outlet />
       <nav className="app-navigation fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur">
         <div className="mx-auto grid max-w-2xl grid-cols-5">
-          {tabs.map(({ to, label, en, icon: Icon }) => (
+          {tabs.map(({ to, label, icon: Icon }) => (
             <Link
               key={to}
               to={to}
@@ -89,7 +91,7 @@ function AppLayout() {
                     <span className="flex h-9 items-center justify-center">
                       <Icon className="h-6 w-6" />
                     </span>
-                    <span data-navlabel>{t(label, en)}</span>
+                    <span data-navlabel>{t(label)}</span>
                   </span>
                 ) : (
                   <>
@@ -104,7 +106,7 @@ function AppLayout() {
                       />
                     </span>
                     <span data-navlabel className={cn(isActive ? "font-semibold text-brand-blue" : "text-muted-foreground")}>
-                      {t(label, en)}
+                      {t(label)}
                     </span>
                   </>
                 )

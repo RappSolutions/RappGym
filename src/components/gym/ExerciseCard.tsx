@@ -31,12 +31,12 @@ export function ExerciseCard({
           {last ? (
             <>
               <div className="text-xl font-bold">{last.load || "–"}<span className="text-sm text-muted-foreground"> × {last.reps ?? "–"}</span></div>
-              <div className="text-xs text-muted-foreground">{t("senast", "last")}</div>
+              <div className="text-xs text-muted-foreground">{t("exerciseCard.last")}</div>
             </>
           ) : (
-            <div className="text-xs text-muted-foreground">{t("ny", "new")}</div>
+            <div className="text-xs text-muted-foreground">{t("exerciseCard.new")}</div>
           )}
-          {!!doneToday && <div className="mt-1 rounded bg-primary px-1.5 text-xs font-bold text-primary-foreground">{doneToday} {t("idag", "today")}</div>}
+          {!!doneToday && <div className="mt-1 rounded bg-primary px-1.5 text-xs font-bold text-primary-foreground">{doneToday} {t("exerciseCard.today")}</div>}
         </div>}
       </Button>
       {action}

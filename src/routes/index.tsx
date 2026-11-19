@@ -57,7 +57,7 @@ function Index() {
     if (result.error) {
       setPending(null);
       toast.error(
-        result.error instanceof Error ? result.error.message : t("Inloggningen misslyckades", "Sign-in failed"),
+        result.error instanceof Error ? result.error.message : t("signIn.signInFailed"),
       );
       return;
     }
@@ -88,29 +88,26 @@ function Index() {
           RappGym
         </h1>
         <p className="landing-rise relative mt-3 max-w-sm text-muted-foreground [animation-delay:120ms]">
-          {t("Logga pass, följ cirklar, se din progress.", "Log workouts, run circuits, track your progress.")}
+          {t("signIn.logWorkoutsRunCircuitsTrack")}
         </p>
         <div className="landing-rise relative mt-8 w-full max-w-sm space-y-3 [animation-delay:240ms]">
           {waiting && (
             <p role="status" className="text-sm font-medium text-muted-foreground">
-              {checking ? t("Loggar in…", "Signing in…") : t(`Ansluter till ${pending === authProviders[0] ? "Google" : "Microsoft"}…`, `Connecting to ${pending === authProviders[0] ? "Google" : "Microsoft"}…`)}
+              {checking ? t("signIn.signingIn") : t("signIn.connectingTo", { v0: pending === authProviders[0] ? "Google" : "Microsoft" })}
             </p>
           )}
           {authError && (
             <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-left text-sm text-destructive">
               <p className="font-semibold">
                 {authError.kind === "rejected"
-                  ? t("Inloggningen nekades", "Sign-in was rejected")
+                  ? t("signIn.signInWasRejected")
                   : authError.kind === "cancelled"
-                    ? t("Inloggningen avbröts", "Sign-in was cancelled")
-                    : t("Inloggningen misslyckades", "Sign-in failed")}
+                    ? t("signIn.signInWasCancelled")
+                    : t("signIn.signInFailed")}
               </p>
               {authError.kind === "rejected" && (
                 <p className="mt-1">
-                  {t(
-                    "Kontot kan vara inaktiverat. Kontakta administratören om du tror att det är fel.",
-                    "The account may be disabled. Contact the administrator if you think this is wrong.",
-                  )}
+                  {t("signIn.theAccountMayBeDisabled")}
                 </p>
               )}
               <p className="mt-1 text-xs opacity-80">{authError.description}</p>
@@ -141,7 +138,7 @@ function Index() {
                 d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"
               />
             </svg>
-            {t("Fortsätt med Google", "Continue with Google")}
+            {t("signIn.continueWithGoogle")}
           </Button>
           <Button
             variant="outline"
@@ -156,10 +153,10 @@ function Index() {
               <rect x="1" y="11" width="9" height="9" fill="#00A4EF" />
               <rect x="11" y="11" width="9" height="9" fill="#FFB900" />
             </svg>
-            {t("Fortsätt med Microsoft", "Continue with Microsoft")}
+            {t("signIn.continueWithMicrosoft")}
           </Button>
           <p className="pt-2 text-xs text-muted-foreground">
-            {t("Endast befintliga Google- eller Microsoft-konton.", "Existing Google or Microsoft accounts only.")}
+            {t("signIn.existingGoogleOrMicrosoftAccounts")}
           </p>
         </div>
       </main>

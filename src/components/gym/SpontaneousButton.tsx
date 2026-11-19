@@ -14,14 +14,14 @@ export function SpontaneousButton({ gymId, size = "default" }: { gymId: string; 
   const [busy, setBusy] = useState(false);
   async function start() {
     setBusy(true);
-    const { data, error } = await supabase.from("workouts").insert({ title: `${t("Spontanpass", "Spontaneous workout")} ${todayISO()}`, created_by: "user", scheduled_date: todayISO(), gym_id: gymId, is_circuit: true }).select("id").single();
+    const { data, error } = await supabase.from("workouts").insert({ title: `${t("spontaneousButton.spontaneousWorkout")} ${todayISO()}`, created_by: "user", scheduled_date: todayISO(), gym_id: gymId, is_circuit: true }).select("id").single();
     setBusy(false);
-    if (error) { toast.error(t("Kunde inte starta passet.", "Could not start the workout.")); return; }
+    if (error) { toast.error(t("spontaneousButton.couldNotStartTheWorkout")); return; }
     setId(data.id);
   }
   return (
     <>
-      <Button variant="secondary" size={size} className="w-full px-4" disabled={busy} onClick={() => void start()}><Zap className="size-4" />{t("Spontanpass", "Spontaneous")}</Button>
+      <Button variant="secondary" size={size} className="w-full px-4" disabled={busy} onClick={() => void start()}><Zap className="size-4" />{t("spontaneousButton.spontaneous")}</Button>
       {id && <CircuitRunner workoutId={id} onClose={() => setId(null)} />}
     </>
   );

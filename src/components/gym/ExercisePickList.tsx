@@ -10,7 +10,7 @@ export function ExercisePickList({ exercises, onPick, disabled }: { exercises: E
   const cats = categoriesOf(exercises);
   return (
     <div className="ml-3 space-y-1 rounded-md border border-dashed bg-muted/40 p-2">
-      <div className="flex items-center gap-1.5 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground"><Plus className="size-3.5" />{t("Lägg till övning", "Add exercise")}</div>
+      <div className="flex items-center gap-1.5 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground"><Plus className="size-3.5" />{t("common.addExercise")}</div>
       {cats.map((cat) => {
         const list = exercises.filter((e) => e.category === cat);
         const isOpen = open.has(cat);

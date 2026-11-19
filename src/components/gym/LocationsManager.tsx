@@ -41,7 +41,7 @@ export function LocationsManager() {
     const drop = current.filter((id) => !keep.has(id));
     if (drop.length) await removeLinks(g.id, drop);
     await addLinks(g.id, ids);
-    const note = `${t("Utrustning", "Equipment")}: ${equipment}`;
+    const note = `${t("locationsManager.equipment")}: ${equipment}`;
     const description = (g.description ? `${g.description.split(/\s*—?\s*(?:Utrustning|Equipment): /)[0]!.trim()} — ${note}` : note).slice(0, 300);
     await supabase.from("gyms").update({ description }).eq("id", g.id);
     refresh();
@@ -81,10 +81,10 @@ export function LocationsManager() {
     refresh();
   }
   async function remove(g: Gym) {
-    if (!await confirmDialog(t(`Ta bort ${g.name}?`, `Delete ${g.name}?`))) return;
+    if (!await confirmDialog(t("locationsManager.delete", { name: g.name }))) return;
     const { error } = await supabase.from("gyms").delete().eq("id", g.id);
     if (error) {
-      toast.error(error.code === "23503" ? t("Platsen finns i din logg och kan inte tas bort. Byt namn istället.", "This location is used in your log and can't be deleted. Rename it instead.") : error.message);
+      toast.error(error.code === "23503" ? t("locationsManager.thisLocationIsUsedIn") : error.message);
       return;
     }
     if (selected === g.id) setSelected(null);
@@ -93,14 +93,14 @@ export function LocationsManager() {
 
   return (
     <section className="space-y-3">
-      <p className="text-sm text-muted-foreground">{t("Var du tränar. Varje loggat set sparar platsen.", "Where you train. Every logged set remembers the location.")}</p>
+      <p className="text-sm text-muted-foreground">{t("locationsManager.whereYouTrainEveryLogged")}</p>
       {gyms.map((g) => editing === g.id ? (
         <div key={g.id} className="grid gap-2 rounded-lg border p-2 sm:grid-cols-[1fr_1fr_auto]">
-          <Input aria-label={t("Namn", "Name")} value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
-          <Input aria-label={t("Beskrivning", "Description")} value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
+          <Input aria-label={t("common.name")} value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+          <Input aria-label={t("locationsManager.description")} value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
           <div className="flex gap-1">
-            <Button size="icon" onClick={() => void save(g)} aria-label={t("Spara", "Save")}><Check /></Button>
-            <Button size="icon" variant="ghost" onClick={() => setEditing(null)} aria-label={t("Avbryt", "Cancel")}><X /></Button>
+            <Button size="icon" onClick={() => void save(g)} aria-label={t("common.save")}><Check /></Button>
+            <Button size="icon" variant="ghost" onClick={() => setEditing(null)} aria-label={t("common.cancel")}><X /></Button>
           </div>
         </div>
       ) : (
@@ -111,9 +111,9 @@ export function LocationsManager() {
             <div className="font-semibold">{g.name}</div>
             {g.description && <div className="text-sm text-muted-foreground">{g.description}</div>}
           </div>
-          <Button size="icon" variant="ghost" onClick={() => void togglePublic(g)} aria-pressed={g.is_public} title={g.is_public ? t("Delad med alla användare", "Shared with all users") : t("Endast ägare och admin", "Owner and admin only")} aria-label={g.is_public ? t("Delad med alla användare", "Shared with all users") : t("Endast ägare och admin", "Owner and admin only")}>{g.is_public ? <Globe className="text-primary" /> : <Lock className="text-muted-foreground" />}</Button>
-          <Button size="icon" variant="ghost" onClick={() => { setEditing(g.id); setDraft({ name: g.name, description: g.description }); }} aria-label={t("Redigera", "Edit")}><Pencil /></Button>
-          <Button size="icon" variant="ghost" onClick={() => void remove(g)} aria-label={t("Ta bort", "Delete")}><Trash2 /></Button>
+          <Button size="icon" variant="ghost" onClick={() => void togglePublic(g)} aria-pressed={g.is_public} title={g.is_public ? t("locationsManager.sharedWithAllUsers") : t("locationsManager.ownerAndAdminOnly")} aria-label={g.is_public ? t("locationsManager.sharedWithAllUsers") : t("locationsManager.ownerAndAdminOnly")}>{g.is_public ? <Globe className="text-primary" /> : <Lock className="text-muted-foreground" />}</Button>
+          <Button size="icon" variant="ghost" onClick={() => { setEditing(g.id); setDraft({ name: g.name, description: g.description }); }} aria-label={t("common.edit")}><Pencil /></Button>
+          <Button size="icon" variant="ghost" onClick={() => void remove(g)} aria-label={t("common.delete")}><Trash2 /></Button>
         </div>
         {(() => {
           const here = new Set(links.filter((l) => l.gym_id === g.id).map((l) => l.exercise_id));
@@ -121,13 +121,13 @@ export function LocationsManager() {
           const allIds = exercises.map((e) => e.id);
           return <div className="border-t px-3 py-2">
             <Button variant="ghost" className="h-auto w-full justify-start gap-2 px-0" aria-expanded={open} onClick={() => setOpenId(open ? null : g.id)}>
-              {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}<Dumbbell className="size-4 text-primary" />{t("Övningar här", "Exercises here")}<span className="ml-auto text-sm text-muted-foreground">{here.size} / {exercises.length}</span>
+              {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}<Dumbbell className="size-4 text-primary" />{t("locationsManager.exercisesHere")}<span className="ml-auto text-sm text-muted-foreground">{here.size} / {exercises.length}</span>
             </Button>
             {open && <div className="space-y-3 pb-2">
               <LocationPhotoScan gymId={g.id} onApply={(ids, eq) => applyScan(g, ids, eq)} />
               <div className="flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" disabled={busy || here.size === exercises.length} onClick={() => void addLinks(g.id, allIds)}>{t("Lägg till alla", "Add all")}</Button>
-                <Button size="sm" variant="outline" disabled={busy || here.size === 0} onClick={() => void removeLinks(g.id, [...here])}>{t("Ta bort alla", "Remove all")}</Button>
+                <Button size="sm" variant="outline" disabled={busy || here.size === exercises.length} onClick={() => void addLinks(g.id, allIds)}>{t("locationsManager.addAll")}</Button>
+                <Button size="sm" variant="outline" disabled={busy || here.size === 0} onClick={() => void removeLinks(g.id, [...here])}>{t("locationsManager.removeAll")}</Button>
               </div>
               {categoriesOf(exercises).map((cat) => {
                 const inCat = exercises.filter((e) => e.category === cat);
@@ -144,9 +144,9 @@ export function LocationsManager() {
         </div>
       ))}
       <form onSubmit={add} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
-        <Input value={fresh.name} onChange={(e) => setFresh({ ...fresh, name: e.target.value })} placeholder={t("Ny plats, t.ex. SATS City", "New location, e.g. SATS City")} />
-        <Input value={fresh.description} onChange={(e) => setFresh({ ...fresh, description: e.target.value })} placeholder={t("Beskrivning (valfri)", "Description (optional)")} />
-        <Button type="submit" variant="secondary"><Plus />{t("Lägg till", "Add")}</Button>
+        <Input value={fresh.name} onChange={(e) => setFresh({ ...fresh, name: e.target.value })} placeholder={t("locationsManager.newLocationEGSats")} />
+        <Input value={fresh.description} onChange={(e) => setFresh({ ...fresh, description: e.target.value })} placeholder={t("locationsManager.descriptionOptional")} />
+        <Button type="submit" variant="secondary"><Plus />{t("common.add")}</Button>
       </form>
     </section>
   );

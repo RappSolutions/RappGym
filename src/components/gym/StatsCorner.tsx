@@ -86,12 +86,12 @@ export function StatsCorner() {
       .insert(history.map((h) => ({ ...h, gym_id: "00000000-0000-0000-0000-000000000001" })));
     setBusy(false);
     if (error) return void toast.error(error.message);
-    toast.success(`${history.length} ${t("rader importerade", "entries imported")}`);
+    toast.success(`${history.length} ${t("statsCorner.entriesImported")}`);
     invalidate();
   }
 
   return (
-    <section className="space-y-4 border-t pt-3" aria-label={t("Statistik", "Statistics")}>
+    <section className="space-y-4 border-t pt-3" aria-label={t("statsCorner.statistics")}>
       <Button
         variant="ghost"
         className="w-full justify-start gap-2 px-0"
@@ -101,7 +101,7 @@ export function StatsCorner() {
         {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
         <span className="inline-flex items-center gap-2 font-display text-xl font-bold">
           <BarChart3 className="size-5 text-primary" />
-          {t("Statistik", "Statistics")}
+          {t("statsCorner.statistics")}
         </span>
       </Button>
       {open && (
@@ -109,12 +109,12 @@ export function StatsCorner() {
           <div className="flex flex-wrap gap-2">
             {gyms.length > 0 && (
               <select
-                aria-label={t("Plats", "Location")}
+                aria-label={t("common.location")}
                 value={place}
                 onChange={(e) => setPlace(e.target.value)}
                 className="h-11 w-full rounded-md border bg-background px-3 sm:w-auto"
               >
-                <option value="">{t("Alla platser", "All locations")}</option>
+                <option value="">{t("common.allLocations")}</option>
                 {gyms.map((g) => (
                   <option key={g.id} value={g.id}>
                     {g.name}
@@ -123,37 +123,37 @@ export function StatsCorner() {
               </select>
             )}
             <select
-              aria-label={t("Period", "Period")}
+              aria-label={t("statsCorner.period")}
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
               className="h-11 w-full rounded-md border bg-background px-3 sm:w-auto"
             >
-              <option value="all">{t("Hela historiken", "All time")}</option>
-              <option value="30">{t("Senaste 30 dagarna", "Last 30 days")}</option>
-              <option value="90">{t("Senaste 90 dagarna", "Last 90 days")}</option>
-              <option value="365">{t("Senaste året", "Last year")}</option>
+              <option value="all">{t("statsCorner.allTime")}</option>
+              <option value="30">{t("statsCorner.last30Days")}</option>
+              <option value="90">{t("statsCorner.last90Days")}</option>
+              <option value="365">{t("statsCorner.lastYear")}</option>
             </select>
           </div>
           {s.totalSets > 0 && (
             <Bars
-              title={t("Set per kategori", "Sets by category")}
+              title={t("statsCorner.setsByCategory")}
               data={s.perCat}
               total={s.totalSets}
               tokenOf={(k) => categoryToken(k, categories)}
             />
           )}
           {s.totalSets > 0 && (
-            <Bars title={t("Set per redskap", "Sets by equipment")} data={s.perEq} total={s.totalSets} />
+            <Bars title={t("statsCorner.setsByEquipment")} data={s.perEq} total={s.totalSets} />
           )}
           {log.length === 0 && allLog.length > 0 && (
             <p className="text-muted-foreground">
-              {t("Inga loggade set för valet.", "No sets logged for this selection.")}
+              {t("statsCorner.noSetsLoggedForThis")}
             </p>
           )}
           {log.length > 0 && <ProgressOverview key={place + period} log={log} exercises={exercises} />}
           {allLog.length === 0 && (
             <Button variant="outline" onClick={importExcel} disabled={busy} className="w-full">
-              {t("Importera Excel-historik", "Import Excel history")}
+              {t("statsCorner.importExcelHistory")}
             </Button>
           )}
         </>

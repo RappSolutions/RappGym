@@ -68,11 +68,11 @@ function ExercisesPage() {
 
   return (
     <main className="space-y-4 px-4">
-      <p className="text-sm text-muted-foreground">{t("Välj en övning för att logga set. Lägg till och redigera övningar under Inställningar.", "Pick an exercise to log sets. Add and edit exercises under Settings.")}</p>
-      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} className="size-4" />{t(`Visa alla övningar (${atPlace.length} av ${allExercises.length} finns här)`, `Show all exercises (${atPlace.length} of ${allExercises.length} available here)`)}</label>
-      {!showAll && atPlace.length === 0 && <p className="text-sm text-muted-foreground">{t("Inga övningar kopplade till platsen ännu. Välj övningar under Inställningar → Platser.", "No exercises linked to this location yet. Choose them under Settings → Locations.")}</p>}
-      <div className="relative"><Search className="absolute top-3.5 left-3 h-5 w-5 text-muted-foreground" /><Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("Sök övning…", "Search exercise…")} className="h-12 pl-10" /></div>
-      {todayCount.size > 0 && <p className="text-sm text-muted-foreground">{`${[...todayCount.values()].reduce((a, b) => a + b, 0)} ${t("set loggade idag", "sets logged today")}`}</p>}
+      <p className="text-sm text-muted-foreground">{t("exercisesIndex.pickAnExerciseToLog")}</p>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} className="size-4" />{t("exercisesIndex.showAllExercisesOfAvailable", { length: atPlace.length, length_: allExercises.length })}</label>
+      {!showAll && atPlace.length === 0 && <p className="text-sm text-muted-foreground">{t("exercisesIndex.noExercisesLinkedToThis")}</p>}
+      <div className="relative"><Search className="absolute top-3.5 left-3 h-5 w-5 text-muted-foreground" /><Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("exercisesIndex.searchExercise")} className="h-12 pl-10" /></div>
+      {todayCount.size > 0 && <p className="text-sm text-muted-foreground">{`${[...todayCount.values()].reduce((a, b) => a + b, 0)} ${t("exercisesIndex.setsLoggedToday")}`}</p>}
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
         {cats.map((c) => {
           const token = categoryToken(c, cats);
@@ -104,7 +104,7 @@ function ExercisesPage() {
             onClick={() => setOpen(ex)}
           />
         ))}
-        {!list.length && <p className="text-muted-foreground">{s ? t("Inga träffar.", "No matches.") : t("Inga övningar ännu. Lägg till under Inställningar.", "No exercises yet. Add one under Settings.")}</p>}
+        {!list.length && <p className="text-muted-foreground">{s ? t("exercisesIndex.noMatches") : t("exercisesIndex.noExercisesYetAddOne")}</p>}
       </div>
       <LogSheet
         exercise={open}

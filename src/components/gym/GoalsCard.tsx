@@ -26,11 +26,11 @@ export function GoalsCard() {
   const [editing, setEditing] = useState<string | null>(null);
   const [showClosed, setShowClosed] = useState(false);
   const label: Record<GoalStatus, string> = {
-    active: t("Aktivt", "Active"),
-    fulfilled: t("Uppnått! 🎉", "Fulfilled! 🎉"),
-    partly: t("Delvis uppnått", "Partly achieved"),
-    postponed: t("Skjuter upp", "Postponed"),
-    nevermind: t("Strunt samma", "Never mind"),
+    active: t("goalsCard.active"),
+    fulfilled: t("goalsCard.fulfilled"),
+    partly: t("goalsCard.partlyAchieved"),
+    postponed: t("goalsCard.postponed"),
+    nevermind: t("goalsCard.neverMind"),
   };
   const sorted = sortGoals(goals);
   const open = sorted.filter(isGoalOpen);
@@ -72,10 +72,10 @@ export function GoalsCard() {
         <div className="text-xs text-muted-foreground">
           {g.target_date && (
             <>
-              {t("Mål:", "By:")} {formatDate(g.target_date)} ·{" "}
+              {t("goalsCard.by")} {formatDate(g.target_date)} ·{" "}
             </>
           )}
-          {t("Skapat", "Created")} {formatDate(g.created_at.slice(0, 10))}
+          {t("goalsCard.created")} {formatDate(g.created_at.slice(0, 10))}
           {!isGoalOpen(g) && (
             <>
               {" "}
@@ -88,8 +88,8 @@ export function GoalsCard() {
         <Button
           size="icon"
           variant="ghost"
-          aria-label={t("Återaktivera", "Reactivate")}
-          title={t("Återaktivera", "Reactivate")}
+          aria-label={t("common.reactivate")}
+          title={t("common.reactivate")}
           onClick={() => void setStatus(g, "active")}
         >
           <RotateCcw className="size-4" />
@@ -97,7 +97,7 @@ export function GoalsCard() {
       )}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button size="icon" variant="ghost" aria-label={t("Avsluta mål", "Finalize goal")}>
+          <Button size="icon" variant="ghost" aria-label={t("goalsCard.finalizeGoal")}>
             <Flag className="size-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -106,20 +106,20 @@ export function GoalsCard() {
             .filter((s) => s !== g.status)
             .map((s) => (
               <DropdownMenuItem key={s} className="min-h-11" onSelect={() => void setStatus(g, s)}>
-                {s === "active" ? t("Återaktivera", "Reactivate") : label[s]}
+                {s === "active" ? t("common.reactivate") : label[s]}
               </DropdownMenuItem>
             ))}
         </DropdownMenuContent>
       </DropdownMenu>
-      <Button size="icon" variant="ghost" aria-label={t("Redigera", "Edit")} onClick={() => edit(g)}>
+      <Button size="icon" variant="ghost" aria-label={t("common.edit")} onClick={() => edit(g)}>
         <Pencil className="size-4" />
       </Button>
       <Button
         size="icon"
         variant="ghost"
-        aria-label={t("Ta bort", "Delete")}
+        aria-label={t("common.delete")}
         onClick={async () => {
-          if (await confirmDialog(t(`Ta bort målet "${g.text}"?`, `Delete the goal "${g.text}"?`)))
+          if (await confirmDialog(t("goalsCard.deleteTheGoal", { text: g.text })))
             void run(supabase.from("training_goals").delete().eq("id", g.id));
         }}
       >
@@ -129,7 +129,7 @@ export function GoalsCard() {
   );
 
   return (
-    <section className="space-y-4 border-t pt-3" aria-label={t("Mina mål", "My goals")}>
+    <section className="space-y-4 border-t pt-3" aria-label={t("goalsCard.myGoals")}>
       <Button
         variant="ghost"
         className="w-full justify-start gap-2 px-0"
@@ -140,7 +140,7 @@ export function GoalsCard() {
 
         <span className="inline-flex items-center gap-2 font-display text-xl font-bold">
           <Target className="size-5 text-primary" />
-          {t("Mina mål", "My goals")}
+          {t("goalsCard.myGoals")}
         </span>
       </Button>
       {expanded && (
@@ -158,19 +158,19 @@ export function GoalsCard() {
               value={text}
               maxLength={300}
               onChange={(e) => setText(e.target.value)}
-              placeholder={t("Nytt mål…", "New goal…")}
-              aria-label={t("Mål", "Goal")}
+              placeholder={t("goalsCard.newGoal")}
+              aria-label={t("goalsCard.goal")}
             />
             <Input
               className="w-40"
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              aria-label={t("Måldatum (valfritt)", "Target date (optional)")}
+              aria-label={t("goalsCard.targetDateOptional")}
             />
             <Button type="submit" disabled={!text.trim()}>
               <Plus className="size-4" />
-              {editing ? t("Spara", "Save") : t("Lägg till", "Add")}
+              {editing ? t("common.save") : t("common.add")}
             </Button>
             {editing && (
               <Button
@@ -182,21 +182,18 @@ export function GoalsCard() {
                   setDate("");
                 }}
               >
-                {t("Avbryt", "Cancel")}
+                {t("common.cancel")}
               </Button>
             )}
           </form>
           <p className="text-sm text-muted-foreground">
-            {t(
-              "Dessa mål och din profil används för AI-genererade förslag.",
-              "These goals and your profile are used for AI-generated suggestions.",
-            )}
+            {t("goalsCard.theseGoalsAndYourProfile")}
           </p>
           {closed.length > 0 && (
             <Button variant="ghost" size="sm" onClick={() => setShowClosed(!showClosed)}>
               {showClosed
-                ? t("Dölj avslutade mål", "Hide finished goals")
-                : t(`Visa avslutade mål (${closed.length})`, `Show finished goals (${closed.length})`)}
+                ? t("goalsCard.hideFinishedGoals")
+                : t("goalsCard.showFinishedGoals", { length: closed.length })}
             </Button>
           )}
           {showClosed && <ul className="divide-y divide-border">{closed.map(row)}</ul>}

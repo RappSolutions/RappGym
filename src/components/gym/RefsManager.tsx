@@ -29,31 +29,31 @@ export function RefsManager({ only }: { only: "cat" | "eq" }) {
   async function saveCat() {
     if (!draft) return;
     const { error } = await supabase.from("exercise_categories").update({ name: draft.name.trim(), code_prefix: draft.prefix.trim().toUpperCase(), color_token: draft.color.toLowerCase() }).eq("id", draft.id);
-    if (error) { toast.error(dup(error.code) ? t("Namn eller prefix finns redan", "Name or prefix already exists") : error.message); return; }
+    if (error) { toast.error(dup(error.code) ? t("common.nameOrPrefixAlreadyExists") : error.message); return; }
     setDraft(null); await refresh();
   }
   async function saveEq() {
     if (!draft) return;
     const { error } = await supabase.from("exercise_equipment").update({ name: draft.name.trim() }).eq("id", draft.id);
-    if (error) { toast.error(dup(error.code) ? t("Redskapet finns redan", "Equipment already exists") : error.message); return; }
+    if (error) { toast.error(dup(error.code) ? t("common.equipmentAlreadyExists") : error.message); return; }
     setDraft(null); await refresh();
   }
   async function remove(table: "exercise_categories" | "exercise_equipment", id: string, name: string, used: number) {
-    if (used) { toast.error(t(`${name} används av ${used} övningar och kan inte raderas.`, `${name} is used by ${used} exercises and can't be deleted.`)); return; }
-    if (!await confirmDialog(t(`Radera ${name} permanent?`, `Permanently delete ${name}?`))) return;
+    if (used) { toast.error(t("refsManager.isUsedByExercisesAnd", { name, used })); return; }
+    if (!await confirmDialog(t("refsManager.permanentlyDelete", { name }))) return;
     const { error } = await supabase.from(table).delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
     await refresh();
   }
 
   const actions = (onEdit: () => void, onDelete: () => void, used: number) => (
-    <><span className="w-8 text-right text-xs tabular-nums text-muted-foreground" title={t("Övningar", "Exercises")}>{used}</span>
-      <Button size="icon" variant="ghost" className="size-8" aria-label={t("Ändra", "Edit")} onClick={onEdit}><Pencil className="size-4" /></Button>
-      <Button size="icon" variant="ghost" className="size-8" aria-label={t("Ta bort", "Delete")} onClick={onDelete}><Trash2 className="size-4" /></Button></>
+    <><span className="w-8 text-right text-xs tabular-nums text-muted-foreground" title={t("common.exercises")}>{used}</span>
+      <Button size="icon" variant="ghost" className="size-8" aria-label={t("refsManager.edit")} onClick={onEdit}><Pencil className="size-4" /></Button>
+      <Button size="icon" variant="ghost" className="size-8" aria-label={t("common.delete")} onClick={onDelete}><Trash2 className="size-4" /></Button></>
   );
   const saveCancel = (onSave: () => void, ok: boolean) => (
-    <><Button size="icon" variant="ghost" className="size-8" aria-label={t("Spara", "Save")} disabled={!ok} onClick={onSave}><Check className="size-4" /></Button>
-      <Button size="icon" variant="ghost" className="size-8" aria-label={t("Avbryt", "Cancel")} onClick={() => setDraft(null)}><X className="size-4" /></Button></>
+    <><Button size="icon" variant="ghost" className="size-8" aria-label={t("common.save")} disabled={!ok} onClick={onSave}><Check className="size-4" /></Button>
+      <Button size="icon" variant="ghost" className="size-8" aria-label={t("common.cancel")} onClick={() => setDraft(null)}><X className="size-4" /></Button></>
   );
 
   return (
@@ -63,7 +63,7 @@ export function RefsManager({ only }: { only: "cat" | "eq" }) {
         const ed = draft?.id === c.id ? draft : null;
         return <div key={c.id} data-category={c.color_token} className="category-theme flex items-center gap-2 py-0.5">
           {ed ? <>
-            <input type="color" aria-label={t("Färg", "Colour")} value={ed.color} onChange={(e) => setDraft({ ...ed, color: e.target.value })} className="size-8 shrink-0 cursor-pointer rounded border bg-background p-0.5" />
+            <input type="color" aria-label={t("common.colour")} value={ed.color} onChange={(e) => setDraft({ ...ed, color: e.target.value })} className="size-8 shrink-0 cursor-pointer rounded border bg-background p-0.5" />
             <Input value={ed.name} onChange={(e) => setDraft({ ...ed, name: e.target.value })} className="h-8 flex-1" />
             <Input value={ed.prefix} maxLength={4} onChange={(e) => setDraft({ ...ed, prefix: e.target.value.toUpperCase().replace(/[^A-Z]/g, "") })} className="h-8 w-16" />
             {saveCancel(() => void saveCat(), !!ed.name.trim() && !!ed.prefix)}

@@ -96,9 +96,9 @@ export function PlannedWorkouts() {
         queryClient.invalidateQueries({ queryKey: ["accepted-ai-workouts"] }),
       ]);
       setDeletingId(null);
-      toast.success(t("Förslaget borttaget", "Suggestion removed"));
+      toast.success(t("plannedWorkouts.suggestionRemoved"));
     } catch {
-      toast.error(t("Förslaget kunde inte tas bort. Försök igen.", "Could not remove suggestion. Try again."));
+      toast.error(t("plannedWorkouts.couldNotRemoveSuggestionTry"));
     } finally {
       setDeleting(false);
     }
@@ -110,13 +110,13 @@ export function PlannedWorkouts() {
     if (editBusy) return;
     setEditBusy(true);
     try { await fn(); await queryClient.invalidateQueries({ queryKey: ["workout-suggestions"] }); }
-    catch { toast.error(t("Kunde inte spara. Försök igen.", "Could not save. Try again.")); }
+    catch { toast.error(t("common.couldNotSaveTryAgain")); }
     finally { setEditBusy(false); }
   }
   return (
     <>
       {proposals.length > 0 && (
-        <section className="space-y-3" aria-label={t("Föreslagna pass", "Suggested workouts")}>
+        <section className="space-y-3" aria-label={t("plannedWorkouts.suggestedWorkouts")}>
           <div id="proposed-workouts" className="space-y-3">
             {[...planned].map(([id, rows]) => {
               const first = rows[0];
@@ -161,7 +161,7 @@ export function PlannedWorkouts() {
                           {gym ? ` · ${gym.name}` : ""}
                         </span>
                         <span className="shrink-0 font-medium">
-                          {done}/{total} {t("set klara", "sets done")}
+                          {done}/{total} {t("plannedWorkouts.setsDone")}
                         </span>
                       </span>
                     </span>
@@ -185,28 +185,28 @@ export function PlannedWorkouts() {
                             {formatSet(row)}
                           </span>
                         </Button>
-                        <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={editBusy || idx === 0} aria-label={t("Flytta upp", "Move up")} onClick={() => void edit(() => moveRow(rows, row.id, -1))}><ArrowUp className="size-4" /></Button>
-                        <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={editBusy || idx === rows.length - 1} aria-label={t("Flytta ner", "Move down")} onClick={() => void edit(() => moveRow(rows, row.id, 1))}><ArrowDown className="size-4" /></Button>
-                        <Button variant="ghost" size="icon" className="size-8 shrink-0 text-destructive" disabled={editBusy} aria-label={`${t("Ta bort", "Remove")} ${row.code}`} onClick={async () => { if (await confirmDialog(t(`Ta bort ${row.code} ur passet?`, `Remove ${row.code} from the workout?`))) void edit(() => removePlannedRow(row.id)); }}><X className="size-4" /></Button>
+                        <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={editBusy || idx === 0} aria-label={t("common.moveUp")} onClick={() => void edit(() => moveRow(rows, row.id, -1))}><ArrowUp className="size-4" /></Button>
+                        <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={editBusy || idx === rows.length - 1} aria-label={t("common.moveDown")} onClick={() => void edit(() => moveRow(rows, row.id, 1))}><ArrowDown className="size-4" /></Button>
+                        <Button variant="ghost" size="icon" className="size-8 shrink-0 text-destructive" disabled={editBusy} aria-label={`${t("common.remove")} ${row.code}`} onClick={async () => { if (await confirmDialog(t("plannedWorkouts.removeFromTheWorkout", { code: row.code }))) void edit(() => removePlannedRow(row.id)); }}><X className="size-4" /></Button>
                         </div>
                       ))}
                     </div>
                     {addingTo === id && <ExercisePickList exercises={exercisesAtLocation(exercises.filter((e) => e.is_active), links, first.gym_id)} disabled={editBusy} onPick={(e) => void edit(async () => { await addPlannedExercise(id, e.code, rows, first.gym_id, lastDone.get(e.code)?.load ?? "", Math.max(1, ...rows.map((r) => r.sets)), lastDone.get(e.code)?.reps ?? 10); setAddingTo(null); })} />}
                     <div className="flex items-center justify-between gap-2">
-                      <Button variant={addingTo === id ? "default" : "outline"} className="shrink-0" aria-pressed={addingTo === id} aria-label={t("Lägg till övning", "Add exercise")} title={t("Lägg till övning", "Add exercise")} onClick={() => setAddingTo(addingTo === id ? null : id)}><Plus className="size-4" /><Dumbbell className="size-4" /></Button>
+                      <Button variant={addingTo === id ? "default" : "outline"} className="shrink-0" aria-pressed={addingTo === id} aria-label={t("common.addExercise")} title={t("common.addExercise")} onClick={() => setAddingTo(addingTo === id ? null : id)}><Plus className="size-4" /><Dumbbell className="size-4" /></Button>
                       <Button
                         className="min-w-0 flex-1 whitespace-normal"
                         onClick={() => setCircuitId(id)}
                       >
                         <Play className="size-4 shrink-0" />
-                        {done ? t("Fortsätt passet", "Continue workout") : t("Starta passet", "Start workout")}
+                        {done ? t("plannedWorkouts.continueWorkout") : t("plannedWorkouts.startWorkout")}
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
                         className="shrink-0 text-destructive"
-                        aria-label={`${t("Ta bort förslag", "Remove suggestion")}: ${first.workout?.title}`}
-                        title={t("Ta bort förslag", "Remove suggestion")}
+                        aria-label={`${t("plannedWorkouts.removeSuggestion")}: ${first.workout?.title}`}
+                        title={t("plannedWorkouts.removeSuggestion")}
                         onClick={() => setDeletingId(id)}
                       >
                         <Trash2 className="size-5" />
@@ -227,16 +227,13 @@ export function PlannedWorkouts() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("Ta bort föreslaget pass?", "Remove suggested workout?")}</AlertDialogTitle>
+            <AlertDialogTitle>{t("plannedWorkouts.removeSuggestedWorkout")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t(
-                "Ej genomförda övningar tas bort. Genomförda övningar och AI-svaret i historiken behålls.",
-                "Uncompleted exercises will be removed. Completed exercises and the AI answer in history are kept.",
-              )}
+              {t("plannedWorkouts.uncompletedExercisesWillBeRemoved")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>{t("Avbryt", "Cancel")}</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               disabled={deleting}
               onClick={(event) => {
@@ -244,7 +241,7 @@ export function PlannedWorkouts() {
                 void deleteProposal();
               }}
             >
-              {deleting ? t("Tar bort…", "Removing…") : t("Ta bort förslag", "Remove suggestion")}
+              {deleting ? t("common.removing") : t("plannedWorkouts.removeSuggestion")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

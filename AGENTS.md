@@ -45,6 +45,7 @@ use the editor.
 - Data is read client-side via the browser client + React Query under the `_authenticated` layout (ssr: false); RLS scopes log entries per user.
 - Selected gym is stored in localStorage (`src/lib/gym.ts`); exercises show at a gym only when linked in exercise_locations, and no selected gym shows every exercise.
 - Store exercise illustrations and localized field values on each database exercise; never use a code-keyed exercise bank in application code, so edits and new exercises remain data-driven.
+- UI texts are i18next keys in src/locales/{lang}.json (sv source/fallback) typed from sv.json and read via useLanguage().t or i18n.getFixedT on the server; never inline sv/en pairs, so languages can be added without touching components.
 - Use the shared language context for Swedish/English UI and browser language persistence; preserve original user notes and exercise fields while storing translations separately.
 - Render flag-only language controls through the shared LanguagePicker with image assets, not emoji, because desktop platforms may display country letters instead of flags.
 - Derive progress charts client-side through the shared progress aggregation module; compare weights per exercise and sum repeat counts per date so unrelated exercises and text loads are never mixed into weight trends.

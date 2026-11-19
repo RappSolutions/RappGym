@@ -1,3 +1,4 @@
+import { i18n } from "@/lib/i18n-core";
 import { EXERCISE_SELECT, normalizeExercise } from "@/lib/exercise-refs";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
@@ -11,15 +12,14 @@ export const scanLocationPhoto = createServerFn({ method: "POST" })
   .inputValidator(z.object({ gymId: z.string().uuid(), image: imageSchema, language: z.enum(["sv", "en"]) }))
   .handler(async ({ data, context }): Promise<{ exerciseIds: string[]; equipment: string; error: string | null }> => {
     const { supabase, userId } = context;
-    const sv = data.language === "sv";
     const fail = (error: string) => ({ exerciseIds: [], equipment: "", error });
     const { data: gym } = await supabase.from("gyms").select("id").eq("id", data.gymId).maybeSingle();
-    if (!gym) return fail(sv ? "Platsen hittades inte." : "Location not found.");
+    if (!gym) return fail(i18n.getFixedT(data.language)("server.locationNotFound"));
     const { data: exerciseRows, error } = await supabase.from("exercises").select(EXERCISE_SELECT).eq("is_active", true);
     if (error) throw new Error(error.message);
     const exercises = (exerciseRows as unknown as Parameters<typeof normalizeExercise>[0][]).map(normalizeExercise);
     const key = process.env["LOVABLE_API_KEY"];
-    if (!key) return fail(sv ? "AI är inte konfigurerad ännu." : "AI is not configured yet.");
+    if (!key) return fail(i18n.getFixedT(data.language)("server.aiIsNotConfiguredYet"));
     try {
       const { scanLocationImage } = await import("@/lib/ai/location-scan.server");
       const result = scanLocationImage(getRequest(), key, data.image, exercises.map(({ code, name, equipment, category }) => ({ code, name, equipment, category })), data.language);
@@ -33,6 +33,6 @@ export const scanLocationPhoto = createServerFn({ method: "POST" })
         try { const body = JSON.parse(err.responseBody ?? "{}"); message = body.message ?? body.error?.message ?? message; } catch { /* keep */ }
         return fail(message);
       }
-      return fail(sv ? "Bilden kunde inte analyseras. Kontrollera att länken går direkt till en bild." : "The photo could not be analysed. Make sure the link points directly to an image.");
+      return fail(i18n.getFixedT(data.language)("server.thePhotoCouldNotBe"));
     }
   });

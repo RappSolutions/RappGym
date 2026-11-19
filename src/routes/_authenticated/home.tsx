@@ -74,14 +74,14 @@ function HomePage() {
     }
   const s = dashboardStats(log, exercises, todayISO());
   const since =
-    s.daysSinceLast === null ? "–" : s.daysSinceLast === 0 ? t("Idag", "Today") : `${s.daysSinceLast} ${t("d", "d")}`;
+    s.daysSinceLast === null ? "–" : s.daysSinceLast === 0 ? t("home.today") : `${s.daysSinceLast} ${t("home.d")}`;
   const kpis = [
-    [t("Pass denna vecka", "Workouts this week"), s.workoutsThisWeek],
-    [t("Pass senaste 4 v", "Workouts last 4 wks"), s.workoutsLast28],
-    [t("Sedan senaste pass", "Since last workout"), since],
-    [t("Veckor i rad", "Week streak"), s.weekStreak],
-    [t("Totalt set", "Total sets"), s.totalSets],
-    [t("Totalt reps", "Total reps"), s.totalReps],
+    [t("home.workoutsThisWeek"), s.workoutsThisWeek],
+    [t("home.workoutsLast4Wks"), s.workoutsLast28],
+    [t("home.sinceLastWorkout"), since],
+    [t("home.weekStreak"), s.weekStreak],
+    [t("home.totalSets"), s.totalSets],
+    [t("home.totalReps"), s.totalReps],
   ] as const;
 
   return (
@@ -99,10 +99,10 @@ function HomePage() {
       </div>
       <section
         className="space-y-2 rounded-xl border-2 border-primary bg-card p-4"
-        aria-label={t("Träna nu", "Train now")}
+        aria-label={t("home.trainNow")}
       >
         <h2 className="text-xl font-bold uppercase">
-          {t("Träna nu", "Train now")}
+          {t("home.trainNow")}
           {gym ? <span className="ml-2 text-sm font-normal normal-case text-muted-foreground">{gym.name}</span> : null}
         </h2>
         {[...todaysPlans].map(([id, rows]) => {
@@ -120,7 +120,7 @@ function HomePage() {
               <Play className="size-4 shrink-0" />
               <span className="min-w-0 flex-1">
                 <span className="block font-bold">
-                  {ongoing ? `${t("Pågående", "Ongoing")}: ` : ""}
+                  {ongoing ? `${t("home.ongoing")}: ` : ""}
                   {rows[0]?.workout?.title}
                   {rows[0]?.workout?.created_by === "ai" && (
                     <Sparkles className="ml-1 inline size-4 text-primary" aria-label="AI" />
@@ -129,7 +129,7 @@ function HomePage() {
                 <span className="block text-xs font-normal">
                   {rows[0]?.date !== todayISO() ? `${formatDate(rows[0]?.date ?? "")} · ` : ""}
                   {rows.map((r) => r.code).join(" · ")}
-                  {ongoing ? ` (${doneSets}/${total} ${t("klara", "done")})` : ""}
+                  {ongoing ? ` (${doneSets}/${total} ${t("home.done")})` : ""}
                 </span>
               </span>
             </Button>
@@ -159,7 +159,7 @@ function HomePage() {
       </div>
       {s.recentDates.length > 0 && false && (
         <section className="space-y-2 rounded-xl border bg-card p-4">
-          <h2 className="text-xl font-bold uppercase">{t("Senaste pass", "Recent workouts")}</h2>
+          <h2 className="text-xl font-bold uppercase">{t("home.recentWorkouts")}</h2>
           <ul className="divide-y divide-border">
             {s.recentDates.map((d) => {
               const rows = log.filter((e) => e.date === d);
@@ -167,15 +167,15 @@ function HomePage() {
                 <li key={d} className="flex justify-between py-2 text-sm">
                   <span className="font-medium">{formatDate(d)}</span>
                   <span className="text-muted-foreground">
-                    {rows.reduce((n, e) => n + (e.sets ?? 1), 0)} {t("set", "sets")} ·{" "}
-                    {new Set(rows.map((e) => e.code)).size} {t("övningar", "exercises")}
+                    {rows.reduce((n, e) => n + (e.sets ?? 1), 0)} {t("common.sets")} ·{" "}
+                    {new Set(rows.map((e) => e.code)).size} {t("home.exercises")}
                   </span>
                 </li>
               );
             })}
           </ul>
           <Button asChild variant="outline" size="sm">
-            <Link to="/log">{t("Visa logg", "View log")}</Link>
+            <Link to="/log">{t("home.viewLog")}</Link>
           </Button>
         </section>
       )}

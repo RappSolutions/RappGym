@@ -30,15 +30,15 @@ function SettingsPage() {
   const { isAdmin, isLoading } = useIsAdmin();
   const { t } = useLanguage();
   if (isLoading) return null;
-  if (!isAdmin) return <main className="px-4"><p className="rounded-xl border bg-card p-4">{t("Inställningar hanteras av administratören.", "Settings are managed by the administrator.")}</p></main>;
+  if (!isAdmin) return <main className="px-4"><p className="rounded-xl border bg-card p-4">{t("settings.settingsAreManagedByThe")}</p></main>;
   return (
     <main className="space-y-3 px-4">
-      <SettingsBlock title={t("Användare", "Users")}><UsersManager /></SettingsBlock>
-      <SettingsBlock title={t("AI-kvoter & förbrukning", "AI quotas & usage")}><AiUsageManager /></SettingsBlock>
-      <SettingsBlock title={t("Platser", "Locations")}><LocationsManager /></SettingsBlock>
-      <SettingsBlock title={t("Kategorier", "Categories")}><RefsManager only="cat" /></SettingsBlock>
-      <SettingsBlock title={t("Redskap", "Equipment")}><RefsManager only="eq" /></SettingsBlock>
-      <SettingsBlock title={t("Övningar", "Exercises")}><ExerciseManager /></SettingsBlock>
+      <SettingsBlock title={t("common.users")}><UsersManager /></SettingsBlock>
+      <SettingsBlock title={t("settings.aiQuotasUsage")}><AiUsageManager /></SettingsBlock>
+      <SettingsBlock title={t("settings.locations")}><LocationsManager /></SettingsBlock>
+      <SettingsBlock title={t("settings.categories")}><RefsManager only="cat" /></SettingsBlock>
+      <SettingsBlock title={t("common.equipment")}><RefsManager only="eq" /></SettingsBlock>
+      <SettingsBlock title={t("common.exercises")}><ExerciseManager /></SettingsBlock>
     </main>
   );
 }

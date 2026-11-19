@@ -20,12 +20,12 @@ export function ConfirmHost() {
     <AlertDialog open={!!req} onOpenChange={(o) => { if (!o) done(false); }}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{t("Bekräfta", "Confirm")}</AlertDialogTitle>
+          <AlertDialogTitle>{t("confirmHost.confirm")}</AlertDialogTitle>
           <AlertDialogDescription className="whitespace-pre-line">{req?.message}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => done(false)}>{t("Avbryt", "Cancel")}</AlertDialogCancel>
-          <AlertDialogAction onClick={() => done(true)}>{t("OK", "OK")}</AlertDialogAction>
+          <AlertDialogCancel onClick={() => done(false)}>{t("common.cancel")}</AlertDialogCancel>
+          <AlertDialogAction onClick={() => done(true)}>{t("confirmHost.ok")}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

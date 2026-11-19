@@ -118,10 +118,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
     });
     if (!parsed.success) {
       setError(
-        t(
-          "Kontrollera antal pass och dagar: högst ett pass per dag, 1–14 pass, 1–90 dagar och 5–240 minuter per pass.",
-          "Check workouts and days: at most one workout per day, 1–14 workouts, 1–90 days and 5–240 minutes per workout.",
-        ),
+        t("trainingInsights.checkWorkoutsAndDaysAt"),
       );
       return;
     }
@@ -161,7 +158,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
         return null;
       } catch (error) {
         if (!controller.signal.aborted)
-          setError(error instanceof Error ? error.message : t("Analysen misslyckades", "Analysis failed"));
+          setError(error instanceof Error ? error.message : t("trainingInsights.analysisFailed"));
         return null;
       }
     })();
@@ -198,7 +195,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
   const workouts = current
     ? current.insights.workouts.length
       ? current.insights.workouts.map((workout, index) => ({ ...workout, key: String(index) }))
-      : [{ exercises: current.insights.exercises, dayOffset: 0, title: t("Nästa pass", "Next workout"), key: "next" }]
+      : [{ exercises: current.insights.exercises, dayOffset: 0, title: t("trainingInsights.nextWorkout"), key: "next" }]
     : [];
   const pending = unacceptedWorkoutKeys(
     workouts.filter((workout) => workout.exercises.length).map((workout) => workout.key),
@@ -267,7 +264,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
         queryClient.invalidateQueries({ queryKey: ["ai-history"] }),
       ]);
     } catch (error) {
-      setError(error instanceof Error ? error.message : t("Passet kunde inte sparas", "Could not save workout"));
+      setError(error instanceof Error ? error.message : t("trainingInsights.couldNotSaveWorkout"));
     } finally {
       setSaving(null);
     }
@@ -289,11 +286,11 @@ export function TrainingInsights(props: TrainingInsightsProps) {
             <CalendarPlus className="size-4" />
           )}
           {acceptedKeys.has(key)
-            ? t("Passet accepterat som förslag", "Workout accepted as suggestion")
-            : t("Acceptera passet som förslag", "Accept workout as suggestion")}
+            ? t("trainingInsights.workoutAcceptedAsSuggestion")
+            : t("trainingInsights.acceptWorkoutAsSuggestion")}
         </Button>
         {acceptedKeys.has(key) && (
-          <span className="text-sm text-muted-foreground">{t("Finns under Pass", "Listed under Workouts")}</span>
+          <span className="text-sm text-muted-foreground">{t("trainingInsights.listedUnderWorkouts")}</span>
         )}
       </div>
     );
@@ -320,7 +317,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
               </Link>
               <p className="text-sm font-medium">
                 {exercise.equipment ? <span className="text-muted-foreground">{exercise.equipment} · </span> : null}
-                {suggestion.sets} × {suggestion.reps} {t("reps", "reps")}
+                {suggestion.sets} × {suggestion.reps} {t("trainingInsights.reps")}
                 {suggestion.load ? ` @ ${suggestion.load}` : ""}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">{suggestion.reason}</p>
@@ -333,12 +330,12 @@ export function TrainingInsights(props: TrainingInsightsProps) {
   return (
     <section
       className="space-y-4 border-t border-border pt-5"
-      aria-label={t("AI - råd och planering", "AI - advice and strategy")}
+      aria-label={t("trainingInsights.aiAdviceAndStrategy")}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 text-2xl font-bold">
           <Sparkles className="size-5 text-primary" />
-          {t("AI - råd och planering", "AI - advice and strategy")}
+          {t("trainingInsights.aiAdviceAndStrategy")}
         </h2>
       </div>
       <form
@@ -351,12 +348,12 @@ export function TrainingInsights(props: TrainingInsightsProps) {
         <div
           className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1"
           role="group"
-          aria-label={t("Typ av AI-förslag", "AI request type")}
+          aria-label={t("trainingInsights.aiRequestType")}
         >
           {(
             [
-              ["summary", t("Analys & frågor", "Analysis & questions")],
-              ["plan", t("Planera pass", "Plan workouts")],
+              ["summary", t("trainingInsights.analysisQuestions")],
+              ["plan", t("trainingInsights.planWorkouts")],
             ] as const
           ).map(([m, label]) => (
             <button
@@ -377,7 +374,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
         {mode === "summary" && (
           <div className="space-y-1">
             <label htmlFor={`${id}-question`} className="text-sm font-medium">
-              {t("Din fråga eller önskemål", "Your question or request")}
+              {t("trainingInsights.yourQuestionOrRequest")}
             </label>
             <Textarea
               id={`${id}-question`}
@@ -385,7 +382,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
               onChange={(event) => setQuestion(event.target.value)}
               maxLength={2000}
               disabled={busy}
-              placeholder={t("Vad borde jag prioritera i min träning?", "What should I prioritize in my training?")}
+              placeholder={t("trainingInsights.whatShouldIPrioritizeIn")}
               className="min-h-24"
             />
           </div>
@@ -394,7 +391,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-[7rem_7rem_minmax(0,1fr)]">
             <div className="space-y-1">
               <label htmlFor={`${id}-count`} className="text-sm font-medium">
-                {t("Antal pass", "Workouts")}
+                {t("trainingInsights.workouts")}
               </label>
               <Input
                 id={`${id}-count`}
@@ -410,7 +407,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
             </div>
             <div className="space-y-1">
               <label htmlFor={`${id}-days`} className="text-sm font-medium">
-                {t("Antal dagar", "Days")}
+                {t("trainingInsights.days")}
               </label>
               <Input
                 id={`${id}-days`}
@@ -426,7 +423,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
             </div>
             <div className="col-span-2 space-y-1 sm:col-span-1">
               <label htmlFor={`${id}-purpose`} className="text-sm font-medium">
-                {t("Syfte", "Purpose")}
+                {t("trainingInsights.purpose")}
               </label>
               <Input
                 id={`${id}-purpose`}
@@ -434,7 +431,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                 maxLength={300}
                 disabled={busy}
                 onChange={(event) => setPurpose(event.target.value)}
-                placeholder={t("T.ex. skidåkning, styrka eller variation", "E.g. skiing, strength or variety")}
+                placeholder={t("trainingInsights.eGSkiingStrengthOr")}
               />
             </div>
           </div>
@@ -442,7 +439,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
         {mode === "plan" && (
           <div className="space-y-1">
             <label htmlFor={`${id}-minutes`} className="text-sm font-medium">
-              {t("Ungefärlig längd per pass (min)", "Approximate length per workout (min)")}
+              {t("trainingInsights.approximateLengthPerWorkoutMin")}
             </label>
             <div className="flex flex-wrap gap-2">
               {[15, 30, 45, 60, 75, 90].map((m) => (
@@ -464,7 +461,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                 min={5}
                 max={240}
                 step={5}
-                placeholder={t("Annat", "Other")}
+                placeholder={t("trainingInsights.other")}
                 value={minutes}
                 disabled={busy}
                 onChange={(event) => setMinutes(event.target.value)}
@@ -477,7 +474,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1">
               <label htmlFor={`${id}-gym`} className="text-sm font-medium">
-                {t("Plats", "Location")}
+                {t("common.location")}
               </label>
               <select
                 id={`${id}-gym`}
@@ -486,7 +483,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                 disabled={busy}
                 onChange={(event) => setPlanGym(event.target.value || null)}
               >
-                <option value="">{t("Ingen särskild plats", "No specific location")}</option>
+                <option value="">{t("trainingInsights.noSpecificLocation")}</option>
                 {gyms.map((g) => (
                   <option key={g.id} value={g.id}>
                     {g.name}
@@ -496,22 +493,19 @@ export function TrainingInsights(props: TrainingInsightsProps) {
             </div>
             <div className="space-y-1">
               <label htmlFor="log-date" className="text-sm font-medium">
-                {t("Startdatum", "Start date")}
+                {t("trainingInsights.startDate")}
               </label>
               <LogDatePicker
                 value={startDate}
                 onChange={setStartDate}
-                placeholder={t(`Idag (${todayISO()})`, `Today (${todayISO()})`)}
+                placeholder={t("trainingInsights.today", { v0: todayISO() })}
               />
             </div>
           </div>
         )}
         {mode === "plan" && (
           <p className="text-sm text-muted-foreground">
-            {t(
-              "Antal pass och dagar är valfria — tomt ger 4 pass under 7 dagar. Din profilens ålder, längd, vikt och tempo används.",
-              "Workouts and days are optional — empty means 4 workouts over 7 days. Your profile's age, length, weight, and pace are used.",
-            )}
+            {t("trainingInsights.workoutsAndDaysAreOptional")}
           </p>
         )}
         <Button type="submit" disabled={busy || (mode !== "plan" && !hasLog) || !quotaOk} className="w-full sm:w-auto">
@@ -521,47 +515,47 @@ export function TrainingInsights(props: TrainingInsightsProps) {
             <Send className="size-4" />
           )}
           {busy
-            ? t("Tänker…", "Thinking…")
+            ? t("trainingInsights.thinking")
             : mode === "plan"
-              ? t("Ge mig passförslag", "Suggest workouts")
+              ? t("trainingInsights.suggestWorkouts")
               : question.trim()
-                ? t("Fråga om min träning", "Ask about my training")
+                ? t("trainingInsights.askAboutMyTraining")
                 : current
-                  ? t("Uppdatera analys", "Update analysis")
-                  : t("Analysera mina pass", "Analyze my workouts")}
+                  ? t("trainingInsights.updateAnalysis")
+                  : t("trainingInsights.analyzeMyWorkouts")}
         </Button>
         {quota && (
           <p className={`text-xs ${quotaOk ? "text-muted-foreground" : "text-destructive"}`}>
             {quota.isAdmin
-              ? t("AI-kvot: obegränsad (admin)", "AI quota: unlimited (admin)")
+              ? t("trainingInsights.aiQuotaUnlimitedAdmin")
               : quota.isBlocked
-                ? t("AI-förslag är avstängda för ditt konto.", "AI suggestions are disabled for your account.")
+                ? t("trainingInsights.aiSuggestionsAreDisabledFor")
                 : quota.quota === null
-                  ? t(`AI-kvot: obegränsad (${quota.tierName}) · ${quota.used} denna månad`, `AI quota: unlimited (${quota.tierName}) · ${quota.used} this month`)
+                  ? t("trainingInsights.aiQuotaUnlimitedThisMonth", { tierName: quota.tierName, used: quota.used })
                   : quotaOk
-                    ? t(`Kvar denna månad: ${quotaRemaining(quota)} av ${quota.quota} · Återställs ${quota.periodEnd}`, `Left this month: ${quotaRemaining(quota)} of ${quota.quota} · Resets ${quota.periodEnd}`)
-                    : t(`Månadens kvot är nådd (${quota.used}/${quota.quota}). Återställs ${quota.periodEnd}. Egna pass kan du skapa och logga som vanligt.`, `This month's quota is used (${quota.used}/${quota.quota}). Resets ${quota.periodEnd}. You can still create and log your own workouts.`)}
+                    ? t("trainingInsights.leftThisMonthOfResets", { v0: quotaRemaining(quota), quota: quota.quota, periodEnd: quota.periodEnd })
+                    : t("trainingInsights.thisMonthSQuotaIs", { used: quota.used, quota: quota.quota, periodEnd: quota.periodEnd })}
           </p>
         )}
         {busy && (
           <Button type="button" variant="outline" className="ml-2" onClick={cancel}>
             <Square className="size-4" />
-            {t("Avbryt", "Cancel")}
+            {t("common.cancel")}
           </Button>
         )}
         {blocker.status === "blocked" && (
           <AlertDialog open onOpenChange={(o) => { if (!o) blocker.reset?.(); }}>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>{t("AI tänker fortfarande", "AI is still thinking")}</AlertDialogTitle>
+                <AlertDialogTitle>{t("trainingInsights.aiIsStillThinking")}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  {t("Ska den fortsätta i bakgrunden? Svaret sparas i AI-historiken.", "Keep it running in the background? The answer is saved in AI history.")}
+                  {t("trainingInsights.keepItRunningInThe")}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => blocker.reset?.()}>{t("Stanna kvar", "Stay")}</AlertDialogCancel>
-                <Button variant="outline" onClick={() => { cancel(); blocker.proceed?.(); }}>{t("Avbryt AI och lämna", "Stop AI and leave")}</Button>
-                <AlertDialogAction onClick={() => blocker.proceed?.()}>{t("Fortsätt i bakgrunden", "Keep running")}</AlertDialogAction>
+                <AlertDialogCancel onClick={() => blocker.reset?.()}>{t("trainingInsights.stay")}</AlertDialogCancel>
+                <Button variant="outline" onClick={() => { cancel(); blocker.proceed?.(); }}>{t("trainingInsights.stopAiAndLeave")}</Button>
+                <AlertDialogAction onClick={() => blocker.proceed?.()}>{t("trainingInsights.keepRunning")}</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -573,7 +567,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
           );
           return (
             <p className="text-xs text-muted-foreground">
-              {t("Uppskattad kostnad", "Estimated cost")}: {formatAiCost(e.input, e.output, language, true)}
+              {t("trainingInsights.estimatedCost")}: {formatAiCost(e.input, e.output, language, true)}
             </p>
           );
         })()}
@@ -581,7 +575,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
       {scopedHistory.length > 0 && (
         <div className="space-y-1">
           <label htmlFor={`${id}-history`} className="text-sm font-semibold">
-            {t("AI-historik", "AI history")}
+            {t("trainingInsights.aiHistory")}
           </label>
           <select
             id={`${id}-history`}
@@ -590,7 +584,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
             disabled={busy || saving !== null}
             onChange={(event) => setSelectedId(event.target.value || null)}
           >
-            <option value="">{t("Välj tidigare svar…", "Pick a previous answer…")}</option>
+            <option value="">{t("trainingInsights.pickAPreviousAnswer")}</option>
             {scopedHistory.map((row) => (
               <option key={row.id} value={row.id}>
                 {analysisDateTime(row.generatedAt)}
@@ -602,7 +596,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
         </div>
       )}
       {!hasLog && mode !== "plan" && (
-        <p className="text-sm text-muted-foreground">{t("Inga träningsloggar ännu.", "No workouts logged yet.")}</p>
+        <p className="text-sm text-muted-foreground">{t("trainingInsights.noWorkoutsLoggedYet")}</p>
       )}
       {error && (
         <p role="alert" className="text-sm text-destructive">
@@ -614,7 +608,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
           <div className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-xs text-muted-foreground">
-                {sections.plan ? t("Planerad", "Planned") : t("Analyserad", "Analyzed")}{" "}
+                {sections.plan ? t("trainingInsights.planned") : t("trainingInsights.analyzed")}{" "}
                 {analysisDateTime(current.generatedAt)}
                 {(() => {
                   const u = history.find((h) => h.id === current.id);
@@ -630,7 +624,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                 onClick={() => reuseRequest(current.request, current.gymId)}
               >
                 <RotateCcw className="size-4" />
-                {t("Fråga samma igen", "Ask the same again")}
+                {t("trainingInsights.askTheSameAgain")}
               </Button>
             </div>
             {sections.analysis && (
@@ -644,11 +638,11 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                 <p className="leading-relaxed">{current.insights.summary}</p>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <h3 className="font-bold">{t("Viktutveckling", "Weight development")}</h3>
+                    <h3 className="font-bold">{t("trainingInsights.weightDevelopment")}</h3>
                     <p className="mt-1 text-sm leading-relaxed">{current.insights.weightDevelopment}</p>
                   </div>
                   <div>
-                    <h3 className="font-bold">{t("Utveckling i set", "Set development")}</h3>
+                    <h3 className="font-bold">{t("trainingInsights.setDevelopment")}</h3>
                     <p className="mt-1 text-sm leading-relaxed">{current.insights.setDevelopment}</p>
                   </div>
                 </div>
@@ -658,8 +652,8 @@ export function TrainingInsights(props: TrainingInsightsProps) {
               <>
                 <h3 className="text-xl font-bold">
                   {current.insights.workouts.length
-                    ? t("Din träningsplan", "Your workout plan")
-                    : t("Förslag på nästa pass", "Suggested next workout")}
+                    ? t("trainingInsights.yourWorkoutPlan")
+                    : t("trainingInsights.suggestedNextWorkout")}
                 </h3>
                 {current.insights.workouts.length > 0 && (
                   <Button
@@ -675,14 +669,14 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                       <CalendarPlus className="size-4" />
                     )}
                     {pending.length === 0
-                      ? t("Alla pass accepterade som förslag", "All workouts accepted as suggestions")
-                      : t("Acceptera alla pass som förslag", "Accept all workouts as suggestions")}
+                      ? t("trainingInsights.allWorkoutsAcceptedAsSuggestions")
+                      : t("trainingInsights.acceptAllWorkoutsAsSuggestions")}
                   </Button>
                 )}
                 <p className="text-sm leading-relaxed">{current.insights.recommendation}</p>
                 {current.insights.goalNotes && (
                   <p className="rounded-lg border-l-4 border-brand-yellow bg-muted p-3 text-sm leading-relaxed">
-                    <strong>{t("Dina mål", "Your goals")}: </strong>
+                    <strong>{t("trainingInsights.yourGoals")}: </strong>
                     {current.insights.goalNotes}
                   </p>
                 )}
@@ -692,7 +686,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                       <article
                         key={workout.dayOffset}
                         className="py-4"
-                        aria-label={`${t("Pass", "Workout")} ${index + 1}`}
+                        aria-label={`${t("common.workout")} ${index + 1}`}
                       >
                         <div className="flex flex-wrap items-baseline justify-between gap-2">
                           <h4 className="text-xl font-bold">
@@ -711,7 +705,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                 ) : (
                   <>
                     {suggestions(current.insights.exercises)}
-                    {saveControl(current.insights.exercises, 0, t("Nästa pass", "Next workout"), "next")}
+                    {saveControl(current.insights.exercises, 0, t("trainingInsights.nextWorkout"), "next")}
                   </>
                 )}
               </>

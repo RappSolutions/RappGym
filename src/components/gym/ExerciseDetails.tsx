@@ -35,14 +35,14 @@ export function ExerciseDetails({
               <XAxis dataKey="d" stroke="var(--muted-foreground)" fontSize={11} />
               <YAxis stroke="var(--muted-foreground)" fontSize={11} width={30} />
               <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)" }} />
-              <Line dataKey="v" name={t("Belastning", "Load")} stroke="var(--primary)" strokeWidth={3} dot />
+              <Line dataKey="v" name={t("common.load")} stroke="var(--primary)" strokeWidth={3} dot />
             </LineChart>
           </ResponsiveContainer>
         </div>
       )}
       <div className="space-y-1">
-        <div className="text-sm font-bold uppercase">{t("Historik", "History")}</div>
-        {!history.length && <p className="text-sm text-muted-foreground">{t("Inga loggade set ännu.", "No sets logged yet.")}</p>}
+        <div className="text-sm font-bold uppercase">{t("common.history")}</div>
+        {!history.length && <p className="text-sm text-muted-foreground">{t("common.noSetsLoggedYet")}</p>}
         {history.map((e) => (
           <button key={e.id} onClick={() => onLog(e)} className="flex w-full items-center justify-between rounded-lg border bg-card px-3 py-2 text-left">
             <span className="text-sm text-muted-foreground">{formatDate(e.date)}</span>

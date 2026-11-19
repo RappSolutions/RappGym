@@ -77,7 +77,7 @@ function LogPage() {
     setBusy(true);
     const { error } = await supabase.from("workouts").update({ title: renaming.title.trim() }).eq("id", renaming.id);
     setBusy(false);
-    if (error) { toast.error(t("Kunde inte byta namn.", "Could not rename.")); return; }
+    if (error) { toast.error(t("log.couldNotRename")); return; }
     setRenaming(null);
     await queryClient.invalidateQueries({ queryKey: ["log"] });
   }
@@ -92,12 +92,12 @@ function LogPage() {
   const categories = categoriesOf(exercises);
   const byCode = new Map(exercises.map((e) => [e.code, localize(e)]));
   const groups = groupLogByWorkout(log);
-  const titleOf = (g: Group) => g.entries[0]?.workout?.title ?? t("Enskilda övningar", "Single exercises");
+  const titleOf = (g: Group) => g.entries[0]?.workout?.title ?? t("log.singleExercises");
   const isOpen = (g: Group) => overrides.get(g.key) ?? g.date === today;
 
   function openCopy(g: Group) {
     setForm({
-      title: g.workoutId ? titleOf(g) : `${t("Pass", "Workout")} ${g.date}`,
+      title: g.workoutId ? titleOf(g) : `${t("common.workout")} ${g.date}`,
       date: today,
       gymId: g.entries.find((e) => e.gym_id)?.gym_id ?? "",
       circuit: g.entries[0]?.workout?.is_circuit ?? true,
@@ -136,10 +136,10 @@ function LogPage() {
       if (error) throw error;
       await queryClient.invalidateQueries({ queryKey: ["workout-suggestions"] });
       setCopying(null);
-      toast.success(t(`Planerat ${form.date} under Pass`, `Planned ${form.date} under Workouts`));
+      toast.success(t("log.plannedUnderWorkouts", { date: form.date }));
       void navigate({ to: "/workout" });
     } catch {
-      toast.error(t("Kunde inte planera passet igen.", "Could not plan the workout again."));
+      toast.error(t("log.couldNotPlanTheWorkout"));
     } finally {
       setBusy(false);
     }
@@ -169,9 +169,9 @@ function LogPage() {
         queryClient.invalidateQueries({ queryKey: ["workout-suggestions"] }),
       ]);
       setDeleting(null);
-      toast.success(t("Passet borttaget från loggen", "Workout removed from the log"));
+      toast.success(t("log.workoutRemovedFromTheLog"));
     } catch {
-      toast.error(t("Passet kunde inte tas bort. Försök igen.", "Could not remove the workout. Try again."));
+      toast.error(t("log.couldNotRemoveTheWorkout"));
     } finally {
       setBusy(false);
     }
@@ -179,7 +179,7 @@ function LogPage() {
 
   return (
     <main className="space-y-5 px-4">
-      {!log.length && <p className="text-muted-foreground">{t("Inga pass ännu.", "No workouts yet.")}</p>}
+      {!log.length && <p className="text-muted-foreground">{t("log.noWorkoutsYet")}</p>}
       <Drawer
         open={!!copying}
         onOpenChange={(o) => {
@@ -189,13 +189,13 @@ function LogPage() {
         <DrawerContent>
           <div className="mx-auto w-full max-w-lg space-y-3 px-4 pb-6">
             <DrawerHeader className="px-0">
-              <DrawerTitle className="font-display text-2xl">{t("Planera igen", "Plan again")}</DrawerTitle>
+              <DrawerTitle className="font-display text-2xl">{t("log.planAgain")}</DrawerTitle>
               <DrawerDescription>
-                {t("Kopieras som planerat pass under Pass.", "Copied as a planned workout under Workouts.")}
+                {t("log.copiedAsAPlannedWorkout")}
               </DrawerDescription>
             </DrawerHeader>
             <div className="space-y-1">
-              <Label htmlFor="copy-title">{t("Namn", "Name")}</Label>
+              <Label htmlFor="copy-title">{t("common.name")}</Label>
               <Input
                 id="copy-title"
                 className="h-12"
@@ -205,18 +205,18 @@ function LogPage() {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
-                <Label htmlFor="log-date">{t("Datum", "Date")}</Label>
+                <Label htmlFor="log-date">{t("common.date")}</Label>
                 <LogDatePicker value={form.date} onChange={(date) => setForm({ ...form, date })} />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="copy-gym">{t("Plats", "Location")}</Label>
+                <Label htmlFor="copy-gym">{t("common.location")}</Label>
                 <select
                   id="copy-gym"
                   className="h-12 w-full rounded-md border border-input bg-background px-3 text-sm"
                   value={form.gymId}
                   onChange={(e) => setForm({ ...form, gymId: e.target.value })}
                 >
-                  <option value="">{t("Ingen plats", "No location")}</option>
+                  <option value="">{t("common.noLocation")}</option>
                   {gyms.map((g) => (
                     <option key={g.id} value={g.id}>
                       {g.name}
@@ -226,15 +226,15 @@ function LogPage() {
               </div>
             </div>
             <label className="flex items-center justify-between gap-2 text-sm">
-              <span>{t("Kör som cirkel", "Run as circuit")}</span>
+              <span>{t("common.runAsCircuit")}</span>
               <Switch checked={form.circuit} onCheckedChange={(circuit) => setForm({ ...form, circuit })} />
             </label>
             <div className="flex justify-end gap-2">
               <Button variant="ghost" disabled={busy} onClick={() => setCopying(null)}>
-                {t("Avbryt", "Cancel")}
+                {t("common.cancel")}
               </Button>
               <Button disabled={busy || !form.title.trim() || !form.date} onClick={() => void replan()}>
-                {t("Planera", "Plan")}
+                {t("log.plan")}
               </Button>
             </div>
           </div>
@@ -243,7 +243,7 @@ function LogPage() {
       {!!log.length && (
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>
-            {groups.length} {t("pass", "workouts")} · {log.reduce((n, x) => n + (x.sets ?? 1), 0)} {t("set", "sets")}
+            {groups.length} {t("log.workouts")} · {log.reduce((n, x) => n + (x.sets ?? 1), 0)} {t("common.sets")}
           </span>
           <span className="flex gap-1">
             {[false, true].map((c) => (
@@ -252,8 +252,8 @@ function LogPage() {
                 variant="ghost"
                 size="icon"
                 aria-pressed={compact === c}
-                aria-label={c ? t("Kompakt lista", "Compact list") : t("Kort", "Cards")}
-                title={c ? t("Kompakt lista", "Compact list") : t("Kort", "Cards")}
+                aria-label={c ? t("log.compactList") : t("log.cards")}
+                title={c ? t("log.compactList") : t("log.cards")}
                 className={compact === c ? "bg-muted text-foreground" : ""}
                 onClick={() => chooseView(c)}
               >
@@ -274,7 +274,7 @@ function LogPage() {
           const open = isOpen(g);
           const places = [
             ...new Set(
-              entries.map((x) => gyms.find((gym) => gym.id === x.gym_id)?.name ?? t("Ingen plats", "No location")),
+              entries.map((x) => gyms.find((gym) => gym.id === x.gym_id)?.name ?? t("common.noLocation")),
             ),
           ];
           const sets = entries.reduce((n, x) => n + (x.sets ?? 1), 0);
@@ -316,19 +316,19 @@ function LogPage() {
                         className="category-theme flex w-full items-center gap-3 border-l-4 border-category-fill px-3 py-1.5 text-left"
                       >
                         <span className="w-12 shrink-0 font-semibold text-category-ink">{e.code}</span>
-                        <span className="min-w-0 flex-1 truncate">{byCode.get(e.code)?.name ?? t("Okänd övning", "Unknown exercise")}</span>
+                        <span className="min-w-0 flex-1 truncate">{byCode.get(e.code)?.name ?? t("log.unknownExercise")}</span>
                         <span className="font-semibold">{formatSet(e)}</span>
                       </button>
                     ))}
                     <div className="flex items-center justify-end gap-1 px-2 py-1 text-xs text-muted-foreground">
-                      <span className="mr-auto">{sets} {t("set", "sets")} · {places.join(", ")}</span>
-                      {g.workoutId && <Button variant="ghost" size="icon" disabled={busy} title={t("Byt namn", "Rename")} aria-label={`${t("Byt namn", "Rename")}: ${titleOf(g)}`} onClick={() => setRenaming({ id: g.workoutId!, title: titleOf(g) })}>
+                      <span className="mr-auto">{sets} {t("common.sets")} · {places.join(", ")}</span>
+                      {g.workoutId && <Button variant="ghost" size="icon" disabled={busy} title={t("log.rename")} aria-label={`${t("log.rename")}: ${titleOf(g)}`} onClick={() => setRenaming({ id: g.workoutId!, title: titleOf(g) })}>
                         <Pencil className="size-4" />
                       </Button>}
-                      <Button variant="ghost" size="icon" disabled={busy} title={t("Planera igen", "Plan again")} aria-label={`${t("Planera igen", "Plan again")}: ${titleOf(g)}`} onClick={() => openCopy(g)}>
+                      <Button variant="ghost" size="icon" disabled={busy} title={t("log.planAgain")} aria-label={`${t("log.planAgain")}: ${titleOf(g)}`} onClick={() => openCopy(g)}>
                         <Repeat className="size-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" disabled={busy} className="text-destructive" title={t("Ta bort pass", "Remove workout")} aria-label={`${t("Ta bort pass", "Remove workout")}: ${titleOf(g)}`} onClick={() => setDeleting(g)}>
+                      <Button variant="ghost" size="icon" disabled={busy} className="text-destructive" title={t("log.removeWorkout")} aria-label={`${t("log.removeWorkout")}: ${titleOf(g)}`} onClick={() => setDeleting(g)}>
                         <Trash2 className="size-4" />
                       </Button>
                     </div>
@@ -359,7 +359,7 @@ function LogPage() {
                       )}
                     </span>
                     <span className="block text-sm">
-                      {formatDateWithWeekday(g.date, language)} · {sets} {t("set", "sets")} · {places.join(", ")}
+                      {formatDateWithWeekday(g.date, language)} · {sets} {t("common.sets")} · {places.join(", ")}
                       {g.entries[0]?.workout && (
                         <span className="text-xs text-muted-foreground">
                           {" "}
@@ -384,15 +384,15 @@ function LogPage() {
                     </span>
                   </span>
                 </Button>
-                {g.workoutId && <Button variant="ghost" size="icon" disabled={busy} title={t("Byt namn", "Rename")} aria-label={`${t("Byt namn", "Rename")}: ${titleOf(g)}`} onClick={() => setRenaming({ id: g.workoutId!, title: titleOf(g) })}>
+                {g.workoutId && <Button variant="ghost" size="icon" disabled={busy} title={t("log.rename")} aria-label={`${t("log.rename")}: ${titleOf(g)}`} onClick={() => setRenaming({ id: g.workoutId!, title: titleOf(g) })}>
                   <Pencil className="size-4" />
                 </Button>}
                 <Button
                   variant="ghost"
                   size="icon"
                   disabled={busy}
-                  title={t("Planera igen", "Plan again")}
-                  aria-label={`${t("Planera igen", "Plan again")}: ${titleOf(g)}`}
+                  title={t("log.planAgain")}
+                  aria-label={`${t("log.planAgain")}: ${titleOf(g)}`}
                   onClick={() => openCopy(g)}
                 >
                   <Repeat className="size-5" />
@@ -402,8 +402,8 @@ function LogPage() {
                   size="icon"
                   disabled={busy}
                   className="text-destructive"
-                  title={t("Ta bort pass", "Remove workout")}
-                  aria-label={`${t("Ta bort pass", "Remove workout")}: ${titleOf(g)}`}
+                  title={t("log.removeWorkout")}
+                  aria-label={`${t("log.removeWorkout")}: ${titleOf(g)}`}
                   onClick={() => setDeleting(g)}
                 >
                   <Trash2 className="size-5" />
@@ -424,7 +424,7 @@ function LogPage() {
                     <span className="w-12 shrink-0 font-bold text-category-ink">{e.code}</span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate">
-                        {byCode.get(e.code)?.name ?? t("Okänd övning", "Unknown exercise")}
+                        {byCode.get(e.code)?.name ?? t("log.unknownExercise")}
                       </span>
                       {e.note && <span className="block truncate text-xs text-muted-foreground">{e.note}</span>}
                     </span>
@@ -444,17 +444,14 @@ function LogPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("Ta bort passet från loggen?", "Remove the workout from the log?")}</AlertDialogTitle>
+            <AlertDialogTitle>{t("log.removeTheWorkoutFromThe")}</AlertDialogTitle>
             <AlertDialogDescription>
               {deleting &&
-                t(
-                  `${titleOf(deleting)} (${deleting.date}): ${deleting.entries.length} loggade rader tas bort permanent.`,
-                  `${titleOf(deleting)} (${deleting.date}): ${deleting.entries.length} logged rows will be permanently removed.`,
-                )}
+                t("log.loggedRowsWillBePermanently", { v0: titleOf(deleting), date: deleting.date, length: deleting.entries.length })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>{t("Avbryt", "Cancel")}</AlertDialogCancel>
+            <AlertDialogCancel disabled={busy}>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               disabled={busy}
               onClick={(ev) => {
@@ -462,7 +459,7 @@ function LogPage() {
                 void remove();
               }}
             >
-              {busy ? t("Tar bort…", "Removing…") : t("Ta bort", "Remove")}
+              {busy ? t("common.removing") : t("common.remove")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -470,9 +467,9 @@ function LogPage() {
       <Drawer open={!!renaming} onOpenChange={(o) => { if (!o && !busy) setRenaming(null); }}>
         <DrawerContent>
           <div className="mx-auto w-full max-w-md space-y-3 px-4 pb-8">
-            <DrawerHeader className="px-0"><DrawerTitle className="font-display text-2xl">{t("Byt namn på passet", "Rename workout")}</DrawerTitle><DrawerDescription className="sr-only">{t("Byt namn", "Rename")}</DrawerDescription></DrawerHeader>
+            <DrawerHeader className="px-0"><DrawerTitle className="font-display text-2xl">{t("log.renameWorkout")}</DrawerTitle><DrawerDescription className="sr-only">{t("log.rename")}</DrawerDescription></DrawerHeader>
             <Input autoFocus value={renaming?.title ?? ""} onChange={(e) => setRenaming((r) => r && { ...r, title: e.target.value })} onKeyDown={(e) => { if (e.key === "Enter") void saveRename(); }} />
-            <Button className="w-full" disabled={busy || !renaming?.title.trim()} onClick={() => void saveRename()}>{t("Spara", "Save")}</Button>
+            <Button className="w-full" disabled={busy || !renaming?.title.trim()} onClick={() => void saveRename()}>{t("common.save")}</Button>
           </div>
         </DrawerContent>
       </Drawer>

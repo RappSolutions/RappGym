@@ -53,15 +53,15 @@ export function ExerciseManager() {
     const { count, error: countError } = await supabase.from("log_entries").select("id", { count: "exact", head: true }).eq("exercise_id", ex.id);
     if (countError) { toast.error(countError.message); return; }
     if (count) {
-      if (!await confirmDialog(t(`${ex.code} ${ex.name} används i ${count} loggrader (genomförda eller föreslagna) . Inaktivera den? Den döljs i Träna och AI-planering, all historik behålls och du kan återaktivera den med ögat.`, `${ex.code} ${ex.name} is used in ${count} log rows (completed or suggested), . Deactivate it? It is hidden in Train and AI planning, all history is kept and you can reactivate it with the eye.`))) return;
+      if (!await confirmDialog(t("exerciseManager.isUsedInLogRows", { code: ex.code, name: ex.name, count }))) return;
       const { error } = await supabase.from("exercises").update({ is_active: false }).eq("id", ex.id);
       if (error) { toast.error(error.message); return; }
-      toast.success(t("Övningen är dold", "Exercise hidden"));
+      toast.success(t("exerciseManager.exerciseHidden"));
       if (openId === ex.id) setOpenId(null);
       invalidate();
       return;
     }
-    if (!await confirmDialog(t(`Radera ${ex.code} ${ex.name} permanent? Den har aldrig använts i loggen.`, `Permanently delete ${ex.code} ${ex.name}? It has never been used in the log.`))) return;
+    if (!await confirmDialog(t("exerciseManager.permanentlyDeleteItHasNever", { code: ex.code, name: ex.name }))) return;
     const { error } = await supabase.from("exercises").delete().eq("id", ex.id);
     if (error) {
       toast.error(error.message);
@@ -75,19 +75,19 @@ export function ExerciseManager() {
   async function reactivate(ex: Exercise) {
     const { error } = await supabase.from("exercises").update({ is_active: true }).eq("id", ex.id);
     if (error) { toast.error(error.message); return; }
-    toast.success(t("Övningen är aktiv igen", "Exercise reactivated"));
+    toast.success(t("exerciseManager.exerciseReactivated"));
     invalidate();
   }
 
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="size-4" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />{t(`Visa inaktiva (${inactiveCount})`, `Show inactive (${inactiveCount})`)}</label>
-        <Button onClick={() => setAdding(true)} className="font-semibold"><Plus className="h-4 w-4" />{t("Ny", "New")}</Button>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="size-4" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />{t("exerciseManager.showInactive", { inactiveCount })}</label>
+        <Button onClick={() => setAdding(true)} className="font-semibold"><Plus className="h-4 w-4" />{t("exerciseManager.new")}</Button>
       </div>
       <div className="relative">
         <Search className="absolute top-3.5 left-3 h-5 w-5 text-muted-foreground" />
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("Sök namn, kod, redskap, muskel…", "Search name, code, equipment, muscle…")} className="h-12 pl-10" />
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("exerciseManager.searchNameCodeEquipmentMuscle")} className="h-12 pl-10" />
       </div>
       {cats.map((c) => {
         const list = hits.filter((e) => e.category === c);
@@ -101,12 +101,12 @@ export function ExerciseManager() {
               <div key={ex.id} className="space-y-2">
                 <ExerciseCard ex={ex} hideLast token={categoryToken(c, cats)}
                   action={<div className="flex shrink-0 items-center gap-1 pr-2">
-                    <Button size="icon" variant="ghost" onClick={() => setEditing(live(ex))} aria-label={t("Redigera", "Edit")} title={t("Redigera", "Edit")}><Pencil className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => setEditing(live(ex))} aria-label={t("common.edit")} title={t("common.edit")}><Pencil className="h-4 w-4" /></Button>
                     {!ex.is_active
-                      ? <Button size="icon" variant="ghost" onClick={() => void reactivate(live(ex))} aria-label={t("Återaktivera", "Reactivate")} title={t("Inaktiv – återaktivera", "Inactive – reactivate")}><Eye className="h-4 w-4" /></Button>
+                      ? <Button size="icon" variant="ghost" onClick={() => void reactivate(live(ex))} aria-label={t("common.reactivate")} title={t("exerciseManager.inactiveReactivate")}><Eye className="h-4 w-4" /></Button>
                       : used.has(ex.id)
-                        ? <Button size="icon" variant="ghost" onClick={() => void remove(live(ex))} aria-label={t("Inaktivera", "Deactivate")} title={t("Används i Logg/Pass – inaktivera istället", "Used in Log/Workouts – deactivate instead")}><EyeOff className="h-4 w-4" /></Button>
-                        : <Button size="icon" variant="ghost" onClick={() => void remove(live(ex))} aria-label={t("Ta bort", "Delete")} title={t("Ta bort", "Delete")}><Trash2 className="h-4 w-4" /></Button>}
+                        ? <Button size="icon" variant="ghost" onClick={() => void remove(live(ex))} aria-label={t("exerciseManager.deactivate")} title={t("exerciseManager.usedInLogWorkoutsDeactivate")}><EyeOff className="h-4 w-4" /></Button>
+                        : <Button size="icon" variant="ghost" onClick={() => void remove(live(ex))} aria-label={t("common.delete")} title={t("common.delete")}><Trash2 className="h-4 w-4" /></Button>}
                   </div>}
                   expanded={openId === ex.id}
                   onClick={() => setOpenId(openId === ex.id ? null : ex.id)}>

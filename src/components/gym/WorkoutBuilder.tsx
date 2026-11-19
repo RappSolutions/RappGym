@@ -42,7 +42,7 @@ export function WorkoutBuilder({
       .from("workouts")
       .insert({
         id: workoutId,
-        title: title.trim() || t("Eget pass", "Own workout"),
+        title: title.trim() || t("workoutBuilder.ownWorkout"),
         created_by: "user",
         scheduled_date: todayISO(),
         gym_id: gymId,
@@ -50,7 +50,7 @@ export function WorkoutBuilder({
       });
     if (head.error) {
       setBusy(false);
-      toast.error(t("Kunde inte spara passet.", "Could not save the workout."));
+      toast.error(t("workoutBuilder.couldNotSaveTheWorkout"));
       return;
     }
     const rows = picked.map((code, index) => ({
@@ -67,7 +67,7 @@ export function WorkoutBuilder({
     const { error } = await supabase.from("log_entries").insert(rows);
     setBusy(false);
     if (error) {
-      toast.error(t("Kunde inte spara passet.", "Could not save the workout."));
+      toast.error(t("workoutBuilder.couldNotSaveTheWorkout"));
       return;
     }
     await qc.invalidateQueries({ queryKey: ["workout-suggestions"] });
@@ -75,7 +75,7 @@ export function WorkoutBuilder({
     setPicked([]);
     setTitle("");
     if (start) setRunning(workoutId);
-    else toast.success(t("Passet är planerat", "Workout planned"));
+    else toast.success(t("workoutBuilder.workoutPlanned"));
   }
 
   return (
@@ -87,39 +87,36 @@ export function WorkoutBuilder({
         onClick={() => setOpen(true)}
       >
         {quickStart ? <Play className="size-4" /> : <ListPlus className="size-4" />}
-        {quickStart ? t("Skapa pass", "Create workout") : t("Skapa pass", "Create workout")}
+        {quickStart ? t("workoutBuilder.createWorkout") : t("workoutBuilder.createWorkout")}
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90dvh] max-w-md overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {quickStart ? t("Skapa pass", "Create workout") : t("Skapa pass", "Create workout")}
+              {quickStart ? t("workoutBuilder.createWorkout") : t("workoutBuilder.createWorkout")}
             </DialogTitle>
             <DialogDescription>
-              {t(
-                "Välj övningar i den ordning du vill köra dem. Vikten förifylls från senaste gången.",
-                "Pick exercises in the order you want to do them. Weight is prefilled from last time.",
-              )}
+              {t("workoutBuilder.pickExercisesInTheOrder")}
             </DialogDescription>
           </DialogHeader>
           <Input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder={t("Namn (valfritt)", "Name (optional)")}
+            placeholder={t("workoutBuilder.nameOptional")}
           />
           <div className="grid grid-cols-2 gap-2">
             <label className="text-sm">
-              {t("Antal set", "Sets")}
+              {t("common.sets2")}
               <Input type="number" min={1} value={laps} onChange={(e) => setLaps(Number(e.target.value) || 1)} />
             </label>
             <label className="text-sm">
-              {t("Reps", "Reps")}
+              {t("common.reps")}
               <Input type="number" min={1} value={reps} onChange={(e) => setReps(Number(e.target.value) || 1)} />
             </label>
           </div>
           {picked.length > 0 && (
             <p className="text-sm">
-              <span className="font-semibold">{t("Ordning:", "Order:")}</span> {picked.join(" → ")}
+              <span className="font-semibold">{t("workoutBuilder.order")}</span> {picked.join(" → ")}
             </p>
           )}
           <div className="space-y-2">
@@ -150,7 +147,7 @@ export function WorkoutBuilder({
                     <span className="flex-1">{cat}</span>
                     {count > 0 && (
                       <span className="text-sm text-primary">
-                        {count} {t("valda", "picked")}
+                        {count} {t("workoutBuilder.picked")}
                       </span>
                     )}
                     <span className="text-xs font-normal text-muted-foreground">{list.length}</span>
@@ -185,7 +182,7 @@ export function WorkoutBuilder({
           <div className="flex flex-col gap-2 sm:flex-row">
             <Button className="flex-1" disabled={!picked.length || busy} onClick={() => void save(true)}>
               <Play className="size-4" />
-              {t(`Starta nu (${picked.length})`, `Start now (${picked.length})`)}
+              {t("workoutBuilder.startNow", { length: picked.length })}
             </Button>
             <Button
               variant="outline"
@@ -193,7 +190,7 @@ export function WorkoutBuilder({
               disabled={!picked.length || busy}
               onClick={() => void save(false)}
             >
-              {t("Spara som planerat", "Save as planned")}
+              {t("workoutBuilder.saveAsPlanned")}
             </Button>
           </div>
         </DialogContent>
