@@ -125,7 +125,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
               {phases.map((ph, i) => {
                 const active = step?.phase === ph;
                 const finished = !active && phaseDone(ph);
-                return <span key={ph} className="flex items-center gap-1">{i > 0 && <span className="text-muted-foreground">→</span>}<button type="button" disabled={finished || active} onClick={() => setFocus(ph)} className={`rounded-full border px-2 py-0.5 disabled:cursor-default font-semibold uppercase tracking-wider ${active ? "border-primary bg-primary text-primary-foreground" : finished ? "border-transparent text-muted-foreground" : "border-border text-muted-foreground"}`}>{finished ? "✓ " : ""}{t(`phase.${ph}`)}{active && showLaps ? ` · ${step?.lap}/${laps}` : ""}</button></span>;
+                return <span key={ph} className="flex items-center gap-1">{i > 0 && <span className="text-muted-foreground">→</span>}<button type="button" disabled={finished || active} onClick={() => setFocus(ph)} className={`rounded-full border px-2 py-0.5 cursor-pointer hover:border-primary disabled:cursor-not-allowed disabled:hover:border-transparent font-semibold uppercase tracking-wider ${active ? "border-primary bg-primary text-primary-foreground" : finished ? "border-transparent text-muted-foreground" : "border-border text-muted-foreground"}`}>{finished ? "✓ " : ""}{t(`phase.${ph}`)}{active && showLaps ? ` · ${step?.lap}/${laps}` : ""}</button></span>;
               })}
             </div>}
             {total > 0 && <div className="flex h-2 gap-2" aria-label={`${doneCount}/${total} set`}>
