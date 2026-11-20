@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Eye, LogOut } from "lucide-react";
 import { toast } from "sonner";
@@ -23,7 +22,6 @@ export function UserViewProvider({ children }: { children: ReactNode }) {
   const [busy, setBusy] = useState(false);
   const getView = useServerFn(getUserView);
   const endView = useServerFn(endUserView);
-  const qc = useQueryClient();
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -41,9 +39,9 @@ export function UserViewProvider({ children }: { children: ReactNode }) {
           return;
         }
         if (initial) {
-          await qc.cancelQueries();
-          qc.clear();
-          if (!alive) return;
+          // Route loaders may already be running. Bootstrap is not an identity
+          // switch: auth changes clear the cache in the root, while inspection
+          // changes load a fresh document. Cancelling here breaks Suspense.
           setGymViewScope(next?.actorId ?? "", next?.userId ?? "");
           current = next;
           setView(next);
@@ -58,14 +56,13 @@ export function UserViewProvider({ children }: { children: ReactNode }) {
     channel.onmessage = recheck;
     window.addEventListener("focus", recheck);
     return () => { alive = false; channel.close(); window.removeEventListener("focus", recheck); };
-  }, [getView, qc]);
+  }, [getView]);
 
   async function exit() {
     setBusy(true);
     try {
       await endView();
-      await qc.cancelQueries();
-      qc.clear();
+      // Hard navigation creates a new cache; leave mounted queries alone.
       const channel = new BroadcastChannel("rappgym-user-view");
       channel.postMessage("changed"); channel.close();
       window.location.assign("/home");

@@ -34,7 +34,8 @@ export function UsersManager() {
     setViewBusy(true);
     try {
       await startView({ data: { userId, language } });
-      await qc.cancelQueries(); qc.clear();
+      // The new document owns a fresh cache; cancelling mounted queries here
+      // can reject a pending Suspense/route-loader promise before navigation.
       const channel = new BroadcastChannel("rappgym-user-view");
       channel.postMessage("changed"); channel.close();
       window.location.assign("/home");

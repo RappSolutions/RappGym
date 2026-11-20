@@ -63,3 +63,4 @@ use the editor.
 - Planned workouts (AI or own, status suggested) live on the Train page with circuit mode logging one completed set per exercise per lap; the Log page shows completed history only, keeping facts separate from plans.
 - Exercise bank: all read, admin (user_roles) writes; one CircuitRunner with circuit toggle.
 - Admin inspection retains actor auth; session-scoped RLS selects the target, blocks writes, and audits start/end. Future write support needs explicit capabilities and operation audits.
+- Preserve queries on view bootstrap/navigation; pending loaders can reject.

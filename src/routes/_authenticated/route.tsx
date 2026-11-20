@@ -1,5 +1,4 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
 import { House, Dumbbell, CalendarDays, ClipboardCheck, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/lib/i18n";
@@ -43,14 +42,12 @@ const pageLabels: [RegExp, NavLabelKey][] = [
 function AppLayout() {
   const { user } = Route.useRouteContext();
   const { t } = useLanguage();
-  const qc = useQueryClient();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const match = pageLabels.find(([re]) => re.test(pathname));
   const page = match ? t(match[1]) : "";
   async function signOut() {
-    await qc.cancelQueries();
-    qc.clear();
+    // The root auth listener clears personal data on SIGNED_OUT.
     await supabase.auth.signOut();
     navigate({ to: "/", replace: true });
   }
