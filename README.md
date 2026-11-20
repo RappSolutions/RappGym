@@ -169,4 +169,3 @@ erDiagram
   }
 ```
 
-Deprecated columns that are still present but never written: `log_entries.proposal_id`, `proposal_title`, `ai_history_id` and `ai_workout_key`, plus `exercises.gym_id`.

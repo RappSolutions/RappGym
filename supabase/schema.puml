@@ -38,12 +38,10 @@ entity exercises {
   equipment_id : uuid <<FK>>
   * reps_unit : text  -- reps|sec|min
   instructions : text
-  category, equipment, variant, focus, muscles, dose : text <<DEPRECATED>>
   image_urls : jsonb
   translations : jsonb
   * is_active : boolean
   sort_order : int
-  gym_id : uuid <<DEPRECATED>>
   * user_id : uuid
 }
 entity exercise_categories {
@@ -101,7 +99,6 @@ entity log_entries {
   proposal_order : int
   * phase : text (intro|main|outro)
   * created_at : timestamptz
-  proposal_id, proposal_title, ai_history_id, ai_workout_key <<DEPRECATED>>
 }
 entity ai_tiers {
   * id : text <<PK>>
@@ -152,7 +149,6 @@ entity training_profiles {
   weight_kg : numeric
   experience, limitations, preferences, pace : text
   * use_for_ai : boolean
-  age : int <<DEPRECATED>>
   updated_at : timestamptz
 }
 

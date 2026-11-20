@@ -10,9 +10,9 @@ type Joined = Tables<"exercises"> & {
   cat?: Pick<ExerciseCategory, "name" | "code_prefix" | "color_token" | "sort_order"> | null;
   eq?: Pick<ExerciseEquipment, "name"> | null;
 };
-export type ExerciseRow = Tables<"exercises"> & { category_token: string; category_sort: number };
+export type ExerciseRow = Tables<"exercises"> & { category: string; equipment: string; category_token: string; category_sort: number };
 
-/** Category and equipment names come from the FK rows; the old text columns are deprecated. */
+/** Category and equipment names come from the FK rows. */
 export function normalizeExercise(row: Joined): ExerciseRow {
   const { cat, eq, ...rest } = row;
   return {

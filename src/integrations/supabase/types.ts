@@ -124,73 +124,52 @@ export type Database = {
       }
       exercises: {
         Row: {
-          category: string
           category_id: string
           code: string
           code_number: number
           created_at: string
-          dose: string
-          equipment: string
           equipment_id: string | null
-          focus: string
-          gym_id: string | null
           id: string
           image_urls: Json
           instructions: string
           is_active: boolean
-          muscles: string
           name: string
           reps_unit: string
           sort_order: number
           translations: Json
           user_id: string
-          variant: string
         }
         Insert: {
-          category?: string
           category_id: string
           code: string
           code_number: number
           created_at?: string
-          dose?: string
-          equipment?: string
           equipment_id?: string | null
-          focus?: string
-          gym_id?: string | null
           id?: string
           image_urls?: Json
           instructions?: string
           is_active?: boolean
-          muscles?: string
           name: string
           reps_unit?: string
           sort_order?: number
           translations?: Json
           user_id?: string
-          variant?: string
         }
         Update: {
-          category?: string
           category_id?: string
           code?: string
           code_number?: number
           created_at?: string
-          dose?: string
-          equipment?: string
           equipment_id?: string | null
-          focus?: string
-          gym_id?: string | null
           id?: string
           image_urls?: Json
           instructions?: string
           is_active?: boolean
-          muscles?: string
           name?: string
           reps_unit?: string
           sort_order?: number
           translations?: Json
           user_id?: string
-          variant?: string
         }
         Relationships: [
           {
@@ -205,13 +184,6 @@ export type Database = {
             columns: ["equipment_id"]
             isOneToOne: false
             referencedRelation: "exercise_equipment"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "exercises_gym_id_fkey"
-            columns: ["gym_id"]
-            isOneToOne: false
-            referencedRelation: "gyms"
             referencedColumns: ["id"]
           },
         ]
@@ -245,8 +217,6 @@ export type Database = {
       }
       log_entries: {
         Row: {
-          ai_history_id: string | null
-          ai_workout_key: string | null
           code: string
           created_at: string
           date: string
@@ -257,9 +227,7 @@ export type Database = {
           load: string
           note: string | null
           phase: string
-          proposal_id: string | null
           proposal_order: number | null
-          proposal_title: string | null
           reps: number | null
           reps_unit: string
           sets: number
@@ -268,8 +236,6 @@ export type Database = {
           workout_id: string | null
         }
         Insert: {
-          ai_history_id?: string | null
-          ai_workout_key?: string | null
           code: string
           created_at?: string
           date?: string
@@ -280,9 +246,7 @@ export type Database = {
           load?: string
           note?: string | null
           phase?: string
-          proposal_id?: string | null
           proposal_order?: number | null
-          proposal_title?: string | null
           reps?: number | null
           reps_unit?: string
           sets?: number
@@ -291,8 +255,6 @@ export type Database = {
           workout_id?: string | null
         }
         Update: {
-          ai_history_id?: string | null
-          ai_workout_key?: string | null
           code?: string
           created_at?: string
           date?: string
@@ -303,9 +265,7 @@ export type Database = {
           load?: string
           note?: string | null
           phase?: string
-          proposal_id?: string | null
           proposal_order?: number | null
-          proposal_title?: string | null
           reps?: number | null
           reps_unit?: string
           sets?: number
@@ -314,13 +274,6 @@ export type Database = {
           workout_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "log_entries_ai_history_id_fkey"
-            columns: ["ai_history_id"]
-            isOneToOne: false
-            referencedRelation: "training_ai_history"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "log_entries_exercise_id_fkey"
             columns: ["exercise_id"]
@@ -426,7 +379,6 @@ export type Database = {
       }
       training_profiles: {
         Row: {
-          age: number | null
           birth_year: number | null
           experience: string
           height_cm: number | null
@@ -439,7 +391,6 @@ export type Database = {
           weight_kg: number | null
         }
         Insert: {
-          age?: number | null
           birth_year?: number | null
           experience?: string
           height_cm?: number | null
@@ -452,7 +403,6 @@ export type Database = {
           weight_kg?: number | null
         }
         Update: {
-          age?: number | null
           birth_year?: number | null
           experience?: string
           height_cm?: number | null

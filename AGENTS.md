@@ -37,7 +37,7 @@ use the editor.
 - Keep OAuth methods in a tested shared auth-provider module; sign-in lives only on "/" (/auth redirects), so restrictions stay consistent.
 - Generate training insights only on an explicit request through an authenticated server function, with user-scoped reads and server-only streamed AI Gateway Responses calls; keep computed facts separate from AI advice to protect log accuracy and avoid automatic billing.
 - Validate custom training requests and normalize multi-workout plans in a shared pure module; scope cached results by request, language and gym to avoid showing another plan as the current answer.
-- Workouts are rows in `workouts`; log_entries.workout_id is an optional FK, status separates plans from facts; proposal_id/proposal_title/ai_* on log_entries are deprecated, never write them.
+- Workouts are rows in `workouts`; log_entries.workout_id is an optional FK, status separates plans from facts.
 - Persist successful AI requests and full answers server-side in owner-scoped training_ai_history; shared history reads restore answers across pages, and unique history/workout/exercise links make individual and bulk acceptance idempotent without overwriting completed work.
 - Store optional training background in owner-scoped training_profiles, separate from OAuth identity and existing goals; always pass the validated profile (incl. pace) to explicit AI calls as untrusted user-reported context, so sensitive profile data stays private by default.
 - Derive approximate age at request time from profile birth year and request date; never infer birth year from legacy age because the birthday is unknown.
@@ -58,7 +58,7 @@ use the editor.
 - AI plans carry an optional startDate in the validated request and use the plan's chosen location (name/description as untrusted context); available exercises come from the owner-scoped exercise_locations link table (shared helpers in src/lib/exercise-locations.ts), with no location meaning all.
 - Location photo scans run only on explicit request via an authenticated server function; AI output only toggles existing exercise_locations links (plus an equipment note in the location description), so planning keeps using the same link table.
 - log_entries.exercise_id is the real FK to exercises (ON DELETE RESTRICT); DB triggers fill it from code on insert and cascade code renames to log rows, so renames never orphan history.
-- Exercises used by any log row are hidden via exercises.is_active=false instead of deleted; Train, AI planning and photo scans offer active exercises only; exercises.gym_id is deprecated and unused.
+- Exercises used by any log row are hidden via exercises.is_active=false instead of deleted; Train, AI planning and photo scans offer active exercises only.
 - Exercise pictures live in the private exercise-images storage bucket as "storage:<path>" refs resolved to signed URLs; AI pictures are generated only on explicit click via an authenticated server function.
 - Planned workouts (AI or own, status suggested) live on the Train page with circuit mode logging one completed set per exercise per lap; the Log page shows completed history only, keeping facts separate from plans.
 - Exercise bank: all read, admin (user_roles) writes; one CircuitRunner with circuit toggle.

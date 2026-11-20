@@ -204,6 +204,13 @@
       "when": 1795172595366,
       "tag": "0028_log_entries_snapshot_name_unit",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1795175467156,
+      "tag": "0029_drop_deprecated_columns",
+      "breakpoints": true
     }
   ]
 }
