@@ -1,4 +1,4 @@
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useLanguage } from "@/lib/i18n";
 import { useUserView } from "@/lib/user-view";
@@ -9,7 +9,8 @@ export function RatingPicker({ exerciseId }: { exerciseId: string }) {
   const { t } = useLanguage();
   const { readOnly } = useUserView();
   const qc = useQueryClient();
-  const { data: ratings } = useSuspenseQuery(exercisePreferencesQuery);
+  const { data: ratings } = useQuery(exercisePreferencesQuery);
+  if (!ratings) return null;
   const current = ratingOf(ratings, exerciseId);
   async function pick(r: Rating) {
     if (readOnly || r === current) return;

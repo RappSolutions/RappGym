@@ -14,6 +14,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { gymsQuery, todayISO, useInvalidateGym, formatSet, type Exercise, type LogEntry } from "@/lib/gym";
 import { ExerciseImages } from "./ExerciseImages";
+import { RatingPicker } from "./RatingPicker";
+import { Link } from "@tanstack/react-router";
+import { Info } from "lucide-react";
 import { LogDatePicker } from "./LogDatePicker";
 import { appendLoadAdvice, splitSuggestedLoad } from "@/lib/suggested-load";
 
@@ -120,13 +123,14 @@ export function LogSheet({
           <DrawerHeader className="px-0">
             {entry?.status === "suggested" && <p className="font-semibold text-primary">{t("logSheet.suggestion")}{progress ? ` · ${progress}` : ""}</p>}
             <DrawerTitle className="font-display text-2xl uppercase">
-              <span className="text-primary">{shown?.code}</span> {shown?.name}<AdminExerciseEdit exercise={exercise} />
+              <span className="text-primary">{shown?.code}</span> {shown?.name}<AdminExerciseEdit exercise={exercise} />{exercise && <Link to="/exercises/$code" params={{ code: exercise.code }} onClick={onClose} aria-label={t("logSheet.openExercise")} title={t("logSheet.openExercise")} className="ml-1 inline-flex size-8 items-center justify-center align-middle text-muted-foreground"><Info className="size-4" /></Link>}
             </DrawerTitle>
             <DrawerDescription>
               {last && !entry && `${t("logSheet.last")}: ${formatSet({ ...last, sets: 1 })}`}
             </DrawerDescription>
           </DrawerHeader>
           {shown && <ExerciseImages exercise={shown} />}
+          {exercise && <RatingPicker exerciseId={exercise.id} />}
           <fieldset disabled={readOnly} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <Stepper label={t("logSheet.numberOfSets")} value={round} onChange={setRound} />

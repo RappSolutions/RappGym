@@ -253,7 +253,8 @@
     "saveAdjustedSuggestion": "Save adjusted suggestion",
     "saveChanges": "Save changes",
     "saved": "saved",
-    "suggestion": "Suggestion"
+    "suggestion": "Suggestion",
+    "openExercise": "Open exercise page"
   },
   "nav": {
     "goToHome": "Go to Home",

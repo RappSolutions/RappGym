@@ -3,6 +3,7 @@ import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ExerciseImages } from "@/components/gym/ExerciseImages";
+import { RatingPicker } from "@/components/gym/RatingPicker";
 import { ExercisePickList } from "@/components/gym/ExercisePickList";
 import { Minus, Plus, Check, SkipForward, Dumbbell, ListOrdered, ArrowUp, ArrowDown, Trash2, Undo2, Pencil } from "lucide-react";
 import { toast } from "sonner";
@@ -177,6 +178,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
             <div><p className="flex items-center gap-1 font-bold text-primary">{r.code}<AdminExerciseEdit exercise={rawEx} /></p><p className="text-xl font-bold">{ex?.name ?? r.code}</p>{r.note && <p className="text-sm text-muted-foreground">{r.note}</p>}</div>
             {ex && <ExerciseImages exercise={ex} />}
             {ex?.instructions && <p className="text-sm leading-relaxed">{ex.instructions}</p>}
+            {rawEx && <RatingPicker exerciseId={rawEx.id} />}
             
             <fieldset disabled={readOnly} className="grid grid-cols-2 gap-3">
               <div className="space-y-1"><p className="text-sm font-medium">{t("common.weightKg")}</p>
