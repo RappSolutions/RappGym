@@ -39,3 +39,13 @@ describe("toLogEntry", () => {
     expect(r.code).toBe("PU7");
   });
 });
+
+import { loggedName } from "@/lib/log-entry";
+describe("loggedName", () => {
+  it("keeps the name recorded at workout time after a rename", () => {
+    expect(loggedName({ exercise_name: "Situps" }, { name: "Tough belly work" }, { name: "Tough belly work" })).toBe("Situps");
+  });
+  it("uses the localized name while the snapshot matches the current name", () => {
+    expect(loggedName({ exercise_name: "Situps" }, { name: "Situps" }, { name: "Sit-ups EN" })).toBe("Sit-ups EN");
+  });
+});

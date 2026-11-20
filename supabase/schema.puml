@@ -88,7 +88,9 @@ entity log_entries {
   * user_id : uuid
   workout_id : uuid <<FK>>
   exercise_id : uuid <<FK>>
-  * code : text
+  * code : text <<snapshot>>
+  * exercise_name : text <<snapshot>>
+  * reps_unit : text <<snapshot>>
   * date : date
   * status : text (suggested|completed)
   * sets : int

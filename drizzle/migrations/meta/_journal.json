@@ -197,6 +197,13 @@
       "when": 1795167329292,
       "tag": "0027_exercise_code_number",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1795172595366,
+      "tag": "0028_log_entries_snapshot_name_unit",
+      "breakpoints": true
     }
   ]
 }

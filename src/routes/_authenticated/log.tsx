@@ -1,3 +1,5 @@
+import type { RepsUnit } from "@/lib/reps-unit";
+import { loggedName } from "@/lib/log-entry";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -91,6 +93,7 @@ function LogPage() {
   const today = todayISO();
   const categories = categoriesOf(exercises);
   const byCode = new Map(exercises.map((e) => [e.code, localize(e)]));
+  const rawByCode = new Map(exercises.map((e) => [e.code, e]));
   const groups = groupLogByWorkout(log);
   const titleOf = (g: Group) => g.entries[0]?.workout?.title ?? t("log.singleExercises");
   const isOpen = (g: Group) => overrides.get(g.key) ?? g.date === today;
@@ -316,8 +319,8 @@ function LogPage() {
                         className="category-theme flex w-full items-center gap-3 border-l-4 border-category-fill px-3 py-1.5 text-left"
                       >
                         <span className="w-12 shrink-0 font-semibold text-category-ink">{e.recorded_code ?? e.code}</span>
-                        <span className="min-w-0 flex-1 truncate">{byCode.get(e.code)?.name ?? t("log.unknownExercise")}</span>
-                        <span className="font-semibold">{formatSet(e)}</span>
+                        <span className="min-w-0 flex-1 truncate">{loggedName(e, rawByCode.get(e.code), byCode.get(e.code)) || t("log.unknownExercise")}</span>
+                        <span className="font-semibold">{formatSet(e, e.reps_unit === "reps" ? "" : t(`repsUnit.${e.reps_unit as RepsUnit}`).toLowerCase())}</span>
                       </button>
                     ))}
                     <div className="flex items-center justify-end gap-1 px-2 py-1 text-xs text-muted-foreground">
@@ -424,11 +427,11 @@ function LogPage() {
                     <span className="w-12 shrink-0 font-bold text-category-ink">{e.recorded_code ?? e.code}</span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate">
-                        {byCode.get(e.code)?.name ?? t("log.unknownExercise")}
+                        {loggedName(e, rawByCode.get(e.code), byCode.get(e.code)) || t("log.unknownExercise")}
                       </span>
                       {e.note && <span className="block truncate text-xs text-muted-foreground">{e.note}</span>}
                     </span>
-                    <span className="text-lg font-bold">{formatSet(e)}</span>
+                    <span className="text-lg font-bold">{formatSet(e, e.reps_unit === "reps" ? "" : t(`repsUnit.${e.reps_unit as RepsUnit}`).toLowerCase())}</span>
                   </Button>
                 ))}
               </div>
