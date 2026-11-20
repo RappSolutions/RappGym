@@ -31,7 +31,8 @@ entity gyms {
 entity exercises {
   * id : uuid <<PK>>
   --
-  * code : text <<UQ>>
+  * code : text <<UQ, derived prefix||code_number>>
+  * code_number : int <<UQ(category_id)>>
   * name : text
   * category_id : uuid <<FK>>
   equipment_id : uuid <<FK>>

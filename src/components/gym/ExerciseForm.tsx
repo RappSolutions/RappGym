@@ -7,15 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { exerciseCategoriesQuery, exerciseEquipmentQuery, useInvalidateGym, type Exercise } from "@/lib/gym";
+import { exercisesQuery, exerciseCategoriesQuery, exerciseEquipmentQuery, useInvalidateGym, type Exercise } from "@/lib/gym";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { gymsQuery } from "@/lib/gym";
 import { exerciseLocationsQuery } from "@/lib/exercise-locations";
 import { ExerciseImageEditor } from "@/components/gym/ExerciseImageEditor";
+import { nextCodeNumber } from "@/lib/exercise-refs";
 import { REPS_UNITS, repsUnit, type RepsUnit } from "@/lib/reps-unit";
 
-const empty = { code: "", category_id: "", equipment_id: "", reps_unit: "reps" as RepsUnit, name: "", instructions: "" };
+const empty = { code_number: "", category_id: "", equipment_id: "", reps_unit: "reps" as RepsUnit, name: "", instructions: "" };
 type Texts = Record<"sv" | "en", { name: string; instructions: string }>;
 const selectCls = "h-10 w-full rounded-md border bg-background px-3 text-sm";
 const NEW = "__new__";
@@ -39,6 +40,7 @@ export function ExerciseForm({
   const { data: links = [] } = useQuery(exerciseLocationsQuery);
   const { data: categories = [] } = useQuery(exerciseCategoriesQuery);
   const { data: equipment = [] } = useQuery(exerciseEquipmentQuery);
+  const { data: bank = [] } = useQuery(exercisesQuery);
   const [newCat, setNewCat] = useState<{ name: string; prefix: string; color: string } | null>(null);
   const [newEq, setNewEq] = useState<string | null>(null);
   const [places, setPlaces] = useState<Set<string>>(new Set());
@@ -58,19 +60,19 @@ export function ExerciseForm({
     const tr = exercise?.translations as Record<string, unknown> | null | undefined;
     const hasEn = !!(tr && typeof tr === "object" && tr["en"]);
     setTexts({ sv: pick("sv"), en: hasEn ? pick("en") : { name: "", instructions: "" } });
-    setF(exercise ? { code: exercise.code, category_id: exercise.category_id ?? "", equipment_id: exercise.equipment_id ?? "", reps_unit: repsUnit(exercise), name: "", instructions: "" } : { ...empty });
+    setF(exercise ? { code_number: String(exercise.code_number), category_id: exercise.category_id ?? "", equipment_id: exercise.equipment_id ?? "", reps_unit: repsUnit(exercise), name: "", instructions: "" } : { ...empty });
   }, [open, exercise]);
   const text = texts[textLanguage];
-  const set = (k: "code") => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setF({ ...f, [k]: e.target.value });
-  };
+  const prefix = categories.find((c) => c.id === f.category_id)?.code_prefix ?? "";
+  // New exercise (or category change): suggest next free number in that category; the user may override it.
+  const suggest = (categoryId: string) => String(nextCodeNumber(categoryId, bank, exercise?.id));
   const setText = (k: "name" | "instructions") => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const v = e.target.value;
     setTexts((cur) => ({ ...cur, [textLanguage]: { ...cur[textLanguage], [k]: v } }));
   };
   function pickCategory(id: string) {
     if (id === NEW) { setNewCat({ name: "", prefix: "", color: "#0063ff" }); return; }
-    setF((cur) => ({ ...cur, category_id: id }));
+    setF((cur) => ({ ...cur, category_id: id, code_number: !exercise || id !== exercise.category_id ? suggest(id) : String(exercise.code_number) }));
   }
   async function addCategory() {
     if (!newCat) return;
@@ -78,7 +80,7 @@ export function ExerciseForm({
     if (error) { toast.error(error.code === "23505" ? t("common.nameOrPrefixAlreadyExists") : error.message); return; }
     await qc.invalidateQueries({ queryKey: ["exercise-categories"] });
     setNewCat(null);
-    setF((cur) => ({ ...cur, category_id: data.id }));
+    setF((cur) => ({ ...cur, category_id: data.id, code_number: "1" }));
   }
   async function addEquipment() {
     if (!newEq?.trim()) return;
@@ -97,10 +99,12 @@ export function ExerciseForm({
     const existing = exercise?.translations;
     const translations = existing && typeof existing === "object" && !Array.isArray(existing) ? existing : {};
     const en = texts.en.name.trim() || texts.en.instructions.trim() ? { name: texts.en.name.trim(), instructions: texts.en.instructions } : null;
-    const row = { code: f.code.trim().toUpperCase(), category_id: f.category_id, equipment_id: f.equipment_id || null, reps_unit: f.reps_unit, name: sv.name, instructions: sv.instructions, translations: en ? { ...translations, en } : translations };
+    const num = Number(f.code_number);
+    if (!Number.isInteger(num) || num < 1) { toast.error(t("exerciseForm.code")); return; }
+    const row = { code_number: num, category_id: f.category_id, equipment_id: f.equipment_id || null, reps_unit: f.reps_unit, name: sv.name, instructions: sv.instructions, translations: en ? { ...translations, en } : translations };
     const res = exercise
       ? await supabase.from("exercises").update(row).eq("id", exercise.id).select().single()
-      : await supabase.from("exercises").insert({ ...row, sort_order: all.length }).select().single();
+      : await supabase.from("exercises").insert({ ...row, code: "", sort_order: all.length }).select().single(); // code is derived by the DB trigger
     if (res.error) {
       toast.error(res.error.code === "23505" ? t("exerciseForm.codeAlreadyExists") : res.error.message);
       return;
@@ -135,7 +139,7 @@ export function ExerciseForm({
                 <option value={NEW}>{t("exerciseForm.newCategory")}</option>
               </select>
             </div>
-            <div className="space-y-1"><Label htmlFor="ex-code">{t("exerciseForm.code")}</Label><Input id="ex-code" required value={f.code} onChange={set("code")} /></div>
+            <div className="space-y-1"><Label htmlFor="ex-code">{t("exerciseForm.code")}</Label><div className="flex items-center rounded-md border bg-background"><span className="pl-3 font-semibold text-muted-foreground">{prefix || "—"}</span><Input id="ex-code" type="number" min={1} step={1} required inputMode="numeric" className="border-0 pl-1 shadow-none focus-visible:ring-0" value={f.code_number} onChange={(e) => setF({ ...f, code_number: e.target.value })} /></div></div>
           </div>
           {newCat && <div className="grid grid-cols-[1fr_5rem_6rem_auto] items-end gap-2 rounded-md border border-dashed bg-muted/40 p-2">
             <div className="space-y-1"><Label className="text-xs">{t("common.name")}</Label><Input value={newCat.name} onChange={(e) => setNewCat({ ...newCat, name: e.target.value })} /></div>

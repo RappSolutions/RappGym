@@ -1,1 +1,2 @@
 - Keep supabase/schema.puml (and the README Mermaid model) in sync with every schema migration; it is the reviewed data-model documentation.
+- exercises.code is derived by trigger (category.code_prefix || code_number, UNIQUE(category_id, code_number)); write code_number only. Renames cascade to planned log rows only; completed log rows freeze their recorded code (read model exposes it as recorded_code, current code as code), because history is never rewritten.

@@ -22,3 +22,20 @@ describe("normalizeExercise", () => {
     expect([row.category, row.equipment, row.category_token]).toEqual(["Push", "Hantel", "cat-1"]);
   });
 });
+
+import { nextCodeNumber } from "@/lib/exercise-refs";
+describe("nextCodeNumber", () => {
+  const bank = [{ id: "a", category_id: "PU", code_number: 10 }, { id: "b", category_id: "PU", code_number: 2 }, { id: "c", category_id: "PL", code_number: 30 }];
+  it("suggests max + 1 within the category only", () => expect(nextCodeNumber("PU", bank)).toBe(11));
+  it("starts at 1 for an empty category", () => expect(nextCodeNumber("CO", bank)).toBe(1));
+  it("ignores the edited exercise itself", () => expect(nextCodeNumber("PU", bank, "a")).toBe(3));
+});
+
+import { toLogEntry } from "@/lib/log-entry";
+describe("toLogEntry", () => {
+  it("keeps the recorded code for history and exposes the current code for lookups", () => {
+    const r = toLogEntry({ code: "PU3", ex: { code: "PU7" } } as never) as unknown as { code: string; recorded_code: string };
+    expect(r.recorded_code).toBe("PU3");
+    expect(r.code).toBe("PU7");
+  });
+});

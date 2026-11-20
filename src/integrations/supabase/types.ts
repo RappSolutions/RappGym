@@ -127,6 +127,7 @@ export type Database = {
           category: string
           category_id: string
           code: string
+          code_number: number
           created_at: string
           dose: string
           equipment: string
@@ -149,6 +150,7 @@ export type Database = {
           category?: string
           category_id: string
           code: string
+          code_number: number
           created_at?: string
           dose?: string
           equipment?: string
@@ -171,6 +173,7 @@ export type Database = {
           category?: string
           category_id?: string
           code?: string
+          code_number?: number
           created_at?: string
           dose?: string
           equipment?: string

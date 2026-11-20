@@ -37,3 +37,8 @@ export function nextExerciseCode(prefix: string, codes: readonly string[]): stri
 }
 
 export const CATEGORY_COLOR_TOKENS = ["cat-1", "cat-2", "cat-3", "cat-4", "cat-5", "cat-6", "cat-7"] as const;
+
+/** Next free number within a category (max + 1); the prefix itself always comes from the category. */
+export function nextCodeNumber(categoryId: string, exercises: readonly { id: string; category_id: string; code_number: number }[], exceptId?: string): number {
+  return exercises.reduce((m, e) => (e.category_id === categoryId && e.id !== exceptId ? Math.max(m, e.code_number) : m), 0) + 1;
+}

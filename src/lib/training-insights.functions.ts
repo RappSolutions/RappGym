@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { trainingContext } from "@/lib/training-context";
 import type { LogEntry } from "@/lib/gym";
+import { toLogEntry } from "@/lib/log-entry";
 import type { TrainingInsights } from "@/lib/training-insights-schema";
 import { normalizeTrainingPlan, trainingRequestSchema } from "@/lib/training-request";
 import { profileForAI } from "@/lib/training-profile";
@@ -30,9 +31,9 @@ export const getTrainingInsights = createServerFn({ method: "POST" })
     }
     const log: LogEntry[] = [];
     for (let from = 0; ; from += 1000) {
-      const result = await supabase.from("log_entries").select("*").eq("user_id", userId).eq("status", "completed").order("date", { ascending: false }).range(from, from + 999);
+      const result = await supabase.from("log_entries").select("*, ex:exercises(code)").eq("user_id", userId).eq("status", "completed").order("date", { ascending: false }).range(from, from + 999);
       if (result.error) throw new Error(result.error.message);
-      log.push(...result.data);
+      log.push(...(result.data as unknown as (LogEntry & { ex?: { code: string } | null })[]).map((r) => toLogEntry(r) as LogEntry));
       if (result.data.length < 1000) break;
     }
     const { data: exerciseRows, error } = await supabase.from("exercises").select(EXERCISE_SELECT);

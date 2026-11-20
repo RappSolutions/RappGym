@@ -315,7 +315,7 @@ function LogPage() {
                         data-category={categoryToken(exercises.find((ex) => ex.code === e.code)?.category ?? "", categories)}
                         className="category-theme flex w-full items-center gap-3 border-l-4 border-category-fill px-3 py-1.5 text-left"
                       >
-                        <span className="w-12 shrink-0 font-semibold text-category-ink">{e.code}</span>
+                        <span className="w-12 shrink-0 font-semibold text-category-ink">{e.recorded_code ?? e.code}</span>
                         <span className="min-w-0 flex-1 truncate">{byCode.get(e.code)?.name ?? t("log.unknownExercise")}</span>
                         <span className="font-semibold">{formatSet(e)}</span>
                       </button>
@@ -421,7 +421,7 @@ function LogPage() {
                     onClick={() => setEntry(e)}
                     className="category-theme flex h-auto w-full items-center gap-3 whitespace-normal rounded-none border-l-4 border-category-fill px-3 py-2.5 text-left"
                   >
-                    <span className="w-12 shrink-0 font-bold text-category-ink">{e.code}</span>
+                    <span className="w-12 shrink-0 font-bold text-category-ink">{e.recorded_code ?? e.code}</span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate">
                         {byCode.get(e.code)?.name ?? t("log.unknownExercise")}

@@ -1,3 +1,5 @@
+import { toLogEntry, type LogRow } from "@/lib/log-entry";
+export { toLogEntry };
 import { queryOptions, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
@@ -7,8 +9,10 @@ import { EXERCISE_SELECT, normalizeExercise, type ExerciseCategory, type Exercis
 export type Exercise = ExerciseRow;
 export type Workout = Tables<"workouts">;
 /** Log row with its optional workout header (title, circuit, origin). */
-export type LogEntry = Tables<"log_entries"> & { workout?: Pick<Workout, "id" | "title" | "created_by" | "is_circuit" | "scheduled_date" | "created_at"> | null };
-const ENTRY_SELECT = "*, workout:workouts(id,title,created_by,is_circuit,scheduled_date,created_at)";
+/** Log row with its optional workout header. `code` is the exercise's current code (for lookups);
+ * `recorded_code` is the code stored on the row — frozen for completed rows, so history shows what was done. */
+export type LogEntry = LogRow & { workout?: Pick<Workout, "id" | "title" | "created_by" | "is_circuit" | "scheduled_date" | "created_at"> | null };
+const ENTRY_SELECT = "*, workout:workouts(id,title,created_by,is_circuit,scheduled_date,created_at), ex:exercises(code)";
 
 export const exercisesQuery = queryOptions({
   queryKey: ["exercises"],
@@ -16,8 +20,7 @@ export const exercisesQuery = queryOptions({
     const { data, error } = await supabase
       .from("exercises")
       .select(EXERCISE_SELECT)
-      .order("sort_order")
-      .order("code");
+      .order("code_number");
     if (error) throw error;
     const rows = (data as unknown as Parameters<typeof normalizeExercise>[0][]).map(normalizeExercise);
     for (const r of rows) if (r.category) TOKEN_BY_CATEGORY.set(r.category, r.category_token);
@@ -57,7 +60,7 @@ export const logQuery = queryOptions({
         .order("created_at", { ascending: false })
         .range(from, from + 999);
       if (error) throw error;
-      all.push(...(data as LogEntry[]));
+      all.push(...(data as unknown as (LogEntry & { ex?: { code: string } | null })[]).map((r) => toLogEntry(r) as LogEntry));
       if (data.length < 1000) break;
     }
     return all;
@@ -71,7 +74,7 @@ export const suggestionsQuery = queryOptions({
     for (let from = 0; ; from += 1000) {
       const { data, error } = await supabase.from("log_entries").select(ENTRY_SELECT).eq("status", "suggested").order("date").order("proposal_order").range(from, from + 999);
       if (error) throw error;
-      all.push(...(data as LogEntry[]));
+      all.push(...(data as unknown as (LogEntry & { ex?: { code: string } | null })[]).map((r) => toLogEntry(r) as LogEntry));
       if (data.length < 1000) break;
     }
     return all;
