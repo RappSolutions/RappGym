@@ -17,7 +17,7 @@ export function suggestionRows(items: TrainingInsights["exercises"], today: stri
     return {
     code: item.code, sets: item.sets, reps: item.reps, load: split.load,
     date: plannedWorkoutDate(today, dayOffset), note: appendLoadAdvice(item.reason, split.advice) || null,
-    gym_id: gymId, status: "suggested" as const, workout_id: workoutId, proposal_order: index,
+    gym_id: gymId, status: "suggested" as const, workout_id: workoutId, proposal_order: index, phase: item.phase,
   }; });
 }
 

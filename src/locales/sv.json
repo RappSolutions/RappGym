@@ -494,9 +494,5 @@
     "reps": "Reps",
     "sec": "Sekunder",
     "min": "Minuter"
-  },
-  "insights": {
-    "warmup": "Uppvärmning",
-    "cooldown": "Nedvarvning"
   }
 }

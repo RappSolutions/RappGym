@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { normalizeTrainingPlan, planStartDate, plannedWorkoutDate, trainingRequestSchema, trainingResultSections } from "@/lib/training-request";
 import type { TrainingInsights } from "@/lib/training-insights-schema";
 
-const suggestion = { code: "DB-EX", sets: 2, reps: 12, load: "15", reason: "" };
-const insights = { summary: "", weightDevelopment: "", setDevelopment: "", recommendation: "", answer: "", exercises: [suggestion], goalNotes: "", caution: "", workouts: [0, 2, 4, 6].map((dayOffset) => ({ title: "", focus: "", warmup: "", cooldown: "", dayOffset, exercises: [suggestion] })) } satisfies TrainingInsights;
+const suggestion = { code: "DB-EX", phase: "main" as const, sets: 2, reps: 12, load: "15", reason: "" };
+const insights = { summary: "", weightDevelopment: "", setDevelopment: "", recommendation: "", answer: "", exercises: [suggestion], goalNotes: "", caution: "", workouts: [0, 2, 4, 6].map((dayOffset) => ({ title: "", focus: "", dayOffset, exercises: [suggestion] })) } satisfies TrainingInsights;
 const request = trainingRequestSchema.parse({ mode: "plan", workoutCount: 4, periodDays: 7, question: "Ge mig fyra nya pass med bra blandning under 7 dagar", purpose: "Skidåkning" });
 
 describe("Personal training requests", () => {
@@ -49,9 +49,9 @@ import { normalizeTrainingPlan as normalizeLong } from "@/lib/training-request";
 import { describe as d2, expect as e2, it as i2 } from "vitest";
 d2("long sessions", () => {
   i2("keeps more than 5 exercises so long sessions can fill the requested time", () => {
-    const ex = Array.from({ length: 10 }, (_, i) => ({ code: `X${i}`, sets: 4, reps: 10, load: "", reason: "" }));
+    const ex = Array.from({ length: 10 }, (_, i) => ({ code: `X${i}`, phase: "main" as const, sets: 4, reps: 10, load: "", reason: "" }));
     const out = normalizeLong(
-      { summary: "", weightDevelopment: "", setDevelopment: "", recommendation: "", exercises: [], answer: "", goalNotes: "", caution: "", workouts: [{ title: "A", dayOffset: 0, focus: "", warmup: "", cooldown: "", exercises: ex }] },
+      { summary: "", weightDevelopment: "", setDevelopment: "", recommendation: "", exercises: [], answer: "", goalNotes: "", caution: "", workouts: [{ title: "A", dayOffset: 0, focus: "", exercises: ex }] },
       { mode: "plan", question: "", workoutCount: 1, periodDays: 1, sessionMinutes: 75, purpose: "", startDate: null },
       ex.map((e) => e.code),
     );
@@ -61,8 +61,13 @@ d2("long sessions", () => {
 
 import { parseStoredInsights } from "@/lib/training-insights-schema";
 describe("stored AI history", () => {
-  it("parses answers saved before warm-up/cool-down existed", () => {
-    const old = { summary: "", weightDevelopment: "", setDevelopment: "", recommendation: "", exercises: [], answer: "", goalNotes: "", caution: "", workouts: [{ title: "A", dayOffset: 0, focus: "", exercises: [] }] };
-    expect(parseStoredInsights(old).workouts[0]?.warmup).toBe("");
+  it("defaults exercises saved before phases existed to main and drops retired warmup text", () => {
+    const old = { summary: "", weightDevelopment: "", setDevelopment: "", recommendation: "", exercises: [], answer: "", goalNotes: "", caution: "", workouts: [{ title: "A", dayOffset: 0, focus: "", warmup: "5 min", cooldown: "", exercises: [{ code: "X1", sets: 1, reps: 1, load: "", reason: "" }] }] };
+    expect(parseStoredInsights(old).workouts[0]?.exercises[0]?.phase).toBe("main");
+  });
+  it("carries the AI phase into planned rows", async () => {
+    const { suggestionRows } = await import("@/lib/workout-suggestions");
+    const rows = suggestionRows([{ code: "MO1", phase: "intro", sets: 1, reps: 300, load: "", reason: "" }, { code: "RX1", phase: "outro", sets: 1, reps: 300, load: "", reason: "" }], "2026-11-20", 0, null, "w");
+    expect(rows.map((r) => r.phase)).toEqual(["intro", "outro"]);
   });
 });

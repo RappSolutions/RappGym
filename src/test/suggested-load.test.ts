@@ -5,7 +5,7 @@ import { suggestionRows } from "@/lib/workout-suggestions";
 describe("suggested load", () => {
   it("separates the pictured 20 kg proposal from its advice", () => {
     expect(splitSuggestedLoad("20 kg eller lägre vid behov")).toEqual({ load: "20", advice: "20 kg eller lägre vid behov" });
-    const row = suggestionRows([{ code: "TEST", sets: 2, reps: 15, load: "20 kg eller lägre vid behov", reason: "Bekant kombination" }], "2026-11-16", 6, null, "id")[0];
+    const row = suggestionRows([{ code: "TEST", phase: "main", sets: 2, reps: 15, load: "20 kg eller lägre vid behov", reason: "Bekant kombination" }], "2026-11-16", 6, null, "id")[0];
     expect(row?.load).toBe("20");
     expect(row?.note).toBe("Bekant kombination\n20 kg eller lägre vid behov");
   });

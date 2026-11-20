@@ -19,8 +19,8 @@ describe("saved suggestions", () => {
     ], "selected")).toEqual(["pending"]);
   });
   it("stores planned date, dose, suggestion status and exercise order without recording completed work", () => {
-    const result = suggestionRows([{ code: "A", sets: 2, reps: 12, load: "15", reason: "Balance" }], "2026-11-16", 3, null, "plan-id");
-    expect(result[0]).toEqual({ code: "A", sets: 2, reps: 12, load: "15", note: "Balance", date: "2026-11-19", status: "suggested", gym_id: null, workout_id: "plan-id", proposal_order: 0 });
+    const result = suggestionRows([{ code: "A", phase: "main", sets: 2, reps: 12, load: "15", reason: "Balance" }], "2026-11-16", 3, null, "plan-id");
+    expect(result[0]).toEqual({ code: "A", phase: "main", sets: 2, reps: 12, load: "15", note: "Balance", date: "2026-11-19", status: "suggested", gym_id: null, workout_id: "plan-id", proposal_order: 0 });
   });
   it("counts only completed work in every statistical surface", () => {
     expect(computeStats(rows, []).totalSets).toBe(2);

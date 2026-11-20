@@ -317,6 +317,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                 className="font-semibold text-category-ink underline-offset-4 hover:underline"
               >
                 {suggestion.code} · {localize(exercise).name}
+                {suggestion.phase !== "main" && <span className="ml-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t(`phase.${suggestion.phase}`)}</span>}
               </Link>
               <p className="text-sm font-medium">
                 {exercise.equipment ? <span className="text-muted-foreground">{exercise.equipment} · </span> : null}
@@ -700,9 +701,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                           </span>
                         </div>
                         <p className="mt-1 text-sm leading-relaxed">{workout.focus}</p>
-                        {workout.warmup && <p className="mt-2 text-sm"><span className="font-semibold">{t("insights.warmup")}:</span> {workout.warmup}</p>}
                         {suggestions(workout.exercises)}
-                        {workout.cooldown && <p className="mt-2 text-sm"><span className="font-semibold">{t("insights.cooldown")}:</span> {workout.cooldown}</p>}
                         {saveControl(workout.exercises, workout.dayOffset, workout.title, String(index))}
                       </article>
                     ))}
