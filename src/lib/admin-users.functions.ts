@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertUserViewWritable } from "@/lib/user-view-guard";
 
 export type AdminUser = { id: string; email: string; name: string; provider: string; createdAt: string; lastSignIn: string | null; disabled: boolean; isAdmin: boolean };
 type Action = "makeAdmin" | "removeAdmin" | "disable" | "enable" | "delete";
@@ -12,6 +13,7 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
 export const listUsers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<AdminUser[]> => {
+    await assertUserViewWritable(context.supabase);
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
@@ -38,6 +40,7 @@ export const manageUser = createServerFn({ method: "POST" })
     return input;
   })
   .handler(async ({ data, context }) => {
+    await assertUserViewWritable(context.supabase);
     await assertAdmin(context);
     if (data.userId === context.userId) throw new Error("You cannot change your own account here");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

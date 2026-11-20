@@ -1,4 +1,12 @@
 {
+  "userView": {
+    "viewAs": "Visa som användare",
+    "viewing": "Visar {{name}}",
+    "readOnly": "Endast läsning",
+    "exit": "Avsluta användarvy",
+    "failed": "Användarvyn kunde inte laddas",
+    "sessionRequired": "Logga in på nytt med Google eller Microsoft för att öppna en sessionsbunden användarvy."
+  },
   "aiUsageManager": {
     "blockAiRequestsEntirely": "Stryp AI-anrop helt",
     "blocked": "Strypt",

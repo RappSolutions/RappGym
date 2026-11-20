@@ -1,3 +1,4 @@
+import { useUserView } from "@/lib/user-view";
 import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { groupByPhase, isWorkoutFinished, workoutSetProgress } from "@/lib/circuit";
 import { repsUnit } from "@/lib/reps-unit";
@@ -44,6 +45,7 @@ import {
 /** Planned (suggested) workouts: encouragement and how-to, kept apart from the factual Log. */
 export function PlannedWorkouts() {
   const { t, language, localize } = useLanguage();
+  const { readOnly } = useUserView();
   const queryClient = useQueryClient();
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
   const { data: log } = useSuspenseQuery(logQuery);
@@ -79,7 +81,7 @@ export function PlannedWorkouts() {
   }
 
   async function deleteProposal() {
-    if (!deletingId || deleting) return;
+    if (readOnly || !deletingId || deleting) return;
     const ids = removableSuggestionIds(proposals, deletingId);
     if (!ids.length) {
       setDeletingId(null);
@@ -109,7 +111,7 @@ export function PlannedWorkouts() {
   const [addingTo, setAddingTo] = useState<string | null>(null);
   const [editBusy, setEditBusy] = useState(false);
   async function edit(fn: () => Promise<unknown>) {
-    if (editBusy) return;
+    if (readOnly || editBusy) return;
     setEditBusy(true);
     try { await fn(); await queryClient.invalidateQueries({ queryKey: ["workout-suggestions"] }); }
     catch { toast.error(t("common.couldNotSaveTryAgain")); }
@@ -190,17 +192,17 @@ export function PlannedWorkouts() {
                             {formatSet(row, repsUnit(exercises.find((e) => e.code === row.code)) === "reps" ? "" : t(`repsUnit.${repsUnit(exercises.find((e) => e.code === row.code))}`).toLowerCase())}
                           </span>
                         </Button>
-                        <PhaseSelect value={row.phase} disabled={editBusy} onChange={(ph) => void edit(() => setRowPhase(row.id, ph))} />
-                        <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={editBusy || !canMove(rows, row.id, -1)} aria-label={t("common.moveUp")} onClick={() => void edit(() => moveRow(rows, row.id, -1))}><ArrowUp className="size-4" /></Button>
-                        <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={editBusy || !canMove(rows, row.id, 1)} aria-label={t("common.moveDown")} onClick={() => void edit(() => moveRow(rows, row.id, 1))}><ArrowDown className="size-4" /></Button>
-                        <Button variant="ghost" size="icon" className="size-8 shrink-0 text-destructive" disabled={editBusy} aria-label={`${t("common.remove")} ${row.code}`} onClick={async () => { if (await confirmDialog(t("plannedWorkouts.removeFromTheWorkout", { code: row.code }))) void edit(() => removePlannedRow(row.id)); }}><X className="size-4" /></Button>
+                        <PhaseSelect value={row.phase} disabled={readOnly || editBusy} onChange={(ph) => void edit(() => setRowPhase(row.id, ph))} />
+                        <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={readOnly || editBusy || !canMove(rows, row.id, -1)} aria-label={t("common.moveUp")} onClick={() => void edit(() => moveRow(rows, row.id, -1))}><ArrowUp className="size-4" /></Button>
+                        <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={readOnly || editBusy || !canMove(rows, row.id, 1)} aria-label={t("common.moveDown")} onClick={() => void edit(() => moveRow(rows, row.id, 1))}><ArrowDown className="size-4" /></Button>
+                        <Button variant="ghost" size="icon" className="size-8 shrink-0 text-destructive" disabled={readOnly || editBusy} aria-label={`${t("common.remove")} ${row.code}`} onClick={async () => { if (await confirmDialog(t("plannedWorkouts.removeFromTheWorkout", { code: row.code }))) void edit(() => removePlannedRow(row.id)); }}><X className="size-4" /></Button>
                         </div>
                       ); })}
                     </div>
                     </div>)}
-                    {addingTo === id && <ExercisePickList exercises={exercisesAtLocation(exercises.filter((e) => e.is_active), links, first.gym_id)} disabled={editBusy} onPick={(e, ph) => void edit(async () => { await addPlannedExercise(id, e.code, rows, first.gym_id, lastDone.get(e.code)?.load ?? "", Math.max(1, ...rows.map((r) => r.sets)), lastDone.get(e.code)?.reps ?? 10, ph); setAddingTo(null); })} />}
+                    {addingTo === id && <ExercisePickList exercises={exercisesAtLocation(exercises.filter((e) => e.is_active), links, first.gym_id)} disabled={readOnly || editBusy} onPick={(e, ph) => void edit(async () => { await addPlannedExercise(id, e.code, rows, first.gym_id, lastDone.get(e.code)?.load ?? "", Math.max(1, ...rows.map((r) => r.sets)), lastDone.get(e.code)?.reps ?? 10, ph); setAddingTo(null); })} />}
                     <div className="flex items-center justify-between gap-2">
-                      <Button variant={addingTo === id ? "default" : "outline"} className="shrink-0" aria-pressed={addingTo === id} aria-label={t("common.addExercise")} title={t("common.addExercise")} onClick={() => setAddingTo(addingTo === id ? null : id)}><Plus className="size-4" /><Dumbbell className="size-4" /></Button>
+                      <Button disabled={readOnly} variant={addingTo === id ? "default" : "outline"} className="shrink-0" aria-pressed={addingTo === id} aria-label={t("common.addExercise")} title={t("common.addExercise")} onClick={() => setAddingTo(addingTo === id ? null : id)}><Plus className="size-4" /><Dumbbell className="size-4" /></Button>
                       <Button
                         className="min-w-0 flex-1 whitespace-normal"
                         onClick={() => setCircuitId(id)}
@@ -214,6 +216,7 @@ export function PlannedWorkouts() {
                         className="shrink-0 text-destructive"
                         aria-label={`${t("plannedWorkouts.removeSuggestion")}: ${first.workout?.title}`}
                         title={t("plannedWorkouts.removeSuggestion")}
+                        disabled={readOnly}
                         onClick={() => setDeletingId(id)}
                       >
                         <Trash2 className="size-5" />

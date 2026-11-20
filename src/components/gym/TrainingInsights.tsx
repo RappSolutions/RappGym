@@ -1,3 +1,4 @@
+import { useUserView } from "@/lib/user-view";
 import { useEffect, useId, useState } from "react";
 import { useBlocker } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -51,6 +52,7 @@ type TrainingInsightsProps = {
 export function TrainingInsights(props: TrainingInsightsProps) {
   const { exercises, hasLog } = props;
   const { t, language, localize } = useLanguage();
+  const { readOnly } = useUserView();
   const queryClient = useQueryClient();
   const generate = useServerFn(getTrainingInsights);
   const fetchQuota = useServerFn(getMyAiQuota);
@@ -107,6 +109,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
   } | null>(null);
 
   async function analyze() {
+    if (readOnly) return;
     const parsed = trainingRequestSchema.safeParse({
       mode,
       question: mode === "plan" ? "" : question,
@@ -202,7 +205,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
     acceptedKeys,
   );
   async function saveWorkouts(keys: string[]) {
-    if (!current || !sections.plan || saving || !keys.length) return;
+    if (readOnly || !current || !sections.plan || saving || !keys.length) return;
     setSaving(keys.length > 1 ? "all" : (keys[0] ?? "all"));
     setError(null);
     try {
@@ -275,7 +278,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
         <Button
           type="button"
           variant="outline"
-          disabled={busy || saving !== null || acceptedKeys.has(key) || !items.length}
+          disabled={readOnly || busy || saving !== null || acceptedKeys.has(key) || !items.length}
           onClick={() => void saveWorkouts([key])}
         >
           {saving === key ? (
@@ -342,7 +345,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
         className="space-y-3"
         onSubmit={(event) => {
           event.preventDefault();
-          if (!busy) void analyze();
+          if (!busy && !readOnly) void analyze();
         }}
       >
         <div
@@ -508,7 +511,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
             {t("trainingInsights.workoutsAndDaysAreOptional")}
           </p>
         )}
-        <Button type="submit" disabled={busy || (mode !== "plan" && !hasLog) || !quotaOk} className="w-full sm:w-auto">
+        <Button type="submit" disabled={readOnly || busy || (mode !== "plan" && !hasLog) || !quotaOk} className="w-full sm:w-auto">
           {busy ? (
             <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" />
           ) : (
@@ -658,7 +661,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                 {current.insights.workouts.length > 0 && (
                   <Button
                     type="button"
-                    disabled={busy || saving !== null || pending.length === 0}
+                    disabled={readOnly || busy || saving !== null || pending.length === 0}
                     onClick={() => void saveWorkouts(pending)}
                   >
                     {saving === "all" ? (

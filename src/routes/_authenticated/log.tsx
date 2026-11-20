@@ -1,3 +1,4 @@
+import { useUserView } from "@/lib/user-view";
 import type { RepsUnit } from "@/lib/reps-unit";
 import { loggedName } from "@/lib/log-entry";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -63,6 +64,7 @@ type Group = ReturnType<typeof groupLogByWorkout<LogEntry>>[number];
 
 function LogPage() {
   const { t, language, localize } = useLanguage();
+  const { readOnly } = useUserView();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
@@ -75,7 +77,7 @@ function LogPage() {
   const [copying, setCopying] = useState<Group | null>(null);
   const [renaming, setRenaming] = useState<{ id: string; title: string } | null>(null);
   async function saveRename() {
-    if (!renaming || !renaming.title.trim()) return;
+    if (readOnly || !renaming || !renaming.title.trim()) return;
     setBusy(true);
     const { error } = await supabase.from("workouts").update({ title: renaming.title.trim() }).eq("id", renaming.id);
     setBusy(false);
@@ -110,7 +112,7 @@ function LogPage() {
 
   async function replan() {
     const g = copying;
-    if (busy || !g) return;
+    if (readOnly || busy || !g) return;
     setBusy(true);
     try {
       const gymId = form.gymId || null;
@@ -149,7 +151,7 @@ function LogPage() {
   }
 
   async function remove() {
-    if (!deleting || busy) return;
+    if (readOnly || !deleting || busy) return;
     setBusy(true);
     try {
       const { error } = await supabase
@@ -233,10 +235,10 @@ function LogPage() {
               <Switch checked={form.circuit} onCheckedChange={(circuit) => setForm({ ...form, circuit })} />
             </label>
             <div className="flex justify-end gap-2">
-              <Button variant="ghost" disabled={busy} onClick={() => setCopying(null)}>
+              <Button variant="ghost" disabled={readOnly || busy} onClick={() => setCopying(null)}>
                 {t("common.cancel")}
               </Button>
-              <Button disabled={busy || !form.title.trim() || !form.date} onClick={() => void replan()}>
+              <Button disabled={readOnly || busy || !form.title.trim() || !form.date} onClick={() => void replan()}>
                 {t("log.plan")}
               </Button>
             </div>
@@ -325,13 +327,13 @@ function LogPage() {
                     ))}
                     <div className="flex items-center justify-end gap-1 px-2 py-1 text-xs text-muted-foreground">
                       <span className="mr-auto">{sets} {t("common.sets")} · {places.join(", ")}</span>
-                      {g.workoutId && <Button variant="ghost" size="icon" disabled={busy} title={t("log.rename")} aria-label={`${t("log.rename")}: ${titleOf(g)}`} onClick={() => setRenaming({ id: g.workoutId!, title: titleOf(g) })}>
+                      {g.workoutId && <Button variant="ghost" size="icon" disabled={readOnly || busy} title={t("log.rename")} aria-label={`${t("log.rename")}: ${titleOf(g)}`} onClick={() => setRenaming({ id: g.workoutId!, title: titleOf(g) })}>
                         <Pencil className="size-4" />
                       </Button>}
-                      <Button variant="ghost" size="icon" disabled={busy} title={t("log.planAgain")} aria-label={`${t("log.planAgain")}: ${titleOf(g)}`} onClick={() => openCopy(g)}>
+                      <Button variant="ghost" size="icon" disabled={readOnly || busy} title={t("log.planAgain")} aria-label={`${t("log.planAgain")}: ${titleOf(g)}`} onClick={() => openCopy(g)}>
                         <Repeat className="size-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" disabled={busy} className="text-destructive" title={t("log.removeWorkout")} aria-label={`${t("log.removeWorkout")}: ${titleOf(g)}`} onClick={() => setDeleting(g)}>
+                      <Button variant="ghost" size="icon" disabled={readOnly || busy} className="text-destructive" title={t("log.removeWorkout")} aria-label={`${t("log.removeWorkout")}: ${titleOf(g)}`} onClick={() => setDeleting(g)}>
                         <Trash2 className="size-4" />
                       </Button>
                     </div>
@@ -387,13 +389,13 @@ function LogPage() {
                     </span>
                   </span>
                 </Button>
-                {g.workoutId && <Button variant="ghost" size="icon" disabled={busy} title={t("log.rename")} aria-label={`${t("log.rename")}: ${titleOf(g)}`} onClick={() => setRenaming({ id: g.workoutId!, title: titleOf(g) })}>
+                {g.workoutId && <Button variant="ghost" size="icon" disabled={readOnly || busy} title={t("log.rename")} aria-label={`${t("log.rename")}: ${titleOf(g)}`} onClick={() => setRenaming({ id: g.workoutId!, title: titleOf(g) })}>
                   <Pencil className="size-4" />
                 </Button>}
                 <Button
                   variant="ghost"
                   size="icon"
-                  disabled={busy}
+                  disabled={readOnly || busy}
                   title={t("log.planAgain")}
                   aria-label={`${t("log.planAgain")}: ${titleOf(g)}`}
                   onClick={() => openCopy(g)}
@@ -403,7 +405,7 @@ function LogPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  disabled={busy}
+                  disabled={readOnly || busy}
                   className="text-destructive"
                   title={t("log.removeWorkout")}
                   aria-label={`${t("log.removeWorkout")}: ${titleOf(g)}`}
@@ -454,9 +456,9 @@ function LogPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogCancel disabled={readOnly || busy}>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
-              disabled={busy}
+              disabled={readOnly || busy}
               onClick={(ev) => {
                 ev.preventDefault();
                 void remove();
@@ -472,7 +474,7 @@ function LogPage() {
           <div className="mx-auto w-full max-w-md space-y-3 px-4 pb-8">
             <DrawerHeader className="px-0"><DrawerTitle className="font-display text-2xl">{t("log.renameWorkout")}</DrawerTitle><DrawerDescription className="sr-only">{t("log.rename")}</DrawerDescription></DrawerHeader>
             <Input autoFocus value={renaming?.title ?? ""} onChange={(e) => setRenaming((r) => r && { ...r, title: e.target.value })} onKeyDown={(e) => { if (e.key === "Enter") void saveRename(); }} />
-            <Button className="w-full" disabled={busy || !renaming?.title.trim()} onClick={() => void saveRename()}>{t("common.save")}</Button>
+            <Button className="w-full" disabled={readOnly || busy || !renaming?.title.trim()} onClick={() => void saveRename()}>{t("common.save")}</Button>
           </div>
         </DrawerContent>
       </Drawer>

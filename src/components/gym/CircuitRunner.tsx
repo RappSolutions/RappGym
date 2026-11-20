@@ -1,3 +1,4 @@
+import { useUserView } from "@/lib/user-view";
 import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,6 +23,7 @@ import { Switch } from "@/components/ui/switch";
 /** Guided runner for one workout. Rows and completed sets are read live, so exercises can be added, reordered and removed mid-workout. */
 export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClose: () => void }) {
   const { t, localize } = useLanguage();
+  const { readOnly } = useUserView();
   const qc = useQueryClient();
   const { data: allExercises = [] } = useQuery(exercisesQuery);
   const { data: log = [] } = useQuery(logQuery);
@@ -70,6 +72,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
   const refresh = () => Promise.all([qc.invalidateQueries({ queryKey: ["log"] }), qc.invalidateQueries({ queryKey: ["workout-suggestions"] })]);
 
   async function close(finished: boolean) {
+    if (readOnly) { onClose(); return; }
     if (finished) {
       await supabase.from("log_entries").delete().eq("workout_id", workoutId).eq("status", "suggested");
       toast.success(t("circuitRunner.workoutDoneSetsLogged", { length: doneRows.length }));
@@ -87,7 +90,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
   const setRep = (v: number) => r && setReps((m) => new Map(m).set(r.id, Math.max(0, v)));
 
   async function run(fn: () => Promise<unknown>) {
-    if (busy) return;
+    if (readOnly || busy) return;
     setBusy(true);
     try { await fn(); } catch { toast.error(t("common.couldNotSaveTryAgain")); } finally { setBusy(false); }
   }
@@ -125,7 +128,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
       <DrawerContent>
         <div className="mx-auto max-h-[85vh] w-full max-w-md space-y-3 overflow-y-auto px-4 pb-8">
           <DrawerHeader className="space-y-2 px-0">
-            <div className="relative"><Input aria-label={t("circuitRunner.workoutName")} value={title ?? workout?.title ?? ""} onChange={(e) => setTitle(e.target.value)} onBlur={saveTitle} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} className="h-9 pr-8 text-sm font-semibold" /><Pencil className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /></div>
+            <div className="relative"><Input disabled={readOnly} aria-label={t("circuitRunner.workoutName")} value={title ?? workout?.title ?? ""} onChange={(e) => setTitle(e.target.value)} onBlur={saveTitle} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} className="h-9 pr-8 text-sm font-semibold" /><Pencil className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /></div>
             <DrawerTitle className="font-display text-2xl">
               {total === 0 || !step ? t("circuitRunner.addAnExercise") : <>{t(`phase.${step.phase}`)} · {showLaps ? <>{t("circuitRunner.lap", { v0: step?.lap ?? laps, laps })} · </> : !circuit ? <>{`Set ${step?.set ?? 1}/${step?.row.sets ?? 1}`} · </> : null}{t("circuitRunner.step", { stepNo, total })}</>}
             </DrawerTitle>
@@ -148,12 +151,12 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
           </DrawerHeader>
 
           <div className="flex items-center gap-2">
-            <label className="flex flex-1 items-center justify-between gap-2 rounded-lg border px-3 py-1.5 text-sm"><span className="font-medium">{t("common.runAsCircuit")}</span><Switch checked={circuit} disabled={busy} onCheckedChange={(value) => void run(async () => { const { error } = await supabase.from("workouts").update({ is_circuit: value }).eq("id", workoutId); if (error) throw error; await qc.invalidateQueries({ queryKey: ["workout", workoutId] }); })} /></label>
+            <label className="flex flex-1 items-center justify-between gap-2 rounded-lg border px-3 py-1.5 text-sm"><span className="font-medium">{t("common.runAsCircuit")}</span><Switch checked={circuit} disabled={readOnly || busy} onCheckedChange={(value) => void run(async () => { const { error } = await supabase.from("workouts").update({ is_circuit: value }).eq("id", workoutId); if (error) throw error; await qc.invalidateQueries({ queryKey: ["workout", workoutId] }); })} /></label>
             <Button variant={listOpen ? "default" : "outline"} size="icon" aria-pressed={listOpen} aria-label={t("circuitRunner.exercisesInWorkout")} title={t("circuitRunner.exercisesInWorkout")} onClick={() => setListOpen((v) => !v)}><ListOrdered className="size-4" /></Button>
-            <Button variant={adding ? "default" : "outline"} aria-pressed={adding} aria-label={t("common.addExercise")} title={t("common.addExercise")} onClick={() => setAdding((v) => !v)}><Plus className="size-4" /><Dumbbell className="size-4" /></Button>
+            <Button disabled={readOnly} variant={adding ? "default" : "outline"} aria-pressed={adding} aria-label={t("common.addExercise")} title={t("common.addExercise")} onClick={() => setAdding((v) => !v)}><Plus className="size-4" /><Dumbbell className="size-4" /></Button>
           </div>
 
-          {adding && <ExercisePickList exercises={pickable} disabled={busy} onPick={(e, ph) => void run(async () => { await addPlannedExercise(workoutId, e.code, rows, workout?.gym_id ?? null, last.get(e.code)?.load ?? "", circuit ? Math.max(1, laps) : 3, last.get(e.code)?.reps ?? 10, ph); await refresh(); setAdding(false); toast.success(`${e.code} ${t("circuitRunner.added")}`); })} />}
+          {adding && <ExercisePickList exercises={pickable} disabled={readOnly || busy} onPick={(e, ph) => void run(async () => { await addPlannedExercise(workoutId, e.code, rows, workout?.gym_id ?? null, last.get(e.code)?.load ?? "", circuit ? Math.max(1, laps) : 3, last.get(e.code)?.reps ?? 10, ph); await refresh(); setAdding(false); toast.success(`${e.code} ${t("circuitRunner.added")}`); })} />}
 
           {listOpen && rows.length > 0 && <div className="rounded-md border text-sm">
             {groupByPhase(rows).map((g) => <div key={g.phase}><p className="border-b bg-muted/50 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t(`phase.${g.phase}`)}</p><div className="divide-y">{g.rows.map((row) => {
@@ -162,10 +165,10 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
                 <span className="w-10 font-bold text-category-ink">{row.code}</span>
                 <span className="flex-1 truncate">{localize(allExercises.find((e) => e.code === row.code) ?? { code: row.code, name: row.code } as never).name}</span>
                 <span className="tabular-nums text-xs text-muted-foreground">{Math.min(doneSets, row.sets)}/{row.sets}</span>
-                <PhaseSelect value={row.phase} disabled={busy} onChange={(ph) => void run(async () => { await setRowPhase(row.id, ph); await refresh(); })} />
-                <Button variant="ghost" size="icon" className="size-8" disabled={busy || !canMove(rows, row.id, -1)} aria-label={t("common.moveUp")} onClick={() => void run(async () => { await moveRow(rows, row.id, -1); await refresh(); })}><ArrowUp className="size-4" /></Button>
-                <Button variant="ghost" size="icon" className="size-8" disabled={busy || !canMove(rows, row.id, 1)} aria-label={t("common.moveDown")} onClick={() => void run(async () => { await moveRow(rows, row.id, 1); await refresh(); })}><ArrowDown className="size-4" /></Button>
-                <Button variant="ghost" size="icon" className="size-8 text-destructive" disabled={busy} aria-label={t("common.remove")} onClick={async () => { if (await confirmDialog(t("circuitRunner.removeFromTheWorkoutLogged", { code: row.code }))) void run(async () => { await removePlannedRow(row.id); await refresh(); }); }}><Trash2 className="size-4" /></Button>
+                <PhaseSelect value={row.phase} disabled={readOnly || busy} onChange={(ph) => void run(async () => { await setRowPhase(row.id, ph); await refresh(); })} />
+                <Button variant="ghost" size="icon" className="size-8" disabled={readOnly || busy || !canMove(rows, row.id, -1)} aria-label={t("common.moveUp")} onClick={() => void run(async () => { await moveRow(rows, row.id, -1); await refresh(); })}><ArrowUp className="size-4" /></Button>
+                <Button variant="ghost" size="icon" className="size-8" disabled={readOnly || busy || !canMove(rows, row.id, 1)} aria-label={t("common.moveDown")} onClick={() => void run(async () => { await moveRow(rows, row.id, 1); await refresh(); })}><ArrowDown className="size-4" /></Button>
+                <Button variant="ghost" size="icon" className="size-8 text-destructive" disabled={readOnly || busy} aria-label={t("common.remove")} onClick={async () => { if (await confirmDialog(t("circuitRunner.removeFromTheWorkoutLogged", { code: row.code }))) void run(async () => { await removePlannedRow(row.id); await refresh(); }); }}><Trash2 className="size-4" /></Button>
               </div>;
             })}</div></div>)}
           </div>}
@@ -175,17 +178,17 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
             {ex && <ExerciseImages exercise={ex} />}
             {ex?.instructions && <p className="text-sm leading-relaxed">{ex.instructions}</p>}
             
-            <div className="grid grid-cols-2 gap-3">
+            <fieldset disabled={readOnly} className="grid grid-cols-2 gap-3">
               <div className="space-y-1"><p className="text-sm font-medium">{t("common.weightKg")}</p>
                 <div className="flex items-center gap-1"><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="-5 kg" onClick={() => setLoad(adjustLoad(load, -5))}><Minus /></Button><Input inputMode="decimal" value={load} onChange={(e) => setLoad(e.target.value)} className="h-10 min-w-0 px-1 text-center text-lg font-bold" /><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="+5 kg" onClick={() => setLoad(adjustLoad(load, 5))}><Plus /></Button></div></div>
               <div className="space-y-1"><p className="text-sm font-medium">{t(`repsUnitLong.${repsUnit(rawEx)}`)}</p>
                 <div className="flex items-center gap-1"><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="-1" onClick={() => setRep(rep - 1)}><Minus /></Button><Input inputMode="numeric" value={rep} onChange={(e) => setRep(Number(e.target.value) || 0)} className="h-10 min-w-0 px-1 text-center text-lg font-bold" /><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="+1" onClick={() => setRep(rep + 1)}><Plus /></Button></div></div>
-            </div>
-            <div className="flex gap-2"><Button variant="ghost" disabled={busy} onClick={() => { if (step) { setSkipped((s) => new Set(s).add(keyOf(step))); advance(); } }}><SkipForward className="size-4" />{t("circuitRunner.skip")}</Button><Button className="h-12 flex-1 text-lg" disabled={busy} onClick={() => void logStep()}><Check />{t("circuitRunner.done")}</Button></div>
+            </fieldset>
+            <div className="flex gap-2"><Button variant="ghost" disabled={readOnly || busy} onClick={() => { if (step) { setSkipped((s) => new Set(s).add(keyOf(step))); advance(); } }}><SkipForward className="size-4" />{t("circuitRunner.skip")}</Button><Button className="h-12 flex-1 text-lg" disabled={readOnly || busy} onClick={() => void logStep()}><Check />{t("circuitRunner.done")}</Button></div>
           </div>}
           {!r && total > 0 && <p className="text-sm text-muted-foreground">{t("circuitRunner.allSetsDoneAddThe")}</p>}
           <div className="flex gap-2">
-            {doneRows.length > 0 && <Button variant="ghost" size="sm" disabled={busy} onClick={() => void undo()}><Undo2 className="size-4" />{t("circuitRunner.undoLastSet2")}</Button>}
+            {doneRows.length > 0 && <Button variant="ghost" size="sm" disabled={readOnly || busy} onClick={() => void undo()}><Undo2 className="size-4" />{t("circuitRunner.undoLastSet2")}</Button>}
             <Button variant="outline" size="sm" className="ml-auto" disabled={busy} onClick={() => void close(doneRows.length > 0)}>{t("circuitRunner.endWorkout")}</Button>
           </div>
         </div>

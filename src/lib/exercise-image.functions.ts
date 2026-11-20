@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertUserViewWritable } from "@/lib/user-view-guard";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -10,6 +11,7 @@ export const generateExerciseImage = createServerFn({ method: "POST" })
   .inputValidator(z.object({ exerciseId: z.string().uuid(), wishes: z.string().max(1000).default("") }))
   .handler(async ({ data, context }): Promise<{ path: string | null; error: string | null }> => {
     const { supabase, userId } = context;
+    await assertUserViewWritable(supabase);
     const { data: ex } = await supabase.from("exercises").select("id,code,name,instructions,eq:exercise_equipment(name)").eq("id", data.exerciseId).maybeSingle();
     if (!ex) return { path: null, error: "Exercise not found." };
     const key = process.env["LOVABLE_API_KEY"];

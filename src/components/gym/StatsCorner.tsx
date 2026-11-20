@@ -1,3 +1,4 @@
+import { useUserView } from "@/lib/user-view";
 import { useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, BarChart3 } from "lucide-react";
@@ -65,6 +66,7 @@ function Bars({
 /** Collapsed statistics corner at the bottom of Home (replaces the former Statistics page). */
 export function StatsCorner() {
   const { t, localize } = useLanguage();
+  const { readOnly } = useUserView();
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
   const { data: allLog } = useSuspenseQuery(logQuery);
   const { data: gyms } = useSuspenseQuery(gymsQuery);
@@ -79,6 +81,7 @@ export function StatsCorner() {
   const categories = categoriesOf(exercises);
 
   async function importExcel() {
+    if (readOnly) return;
     setBusy(true);
     const history = (await import("@/data/history.json")).default;
     const { error } = await supabase
@@ -152,7 +155,7 @@ export function StatsCorner() {
           )}
           {log.length > 0 && <ProgressOverview key={place + period} log={log} exercises={exercises} />}
           {allLog.length === 0 && (
-            <Button variant="outline" onClick={importExcel} disabled={busy} className="w-full">
+            <Button variant="outline" onClick={importExcel} disabled={readOnly || busy} className="w-full">
               {t("statsCorner.importExcelHistory")}
             </Button>
           )}

@@ -1,0 +1,3 @@
+CREATE POLICY "user view blocks image insert" ON storage.objects AS RESTRICTIVE FOR INSERT TO authenticated WITH CHECK (bucket_id <> 'exercise-images' OR NOT (SELECT public.user_view_active()));
+CREATE POLICY "user view blocks image update" ON storage.objects AS RESTRICTIVE FOR UPDATE TO authenticated USING (bucket_id <> 'exercise-images' OR NOT (SELECT public.user_view_active())) WITH CHECK (bucket_id <> 'exercise-images' OR NOT (SELECT public.user_view_active()));
+CREATE POLICY "user view blocks image delete" ON storage.objects AS RESTRICTIVE FOR DELETE TO authenticated USING (bucket_id <> 'exercise-images' OR NOT (SELECT public.user_view_active()));

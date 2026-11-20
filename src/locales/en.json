@@ -1,4 +1,12 @@
 {
+  "userView": {
+    "viewAs": "View as user",
+    "viewing": "Viewing {{name}}",
+    "readOnly": "Read only",
+    "exit": "Exit user view",
+    "failed": "The user view could not be loaded",
+    "sessionRequired": "Sign in again with Google or Microsoft to open a session-scoped user view."
+  },
   "aiUsageManager": {
     "blockAiRequestsEntirely": "Block AI requests entirely",
     "blocked": "Blocked",

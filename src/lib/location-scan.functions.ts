@@ -1,4 +1,5 @@
 import { i18n } from "@/lib/i18n-core";
+import { assertUserViewWritable } from "@/lib/user-view-guard";
 import { EXERCISE_SELECT, normalizeExercise } from "@/lib/exercise-refs";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
@@ -12,6 +13,7 @@ export const scanLocationPhoto = createServerFn({ method: "POST" })
   .inputValidator(z.object({ gymId: z.string().uuid(), image: imageSchema, language: z.enum(["sv", "en"]) }))
   .handler(async ({ data, context }): Promise<{ exerciseIds: string[]; equipment: string; error: string | null }> => {
     const { supabase, userId } = context;
+    await assertUserViewWritable(supabase, data.language);
     const fail = (error: string) => ({ exerciseIds: [], equipment: "", error });
     const { data: gym } = await supabase.from("gyms").select("id").eq("id", data.gymId).maybeSingle();
     if (!gym) return fail(i18n.getFixedT(data.language)("server.locationNotFound"));

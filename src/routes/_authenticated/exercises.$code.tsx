@@ -1,3 +1,5 @@
+import { useIsAdmin } from "@/lib/roles";
+import { useUserView } from "@/lib/user-view";
 import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useLanguage } from "@/lib/i18n";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -33,6 +35,8 @@ export const Route = createFileRoute("/_authenticated/exercises/$code")({
 
 function ExercisePage() {
   const { t, language, localize } = useLanguage();
+  const { readOnly } = useUserView();
+  const { isAdmin } = useIsAdmin();
   const { code } = Route.useParams();
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
   const { data: log } = useSuspenseQuery(logQuery);
@@ -72,9 +76,9 @@ function ExercisePage() {
       <ExerciseImages exercise={ex} />
       {ex.instructions && <p className="whitespace-pre-line leading-relaxed">{ex.instructions}</p>}
       <div className="flex gap-2">
-        <Button onClick={() => { setEntry(null); setLogging(true); }} className="h-12 flex-1 font-bold uppercase"><Plus className="h-5 w-5" />{t("common.logSets")}</Button>
-        <Button variant="secondary" className="h-12" onClick={() => setEditing(true)} aria-label={t("common.edit")}><Pencil className="h-5 w-5" /></Button>
-        <Button variant="secondary" className="h-12" onClick={remove} aria-label={t("common.delete")}><Trash2 className="h-5 w-5" /></Button>
+        <Button disabled={readOnly} onClick={() => { setEntry(null); setLogging(true); }} className="h-12 flex-1 font-bold uppercase"><Plus className="h-5 w-5" />{t("common.logSets")}</Button>
+        {isAdmin && <Button variant="secondary" className="h-12" onClick={() => setEditing(true)} aria-label={t("common.edit")}><Pencil className="h-5 w-5" /></Button>}
+        {isAdmin && <Button variant="secondary" className="h-12" onClick={remove} aria-label={t("common.delete")}><Trash2 className="h-5 w-5" /></Button>}
       </div>
       {chart.length > 1 && (
         <div className="h-48 rounded-xl border bg-card p-2">

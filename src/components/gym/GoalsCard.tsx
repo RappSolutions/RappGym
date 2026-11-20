@@ -1,3 +1,4 @@
+import { useUserView } from "@/lib/user-view";
 import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -18,6 +19,7 @@ import { useLanguage } from "@/lib/i18n";
 
 export function GoalsCard() {
   const { t } = useLanguage();
+  const { readOnly } = useUserView();
   const qc = useQueryClient();
   const { data: goals } = useSuspenseQuery(goalsQuery);
   const [expanded, setExpanded] = useState(false);
@@ -43,6 +45,7 @@ export function GoalsCard() {
     return !error;
   }
   async function save() {
+    if (readOnly) return;
     const value = text.trim();
     if (!value) return;
     const row = { text: value.slice(0, 300), target_date: date || null };
@@ -86,6 +89,7 @@ export function GoalsCard() {
       </div>
       {!isGoalOpen(g) && (
         <Button
+          disabled={readOnly}
           size="icon"
           variant="ghost"
           aria-label={t("common.reactivate")}
@@ -97,7 +101,7 @@ export function GoalsCard() {
       )}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button size="icon" variant="ghost" aria-label={t("goalsCard.finalizeGoal")}>
+          <Button disabled={readOnly} size="icon" variant="ghost" aria-label={t("goalsCard.finalizeGoal")}>
             <Flag className="size-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -111,12 +115,13 @@ export function GoalsCard() {
             ))}
         </DropdownMenuContent>
       </DropdownMenu>
-      <Button size="icon" variant="ghost" aria-label={t("common.edit")} onClick={() => edit(g)}>
+      <Button disabled={readOnly} size="icon" variant="ghost" aria-label={t("common.edit")} onClick={() => edit(g)}>
         <Pencil className="size-4" />
       </Button>
       <Button
         size="icon"
         variant="ghost"
+        disabled={readOnly}
         aria-label={t("common.delete")}
         onClick={async () => {
           if (await confirmDialog(t("goalsCard.deleteTheGoal", { text: g.text })))
@@ -146,6 +151,7 @@ export function GoalsCard() {
       {expanded && (
         <>
           <ul className="divide-y divide-border">{open.map(row)}</ul>
+          <fieldset disabled={readOnly}>
           <form
             className="flex flex-wrap gap-2"
             onSubmit={(e) => {
@@ -186,6 +192,7 @@ export function GoalsCard() {
               </Button>
             )}
           </form>
+          </fieldset>
           <p className="text-sm text-muted-foreground">
             {t("goalsCard.theseGoalsAndYourProfile")}
           </p>

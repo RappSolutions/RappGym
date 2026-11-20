@@ -1,3 +1,4 @@
+import { useUserView } from "@/lib/user-view";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ export function WorkoutBuilder({
   quickStart?: boolean;
 }) {
   const { t, localize } = useLanguage();
+  const { readOnly } = useUserView();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [picked, setPicked] = useState<string[]>([]);
@@ -35,7 +37,7 @@ export function WorkoutBuilder({
   const cats = categoriesOf(exercises);
 
   async function save(start: boolean) {
-    if (!picked.length || busy) return;
+    if (readOnly || !picked.length || busy) return;
     setBusy(true);
     const workoutId = crypto.randomUUID();
     const head = await supabase
@@ -84,6 +86,7 @@ export function WorkoutBuilder({
         variant={quickStart ? "secondary" : "outline"}
         size={quickStart ? "lg" : "default"}
         className="w-full px-4"
+        disabled={readOnly}
         onClick={() => setOpen(true)}
       >
         {quickStart ? <Play className="size-4" /> : <ListPlus className="size-4" />}

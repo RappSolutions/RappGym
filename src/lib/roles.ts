@@ -1,5 +1,6 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserView } from "@/lib/user-view";
 
 /** The signed-in user's roles; RLS only exposes the caller's own rows. Write access is enforced by the database. */
 export const myRolesQuery = queryOptions({
@@ -12,6 +13,7 @@ export const myRolesQuery = queryOptions({
 });
 
 export function useIsAdmin() {
+  const { readOnly } = useUserView();
   const { data, isLoading } = useQuery(myRolesQuery);
-  return { isAdmin: !!data?.includes("admin"), isLoading };
+  return { isAdmin: !readOnly && !!data?.includes("admin"), isLoading };
 }

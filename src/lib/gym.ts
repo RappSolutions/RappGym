@@ -179,13 +179,17 @@ export const gymsQuery = queryOptions({
 });
 
 const GYM_KEY = "selected-gym";
+let gymScope = "";
+export function setGymViewScope(actorId: string, targetId: string) {
+  gymScope = actorId === targetId ? "" : `:view:${actorId}:${targetId}`;
+}
 const listeners = new Set<() => void>();
 export function getSelectedGym(): string | null {
-  return typeof window === "undefined" ? null : localStorage.getItem(GYM_KEY);
+  return typeof window === "undefined" ? null : localStorage.getItem(GYM_KEY + gymScope);
 }
 export function setSelectedGym(id: string | null) {
-  if (id) localStorage.setItem(GYM_KEY, id);
-  else localStorage.removeItem(GYM_KEY);
+  if (id) localStorage.setItem(GYM_KEY + gymScope, id);
+  else localStorage.removeItem(GYM_KEY + gymScope);
   listeners.forEach((l) => l());
 }
 export function subscribeGym(l: () => void) {

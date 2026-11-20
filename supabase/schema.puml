@@ -19,6 +19,15 @@ entity user_roles {
   * user_id : uuid <<FK>>
   * role : app_role (admin|user)
 }
+entity admin_user_views {
+  * id : uuid <<PK>>
+  --
+  * auth_session_id : uuid <<UQ active>>
+  * actor_id : uuid
+  * target_user_id : uuid
+  * started_at : timestamptz
+  ended_at : timestamptz
+}
 entity gyms {
   * id : uuid <<PK>>
   --
@@ -153,6 +162,7 @@ entity training_profiles {
 }
 
 users ||--o{ user_roles : "CASCADE"
+users ||..o{ admin_user_views : "actor / target (read-only audit)"
 users ||..o{ gyms
 users ||..o{ workouts
 users ||..o{ log_entries

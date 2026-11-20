@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_user_views: {
+        Row: {
+          actor_id: string
+          auth_session_id: string
+          ended_at: string | null
+          id: string
+          started_at: string
+          target_user_id: string
+        }
+        Insert: {
+          actor_id: string
+          auth_session_id: string
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          target_user_id: string
+        }
+        Update: {
+          actor_id?: string
+          auth_session_id?: string
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       ai_tiers: {
         Row: {
           created_at: string
@@ -564,6 +591,8 @@ export type Database = {
           used: number
         }[]
       }
+      effective_user_id: { Args: never; Returns: string }
+      end_user_view: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -572,6 +601,8 @@ export type Database = {
         Returns: boolean
       }
       is_exercise_image: { Args: { _path: string }; Returns: boolean }
+      start_user_view: { Args: { _target_user_id: string }; Returns: string }
+      user_view_active: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user"

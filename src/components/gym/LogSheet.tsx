@@ -1,3 +1,4 @@
+import { useUserView } from "@/lib/user-view";
 import { AdminExerciseEdit } from "@/components/gym/AdminExerciseEdit";
 import { repsUnit } from "@/lib/reps-unit";
 import { confirmDialog } from "@/components/gym/ConfirmHost";
@@ -47,6 +48,7 @@ export function LogSheet({
   progress?: string | undefined;
 }) {
   const { t, language, localize } = useLanguage();
+  const { readOnly } = useUserView();
   const invalidate = useInvalidateGym();
   const [round, setRound] = useState(1);
   const [load, setLoad] = useState("");
@@ -71,7 +73,7 @@ export function LogSheet({
   }, [exercise, entry, last, gymId]);
 
   async function save(complete = true) {
-    if (!exercise) return;
+    if (!exercise || readOnly) return;
     setBusy(true);
     const row = { code: exercise.code, sets: Math.max(1, round), load, reps, note: note || null, date, status: entry?.status === "suggested" && !complete ? "suggested" : "completed", ...(entry?.status === "suggested" && complete ? { created_at: new Date().toISOString() } : {}), gym_id: place || null };
     const { error } = entry
@@ -100,7 +102,7 @@ export function LogSheet({
   }
 
   async function remove() {
-    if (!entry) return;
+    if (!entry || readOnly) return;
     if (!await confirmDialog(t("logSheet.deleteThisLogEntry"))) return;
     const { error } = await supabase.from("log_entries").delete().eq("id", entry.id);
     if (error) {
@@ -125,6 +127,7 @@ export function LogSheet({
             </DrawerDescription>
           </DrawerHeader>
           {shown && <ExerciseImages exercise={shown} />}
+          <fieldset disabled={readOnly} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <Stepper label={t("logSheet.numberOfSets")} value={round} onChange={setRound} />
             <Stepper label={t(`repsUnit.${repsUnit(exercise)}`)} value={reps} onChange={setReps} />
@@ -150,13 +153,14 @@ export function LogSheet({
             <Label htmlFor="log-note">{t("logSheet.notesFeel")}</Label>
             <Textarea id="log-note" value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
           </div>
-          <Button onClick={() => void save()} disabled={busy} className="h-14 w-full text-lg font-bold uppercase">
+          <Button onClick={() => void save()} disabled={readOnly || busy} className="h-14 w-full text-lg font-bold uppercase">
             {entry?.status === "suggested" ? t("logSheet.confirmCompleted") : entry ? t("logSheet.saveChanges") : t("common.logSets")}
           </Button>
-          {entry?.status === "suggested" && <Button variant="outline" disabled={busy} className="w-full" onClick={() => void save(false)}>{t("logSheet.saveAdjustedSuggestion")}</Button>}
+          {entry?.status === "suggested" && <Button variant="outline" disabled={readOnly || busy} className="w-full" onClick={() => void save(false)}>{t("logSheet.saveAdjustedSuggestion")}</Button>}
           {entry && (
-            <Button variant="ghost" disabled={busy} onClick={remove} className="w-full text-destructive">{t("common.delete")}</Button>
+            <Button variant="ghost" disabled={readOnly || busy} onClick={remove} className="w-full text-destructive">{t("common.delete")}</Button>
           )}
+          </fieldset>
         </div>
       </DrawerContent>
     </Drawer>

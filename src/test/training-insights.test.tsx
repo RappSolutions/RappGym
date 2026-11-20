@@ -2,10 +2,11 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TrainingInsights } from "@/components/gym/TrainingInsights";
 
-const { generate } = vi.hoisted(() => ({ generate: vi.fn() }));
+const { generate, viewState } = vi.hoisted(() => ({ generate: vi.fn(), viewState: { readOnly: false } }));
 
 vi.mock("@/lib/training-insights.functions", () => ({ getTrainingInsights: vi.fn() }));
 vi.mock("@/lib/ai-quota.functions", () => ({ getMyAiQuota: vi.fn() }));
+vi.mock("@/lib/user-view", () => ({ useUserView: () => viewState }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: () => generate }));
 vi.mock("@tanstack/react-query", async (importOriginal) => ({
   ...await importOriginal<typeof import("@tanstack/react-query")>(),
@@ -18,11 +19,18 @@ vi.mock("@tanstack/react-router", async (importOriginal) => ({ ...(await importO
 
 afterEach(cleanup);
 beforeEach(() => {
+  viewState.readOnly = false;
   generate.mockReset();
   generate.mockResolvedValue({ insights: null, error: null });
 });
 
 describe("TrainingInsights initial request mode", () => {
+  it("cannot issue paid AI requests while viewing another user", () => {
+    viewState.readOnly = true;
+    render(<TrainingInsights exercises={[]} hasLog initialMode="plan" />);
+    fireEvent.click(screen.getByRole("button", { name: "Ge mig passförslag" }));
+    expect(generate).not.toHaveBeenCalled();
+  });
   it("submits a plan when opened from the workout AI shortcut", async () => {
     render(<TrainingInsights exercises={[]} hasLog initialMode="plan" />);
     fireEvent.click(screen.getByRole("button", { name: "Ge mig passförslag" }));

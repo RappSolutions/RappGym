@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertUserViewWritable } from "@/lib/user-view-guard";
 import { lastMonths, mapQuotaRow, monthKey, type AiQuotaStatus } from "@/lib/ai-quota";
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
@@ -11,7 +12,9 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
 export const getMyAiQuota = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<AiQuotaStatus> => {
-    const { data, error } = await context.supabase.rpc("ai_quota_status", { _user_id: context.userId });
+    const { data: effectiveId, error: viewError } = await context.supabase.rpc("effective_user_id");
+    if (viewError || !effectiveId) throw new Error(viewError?.message ?? "No user");
+    const { data, error } = await context.supabase.rpc("ai_quota_status", { _user_id: effectiveId });
     if (error || !data?.[0]) throw new Error(error?.message ?? "No quota");
     return mapQuotaRow(data[0]);
   });
@@ -25,6 +28,7 @@ export const getAiUsageReport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ today: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), months: z.number().int().min(1).max(24) }))
   .handler(async ({ data, context }): Promise<AiUsageReport> => {
+    await assertUserViewWritable(context.supabase);
     await assertAdmin(context);
     const sb = context.supabase;
     const months = lastMonths(data.today, data.months);
@@ -70,6 +74,7 @@ export const setUserAiQuota = createServerFn({ method: "POST" })
     setting: z.object({ tierId: z.string().min(1).max(40), customQuota: z.number().int().min(0).max(100000).nullable(), isBlocked: z.boolean(), validUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(), notes: z.string().max(500).nullable() }).nullable(),
   }))
   .handler(async ({ data, context }) => {
+    await assertUserViewWritable(context.supabase);
     await assertAdmin(context);
     const sb = context.supabase;
     if (!data.setting) {

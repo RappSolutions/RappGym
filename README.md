@@ -13,6 +13,7 @@ Live: https://gym.rappen.net
 - **AI:** analysis and structured workout planning through Lovable AI Gateway, on explicit request only. It shows an estimated and actual cost per request and keeps a persistent history.
 - **Home:** dashboard with key figures, the ongoing or today's workout, and soft goals.
 - **Access:** sign in with Google or Microsoft only. A global admin manages exercises, locations and users. Everyone else is a normal user who sees only their own data.
+- **Admin user view:** view an ordinary user's app read-only, retaining the admin identity. A persistent banner ends the view; session-scoped database rules block writes and audit start/end. Future support writes require explicit capabilities and operation-level auditing.
 
 ## Principles
 
@@ -61,6 +62,7 @@ The full PlantUML model lives in [`supabase/schema.puml`](supabase/schema.puml).
 ```mermaid
 erDiagram
   USERS ||--o{ USER_ROLES : has
+  USERS ||--o{ ADMIN_USER_VIEWS : "actor / target"
   USERS ||--o{ GYMS : owns
   USERS ||--o{ WORKOUTS : owns
   USERS ||--o{ LOG_ENTRIES : owns
@@ -82,6 +84,14 @@ erDiagram
     uuid id PK
     uuid user_id FK
     app_role role
+  }
+  ADMIN_USER_VIEWS {
+    uuid id PK
+    uuid auth_session_id "unique while active"
+    uuid actor_id
+    uuid target_user_id
+    timestamptz started_at
+    timestamptz ended_at
   }
   GYMS {
     uuid id PK

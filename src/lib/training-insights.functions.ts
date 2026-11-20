@@ -1,4 +1,5 @@
 import { i18n } from "@/lib/i18n-core";
+import { assertUserViewWritable } from "@/lib/user-view-guard";
 import { EXERCISE_SELECT, normalizeExercise } from "@/lib/exercise-refs";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
@@ -19,6 +20,7 @@ export const getTrainingInsights = createServerFn({ method: "POST" })
   .inputValidator(z.object({ language: z.enum(["sv", "en"]), gymId: z.string().uuid().nullable(), today: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), request: trainingRequestSchema.optional() }))
   .handler(async ({ data, context }): Promise<{ insights: TrainingInsights | null; error: string | null; generatedAt: string | null; historyId?: string }> => {
     const { supabase, userId } = context;
+    await assertUserViewWritable(supabase, data.language);
     // Quota is enforced server-side before any paid AI call; only saved answers count.
     const { data: quotaRows, error: quotaError } = await supabase.rpc("ai_quota_status", { _user_id: userId });
     if (quotaError || !quotaRows?.[0]) throw new Error(quotaError?.message ?? "Quota unavailable");
