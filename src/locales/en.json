@@ -330,7 +330,7 @@
     "permanentlyDelete": "Permanently delete {{name}}?"
   },
   "settings": {
-    "aiQuotasUsage": "AI quotas & usage",
+    "aiQuotasUsage": "AI quotas & stats",
     "categories": "Categories",
     "locations": "Locations",
     "settingsAreManagedByThe": "Settings are managed by the administrator."

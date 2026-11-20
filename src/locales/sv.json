@@ -330,7 +330,7 @@
     "permanentlyDelete": "Radera {{name}} permanent?"
   },
   "settings": {
-    "aiQuotasUsage": "AI-kvoter & förbrukning",
+    "aiQuotasUsage": "AI-kvoter & stats",
     "categories": "Kategorier",
     "locations": "Platser",
     "settingsAreManagedByThe": "Inställningar hanteras av administratören."
