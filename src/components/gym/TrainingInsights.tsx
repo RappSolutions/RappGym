@@ -700,7 +700,9 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                           </span>
                         </div>
                         <p className="mt-1 text-sm leading-relaxed">{workout.focus}</p>
+                        {workout.warmup && <p className="mt-2 text-sm"><span className="font-semibold">{t("insights.warmup")}:</span> {workout.warmup}</p>}
                         {suggestions(workout.exercises)}
+                        {workout.cooldown && <p className="mt-2 text-sm"><span className="font-semibold">{t("insights.cooldown")}:</span> {workout.cooldown}</p>}
                         {saveControl(workout.exercises, workout.dayOffset, workout.title, String(index))}
                       </article>
                     ))}

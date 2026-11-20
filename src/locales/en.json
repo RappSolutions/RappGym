@@ -494,5 +494,9 @@
     "reps": "Reps",
     "sec": "Seconds",
     "min": "Minutes"
+  },
+  "insights": {
+    "warmup": "Warm-up",
+    "cooldown": "Cool-down"
   }
 }

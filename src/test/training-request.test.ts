@@ -3,7 +3,7 @@ import { normalizeTrainingPlan, planStartDate, plannedWorkoutDate, trainingReque
 import type { TrainingInsights } from "@/lib/training-insights-schema";
 
 const suggestion = { code: "DB-EX", sets: 2, reps: 12, load: "15", reason: "" };
-const insights = { summary: "", weightDevelopment: "", setDevelopment: "", recommendation: "", answer: "", exercises: [suggestion], goalNotes: "", caution: "", workouts: [0, 2, 4, 6].map((dayOffset) => ({ title: "", focus: "", dayOffset, exercises: [suggestion] })) } satisfies TrainingInsights;
+const insights = { summary: "", weightDevelopment: "", setDevelopment: "", recommendation: "", answer: "", exercises: [suggestion], goalNotes: "", caution: "", workouts: [0, 2, 4, 6].map((dayOffset) => ({ title: "", focus: "", warmup: "", cooldown: "", dayOffset, exercises: [suggestion] })) } satisfies TrainingInsights;
 const request = trainingRequestSchema.parse({ mode: "plan", workoutCount: 4, periodDays: 7, question: "Ge mig fyra nya pass med bra blandning under 7 dagar", purpose: "Skidåkning" });
 
 describe("Personal training requests", () => {
@@ -51,10 +51,18 @@ d2("long sessions", () => {
   i2("keeps more than 5 exercises so long sessions can fill the requested time", () => {
     const ex = Array.from({ length: 10 }, (_, i) => ({ code: `X${i}`, sets: 4, reps: 10, load: "", reason: "" }));
     const out = normalizeLong(
-      { summary: "", weightDevelopment: "", setDevelopment: "", recommendation: "", exercises: [], answer: "", goalNotes: "", caution: "", workouts: [{ title: "A", dayOffset: 0, focus: "", exercises: ex }] },
+      { summary: "", weightDevelopment: "", setDevelopment: "", recommendation: "", exercises: [], answer: "", goalNotes: "", caution: "", workouts: [{ title: "A", dayOffset: 0, focus: "", warmup: "", cooldown: "", exercises: ex }] },
       { mode: "plan", question: "", workoutCount: 1, periodDays: 1, sessionMinutes: 75, purpose: "", startDate: null },
       ex.map((e) => e.code),
     );
     e2(out.workouts[0]!.exercises).toHaveLength(10);
+  });
+});
+
+import { parseStoredInsights } from "@/lib/training-insights-schema";
+describe("stored AI history", () => {
+  it("parses answers saved before warm-up/cool-down existed", () => {
+    const old = { summary: "", weightDevelopment: "", setDevelopment: "", recommendation: "", exercises: [], answer: "", goalNotes: "", caution: "", workouts: [{ title: "A", dayOffset: 0, focus: "", exercises: [] }] };
+    expect(parseStoredInsights(old).workouts[0]?.warmup).toBe("");
   });
 });
