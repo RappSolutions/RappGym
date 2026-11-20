@@ -232,6 +232,13 @@
       "when": 1795187841888,
       "tag": "0032_user_view_quota_read_scope",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1795196889082,
+      "tag": "0033_user_exercise_preferences",
+      "breakpoints": true
     }
   ]
 }

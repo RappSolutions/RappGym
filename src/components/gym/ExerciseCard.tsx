@@ -1,12 +1,13 @@
 import { useLanguage } from "@/lib/i18n";
 import type { Exercise, LogEntry } from "@/lib/gym";
 import { Button } from "@/components/ui/button";
+import type { Rating } from "@/lib/exercise-preferences";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 export function ExerciseCard({
-  ex, last, doneToday, token, onClick, action, expanded, children, hideLast,
+  ex, last, doneToday, token, onClick, action, expanded, children, hideLast, rating,
 }: {
-  ex: Exercise; last?: LogEntry | undefined; doneToday?: number | undefined; token: string; onClick?: () => void; action?: React.ReactNode; expanded?: boolean; children?: React.ReactNode; hideLast?: boolean;
+  ex: Exercise; last?: LogEntry | undefined; doneToday?: number | undefined; token: string; onClick?: () => void; action?: React.ReactNode; expanded?: boolean; children?: React.ReactNode; hideLast?: boolean; rating?: Rating;
 }) {
   const { t, language, localize } = useLanguage();
   ex = localize(ex);
@@ -24,6 +25,7 @@ export function ExerciseCard({
           </div>
           <div className="mt-0.5 text-sm text-muted-foreground">
             {ex.equipment}
+            {rating !== undefined && rating !== 3 && <span className="ml-2 rounded border px-1 text-xs">{t("rating.title")}: {t(`rating.r${rating}`)}</span>}
           </div>
           
         </div>

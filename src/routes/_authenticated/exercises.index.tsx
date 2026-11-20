@@ -12,6 +12,7 @@ import { ExerciseCard } from "@/components/gym/ExerciseCard";
 import { LogSheet } from "@/components/gym/LogSheet";
 import { Button } from "@/components/ui/button";
 import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
+import { NEVER, exercisePreferencesQuery, ratingOf } from "@/lib/exercise-preferences";
 import { categoriesOf, categoryToken, exercisesQuery, gymsQuery, lastByCode, logQuery, todayISO, type Exercise } from "@/lib/gym";
 
 export const Route = createFileRoute("/_authenticated/exercises/")({
@@ -27,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/exercises/")({
     ],
   }),
   loader: ({ context }) =>
-    Promise.all([context.queryClient.ensureQueryData(gymsQuery), context.queryClient.ensureQueryData(exercisesQuery), context.queryClient.ensureQueryData(logQuery), context.queryClient.ensureQueryData(exerciseLocationsQuery)] ),
+    Promise.all([context.queryClient.ensureQueryData(gymsQuery), context.queryClient.ensureQueryData(exercisesQuery), context.queryClient.ensureQueryData(logQuery), context.queryClient.ensureQueryData(exerciseLocationsQuery), context.queryClient.ensureQueryData(exercisePreferencesQuery)]),
   component: ExercisesPage,
 });
 
@@ -42,7 +43,11 @@ function ExercisesPage() {
   const { data: links } = useSuspenseQuery(exerciseLocationsQuery);
   const [showAll, setShowAll] = useState(false);
   const atPlace = exercisesAtLocation(allExercises, links, gymId);
-  const exercises = showAll ? allExercises : atPlace;
+  const { data: ratings } = useSuspenseQuery(exercisePreferencesQuery);
+  const [showNever, setShowNever] = useState(false);
+  const placed = showAll ? allExercises : atPlace;
+  const neverCount = placed.filter((e) => ratingOf(ratings, e.id) === NEVER).length;
+  const exercises = showNever ? placed : placed.filter((e) => ratingOf(ratings, e.id) !== NEVER);
   const { data: log } = useSuspenseQuery(logQuery);
   const { cat } = Route.useSearch();
   const navigate = Route.useNavigate();
@@ -70,6 +75,7 @@ function ExercisesPage() {
     <main className="space-y-4 px-4">
       <p className="text-sm text-muted-foreground">{t("exercisesIndex.pickAnExerciseToLog")}</p>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} className="size-4" />{t("exercisesIndex.showAllExercisesOfAvailable", { length: atPlace.length, length_: allExercises.length })}</label>
+      {neverCount > 0 && <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={showNever} onChange={(e) => setShowNever(e.target.checked)} className="size-4" />{t("rating.showNever", { count: neverCount })}</label>}
       {!showAll && atPlace.length === 0 && <p className="text-sm text-muted-foreground">{t("exercisesIndex.noExercisesLinkedToThis")}</p>}
       <div className="relative"><Search className="absolute top-3.5 left-3 h-5 w-5 text-muted-foreground" /><Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("exercisesIndex.searchExercise")} className="h-12 pl-10" /></div>
       {todayCount.size > 0 && <p className="text-sm text-muted-foreground">{`${[...todayCount.values()].reduce((a, b) => a + b, 0)} ${t("exercisesIndex.setsLoggedToday")}`}</p>}
@@ -101,6 +107,7 @@ function ExercisesPage() {
             last={last.get(ex.code)}
             doneToday={todayCount.get(ex.code)}
             token={categoryToken(ex.category, cats)}
+            rating={ratingOf(ratings, ex.id)}
             onClick={() => setOpen(ex)}
           />
         ))}

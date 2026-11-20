@@ -182,4 +182,12 @@ gyms |o--o{ workouts : "SET NULL"
 training_ai_history |o--o{ workouts : "SET NULL"
 workouts |o--o{ workouts : "source (SET NULL)"
 gyms |o..o{ training_ai_history
+entity user_exercise_preferences {
+  * user_id : uuid <<PK>>
+  * exercise_id : uuid <<PK,FK>>
+  --
+  rating : smallint (1,2,4,5; none = 3)
+  updated_at : timestamptz
+}
+exercises ||--o{ user_exercise_preferences
 @enduml

@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { ExerciseForm } from "@/components/gym/ExerciseForm";
 import { LogSheet } from "@/components/gym/LogSheet";
 import { ExerciseImages } from "@/components/gym/ExerciseImages";
+import { RatingPicker } from "@/components/gym/RatingPicker";
+import { exercisePreferencesQuery } from "@/lib/exercise-preferences";
 import { supabase } from "@/integrations/supabase/client";
 import { categoriesOf, categoryToken, exercisesQuery, formatDate, logQuery, todayISO, useInvalidateGym, type LogEntry, formatSet } from "@/lib/gym";
 
@@ -27,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/exercises/$code")({
     ],
   }),
   loader: ({ context }) =>
-    Promise.all([context.queryClient.ensureQueryData(exercisesQuery), context.queryClient.ensureQueryData(logQuery)]),
+    Promise.all([context.queryClient.ensureQueryData(exercisesQuery), context.queryClient.ensureQueryData(logQuery), context.queryClient.ensureQueryData(exercisePreferencesQuery)]),
   component: ExercisePage,
   notFoundComponent: () => <p className="p-4">Övningen finns inte.</p>,
   errorComponent: ({ error }) => <p className="p-4">{error instanceof Error ? error.message : String(error)}</p>,
@@ -73,6 +75,7 @@ function ExercisePage() {
         <h1 className="text-4xl font-extrabold uppercase leading-none">{ex.name}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{ex.equipment}</p>
       </div>
+      <RatingPicker exerciseId={ex.id} />
       <ExerciseImages exercise={ex} />
       {ex.instructions && <p className="whitespace-pre-line leading-relaxed">{ex.instructions}</p>}
       <div className="flex gap-2">
