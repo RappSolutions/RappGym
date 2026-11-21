@@ -517,5 +517,21 @@
     "d4": "Prioriteras i rotationen",
     "l5": "100%",
     "d5": "Med i alla pass där den passar"
+  },
+  "contact": {
+    "menu": "Kontakta RappGym",
+    "title": "Kontakta RappGym",
+    "description": "Meddelandet går till gym@rappsol.com.",
+    "kind": "Typ",
+    "kinds": {
+      "question": "Fråga",
+      "feedback": "Feedback",
+      "bug": "Bugg"
+    },
+    "message": "Meddelande",
+    "diagnosticsNote": "Ditt namn, e-post, konto-id, antal loggade set/pass, AI-kvot, aktuell plats och webbläsarinfo skickas med.",
+    "send": "Skicka",
+    "sent": "Tack! Meddelandet är skickat.",
+    "failed": "Kunde inte skicka"
   }
 }

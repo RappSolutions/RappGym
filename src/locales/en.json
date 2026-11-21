@@ -517,5 +517,21 @@
     "d4": "Prioritised in rotation",
     "l5": "100%",
     "d5": "In every workout where it fits"
+  },
+  "contact": {
+    "menu": "Contact RappGym",
+    "title": "Contact RappGym",
+    "description": "Your message goes to gym@rappsol.com.",
+    "kind": "Type",
+    "kinds": {
+      "question": "Question",
+      "feedback": "Feedback",
+      "bug": "Bug"
+    },
+    "message": "Message",
+    "diagnosticsNote": "Your name, email, account id, logged set/workout counts, AI quota, current location and browser info are included.",
+    "send": "Send",
+    "sent": "Thanks! Your message was sent.",
+    "failed": "Could not send"
   }
 }

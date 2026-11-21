@@ -327,6 +327,42 @@ export type Database = {
           },
         ]
       }
+      support_messages: {
+        Row: {
+          created_at: string
+          diagnostics: Json
+          id: string
+          kind: string
+          message: string
+          sender_email: string
+          sender_name: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          diagnostics?: Json
+          id?: string
+          kind: string
+          message: string
+          sender_email?: string
+          sender_name?: string
+          status?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          diagnostics?: Json
+          id?: string
+          kind?: string
+          message?: string
+          sender_email?: string
+          sender_name?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       training_ai_history: {
         Row: {
           cost_usd: number | null
