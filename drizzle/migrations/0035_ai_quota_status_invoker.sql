@@ -1,0 +1,1 @@
+ALTER FUNCTION public.ai_quota_status(uuid) SECURITY INVOKER;
