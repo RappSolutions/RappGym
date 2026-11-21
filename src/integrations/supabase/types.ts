@@ -149,6 +149,54 @@ export type Database = {
           },
         ]
       }
+      exercise_suggestions: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          equipment_id: string | null
+          id: string
+          instructions: string
+          name: string
+          source_url: string | null
+          user_id: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          equipment_id?: string | null
+          id?: string
+          instructions: string
+          name: string
+          source_url?: string | null
+          user_id?: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          equipment_id?: string | null
+          id?: string
+          instructions?: string
+          name?: string
+          source_url?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_suggestions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exercise_suggestions_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_equipment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exercises: {
         Row: {
           category_id: string

@@ -1,7 +1,9 @@
 import { useLanguage } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Search } from "lucide-react";
+import { Search, Lightbulb } from "lucide-react";
+import { useUserView } from "@/lib/user-view";
+import { ExerciseSuggestionDialog } from "@/components/gym/ExerciseSuggestionDialog";
 import { Input } from "@/components/ui/input";
 import { GymPicker } from "@/components/gym/GymPicker";
 import { useSelectedGym } from "@/hooks/use-gym";
@@ -34,6 +36,9 @@ export const Route = createFileRoute("/_authenticated/exercises/")({
 
 function ExercisesPage() {
   const { t, localize } = useLanguage();
+  const { readOnly } = useUserView();
+  const [suggestionOpen, setSuggestionOpen] = useState(false);
+  const suggestionButton = <Button variant="ghost" size="sm" disabled={readOnly} onClick={() => setSuggestionOpen(true)} className="shrink-0"><Lightbulb />{t("exerciseSuggestion.title")}</Button>;
   const { data: everyExercise } = useSuspenseQuery(exercisesQuery);
   const allExercises = everyExercise.filter((e) => e.is_active);
   const { data: gyms } = useSuspenseQuery(gymsQuery);
@@ -67,13 +72,16 @@ function ExercisesPage() {
   if (!gym)
     return (
       <main className="px-4">
+        <div className="flex justify-end">{suggestionButton}</div>
+        <ExerciseSuggestionDialog open={suggestionOpen} onOpenChange={setSuggestionOpen} />
         <GymPicker gyms={gyms} selected={null} onPick={(id) => setGym(id)} />
       </main>
     );
 
   return (
     <main className="space-y-4 px-4">
-      <p className="text-sm text-muted-foreground">{t("exercisesIndex.pickAnExerciseToLog")}</p>
+      <div className="flex flex-wrap items-center justify-between gap-2"><p className="text-sm text-muted-foreground">{t("exercisesIndex.pickAnExerciseToLog")}</p>{suggestionButton}</div>
+      <ExerciseSuggestionDialog open={suggestionOpen} onOpenChange={setSuggestionOpen} />
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} className="size-4" />{t("exercisesIndex.showAllExercisesOfAvailable", { length: atPlace.length, length_: allExercises.length })}</label>
       {neverCount > 0 && <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={showNever} onChange={(e) => setShowNever(e.target.checked)} className="size-4" />{t("rating.showNever", { count: neverCount })}</label>}
       {!showAll && atPlace.length === 0 && <p className="text-sm text-muted-foreground">{t("exercisesIndex.noExercisesLinkedToThis")}</p>}

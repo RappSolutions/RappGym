@@ -191,4 +191,17 @@ entity user_exercise_preferences {
   updated_at : timestamptz
 }
 exercises ||--o{ user_exercise_preferences
+entity exercise_suggestions {
+  * id : uuid <<PK>>
+  * user_id : uuid
+  * name : text
+  category_id : uuid <<FK>>
+  equipment_id : uuid <<FK>>
+  * instructions : text
+  source_url : text
+  * created_at : timestamptz
+}
+users ||..o{ exercise_suggestions
+exercise_categories |o--o{ exercise_suggestions : "RESTRICT"
+exercise_equipment |o--o{ exercise_suggestions : "RESTRICT"
 @enduml

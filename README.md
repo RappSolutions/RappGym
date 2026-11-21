@@ -74,6 +74,19 @@ erDiagram
   EXERCISES ||--o{ LOG_ENTRIES : "RESTRICT"
   EXERCISE_CATEGORIES ||--o{ EXERCISES : "RESTRICT"
   EXERCISE_EQUIPMENT |o--o{ EXERCISES : "RESTRICT"
+  USERS ||--o{ EXERCISE_SUGGESTIONS : proposes
+  EXERCISE_CATEGORIES |o--o{ EXERCISE_SUGGESTIONS : "RESTRICT"
+  EXERCISE_EQUIPMENT |o--o{ EXERCISE_SUGGESTIONS : "RESTRICT"
+  EXERCISE_SUGGESTIONS {
+    uuid id PK
+    uuid user_id
+    text name
+    uuid category_id FK
+    uuid equipment_id FK
+    text instructions
+    text source_url
+    timestamptz created_at
+  }
   WORKOUTS |o--o{ LOG_ENTRIES : "SET NULL"
   GYMS |o--o{ LOG_ENTRIES : "performed at"
   GYMS |o--o{ WORKOUTS : "planned at"

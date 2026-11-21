@@ -260,6 +260,13 @@
       "when": 1795261386384,
       "tag": "0036_support_messages",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1795286515314,
+      "tag": "0037_exercise_suggestions",
+      "breakpoints": true
     }
   ]
 }

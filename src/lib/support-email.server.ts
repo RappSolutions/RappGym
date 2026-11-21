@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export interface SupportEmail {
   id: string;
-  kind: "question" | "feedback" | "bug";
+  kind: "question" | "feedback" | "bug" | "exercise-suggestion";
   message: string;
   senderEmail: string;
   senderName: string;

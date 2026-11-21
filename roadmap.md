@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Structured exercise suggestions from account menu and Exercises page; authenticated save/readback with real category/equipment FKs, unchanged exercise bank, mobile/desktop and 14 tests verified; email still waits on Elastic account verification.
 - [x] Connect contact form to Elastic Email with fixed recipient and auth-derived Reply-To; 9 tests pass and authenticated persistence/failure notice verified.
 - [ ] Verify successful contact email delivery: Elastic Email rejects sending pending account verification (HTTP 400); owner must complete account verification.
 - [x] Global session-scoped admin read-only user view, database/server/storage write guards, isolated cache/location selection and exit banner; admin entry verified

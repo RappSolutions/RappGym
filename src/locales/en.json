@@ -518,6 +518,21 @@
     "l5": "100%",
     "d5": "In every workout where it fits"
   },
+  "exerciseSuggestion": {
+    "title": "Suggest an exercise",
+    "description": "Your suggestion is sent to RappGym for review, not added directly to the exercise bank.",
+    "name": "Exercise name",
+    "category": "Category (optional)",
+    "equipment": "Equipment (optional)",
+    "unspecified": "Not specified / other",
+    "instructions": "Description and instructions",
+    "link": "Video or description link (optional)",
+    "accountNote": "Your name, email and account information are included for gym@rappsol.com.",
+    "send": "Send suggestion",
+    "sent": "Thanks! Your exercise suggestion was saved and sent.",
+    "savedNotSent": "Your suggestion was saved, but the email could not be sent. Please do not send it again.",
+    "lookupFailed": "Categories and equipment could not be loaded. You can still submit a suggestion."
+  },
   "contact": {
     "menu": "Contact RappGym",
     "title": "Contact RappGym",

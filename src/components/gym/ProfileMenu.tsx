@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { User } from "@supabase/supabase-js";
-import { LogOut, Settings, UserRound, Save, Trash2, LoaderCircle, MapPin, Check, Mail } from "lucide-react";
+import { LogOut, Settings, UserRound, Save, Trash2, LoaderCircle, MapPin, Check, Mail, Lightbulb } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +21,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ExerciseSuggestionDialog } from "@/components/gym/ExerciseSuggestionDialog";
 import { ContactDialog } from "@/components/gym/ContactDialog";
 
 export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => Promise<void> }) {
@@ -35,6 +36,7 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
   const [open, setOpen] = useState(false);
   const [gymOpen, setGymOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+  const [suggestionOpen, setSuggestionOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [profile, setProfile] = useState<TrainingProfile>(emptyTrainingProfile);
@@ -78,11 +80,12 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
   }
   return <>
     <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label={t("profileMenu.myAccount")} title={t("profileMenu.myAccount")} className="shrink-0 rounded-full text-brand-yellow hover:bg-brand-royal hover:text-brand-yellow"><Avatar className="size-9 border-2 border-brand-yellow"><AvatarFallback className="bg-brand-royal text-sm font-semibold text-brand-yellow">{initials || <UserRound className="size-5" />}</AvatarFallback></Avatar></Button></DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 max-w-[calc(100vw-2rem)]"><DropdownMenuLabel><span className="block break-words">{name}</span>{email !== name && <span className="block break-words text-xs font-normal text-muted-foreground">{email}</span>}</DropdownMenuLabel><DropdownMenuSeparator />{gyms.length > 0 && <><DropdownMenuItem className="min-h-12" onSelect={() => setGymOpen(true)}><MapPin /><span className="min-w-0"><span className="block text-xs text-muted-foreground">{t("common.location")}</span><span className="block truncate font-medium">{currentGym?.name ?? ""}</span></span></DropdownMenuItem><DropdownMenuSeparator /></>}<DropdownMenuItem className="min-h-12" onSelect={() => void edit()}><UserRound />{t("profileMenu.myTrainingProfile")}</DropdownMenuItem>{isAdmin && <DropdownMenuItem asChild className="min-h-12"><Link to="/settings"><Settings />{t("profileMenu.settings")}</Link></DropdownMenuItem>}<DropdownMenuItem className="min-h-12" disabled={readOnly} onSelect={() => setContactOpen(true)}><Mail />{t("contact.menu")}</DropdownMenuItem><DropdownMenuSeparator /><div className="px-2 py-2"><LanguagePicker flagsOnly /></div><DropdownMenuSeparator /><DropdownMenuItem className="min-h-12" onSelect={() => void onSignOut()}><LogOut />{t("profileMenu.signOut")}</DropdownMenuItem><DropdownMenuSeparator /><a href="https://rappsol.com" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-sm px-2 py-1.5 text-[11px] text-muted-foreground hover:bg-accent"><img src={rappSolutionsMark} alt="Rapp Solutions AB" width={64} height={64} className="size-5 shrink-0 rounded-[5px] ring-1 ring-foreground/10" /><span>Provided by <span className="font-semibold text-foreground/80">Rapp Solutions AB</span></span></a></DropdownMenuContent>
+      <DropdownMenuContent align="end" className="w-64 max-w-[calc(100vw-2rem)]"><DropdownMenuLabel><span className="block break-words">{name}</span>{email !== name && <span className="block break-words text-xs font-normal text-muted-foreground">{email}</span>}</DropdownMenuLabel><DropdownMenuSeparator />{gyms.length > 0 && <><DropdownMenuItem className="min-h-12" onSelect={() => setGymOpen(true)}><MapPin /><span className="min-w-0"><span className="block text-xs text-muted-foreground">{t("common.location")}</span><span className="block truncate font-medium">{currentGym?.name ?? ""}</span></span></DropdownMenuItem><DropdownMenuSeparator /></>}<DropdownMenuItem className="min-h-12" onSelect={() => void edit()}><UserRound />{t("profileMenu.myTrainingProfile")}</DropdownMenuItem>{isAdmin && <DropdownMenuItem asChild className="min-h-12"><Link to="/settings"><Settings />{t("profileMenu.settings")}</Link></DropdownMenuItem>}<DropdownMenuItem className="min-h-12" disabled={readOnly} onSelect={() => setContactOpen(true)}><Mail />{t("contact.menu")}</DropdownMenuItem><DropdownMenuItem className="min-h-12" disabled={readOnly} onSelect={() => setSuggestionOpen(true)}><Lightbulb />{t("exerciseSuggestion.title")}</DropdownMenuItem><DropdownMenuSeparator /><div className="px-2 py-2"><LanguagePicker flagsOnly /></div><DropdownMenuSeparator /><DropdownMenuItem className="min-h-12" onSelect={() => void onSignOut()}><LogOut />{t("profileMenu.signOut")}</DropdownMenuItem><DropdownMenuSeparator /><a href="https://rappsol.com" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-sm px-2 py-1.5 text-[11px] text-muted-foreground hover:bg-accent"><img src={rappSolutionsMark} alt="Rapp Solutions AB" width={64} height={64} className="size-5 shrink-0 rounded-[5px] ring-1 ring-foreground/10" /><span>Provided by <span className="font-semibold text-foreground/80">Rapp Solutions AB</span></span></a></DropdownMenuContent>
     </DropdownMenu>
     <Drawer open={gymOpen} onOpenChange={setGymOpen}><DrawerContent><DrawerHeader><DrawerTitle>{t("common.location")}</DrawerTitle></DrawerHeader>
       <div className="max-h-[60dvh] space-y-1 overflow-y-auto px-4 pb-6">{gyms.map((g) => <button key={g.id} type="button" onClick={() => { setGym(g.id); setGymOpen(false); }} className="flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-left hover:bg-muted" aria-pressed={g.id === gymId}><span className="min-w-0 flex-1"><span className="block truncate font-medium">{g.name}</span>{g.description && <span className="block truncate text-xs text-muted-foreground">{g.description}</span>}</span>{g.id === gymId && <Check className="size-5 shrink-0 text-primary" />}</button>)}</div>
     </DrawerContent></Drawer>
+    <ExerciseSuggestionDialog open={suggestionOpen} onOpenChange={setSuggestionOpen} />
     <ContactDialog open={contactOpen} onOpenChange={setContactOpen} gymName={currentGym?.name ?? ""} />
     <Dialog open={open} onOpenChange={(value) => { if (!busy) setOpen(value); }}><DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] overflow-y-auto p-5"><DialogHeader><DialogTitle className="text-2xl">{t("profileMenu.myTrainingProfile")}</DialogTitle><DialogDescription>{t("profileMenu.allDetailsAreOptionalAnd")}</DialogDescription></DialogHeader>
       {!loaded ? <LoaderCircle className="size-6 animate-spin" /> : <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); if (!busy && !readOnly) void save(); }}>

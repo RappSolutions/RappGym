@@ -518,6 +518,21 @@
     "l5": "100%",
     "d5": "Med i alla pass där den passar"
   },
+  "exerciseSuggestion": {
+    "title": "Föreslå övning",
+    "description": "Förslaget skickas till RappGym för granskning, inte direkt till övningsbanken.",
+    "name": "Övningsnamn",
+    "category": "Kategori (valfri)",
+    "equipment": "Utrustning (valfri)",
+    "unspecified": "Ej angivet / annat",
+    "instructions": "Beskrivning och instruktioner",
+    "link": "Länk till video eller beskrivning (valfri)",
+    "accountNote": "Ditt namn, e-post och kontoinfo följer med till gym@rappsol.com.",
+    "send": "Skicka förslag",
+    "sent": "Tack! Övningsförslaget är sparat och skickat.",
+    "savedNotSent": "Förslaget är sparat, men mejlet kunde inte skickas. Skicka inte igen.",
+    "lookupFailed": "Kategorier och utrustning kunde inte laddas. Du kan ändå lämna ett förslag."
+  },
   "contact": {
     "menu": "Kontakta RappGym",
     "title": "Kontakta RappGym",
