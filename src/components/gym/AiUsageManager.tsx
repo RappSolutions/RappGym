@@ -13,13 +13,14 @@ import { listUsers } from "@/lib/admin-users.functions";
 import { getAiUsageReport, setUserAiQuota, type AiTier, type UserUsage } from "@/lib/ai-quota.functions";
 import { quotaRemaining } from "@/lib/ai-quota";
 import { todayISO } from "@/lib/gym";
+import { SEK_PER_USD } from "@/lib/ai-cost";
 import { useLanguage } from "@/lib/i18n";
 
 const MONTHS = 6;
 
 /** Admin view: AI usage per user and month, plus per-user quota overrides (tier, custom limit, block). */
 export function AiUsageManager() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const report = useServerFn(getAiUsageReport);
   const users = useServerFn(listUsers);
   const today = todayISO();
@@ -34,6 +35,9 @@ export function AiUsageManager() {
 
   if (isLoading) return <p className="text-sm text-muted-foreground">{t("common.loading")}</p>;
   if (error || !data) return <p className="text-sm text-destructive">{error?.message}</p>;
+  const locale = language === "sv" ? "sv-SE" : "en-GB";
+  const kr = (usd: number, d = 2) => `${(usd * SEK_PER_USD).toLocaleString(locale, { minimumFractionDigits: d, maximumFractionDigits: d })} kr`;
+  const colorOf = new Map(active.map((u, i) => [u.userId, `var(--chart-${(i % 5) + 1})`]));
   const thisMonth = data.months[data.months.length - 1]!;
   const total = data.users.reduce((a, u) => a + (u.monthly[thisMonth] ?? 0), 0);
   const cost = data.users.reduce((a, u) => a + u.costUsd, 0);
@@ -41,7 +45,7 @@ export function AiUsageManager() {
   return <section className="space-y-4">
     <div className="flex flex-wrap gap-x-4 text-xs text-muted-foreground">
       <span>{t("aiUsageManager.thisMonth")}: <b className="text-foreground">{total}</b> {t("aiUsageManager.requests")}</span>
-      <span>{t("aiUsageManager.lastMonths", { MONTHS })}: <b className="text-foreground">${cost.toFixed(2)}</b></span>
+      <span>{t("aiUsageManager.lastMonths", { MONTHS })}: <b className="text-foreground">{kr(cost)}</b></span>
       <span>{t("aiUsageManager.default")}: {data.tiers.filter((x) => x.isDefault).map((x) => `${x.name} ${x.monthlyQuota ?? "∞"}/${t("aiUsageManager.mo")}`).join(", ")}</span>
     </div>
     {active.length > 0
@@ -56,15 +60,15 @@ export function AiUsageManager() {
           </BarChart>
         </ChartContainer>
       : <p className="text-sm text-muted-foreground">{t("aiUsageManager.noAiRequestsYet")}</p>}
-    <ul className="divide-y divide-border">{[...data.users].sort((a, b) => (b.monthly[thisMonth] ?? 0) - (a.monthly[thisMonth] ?? 0)).map((u) => {
+    <ul className="divide-y divide-border">{[...data.users].sort((a, b) => b.tokens - a.tokens || nameOf(a.userId).localeCompare(nameOf(b.userId), locale)).map((u) => {
       const s = u.status; const rem = quotaRemaining(s);
       const label = s.isAdmin ? "Admin ∞" : s.isBlocked ? t("aiUsageManager.blocked") : s.quota === null ? `${s.tierName} ∞` : `${s.used}/${s.quota}${s.source === "custom" ? ` (${t("aiUsageManager.custom")})` : ""}`;
       const pct = s.quota ? Math.min(100, (s.used / s.quota) * 100) : 0;
       return <li key={u.userId} className="py-2">
         <div className="flex items-center gap-2">
           <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-medium">{nameOf(u.userId)}</div>
-            <div className="text-xs text-muted-foreground">{s.tierName} · {u.tokens.toLocaleString("sv-SE")} tokens · ${u.costUsd.toFixed(3)}{u.setting?.validUntil ? ` · ${t("aiUsageManager.until")} ${u.setting.validUntil}` : ""}{u.setting?.notes ? ` · ${u.setting.notes}` : ""}</div>
+            <div className="flex items-center gap-1.5 truncate text-sm font-medium"><span aria-hidden className="size-2.5 shrink-0 rounded-full" style={{ background: colorOf.get(u.userId) ?? "var(--muted)" }} />{nameOf(u.userId)}</div>
+            <div className="text-xs text-muted-foreground">{s.tierName} · {u.tokens.toLocaleString("sv-SE")} tokens · {kr(u.costUsd)}{u.setting?.validUntil ? ` · ${t("aiUsageManager.until")} ${u.setting.validUntil}` : ""}{u.setting?.notes ? ` · ${u.setting.notes}` : ""}</div>
             {s.quota !== null && !s.isAdmin && <div className="mt-1 h-1 w-full max-w-48 overflow-hidden rounded bg-muted"><div className={rem === 0 ? "h-full bg-destructive" : "h-full bg-primary"} style={{ width: `${pct}%` }} /></div>}
           </div>
           <span className={`shrink-0 rounded px-1.5 py-0.5 text-xs ${s.isBlocked ? "bg-destructive/10 text-destructive" : "bg-muted"}`}>{s.isBlocked && <Ban className="mr-1 inline size-3" />}{label}</span>
