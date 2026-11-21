@@ -497,14 +497,14 @@
     "min": "Minuter"
   },
   "rating": {
-    "title": "AI-prioritet",
-    "r1": "Aldrig",
-    "r2": "Sällan",
-    "r3": "Normal",
-    "r4": "Ofta",
-    "r5": "Alltid",
+    "title": "AI-prio",
+    "r1": "⛔",
+    "r2": "↘️",
+    "r3": "🆗",
+    "r4": "↗️",
+    "r5": "💯",
     "hint": "Påverkar bara vilka övningar AI föreslår. Aldrig döljs också i övningslistan.",
-    "showNever": "Visa övningar markerade Aldrig ({{count}})",
-    "never": "Aldrig"
+    "showNever": "Visa övningar markerade ⛔ ({{count}})",
+    "never": "⛔"
   }
 }

@@ -498,13 +498,13 @@
   },
   "rating": {
     "title": "AI priority",
-    "r1": "Never",
-    "r2": "Rarely",
-    "r3": "Normal",
-    "r4": "Often",
-    "r5": "Always",
+    "r1": "⛔",
+    "r2": "↘️",
+    "r3": "🆗",
+    "r4": "↗️",
+    "r5": "💯",
     "hint": "Only affects which exercises AI suggests. Never is also hidden in the exercise list.",
-    "showNever": "Show exercises marked Never ({{count}})",
-    "never": "Never"
+    "showNever": "Show exercises marked ⛔ ({{count}})",
+    "never": "⛔"
   }
 }
