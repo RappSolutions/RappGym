@@ -21,8 +21,9 @@ export function ContactDialog({ open, onOpenChange, gymName }: { open: boolean; 
     if (!message.trim()) return;
     setBusy(true);
     try {
-      await send({ data: { kind, message, client: { userAgent: navigator.userAgent.slice(0, 500), viewport: `${window.innerWidth}x${window.innerHeight}`, language: String(language).slice(0, 10), path: window.location.pathname.slice(0, 200), gymName: gymName.slice(0, 200) } } });
-      toast.success(t("contact.sent"));
+      const result = await send({ data: { kind, message, client: { userAgent: navigator.userAgent.slice(0, 500), viewport: `${window.innerWidth}x${window.innerHeight}`, language: String(language).slice(0, 10), path: window.location.pathname.slice(0, 200), gymName: gymName.slice(0, 200) } } });
+      if (result.delivered) toast.success(t("contact.sent"));
+      else toast.warning(t("contact.savedNotSent"));
       setMessage(""); onOpenChange(false);
     } catch { toast.error(t("contact.failed")); } finally { setBusy(false); }
   };

@@ -532,6 +532,7 @@
     "diagnosticsNote": "Your name, email, account id, logged set/workout counts, AI quota, current location and browser info are included.",
     "send": "Send",
     "sent": "Thanks! Your message was sent.",
+    "savedNotSent": "Your message was saved, but the email could not be sent. Please do not send it again.",
     "failed": "Could not send"
   }
 }

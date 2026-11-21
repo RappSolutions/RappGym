@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Connect contact form to Elastic Email with fixed recipient and auth-derived Reply-To; 9 tests pass and authenticated persistence/failure notice verified.
+- [ ] Verify successful contact email delivery: Elastic Email rejects sending pending account verification (HTTP 400); owner must complete account verification.
 - [x] Global session-scoped admin read-only user view, database/server/storage write guards, isolated cache/location selection and exit banner; admin entry verified
 - [ ] Verify target-user navigation and blocked writes end-to-end: managed test token lacks session_id; requires normal Google/Microsoft session in preview
 - [x] Separate numeric suggested loads from advice without changing completed history; 20 kg example and ambiguous-load tests passed

@@ -15,7 +15,7 @@ export const supportInput = z.object({
   }),
 });
 
-/** Stores a contact message with account diagnostics collected server-side (client fields are informational only). */
+/** Persist before delivery; account identity is never accepted from the browser. */
 export const sendSupportMessage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(supportInput)
@@ -47,5 +47,10 @@ export const sendSupportMessage = createServerFn({ method: "POST" })
       .insert({ user_id: userId, kind: data.kind, message: data.message, sender_email: email, sender_name: name, diagnostics })
       .select("id").single();
     if (error) throw new Error(error.message);
-    return { id: row.id };
+    const { sendSupportEmail } = await import("./support-email.server");
+    const delivered = await sendSupportEmail({
+      id: row.id, kind: data.kind, message: data.message,
+      senderEmail: email, senderName: name, diagnostics,
+    });
+    return { id: row.id, delivered };
   });
