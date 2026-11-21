@@ -499,12 +499,23 @@
   "rating": {
     "title": "AI-prio",
     "r1": "⛔",
-    "r2": "↘️",
-    "r3": "🆗",
-    "r4": "↗️",
+    "r2": "🧊",
+    "r3": "🔘",
+    "r4": "⭐",
     "r5": "💯",
-    "hint": "Påverkar bara vilka övningar AI föreslår. Aldrig döljs också i övningslistan.",
     "showNever": "Visa övningar markerade ⛔ ({{count}})",
-    "never": "⛔"
+    "never": "⛔",
+    "subtitle": "Styr hur ofta AI föreslår övningen",
+    "atLog": "AI-prio vid loggning",
+    "l1": "Aldrig",
+    "d1": "Föreslås aldrig, döljs i listan",
+    "l2": "Sällan",
+    "d2": "Lagd på is",
+    "l3": "Norm",
+    "d3": "Standard",
+    "l4": "Ofta",
+    "d4": "Prioriteras i rotationen",
+    "l5": "100%",
+    "d5": "Med i alla pass där den passar"
   }
 }

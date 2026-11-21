@@ -72,10 +72,9 @@ function ExercisePage() {
       <Link to="/exercises" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4" />{t("common.exercises")}</Link>
       <div>
         <div className="font-display text-lg font-bold uppercase text-category-ink">{ex.code} · {ex.category}</div>
-        <h1 className="text-4xl font-extrabold uppercase leading-none">{ex.name}</h1>
+        <div className="flex items-start justify-between gap-2"><h1 className="text-4xl font-extrabold uppercase leading-none">{ex.name}</h1><RatingPicker exerciseId={ex.id} /></div>
         <p className="mt-2 text-sm text-muted-foreground">{ex.equipment}</p>
       </div>
-      <RatingPicker exerciseId={ex.id} />
       <ExerciseImages exercise={ex} />
       {ex.instructions && <p className="whitespace-pre-line leading-relaxed">{ex.instructions}</p>}
       <div className="flex gap-2">

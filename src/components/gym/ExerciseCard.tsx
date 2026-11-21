@@ -25,7 +25,7 @@ export function ExerciseCard({
           </div>
           <div className="mt-0.5 text-sm text-muted-foreground">
             {ex.equipment}
-            {rating !== undefined && rating !== 3 && <span className="ml-2 rounded border px-1 text-xs">{t("rating.title")}: {t(`rating.r${rating}`)}</span>}
+            {rating !== undefined && rating !== 3 && <span className="ml-2 text-xs" title={`${t("rating.title")}: ${t(`rating.l${rating}`)}`}>{t(`rating.r${rating}`)}</span>}
           </div>
           
         </div>

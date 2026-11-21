@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useLanguage } from "@/lib/i18n";
 import { LogSheet } from "@/components/gym/LogSheet";
+import { RatingMark } from "@/components/gym/RatingPicker";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -321,7 +322,7 @@ function LogPage() {
                         className="category-theme flex w-full items-center gap-3 border-l-4 border-category-fill px-3 py-1.5 text-left"
                       >
                         <span className="w-12 shrink-0 font-semibold text-category-ink">{e.recorded_code ?? e.code}</span>
-                        <span className="min-w-0 flex-1 truncate">{loggedName(e, rawByCode.get(e.code), byCode.get(e.code)) || t("log.unknownExercise")}</span>
+                        <span className="min-w-0 flex-1 truncate">{loggedName(e, rawByCode.get(e.code), byCode.get(e.code)) || t("log.unknownExercise")}<RatingMark rating={e.exercise_rating} /></span>
                         <span className="font-semibold">{formatSet(e, e.reps_unit === "reps" ? "" : t(`repsUnit.${e.reps_unit as RepsUnit}`).toLowerCase())}</span>
                       </button>
                     ))}
@@ -430,6 +431,7 @@ function LogPage() {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate">
                         {loggedName(e, rawByCode.get(e.code), byCode.get(e.code)) || t("log.unknownExercise")}
+                        <RatingMark rating={e.exercise_rating} />
                       </span>
                       {e.note && <span className="block truncate text-xs text-muted-foreground">{e.note}</span>}
                     </span>

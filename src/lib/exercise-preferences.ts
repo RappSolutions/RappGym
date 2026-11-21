@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 /** AI priority per exercise. 3 (normal) is never stored; 1 is a hard filter, 5 is mandatory when it fits. */
 export const RATINGS = [1, 2, 3, 4, 5] as const;
+/** Display order: highest priority first. */
+export const RATINGS_DESC = [5, 4, 3, 2, 1] as const;
 export type Rating = (typeof RATINGS)[number];
 export const DEFAULT_RATING: Rating = 3;
 export const NEVER: Rating = 1;

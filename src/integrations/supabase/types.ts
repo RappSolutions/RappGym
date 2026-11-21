@@ -249,6 +249,7 @@ export type Database = {
           date: string
           exercise_id: string | null
           exercise_name: string
+          exercise_rating: number | null
           gym_id: string | null
           id: string
           load: string
@@ -268,6 +269,7 @@ export type Database = {
           date?: string
           exercise_id?: string | null
           exercise_name?: string
+          exercise_rating?: number | null
           gym_id?: string | null
           id?: string
           load?: string
@@ -287,6 +289,7 @@ export type Database = {
           date?: string
           exercise_id?: string | null
           exercise_name?: string
+          exercise_rating?: number | null
           gym_id?: string | null
           id?: string
           load?: string

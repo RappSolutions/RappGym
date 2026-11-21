@@ -239,6 +239,13 @@
       "when": 1795196889082,
       "tag": "0033_user_exercise_preferences",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1795253596618,
+      "tag": "0034_log_entries_rating_snapshot",
+      "breakpoints": true
     }
   ]
 }

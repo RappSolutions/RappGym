@@ -107,6 +107,7 @@ entity log_entries {
   gym_id : uuid <<FK>>
   proposal_order : int
   * phase : text (intro|main|outro)
+  exercise_rating : smallint 1-5 <<snapshot, completed only>>
   * created_at : timestamptz
 }
 entity ai_tiers {

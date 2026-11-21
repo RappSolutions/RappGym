@@ -497,14 +497,25 @@
     "min": "Minutes"
   },
   "rating": {
-    "title": "AI priority",
+    "title": "AI prio",
     "r1": "⛔",
-    "r2": "↘️",
-    "r3": "🆗",
-    "r4": "↗️",
+    "r2": "🧊",
+    "r3": "🔘",
+    "r4": "⭐",
     "r5": "💯",
-    "hint": "Only affects which exercises AI suggests. Never is also hidden in the exercise list.",
     "showNever": "Show exercises marked ⛔ ({{count}})",
-    "never": "⛔"
+    "never": "⛔",
+    "subtitle": "Controls how often AI suggests the exercise",
+    "atLog": "AI prio when logged",
+    "l1": "Never",
+    "d1": "Never suggested, hidden in the list",
+    "l2": "Rarely",
+    "d2": "Put on ice",
+    "l3": "Norm",
+    "d3": "Default",
+    "l4": "Often",
+    "d4": "Prioritised in rotation",
+    "l5": "100%",
+    "d5": "In every workout where it fits"
   }
 }

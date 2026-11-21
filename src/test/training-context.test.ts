@@ -50,3 +50,8 @@ describe("AI exercise ratings", () => {
       .toEqual({ always: ["PU1"], often: ["PL1"], rarely: ["LE1"] });
   });
 });
+
+import { RATINGS_DESC } from "@/lib/exercise-preferences";
+describe("rating display order", () => {
+  it("lists 100% first and Aldrig last", () => { expect(RATINGS_DESC).toEqual([5, 4, 3, 2, 1]); });
+});
