@@ -22,13 +22,29 @@ export function remainingLapMinutes(durations: readonly number[], remainingLaps:
   if (spontaneous || !durations.length || remainingLaps <= 0) return null;
   return Math.round((durations.reduce((n, d) => n + d, 0) / durations.length + 1) * remainingLaps);
 }
-export function logSectionHeaders<T extends { phase: string; lap: number | null }>(entries: readonly T[]): ( { phase: Phase | null; lap: number | null } | null)[] {
+export function logSectionHeaders<T extends { phase: string; lap: number | null; code?: string; sets?: number | null; created_at?: string }>(entries: readonly T[], circuit = false): ( { phase: Phase | null; lap: number | null; estimated?: boolean } | null)[] {
   const multiPhase = new Set(entries.map((e) => e.phase)).size > 1;
+  const inferred = new Map<T, number>();
+  // Display-only fallback for individual circuit sets, never aggregated imports or station work.
+  if (circuit) for (const phase of new Set(entries.map((e) => e.phase))) {
+    const rows = entries.filter((e) => e.phase === phase);
+    if (rows.some((e) => e.lap !== null || !e.code || (e.sets ?? 1) !== 1) || new Set(rows.map((e) => e.code)).size < 2 || new Set(rows.map((e) => e.created_at)).size < 2) continue;
+    let lap = 1;
+    const seen = new Set<string>();
+    for (const e of rows) {
+      if (!e.code) continue;
+      if (seen.has(e.code)) { lap++; seen.clear(); }
+      seen.add(e.code);
+      inferred.set(e, lap);
+    }
+  }
+  const lapOf = (e: T) => e.lap ?? inferred.get(e) ?? null;
   return entries.map((e, i) => {
     const prev = entries[i - 1];
-    const multiLap = new Set(entries.filter((r) => r.phase === e.phase).map((r) => r.lap).filter((l) => l !== null)).size > 1;
-    if ((!multiPhase && !multiLap) || (prev?.phase === e.phase && prev.lap === e.lap)) return null;
-    return { phase: multiPhase ? (e.phase as Phase) : null, lap: multiLap ? e.lap : null };
+    const multiLap = new Set(entries.filter((r) => r.phase === e.phase).map(lapOf).filter((l) => l !== null)).size > 1;
+    const lap = lapOf(e);
+    if ((!multiPhase && !multiLap) || (prev?.phase === e.phase && lapOf(prev) === lap)) return null;
+    return { phase: multiPhase ? (e.phase as Phase) : null, lap: multiLap ? lap : null, ...(multiLap && inferred.has(e) ? { estimated: true } : {}) };
   });
 }
 

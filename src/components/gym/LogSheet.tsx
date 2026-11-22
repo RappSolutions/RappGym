@@ -80,7 +80,7 @@ export function LogSheet({
     if (!exercise || readOnly) return;
     setBusy(true);
     const plan = entry?.status === "suggested" ? (entry as PlannedRow) : null;
-    const row = { code: exercise.code, sets: Math.max(1, round), load, reps, note: note || null, date, gym_id: place || null };
+    const row = { code: exercise.code, sets: entry?.status === "suggested" && !complete ? Math.max(1, round) : entry?.status === "completed" ? entry.sets ?? 1 : 1, load, reps, note: note || null, date, gym_id: place || null };
     let error: { message: string } | null = null;
     if (plan && !complete) error = await updatePlannedRow(plan.id, row).then(() => null, (e: Error) => e);
     // Completing a plan records a new fact; the plan itself stays for plan-vs-actual.
@@ -137,8 +137,8 @@ export function LogSheet({
           </DrawerHeader>
           {shown && <ExerciseImages exercise={shown} />}
           <fieldset disabled={readOnly} className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <Stepper label={t("logSheet.numberOfSets")} value={round} onChange={setRound} />
+          <div className={entry?.status === "suggested" ? "grid grid-cols-2 gap-3" : "grid grid-cols-1 gap-3"}>
+            {entry?.status === "suggested" && <Stepper label={t("logSheet.numberOfSets")} value={round} onChange={setRound} />}
             <Stepper label={t(`repsUnit.${repsUnit(exercise)}`)} value={reps} onChange={setReps} />
           </div>
           <div className="grid grid-cols-2 gap-3">

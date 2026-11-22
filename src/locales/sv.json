@@ -43,6 +43,8 @@
     "remainingTime": "Cirka {{minutes}} minuter kvar i {{phase}}, inklusive 1 minuts paus per varv",
     "nextLap": "Starta varv {{lap}}",
     "nextPhase": "Fortsätt till {{phase}}",
+    "moveOn": "Move on",
+    "estimatedLapNumber": "Varv ≈{{lap}}",
     "goNext": "Gå till nästa (behåll setet)",
     "strikeSet": "Stryk ett set ur planen",
     "strikeConfirm": "Minska planen med ett set för denna övning? Genomförda set ändras inte.",

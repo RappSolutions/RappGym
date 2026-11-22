@@ -36,8 +36,8 @@ export function adjustLoad(load: string, delta: number): string {
 }
 
 /** Planned sets for a newly added exercise: spontaneous workouts always start at 1 set per exercise; otherwise circuit mode uses the lap count and station mode 3. */
-export function defaultPlannedSets(opts: { spontaneous: boolean; circuit: boolean; laps: number }): number {
-  if (opts.spontaneous) return 1;
+export function defaultPlannedSets(opts: { spontaneous: boolean; circuit: boolean; laps: number; phase?: Phase }): number {
+  if (opts.spontaneous || (opts.phase !== undefined && opts.phase !== "main")) return 1;
   return opts.circuit ? Math.max(1, opts.laps) : 3;
 }
 

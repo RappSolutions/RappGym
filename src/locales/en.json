@@ -43,6 +43,8 @@
     "remainingTime": "About {{minutes}} minutes left in {{phase}}, including 1 minute of rest per lap",
     "nextLap": "Start lap {{lap}}",
     "nextPhase": "Continue to {{phase}}",
+    "moveOn": "Move on",
+    "estimatedLapNumber": "Lap ≈{{lap}}",
     "goNext": "Go to next (keep set)",
     "strikeSet": "Remove one planned set",
     "strikeConfirm": "Reduce this exercise's plan by one set? Completed sets are unchanged.",

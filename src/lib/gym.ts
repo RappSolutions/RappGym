@@ -72,9 +72,9 @@ export type PlannedRow = {
   id: string; workout_id: string; exercise_id: string; code: string; status: "suggested";
   sets: number; reps: number | null; load: string; note: string | null; phase: string;
   proposal_order: number; date: string; gym_id: string | null; created_at: string;
-  workout: Pick<Workout, "id" | "title" | "created_by" | "is_circuit" | "scheduled_date" | "created_at"> | null;
+  workout: (Pick<Workout, "id" | "title" | "created_by" | "is_circuit" | "scheduled_date" | "created_at"> & { is_spontaneous?: boolean }) | null;
 };
-type PlanDbRow = Tables<"workout_exercises"> & { ex: { code: string } | null; workout: Pick<Workout, "id" | "title" | "created_by" | "is_circuit" | "scheduled_date" | "created_at" | "gym_id"> };
+type PlanDbRow = Tables<"workout_exercises"> & { ex: { code: string } | null; workout: Pick<Workout, "id" | "title" | "created_by" | "is_circuit" | "scheduled_date" | "created_at" | "gym_id"> & { is_spontaneous?: boolean } };
 export function toPlannedRow(r: PlanDbRow): PlannedRow {
   const { gym_id, ...workout } = r.workout;
   return { id: r.id, workout_id: r.workout_id, exercise_id: r.exercise_id, code: r.ex?.code ?? "", status: "suggested", sets: r.target_sets, reps: r.target_reps, load: r.target_load, note: r.note, phase: r.phase, proposal_order: r.sort_order, date: workout.scheduled_date ?? workout.created_at.slice(0, 10), gym_id, created_at: r.created_at, workout };
@@ -86,7 +86,7 @@ export const suggestionsQuery = queryOptions({
   queryFn: async () => {
     const all: PlannedRow[] = [];
     for (let from = 0; ; from += 1000) {
-      const { data, error } = await supabase.from("workout_exercises").select("*, ex:exercises(code), workout:workouts!inner(id,title,created_by,is_circuit,scheduled_date,created_at,gym_id,completed_at)").is("workout.completed_at", null).order("sort_order").range(from, from + 999);
+      const { data, error } = await supabase.from("workout_exercises").select("*, ex:exercises(code), workout:workouts!inner(id,title,created_by,is_circuit,is_spontaneous,scheduled_date,created_at,gym_id,completed_at)").is("workout.completed_at", null).order("sort_order").range(from, from + 999);
       if (error) throw error;
       all.push(...(data as unknown as PlanDbRow[]).map(toPlannedRow));
       if (data.length < 1000) break;

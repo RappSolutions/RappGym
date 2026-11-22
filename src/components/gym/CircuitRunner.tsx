@@ -6,7 +6,7 @@ import { ExerciseImages } from "@/components/gym/ExerciseImages";
 import { InstructionText } from "@/components/gym/InstructionText";
 import { RatingPicker } from "@/components/gym/RatingPicker";
 import { ExercisePickList } from "@/components/gym/ExercisePickList";
-import { Minus, Plus, Check, SkipForward, Dumbbell, ListOrdered, ArrowUp, ArrowDown, Trash2, Undo2, Pencil } from "lucide-react";
+import { Minus, Plus, Check, SkipForward, Dumbbell, ListOrdered, ArrowUp, ArrowDown, Trash2, Undo2, Pencil, Octagon } from "lucide-react";
 import { toast } from "sonner";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,6 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
   const doneRows = useMemo(() => log.filter((e) => e.workout_id === workoutId), [log, workoutId]);
   const doneByCode = useMemo(() => { const m = new Map<string, number>(); for (const e of doneRows) m.set(e.code, (m.get(e.code) ?? 0) + Math.max(1, e.sets ?? 1)); return m; }, [doneRows]);
   const circuit = workout?.is_circuit ?? true;
-  const showLaps = circuit && !workout?.is_spontaneous;
   const allSteps = useMemo(() => workoutSteps(rows, circuit), [rows, circuit]);
   const doneKeys = useMemo(() => completedStepKeys(allSteps, doneRows), [allSteps, doneRows]);
   const [runtime, setRuntime] = useState<RunnerState>(emptyRunnerState);
@@ -75,7 +74,6 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
   const [busy, setBusy] = useState(false);
   const [listOpen, setListOpen] = useState(false);
   const [adding, setAdding] = useState(false);
-  const [skipOpen, setSkipOpen] = useState(false);
   const [title, setTitle] = useState<string | null>(null);
   const cats = categoriesOf(allExercises);
   const catOf = (code: string) => categoryToken(allExercises.find((e) => e.code === code)?.category ?? "", cats);
@@ -183,21 +181,17 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
         <div className="mx-auto max-h-[85vh] w-full max-w-md space-y-3 overflow-y-auto px-4 pb-8">
           <DrawerHeader className="space-y-2 px-0">
             <div className="relative"><Input disabled={readOnly} aria-label={t("circuitRunner.workoutName")} value={title ?? workout?.title ?? ""} onChange={(e) => setTitle(e.target.value)} onBlur={saveTitle} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} className="h-9 pr-8 text-sm font-semibold" /><Pencil className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /></div>
-            <DrawerTitle className="font-display text-2xl">
-              {total === 0 || !step ? t("circuitRunner.addAnExercise") : <>{phases.length > 1 && <>{t(`phase.${step.phase}`)} · </>}{showLaps && laps > 1 ? <>{t("circuitRunner.lap", { v0: step.lap, laps })} · </> : !circuit && step.row.sets > 1 ? <>{`Set ${step.set}/${step.row.sets}`} · </> : null}{t("circuitRunner.step", { stepNo: stepIdx + 1, total })}</>}
-            </DrawerTitle>
+            <DrawerTitle className="sr-only">{workout?.title ?? t("circuitRunner.workoutName")}</DrawerTitle>
             <DrawerDescription className="sr-only">{`${doneCount}/${total}`}</DrawerDescription>
-            {phases.length > 1 && <div className="flex flex-wrap items-center gap-1 text-xs" aria-label={t("phase.phases")}>
-              {phases.map((ph, i) => {
-                const active = step?.phase === ph;
-                const finished = !active && phaseDone(ph);
-                return <span key={ph} className="flex items-center gap-1">{i > 0 && <span className="text-muted-foreground">→</span>}<Button variant={active ? "secondary" : "ghost"} size="sm" aria-pressed={active} onClick={() => jumpPhase(ph)}>{finished ? "✓ " : ""}{t(`phase.${ph}`)}</Button></span>;
-              })}
-            </div>}
-            {circuit && lapNos.length > 1 && <div className="flex gap-1 overflow-x-auto py-1" aria-label={t("circuitRunner.laps")}>
-              {lapNos.map((lap) => <Button key={lap} size="sm" variant={lap === step?.lap ? "secondary" : "outline"} className="min-w-10 shrink-0" aria-pressed={lap === step?.lap} onClick={() => { const first = allSteps.find((s) => s.phase === step?.phase && s.lap === lap); if (first) setCursor(keyOf(first)); }}>{lap}</Button>)}
-            </div>}
-            {total > 0 && <div className="flex gap-1.5 overflow-x-auto py-1.5" aria-label={t("circuitRunner.exercisesInWorkout")}>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex min-w-0 items-center gap-1 text-xs" aria-label={t("phase.phases")}>
+                {phases.length > 1 && phases.map((ph) => <Button key={ph} variant={step?.phase === ph ? "secondary" : "ghost"} size="sm" className="px-2" aria-pressed={step?.phase === ph} onClick={() => jumpPhase(ph)}>{phaseDone(ph) && step?.phase !== ph ? "✓ " : ""}{t(`phase.${ph}`)}</Button>)}
+              </div>
+              {circuit && lapNos.length > 1 && <select className="h-8 shrink-0 rounded-md border border-input bg-background px-2 text-xs" aria-label={t("circuitRunner.laps")} value={String(step?.lap)} onChange={(event) => { const first = allSteps.find((s) => s.phase === step?.phase && s.lap === Number(event.target.value)); if (first) setCursor(keyOf(first)); }}>
+                {lapNos.map((lap) => <option key={lap} value={String(lap)}>{t("circuitRunner.lap", { v0: lap, laps })}</option>)}
+              </select>}
+            </div>
+            {total > 0 && <div className="flex gap-1.5 overflow-x-auto px-1.5 py-1.5" aria-label={t("circuitRunner.exercisesInWorkout")}>
               {visibleSteps.map((s) => {
                 const isDone = doneKeys.has(keyOf(s));
                 const isCurrent = step && keyOf(s) === keyOf(step);
@@ -213,7 +207,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
             <Button disabled={readOnly} variant={adding ? "default" : "outline"} aria-pressed={adding} aria-label={t("common.addExercise")} title={t("common.addExercise")} onClick={() => setAdding((v) => !v)}><Plus className="size-4" /><Dumbbell className="size-4" /></Button>
           </div>
 
-          {adding && <ExercisePickList exercises={pickable} disabled={readOnly || busy} onPick={(e, ph) => void run(async () => { await addPlannedExercise(workoutId, e.code, rows, workout?.gym_id ?? null, last.get(e.code)?.load ?? "", defaultPlannedSets({ spontaneous: workout?.is_spontaneous ?? false, circuit, laps }), last.get(e.code)?.reps ?? 10, ph); await refresh(); if (workout?.is_spontaneous) setRuntime((v) => ({ ...v, pause: null, cursor: null, fromIdx: -1 })); setAdding(false); toast.success(`${e.code} ${t("circuitRunner.added")}`); })} />}
+          {adding && <ExercisePickList exercises={pickable} disabled={readOnly || busy} onPick={(e, ph) => void run(async () => { await addPlannedExercise(workoutId, e.code, rows, workout?.gym_id ?? null, last.get(e.code)?.load ?? "", defaultPlannedSets({ spontaneous: workout?.is_spontaneous ?? false, circuit, laps, phase: ph }), last.get(e.code)?.reps ?? 10, ph); await refresh(); if (workout?.is_spontaneous) setRuntime((v) => ({ ...v, pause: null, cursor: null, fromIdx: -1 })); setAdding(false); toast.success(`${e.code} ${t("circuitRunner.added")}`); })} />}
 
           {listOpen && rows.length > 0 && <div className="rounded-md border text-sm">
             {groupByPhase(rows).map((g) => <div key={g.phase}>{phases.length > 1 && <p className="border-b bg-muted/50 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t(`phase.${g.phase}`)}</p>}<div className="divide-y">{g.rows.map((row) => {
@@ -249,8 +243,11 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
               <div className="space-y-1"><p className="text-sm font-medium">{t(`repsUnitLong.${repsUnit(rawEx)}`)}</p>
                 <div className="flex items-center gap-1"><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="-1" onClick={() => setRep(rep - 1)}><Minus /></Button><Input inputMode="numeric" value={rep} onChange={(e) => setRep(Number(e.target.value) || 0)} className="h-10 min-w-0 px-1 text-center text-lg font-bold" /><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="+1" onClick={() => setRep(rep + 1)}><Plus /></Button></div></div>
             </fieldset>
-            {skipOpen && <div className="flex flex-wrap gap-2 border-y py-2"><Button variant="outline" size="sm" onClick={() => { if (step) setRuntime((v) => ({ ...v, skipped: [...new Set([...v.skipped, keyOf(step)])], cursor: null, fromIdx: stepIdx })); setSkipOpen(false); }}>{t("circuitRunner.goNext")}</Button><Button variant="outline" size="sm" onClick={() => { setSkipOpen(false); void strikeSet(); }}>{t("circuitRunner.strikeSet")}</Button></div>}
-            <div className="flex gap-2"><Button variant="ghost" aria-expanded={skipOpen} disabled={readOnly || busy || (step ? doneKeys.has(keyOf(step)) : false)} onClick={() => setSkipOpen((v) => !v)}><SkipForward className="size-4" />{t("circuitRunner.skip")}</Button><Button className="h-12 flex-1 text-lg" disabled={readOnly || busy || (step ? doneKeys.has(keyOf(step)) : false)} onClick={() => void logStep()}><Check />{t("circuitRunner.done")}</Button></div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="icon" className="h-12 w-12 shrink-0 text-destructive" title={t("circuitRunner.strikeSet")} aria-label={t("circuitRunner.strikeSet")} disabled={readOnly || busy || (step ? doneKeys.has(keyOf(step)) : false)} onClick={() => void strikeSet()}><Octagon className="size-5" /></Button>
+              <Button variant="outline" className="h-12" title={t("circuitRunner.goNext")} disabled={readOnly || busy || (step ? doneKeys.has(keyOf(step)) : false)} onClick={() => { if (step) setRuntime((v) => ({ ...v, skipped: [...new Set([...v.skipped, keyOf(step)])], cursor: null, fromIdx: stepIdx })); }}><SkipForward className="size-4" />{t("circuitRunner.moveOn")}</Button>
+              <Button className="h-12 flex-1 text-lg" disabled={readOnly || busy || (step ? doneKeys.has(keyOf(step)) : false)} onClick={() => void logStep()}><Check />{t("circuitRunner.done")}</Button>
+            </div>
           </div>}
           {!r && total > 0 && <p className="text-sm text-muted-foreground">{t("circuitRunner.allSetsDoneAddThe")}</p>}
           <div className="flex gap-2">

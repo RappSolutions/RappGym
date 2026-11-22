@@ -15,6 +15,14 @@ describe("log per workout", () => {
       { code: "PL1", sets: 1, reps: 10, load: "30", created_at: "2026-11-14T10:02:00Z" },
       { code: "LE6", sets: 1, reps: 10, load: "45", created_at: "2026-11-14T10:10:00Z" },
     ]);
-    expect(rows).toEqual([{ code: "LE6", sets: 2, reps: 10, load: "45" }, { code: "PL1", sets: 1, reps: 10, load: "30" }]);
+    expect(rows).toEqual([{ code: "LE6", sets: 2, reps: 10, load: "45", phase: "main" }, { code: "PL1", sets: 1, reps: 10, load: "30", phase: "main" }]);
+  });
+  it("preserves intro/main/outro when the same exercise occurs in different phases", () => {
+    const entries = ["intro", "main", "outro"].map((phase, i) => ({ code: "MB5", phase, sets: 1, reps: 10, load: "20", created_at: `2026-11-22T10:0${i}:00Z` }));
+    expect(replanRows(entries).map((r) => [r.phase, r.sets])).toEqual([["intro", 1], ["main", 1], ["outro", 1]]);
+    expect(entries.map((r) => r.phase)).toEqual(["intro", "main", "outro"]);
+  });
+  it("copies intro/outro with one set, not the main lap count", () => {
+    expect(replanRows([{ code: "MB5", phase: "intro", sets: 4, reps: 10, load: "20", created_at: "2026-11-22T10:00:00Z" }])[0]?.sets).toBe(1);
   });
 });

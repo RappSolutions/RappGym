@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Alt 1: compact runner, unclipped blips, direct confirmed strike/Move on, header play, phase-preserving copy, phase-scoped laps, log lap headings (inferred legacy laps marked ≈) and no redundant factual set input; 31 targeted tests pass, no Playwright by agreement. Historical facts and aggregate import counts preserved.
 - [x] Del 2: URL/history and scoped runner recovery, temporary skip versus confirmed plan reduction, readable phase/lap/step navigation, lap timing/pause (including spontaneous growth), and factual log phase/lap headings; 32 tests and signed-in mobile/desktop flows passed. Physical phone lock/resume remains device-dependent, reload recovery verified.
 - [x] Spontaneous workouts always add exercises with 1 planned set (tested defaultPlannedSets rule)
 - [x] Clickable exercise instruction links across detail views and display-only YouTube fallback when saved images are absent; 10 tests pass, real MB5 thumbnail and video opening verified signed-in on desktop/mobile without runtime errors.

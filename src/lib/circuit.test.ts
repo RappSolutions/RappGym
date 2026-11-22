@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 import { defaultPlannedSets } from "./circuit";
 
 describe("defaultPlannedSets", () => {
+  it("intro and outro default to one set even when training has four laps", () => {
+    expect(defaultPlannedSets({ spontaneous: false, circuit: true, laps: 4, phase: "intro" })).toBe(1);
+    expect(defaultPlannedSets({ spontaneous: false, circuit: true, laps: 4, phase: "outro" })).toBe(1);
+  });
   it("spontaneous workouts always start at 1 set, in circuit mode", () => {
     expect(defaultPlannedSets({ spontaneous: true, circuit: true, laps: 4 })).toBe(1);
   });
