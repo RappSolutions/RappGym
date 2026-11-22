@@ -6,6 +6,7 @@ import { categoriesOf, categoryToken, type Exercise } from "@/lib/gym";
 import type { Phase } from "@/lib/circuit";
 import { PhaseSelect } from "@/components/gym/PhaseSelect";
 import { ExerciseImages } from "@/components/gym/ExerciseImages";
+import { InstructionText } from "@/components/gym/InstructionText";
 import { AdminExerciseEdit } from "@/components/gym/AdminExerciseEdit";
 
 /** Inline, category-collapsed exercise browser: clicking a row shows details, only "+" adds it to the chosen phase. */
@@ -39,7 +40,7 @@ export function ExercisePickList({ exercises, onPick, disabled }: { exercises: E
                 {isShown && <div className="space-y-2 px-3 pb-3 text-sm">
                   <div className="flex items-center gap-2">{l.equipment && <span className="flex-1 text-muted-foreground">{t("common.equipment")}: {l.equipment}</span>}<span className="ml-auto" /><AdminExerciseEdit exercise={ex} /></div>
                   <ExerciseImages exercise={l} />
-                  {l.instructions && <p className="whitespace-pre-line leading-relaxed">{l.instructions}</p>}
+                  {l.instructions && <InstructionText text={l.instructions} />}
                 </div>}
               </div>); })}</div>}
           </div>

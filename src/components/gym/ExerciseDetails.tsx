@@ -2,6 +2,7 @@ import { useLanguage } from "@/lib/i18n";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { ExerciseImages } from "@/components/gym/ExerciseImages";
+import { InstructionText } from "@/components/gym/InstructionText";
 import { formatDate, formatSet, type Exercise, type LogEntry } from "@/lib/gym";
 
 /** Full exercise details shown inline in Settings, so nothing navigates away. */
@@ -26,7 +27,7 @@ export function ExerciseDetails({
     <div className="space-y-3">
       
       <ExerciseImages exercise={ex} />
-      {ex.instructions && <p className="whitespace-pre-line leading-relaxed">{ex.instructions}</p>}
+      {ex.instructions && <InstructionText text={ex.instructions} />}
       
       {chart.length > 1 && (
         <div className="h-40 rounded-xl border bg-card p-2">

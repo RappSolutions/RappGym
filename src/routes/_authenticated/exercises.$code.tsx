@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ExerciseForm } from "@/components/gym/ExerciseForm";
 import { LogSheet } from "@/components/gym/LogSheet";
 import { ExerciseImages } from "@/components/gym/ExerciseImages";
+import { InstructionText } from "@/components/gym/InstructionText";
 import { RatingPicker } from "@/components/gym/RatingPicker";
 import { exercisePreferencesQuery } from "@/lib/exercise-preferences";
 import { supabase } from "@/integrations/supabase/client";
@@ -76,7 +77,7 @@ function ExercisePage() {
         <p className="mt-2 text-sm text-muted-foreground">{ex.equipment}</p>
       </div>
       <ExerciseImages exercise={ex} />
-      {ex.instructions && <p className="whitespace-pre-line leading-relaxed">{ex.instructions}</p>}
+      {ex.instructions && <InstructionText text={ex.instructions} />}
       <div className="flex gap-2">
         <Button disabled={readOnly} onClick={() => { setEntry(null); setLogging(true); }} className="h-12 flex-1 font-bold uppercase"><Plus className="h-5 w-5" />{t("common.logSets")}</Button>
         {isAdmin && <Button variant="secondary" className="h-12" onClick={() => setEditing(true)} aria-label={t("common.edit")}><Pencil className="h-5 w-5" /></Button>}

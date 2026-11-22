@@ -3,6 +3,7 @@ import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ExerciseImages } from "@/components/gym/ExerciseImages";
+import { InstructionText } from "@/components/gym/InstructionText";
 import { RatingPicker } from "@/components/gym/RatingPicker";
 import { ExercisePickList } from "@/components/gym/ExercisePickList";
 import { Minus, Plus, Check, SkipForward, Dumbbell, ListOrdered, ArrowUp, ArrowDown, Trash2, Undo2, Pencil } from "lucide-react";
@@ -177,7 +178,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
           {r && <div className="space-y-3">
             <div><p className="flex items-center gap-1 font-bold text-primary">{r.code}<AdminExerciseEdit exercise={rawEx} /></p><p className="flex items-start justify-between gap-2 text-xl font-bold"><span className="min-w-0">{ex?.name ?? r.code}</span>{rawEx && <RatingPicker exerciseId={rawEx.id} />}</p>{r.note && <p className="text-sm text-muted-foreground">{r.note}</p>}</div>
             {ex && <ExerciseImages exercise={ex} />}
-            {ex?.instructions && <p className="text-sm leading-relaxed">{ex.instructions}</p>}
+            {ex?.instructions && <InstructionText text={ex.instructions} className="text-sm" />}
             
             <fieldset disabled={readOnly} className="grid grid-cols-2 gap-3">
               <div className="space-y-1"><p className="text-sm font-medium">{t("common.weightKg")}</p>
