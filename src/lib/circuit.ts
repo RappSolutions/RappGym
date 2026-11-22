@@ -35,6 +35,12 @@ export function adjustLoad(load: string, delta: number): string {
   return String(Math.max(0, Math.round((n + delta) * 100) / 100));
 }
 
+/** Planned sets for a newly added exercise: spontaneous workouts always start at 1 set per exercise; otherwise circuit mode uses the lap count and station mode 3. */
+export function defaultPlannedSets(opts: { spontaneous: boolean; circuit: boolean; laps: number }): number {
+  if (opts.spontaneous) return 1;
+  return opts.circuit ? Math.max(1, opts.laps) : 3;
+}
+
 /** Station order: all sets of one exercise before moving to the next. */
 export function stationSteps<T extends { id: string; sets: number; phase?: string | null }>(rows: readonly T[]): Step<T>[] {
   return rows.flatMap((row) => Array.from({ length: Math.max(1, row.sets) }, (_, k) => ({ lap: k + 1, set: k + 1, phase: phaseOf(row), row })));

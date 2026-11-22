@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Spontaneous workouts always add exercises with 1 planned set (tested defaultPlannedSets rule)
 - [x] Clickable exercise instruction links across detail views and display-only YouTube fallback when saved images are absent; 10 tests pass, real MB5 thumbnail and video opening verified signed-in on desktop/mobile without runtime errors.
 - [x] Structured exercise suggestions from account menu and Exercises page; authenticated save/readback with real category/equipment FKs, unchanged exercise bank, mobile/desktop and 14 tests verified; email still waits on Elastic account verification.
 - [x] Connect contact form to Elastic Email with fixed recipient and auth-derived Reply-To; 9 tests pass and authenticated persistence/failure notice verified.

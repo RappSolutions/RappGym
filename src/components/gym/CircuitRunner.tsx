@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/lib/i18n";
 import { categoriesOf, categoryToken, exercisesQuery, lastByCode, logQuery, suggestionsQuery, todayISO } from "@/lib/gym";
 import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
-import { adjustLoad, groupByPhase, remainingSteps, workoutSteps, PHASES, type Phase } from "@/lib/circuit";
+import { adjustLoad, defaultPlannedSets, groupByPhase, remainingSteps, workoutSteps, PHASES, type Phase } from "@/lib/circuit";
 import { addPlannedExercise, canMove, moveRow, orderedRows, removePlannedRow, setRowPhase } from "@/lib/workout-edit";
 import { AdminExerciseEdit } from "@/components/gym/AdminExerciseEdit";
 import { repsUnit } from "@/lib/reps-unit";
@@ -158,7 +158,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
             <Button disabled={readOnly} variant={adding ? "default" : "outline"} aria-pressed={adding} aria-label={t("common.addExercise")} title={t("common.addExercise")} onClick={() => setAdding((v) => !v)}><Plus className="size-4" /><Dumbbell className="size-4" /></Button>
           </div>
 
-          {adding && <ExercisePickList exercises={pickable} disabled={readOnly || busy} onPick={(e, ph) => void run(async () => { await addPlannedExercise(workoutId, e.code, rows, workout?.gym_id ?? null, last.get(e.code)?.load ?? "", circuit ? Math.max(1, laps) : 3, last.get(e.code)?.reps ?? 10, ph); await refresh(); setAdding(false); toast.success(`${e.code} ${t("circuitRunner.added")}`); })} />}
+          {adding && <ExercisePickList exercises={pickable} disabled={readOnly || busy} onPick={(e, ph) => void run(async () => { await addPlannedExercise(workoutId, e.code, rows, workout?.gym_id ?? null, last.get(e.code)?.load ?? "", defaultPlannedSets({ spontaneous: workout?.is_spontaneous ?? false, circuit, laps }), last.get(e.code)?.reps ?? 10, ph); await refresh(); setAdding(false); toast.success(`${e.code} ${t("circuitRunner.added")}`); })} />}
 
           {listOpen && rows.length > 0 && <div className="rounded-md border text-sm">
             {groupByPhase(rows).map((g) => <div key={g.phase}><p className="border-b bg-muted/50 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t(`phase.${g.phase}`)}</p><div className="divide-y">{g.rows.map((row) => {
