@@ -110,6 +110,9 @@
     "today": "today"
   },
   "exerciseForm": {
+    "nameOrUrl": "Name / URL",
+    "fetchingTitle": "Fetching title…",
+    "titleLookupFailed": "Could not fetch the title. The link is unchanged; enter a name manually.",
     "choose": "Choose…",
     "chooseACategory": "Choose a category",
     "code": "Code",

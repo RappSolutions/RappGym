@@ -110,6 +110,9 @@
     "today": "idag"
   },
   "exerciseForm": {
+    "nameOrUrl": "Namn / URL",
+    "fetchingTitle": "Hämtar namn…",
+    "titleLookupFailed": "Kunde inte hämta namnet. Länken är kvar; ange ett namn manuellt.",
     "choose": "Välj…",
     "chooseACategory": "Välj kategori",
     "code": "Kod",

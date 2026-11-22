@@ -1,5 +1,8 @@
 import { useLanguage, localizeExercise } from "@/lib/i18n";
 import { useEffect, useState } from "react";
+import { LoaderCircle } from "lucide-react";
+import { useExerciseTitle } from "@/hooks/use-exercise-title";
+import { exerciseNameUrl, preserveExerciseLink } from "@/lib/exercise-title";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -63,6 +66,14 @@ export function ExerciseForm({
     setF(exercise ? { code_number: String(exercise.code_number), category_id: exercise.category_id ?? "", equipment_id: exercise.equipment_id ?? "", reps_unit: repsUnit(exercise), name: "", instructions: "" } : { ...empty });
   }, [open, exercise]);
   const text = texts[textLanguage];
+  const titleLookup = useExerciseTitle(open, `${exercise?.id ?? "new"}:${textLanguage}`);
+  function lookupName(value: string) {
+    const lang = textLanguage;
+    const url = exerciseNameUrl(value);
+    if (url) setTexts((cur) => ({ ...cur, [lang]: { ...cur[lang], instructions: preserveExerciseLink(cur[lang].instructions, url) } }));
+    void titleLookup.lookup(value, (name, url) => setTexts((cur) => cur[lang].name.trim() === value.trim()
+      ? { ...cur, [lang]: { name, instructions: preserveExerciseLink(cur[lang].instructions, url) } } : cur));
+  }
   const prefix = categories.find((c) => c.id === f.category_id)?.code_prefix ?? "";
   // New exercise (or category change): suggest next free number in that category; the user may override it.
   const suggest = (categoryId: string) => String(nextCodeNumber(categoryId, bank, exercise?.id));
@@ -93,6 +104,7 @@ export function ExerciseForm({
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    if (titleLookup.loading || exerciseNameUrl(text.name)) return;
     if (!f.category_id) { toast.error(t("exerciseForm.chooseACategory")); return; }
     const sv = { name: (texts.sv.name || texts.en.name).trim(), instructions: texts.sv.instructions || texts.en.instructions };
     if (!sv.name) { toast.error(t("common.name")); return; }
@@ -129,7 +141,7 @@ export function ExerciseForm({
         </DialogHeader>
         <form onSubmit={save} className="space-y-3">
           <div className="space-y-1"><Label>{t("exerciseForm.exerciseTextLanguage")}</Label><select aria-label={t("exerciseForm.exerciseTextLanguage")} value={textLanguage} onChange={(e) => setTextLanguage(e.target.value === "en" ? "en" : "sv")} className="h-10 w-full rounded-md border bg-background px-3"><option value="sv">Svenska</option><option value="en">English</option></select></div>
-          <div className="space-y-1"><Label htmlFor="ex-name">{t("common.name")}</Label><Input id="ex-name" required={textLanguage === "sv" || !texts.sv.name} value={text.name} onChange={setText("name")} /></div>
+          <div className="space-y-1"><Label htmlFor="ex-name">{t("exerciseForm.nameOrUrl")}</Label><div className="relative"><Input id="ex-name" className="pr-9" required={textLanguage === "sv" || !texts.sv.name} value={text.name} aria-busy={titleLookup.loading} onChange={(e) => { titleLookup.cancel(); setText("name")(e); }} onPaste={(e) => { const value = e.clipboardData.getData("text").trim(); if (exerciseNameUrl(value)) { e.preventDefault(); setTexts((cur) => ({ ...cur, [textLanguage]: { ...cur[textLanguage], name: value } })); lookupName(value); } }} onBlur={() => { if (!titleLookup.loading) lookupName(text.name); }} />{titleLookup.loading && <LoaderCircle aria-label={t("exerciseForm.fetchingTitle")} className="pointer-events-none absolute right-3 top-3 size-4 animate-spin text-muted-foreground" />}</div></div>
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-2 space-y-1">
               <Label htmlFor="ex-cat">{t("common.category")}</Label>
@@ -169,7 +181,7 @@ export function ExerciseForm({
             <div className="grid gap-1 pl-6 sm:grid-cols-2">{gyms.map((g) => <label key={g.id} className="flex items-center gap-2 text-sm"><input type="checkbox" className="size-4" checked={places.has(g.id)} onChange={() => { const n = new Set(places); if (n.has(g.id)) n.delete(g.id); else n.add(g.id); setPlaces(n); }} />{g.name}</label>)}</div>
           </fieldset>}
           {exercise && <ExerciseImageEditor exercise={exercise} />}
-          <Button type="submit" className="h-12 w-full font-bold uppercase">{t("common.save")}</Button>
+          <Button type="submit" disabled={titleLookup.loading || !!exerciseNameUrl(text.name)} className="h-12 w-full font-bold uppercase">{t("common.save")}</Button>
         </form>
       </DialogContent>
     </Dialog>
