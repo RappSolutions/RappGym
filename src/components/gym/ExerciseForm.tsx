@@ -2,7 +2,7 @@ import { useLanguage, localizeExercise } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { useExerciseTitle } from "@/hooks/use-exercise-title";
-import { exerciseNameUrl, preserveExerciseLink } from "@/lib/exercise-title";
+import { exerciseNameUrl, preserveExerciseLink, withExerciseDescription } from "@/lib/exercise-title";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -71,8 +71,8 @@ export function ExerciseForm({
     const lang = textLanguage;
     const url = exerciseNameUrl(value);
     if (url) setTexts((cur) => ({ ...cur, [lang]: { ...cur[lang], instructions: preserveExerciseLink(cur[lang].instructions, url) } }));
-    void titleLookup.lookup(value, (name, url) => setTexts((cur) => cur[lang].name.trim() === value.trim()
-      ? { ...cur, [lang]: { name, instructions: preserveExerciseLink(cur[lang].instructions, url) } } : cur));
+    void titleLookup.lookup(value, (name, url, description) => setTexts((cur) => cur[lang].name.trim() === value.trim()
+      ? { ...cur, [lang]: { name, instructions: withExerciseDescription(preserveExerciseLink(cur[lang].instructions, url), description) } } : cur));
   }
   const prefix = categories.find((c) => c.id === f.category_id)?.code_prefix ?? "";
   // New exercise (or category change): suggest next free number in that category; the user may override it.

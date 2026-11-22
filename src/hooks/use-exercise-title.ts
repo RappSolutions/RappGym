@@ -13,7 +13,7 @@ export function useExerciseTitle(open: boolean, scope: string) {
   const [loading, setLoading] = useState(false);
   useEffect(() => { generation.current++; setLoading(false); }, [open, scope]);
   function cancel() { generation.current++; setLoading(false); }
-  async function lookup(value: string, apply: (title: string, url: string) => void) {
+  async function lookup(value: string, apply: (title: string, url: string, description: string | null) => void) {
     const url = exerciseNameUrl(value);
     cancel();
     if (!url || !open) return;
@@ -22,7 +22,7 @@ export function useExerciseTitle(open: boolean, scope: string) {
     try {
       const result = await resolve({ data: { url } });
       if (token !== generation.current) return;
-      if (result.title) apply(result.title, url);
+      if (result.title) apply(result.title, url, result.description);
       else toast.error(t("exerciseForm.titleLookupFailed"));
     } catch { if (token === generation.current) toast.error(t("exerciseForm.titleLookupFailed")); }
     finally { if (token === generation.current) setLoading(false); }

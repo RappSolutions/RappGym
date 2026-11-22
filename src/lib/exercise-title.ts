@@ -11,3 +11,10 @@ export function exerciseNameUrl(value: string): string | null {
 export function preserveExerciseLink(instructions: string, url: string): string {
   return instructions.split(/\s+/).includes(url) ? instructions : `${instructions.trimEnd()}${instructions.trim() ? "\n" : ""}${url}`;
 }
+
+/** Prepend fetched description once; never drop what the admin already wrote. */
+export function withExerciseDescription(instructions: string, description: string | null | undefined): string {
+  const text = description?.trim();
+  if (!text || instructions.includes(text)) return instructions;
+  return instructions.trim() ? `${text}\n\n${instructions.trimStart()}` : text;
+}

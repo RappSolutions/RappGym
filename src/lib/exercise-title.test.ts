@@ -47,3 +47,15 @@ describe("exercise URL names", () => {
     expect(await fetchExerciseTitle("https://youtu.be/dQw4w9WgXcQ")).toBeNull();
   });
 });
+import { withExerciseDescription } from "./exercise-title";
+import { descriptionFromHtml } from "./exercise-title.server";
+describe("exercise description", () => {
+  it("prepends once and keeps existing text", () => {
+    const once = withExerciseDescription("Egen not", "Video: Kanal\nBeskrivning");
+    expect(once).toBe("Video: Kanal\nBeskrivning\n\nEgen not");
+    expect(withExerciseDescription(once, "Video: Kanal\nBeskrivning")).toBe(once);
+  });
+  it("reads meta description", () => {
+    expect(descriptionFromHtml('<meta name="description" content="Knäböj &amp; teknik">')).toBe("Knäböj & teknik");
+  });
+});

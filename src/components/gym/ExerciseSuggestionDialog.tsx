@@ -13,7 +13,7 @@ import { useUserView } from "@/lib/user-view";
 import { emptyExerciseSuggestion, exerciseSuggestionSchema, suggestionLookupsQuery } from "@/lib/exercise-suggestions";
 import { sendExerciseSuggestion } from "@/lib/exercise-suggestions.functions";
 import { useExerciseTitle } from "@/hooks/use-exercise-title";
-import { exerciseNameUrl, preserveExerciseLink } from "@/lib/exercise-title";
+import { exerciseNameUrl, withExerciseDescription } from "@/lib/exercise-title";
 
 export function ExerciseSuggestionDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { t } = useLanguage();
@@ -23,9 +23,9 @@ export function ExerciseSuggestionDialog({ open, onOpenChange }: { open: boolean
   const titleLookup = useExerciseTitle(open, "suggestion");
   function lookupName(value: string) {
     const url = exerciseNameUrl(value);
-    if (url) setForm((cur) => ({ ...cur, instructions: preserveExerciseLink(cur.instructions, url), source_url: cur.source_url || url }));
-    void titleLookup.lookup(value, (name, url) => setForm((cur) => cur.name.trim() === value.trim()
-      ? { ...cur, name, instructions: preserveExerciseLink(cur.instructions, url), source_url: cur.source_url || url } : cur));
+    if (url) setForm((cur) => ({ ...cur, source_url: cur.source_url || url }));
+    void titleLookup.lookup(value, (name, url, description) => setForm((cur) => cur.name.trim() === value.trim()
+      ? { ...cur, name, instructions: withExerciseDescription(cur.instructions, description), source_url: cur.source_url || url } : cur));
   }
   const { data: lookups, isPending, isError } = useQuery({ ...suggestionLookupsQuery, enabled: open });
   const send = useServerFn(sendExerciseSuggestion);
