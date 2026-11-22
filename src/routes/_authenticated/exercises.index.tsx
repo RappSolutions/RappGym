@@ -1,7 +1,13 @@
 import { useLanguage } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Search, Lightbulb, ChevronRight } from "lucide-react";
+import { Search, Lightbulb, ChevronRight, Plus } from "lucide-react";
+import { useIsAdmin } from "@/lib/roles";
+import { ExerciseForm } from "@/components/gym/ExerciseForm";
+import { ExerciseDetails } from "@/components/gym/ExerciseDetails";
+import { SpontaneousButton } from "@/components/gym/SpontaneousButton";
+import { RatingPicker } from "@/components/gym/RatingPicker";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { useUserView } from "@/lib/user-view";
 import { ExerciseSuggestionDialog } from "@/components/gym/ExerciseSuggestionDialog";
 import { Input } from "@/components/ui/input";
@@ -11,7 +17,6 @@ import { useMemo, useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { ExerciseCard } from "@/components/gym/ExerciseCard";
-import { LogSheet } from "@/components/gym/LogSheet";
 import { Button } from "@/components/ui/button";
 import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
 import { NEVER, exercisePreferencesQuery, ratingOf } from "@/lib/exercise-preferences";
@@ -24,9 +29,9 @@ export const Route = createFileRoute("/_authenticated/exercises/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { title: "Övningar – RappGym" },
-      { name: "description", content: "Hitta övningar, läs instruktioner och logga dina set." },
+      { name: "description", content: "Hitta övningar, se din egen träningshistorik och starta ett spontanpass." },
       { property: "og:title", content: "Övningar – RappGym" },
-      { property: "og:description", content: "Hitta övningar, läs instruktioner och logga dina set." },
+      { property: "og:description", content: "Hitta övningar, se din egen träningshistorik och starta ett spontanpass." },
     ],
   }),
   loader: ({ context }) =>
@@ -37,10 +42,13 @@ export const Route = createFileRoute("/_authenticated/exercises/")({
 function ExercisesPage() {
   const { t, localize } = useLanguage();
   const { readOnly } = useUserView();
+  const { isAdmin } = useIsAdmin();
+  const [adding, setAdding] = useState(false);
   const [suggestionOpen, setSuggestionOpen] = useState(false);
   const suggestionButton = <Button variant="ghost" size="sm" disabled={readOnly} onClick={() => setSuggestionOpen(true)} className="shrink-0"><Lightbulb />{t("exerciseSuggestion.title")}</Button>;
   const { data: everyExercise } = useSuspenseQuery(exercisesQuery);
   const allExercises = everyExercise.filter((e) => e.is_active);
+  const actions = <div className="flex flex-wrap items-center gap-1">{isAdmin && <Button variant="ghost" size="sm" onClick={() => setAdding(true)}><Plus />{t("exerciseForm.newExercise")}</Button>}{suggestionButton}</div>;
   const { data: gyms } = useSuspenseQuery(gymsQuery);
   const [gymId, setGym] = useSelectedGym();
   const gym = gyms.find((g) => g.id === gymId);
@@ -78,7 +86,8 @@ function ExercisesPage() {
   if (!gym)
     return (
       <main className="px-4">
-        <div className="flex justify-end">{suggestionButton}</div>
+        <div className="flex justify-end">{actions}</div>
+        {isAdmin && <ExerciseForm open={adding} all={everyExercise} onClose={() => setAdding(false)} />}
         <ExerciseSuggestionDialog open={suggestionOpen} onOpenChange={setSuggestionOpen} />
         <GymPicker gyms={gyms} selected={null} onPick={(id) => setGym(id)} />
       </main>
@@ -86,7 +95,7 @@ function ExercisesPage() {
 
   return (
     <main className="space-y-4 px-4">
-      <div className="flex flex-wrap items-center justify-between gap-2"><p className="text-sm text-muted-foreground">{t("exercisesIndex.pickAnExerciseToLog")}</p>{suggestionButton}</div>
+      <div className="flex flex-wrap items-center justify-between gap-2"><h1 className="font-display text-2xl font-bold uppercase">{t("common.exercises")}</h1>{actions}</div>
       <ExerciseSuggestionDialog open={suggestionOpen} onOpenChange={setSuggestionOpen} />
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} className="size-4" />{t("exercisesIndex.showAllExercisesOfAvailable", { length: atPlace.length, length_: allExercises.length })}</label>
       {neverCount > 0 && <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={showNever} onChange={(e) => setShowNever(e.target.checked)} className="size-4" />{t("rating.showNever", { count: neverCount })}</label>}
@@ -101,16 +110,16 @@ function ExercisesPage() {
           const token = categoryToken(c, cats);
           return (
             <section key={c} data-category={token} className="category-theme">
-              <button
-                type="button"
+              <Button
+                variant="ghost"
                 aria-expanded={isOpen}
                 onClick={() => toggle(c)}
-                className="flex w-full items-center gap-2 border-l-4 border-category-fill bg-category-fill/10 px-3 py-2 text-left font-display font-bold uppercase text-category-ink"
+                className="flex h-auto w-full items-center gap-2 rounded-none border-l-4 border-category-fill bg-category-fill/10 px-3 py-2 text-left font-display font-bold uppercase text-category-ink hover:bg-category-fill/20 hover:text-category-ink"
               >
                 <ChevronRight className={cn("size-4 transition-transform", isOpen && "rotate-90")} />
                 <span className="flex-1">{c}</span>
                 <span className="text-sm font-normal text-muted-foreground">{items.length}</span>
-              </button>
+              </Button>
               {isOpen && (
                 <div className="mt-2 space-y-2">
                   {items.map((ex) => (
@@ -123,12 +132,22 @@ function ExercisesPage() {
         })}
         {!(s ? list : exercises).length && <p className="text-muted-foreground">{s ? t("exercisesIndex.noMatches") : t("exercisesIndex.noExercisesYetAddOne")}</p>}
       </div>
-      <LogSheet
-        exercise={open}
-        last={open ? last.get(open.code) : undefined}
-        gymId={gym.id}
-        onClose={() => setOpen(null)}
-      />
+      <Sheet open={!!open} onOpenChange={(value) => { if (!value) setOpen(null); }}>
+        <SheetContent side="bottom" className="mx-auto max-h-[90dvh] max-w-2xl overflow-y-auto rounded-t-lg p-4">
+          {open && <div data-category={categoryToken(open.category, cats)} className="category-theme min-w-0 space-y-4">
+            <SheetHeader className="pr-6 text-left">
+              <SheetDescription className="text-category-ink">{open.code} · {open.category}</SheetDescription>
+              <div className="flex items-start justify-between gap-2"><SheetTitle className="min-w-0 break-words font-display text-2xl uppercase">{localize(open).name}</SheetTitle><RatingPicker exerciseId={open.id} /></div>
+            </SheetHeader>
+            <SpontaneousButton gymId={gym.id} exercise={open} last={last.get(open.code)} onStarted={() => setOpen(null)} />
+            <ExerciseDetails key={open.id} exercise={everyExercise.find((ex) => ex.id === open.id) ?? open} log={log} />
+          </div>}
+        </SheetContent>
+      </Sheet>
+      {isAdmin && <ExerciseForm open={adding} all={everyExercise} onClose={(saved) => {
+        setAdding(false);
+        if (saved) { setOpenCats((current) => new Set(current).add(saved.category)); }
+      }} />}
     </main>
   );
 }

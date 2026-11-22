@@ -160,6 +160,7 @@
     "usedInLogWorkoutsDeactivate": "Används i Logg/Pass – inaktivera istället"
   },
   "exercisesDetail": {
+    "startSpontaneous": "Starta spontanpass",
     "back": "Tillbaka",
     "exerciseNotFound": "Övningen finns inte.",
     "loggedSetsAreKept": "Loggade set behålls."

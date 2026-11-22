@@ -3,13 +3,14 @@ import type { Exercise, LogEntry } from "@/lib/gym";
 import { Button } from "@/components/ui/button";
 import type { Rating } from "@/lib/exercise-preferences";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { formatExerciseResult } from "@/lib/exercise-history";
 
 export function ExerciseCard({
   ex, last, doneToday, token, onClick, action, expanded, children, hideLast, rating,
 }: {
   ex: Exercise; last?: LogEntry | undefined; doneToday?: number | undefined; token: string; onClick?: () => void; action?: React.ReactNode; expanded?: boolean; children?: React.ReactNode; hideLast?: boolean; rating?: Rating;
 }) {
-  const { t, language, localize } = useLanguage();
+  const { t, localize } = useLanguage();
   ex = localize(ex);
   return (
     <div data-category={token} className="category-theme flex items-stretch overflow-hidden rounded-xl border bg-card">
@@ -32,7 +33,7 @@ export function ExerciseCard({
         {!hideLast && <div className="shrink-0 text-right">
           {last ? (
             <>
-              <div className="text-xl font-bold">{last.load || "–"}<span className="text-sm text-muted-foreground"> × {last.reps ?? "–"}</span></div>
+              <div className="max-w-40 whitespace-normal text-base font-bold tabular-nums">{formatExerciseResult(last, (unit) => t(`repsUnit.${unit}`).toLowerCase())}</div>
               <div className="text-xs text-muted-foreground">{t("exerciseCard.last")}</div>
             </>
           ) : (

@@ -160,6 +160,7 @@
     "usedInLogWorkoutsDeactivate": "Used in Log/Workouts – deactivate instead"
   },
   "exercisesDetail": {
+    "startSpontaneous": "Start spontaneous workout",
     "back": "Back",
     "exerciseNotFound": "Exercise not found.",
     "loggedSetsAreKept": "Logged sets are kept."

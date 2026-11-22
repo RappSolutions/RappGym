@@ -16,7 +16,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { gymsQuery } from "@/lib/gym";
 import { exerciseLocationsQuery } from "@/lib/exercise-locations";
 import { ExerciseImageEditor } from "@/components/gym/ExerciseImageEditor";
-import { nextCodeNumber } from "@/lib/exercise-refs";
+import { EXERCISE_SELECT, normalizeExercise, nextCodeNumber } from "@/lib/exercise-refs";
 import { REPS_UNITS, repsUnit, type RepsUnit } from "@/lib/reps-unit";
 
 const empty = { code_number: "", category_id: "", equipment_id: "", reps_unit: "reps" as RepsUnit, name: "", instructions: "" };
@@ -115,8 +115,8 @@ export function ExerciseForm({
     if (!Number.isInteger(num) || num < 1) { toast.error(t("exerciseForm.code")); return; }
     const row = { code_number: num, category_id: f.category_id, equipment_id: f.equipment_id || null, reps_unit: f.reps_unit, name: sv.name, instructions: sv.instructions, translations: en ? { ...translations, en } : translations };
     const res = exercise
-      ? await supabase.from("exercises").update(row).eq("id", exercise.id).select().single()
-      : await supabase.from("exercises").insert({ ...row, code: "", sort_order: all.length }).select().single(); // code is derived by the DB trigger
+      ? await supabase.from("exercises").update(row).eq("id", exercise.id).select(EXERCISE_SELECT).single()
+      : await supabase.from("exercises").insert({ ...row, code: "", sort_order: all.length }).select(EXERCISE_SELECT).single(); // code is derived by the DB trigger
     if (res.error) {
       toast.error(res.error.code === "23505" ? t("exerciseForm.codeAlreadyExists") : res.error.message);
       return;
@@ -130,7 +130,7 @@ export function ExerciseForm({
     // Log rows follow the exercise by id; the database keeps their code in sync.
     invalidate();
     toast.success(t("exerciseForm.exerciseSaved"));
-    onClose(res.data as Exercise);
+    onClose(normalizeExercise(res.data));
   }
 
   return (

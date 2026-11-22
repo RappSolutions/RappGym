@@ -6,13 +6,13 @@ import { categoriesOf, categoryToken, formatDate, type Exercise, type LogEntry }
 import { progressByDay, weightKg } from "@/lib/progress";
 import { ProgressExercisePicker } from "@/components/gym/ProgressExercisePicker";
 
-export function ProgressOverview({ log, exercises }: { log: LogEntry[]; exercises: Exercise[] }) {
+export function ProgressOverview({ log, exercises, fixedExercise }: { log: LogEntry[]; exercises: Exercise[]; fixedExercise?: Exercise }) {
   const { t, language, localize } = useLanguage();
   const loggedCodes = new Set(log.map((entry) => entry.code));
   const options = exercises.filter((exercise) => loggedCodes.has(exercise.code));
   const defaultCode = options.find((exercise) => log.some((entry) => entry.code === exercise.code && weightKg(entry.load) !== null))?.code;
   const [selection, setSelection] = useState<string | null>(null);
-  const code = selection ?? defaultCode ?? "all";
+  const code = fixedExercise?.code ?? selection ?? defaultCode ?? "all";
   const categories = categoriesOf(exercises);
   const selected = code === "all" ? undefined : exercises.find((exercise) => exercise.code === code);
   const chartToken = selected ? categoryToken(selected.category, categories) : null;
@@ -36,12 +36,12 @@ export function ProgressOverview({ log, exercises }: { log: LogEntry[]; exercise
   return (
     <section className={`min-w-0 space-y-4 border-t pt-5${chartToken ? " category-theme" : ""}`} data-category={chartToken ?? undefined} aria-labelledby="progress-title">
       <h2 id="progress-title" className="text-2xl font-bold uppercase">{t("progressOverview.progressOverTime")}</h2>
-      <div className="grid min-w-0 gap-3 ">
+      {!fixedExercise && <div className="grid min-w-0 gap-3 ">
         <div className="min-w-0 space-y-1">
           <label htmlFor="progress-exercise" className="text-xs uppercase text-muted-foreground">{t("progressOverview.exercise")}</label>
           <ProgressExercisePicker exercises={exercises} loggedCodes={loggedCodes} value={code} onChange={setSelection} />
         </div>
-      </div>
+      </div>}
       {!data.length ? <p className="py-6 text-muted-foreground">{t("progressOverview.noSetsLoggedInThis")}</p> : (
         <>
           {code !== "all" && (

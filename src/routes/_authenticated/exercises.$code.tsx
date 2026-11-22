@@ -7,16 +7,17 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { ExerciseForm } from "@/components/gym/ExerciseForm";
 import { LogSheet } from "@/components/gym/LogSheet";
-import { ExerciseImages } from "@/components/gym/ExerciseImages";
-import { InstructionText } from "@/components/gym/InstructionText";
+import { ExerciseDetails } from "@/components/gym/ExerciseDetails";
+import { SpontaneousButton } from "@/components/gym/SpontaneousButton";
+import { useSelectedGym } from "@/hooks/use-gym";
 import { RatingPicker } from "@/components/gym/RatingPicker";
 import { exercisePreferencesQuery } from "@/lib/exercise-preferences";
 import { supabase } from "@/integrations/supabase/client";
-import { categoriesOf, categoryToken, exercisesQuery, formatDate, logQuery, todayISO, useInvalidateGym, type LogEntry, formatSet } from "@/lib/gym";
+import { categoriesOf, categoryToken, exercisesQuery, logQuery, useInvalidateGym, type LogEntry } from "@/lib/gym";
+import { exerciseHistory } from "@/lib/exercise-history";
 
 export const Route = createFileRoute("/_authenticated/exercises/$code")({
   head: ({ params }) => ({
@@ -37,7 +38,8 @@ export const Route = createFileRoute("/_authenticated/exercises/$code")({
 });
 
 function ExercisePage() {
-  const { t, language, localize } = useLanguage();
+  const { t, localize } = useLanguage();
+  const [gymId] = useSelectedGym();
   const { readOnly } = useUserView();
   const { isAdmin } = useIsAdmin();
   const { code } = Route.useParams();
@@ -53,8 +55,7 @@ function ExercisePage() {
   if (!ex) return <p className="p-4">{t("exercisesDetail.exerciseNotFound")} <Link to="/exercises" className="underline">{t("exercisesDetail.back")}</Link></p>;
   const cats = categoriesOf(exercises);
   const token = categoryToken(ex.category, cats);
-  const history = log.filter((e) => e.code === code);
-  const chart = [...history].reverse().map((e) => ({ d: e.date.slice(5), v: parseFloat(e.load.replace(",", ".")) })).filter((p) => !isNaN(p.v));
+  const history = original ? exerciseHistory(log, original) : [];
 
   async function remove() {
     if (!ex) return;
@@ -74,37 +75,14 @@ function ExercisePage() {
       <div>
         <div className="font-display text-lg font-bold uppercase text-category-ink">{ex.code} · {ex.category}</div>
         <div className="flex items-start justify-between gap-2"><h1 className="text-4xl font-extrabold uppercase leading-none">{ex.name}</h1><RatingPicker exerciseId={ex.id} /></div>
-        <p className="mt-2 text-sm text-muted-foreground">{ex.equipment}</p>
       </div>
-      <ExerciseImages exercise={ex} />
-      {ex.instructions && <InstructionText text={ex.instructions} />}
-      <div className="flex gap-2">
-        <Button disabled={readOnly} onClick={() => { setEntry(null); setLogging(true); }} className="h-12 flex-1 font-bold uppercase"><Plus className="h-5 w-5" />{t("common.logSets")}</Button>
+      {gymId && <SpontaneousButton gymId={gymId} exercise={original ?? ex} last={history[0]} />}
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" disabled={readOnly} onClick={() => { setEntry(null); setLogging(true); }}><Plus className="h-5 w-5" />{t("common.logSets")}</Button>
         {isAdmin && <Button variant="secondary" className="h-12" onClick={() => setEditing(true)} aria-label={t("common.edit")}><Pencil className="h-5 w-5" /></Button>}
         {isAdmin && <Button variant="secondary" className="h-12" onClick={remove} aria-label={t("common.delete")}><Trash2 className="h-5 w-5" /></Button>}
       </div>
-      {chart.length > 1 && (
-        <div className="h-48 rounded-xl border bg-card p-2">
-          <ResponsiveContainer>
-            <LineChart data={chart}>
-              <XAxis dataKey="d" stroke="var(--muted-foreground)" fontSize={11} />
-              <YAxis stroke="var(--muted-foreground)" fontSize={11} width={30} />
-              <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)" }} />
-              <Line dataKey="v" name={t("common.load")} stroke="var(--primary)" strokeWidth={3} dot />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-      <section className="space-y-2">
-        <h2 className="text-xl font-bold uppercase">{t("common.history")}</h2>
-        {!history.length && <p className="text-muted-foreground">{t("common.noSetsLoggedYet")}</p>}
-        {history.map((e) => (
-          <button key={e.id} onClick={() => { setEntry(e); setLogging(true); }} className="flex w-full items-center justify-between rounded-lg border bg-card px-4 py-3 text-left">
-            <span className="text-sm text-muted-foreground">{formatDate(e.date)}</span>
-            <span className="text-lg font-bold">{formatSet(e)}</span>
-          </button>
-        ))}
-      </section>
+      <ExerciseDetails key={ex.id} exercise={original ?? ex} log={log} />
       <ExerciseForm open={editing} exercise={original ?? null} all={exercises} onClose={(saved) => {
         setEditing(false);
         if (saved && saved.code !== code) navigate({ to: "/exercises/$code", params: { code: saved.code }, replace: true });
