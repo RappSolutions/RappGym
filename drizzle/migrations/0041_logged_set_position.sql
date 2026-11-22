@@ -1,0 +1,2 @@
+ALTER TABLE public.log_entries ADD COLUMN set_number smallint CHECK (set_number > 0);
+COMMENT ON COLUMN public.log_entries.set_number IS 'Actual 1-based set ordinal within the planned exercise, captured when completed; NULL for legacy and standalone logs.';

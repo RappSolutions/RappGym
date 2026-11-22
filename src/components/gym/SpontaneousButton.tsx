@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/lib/i18n";
 import { todayISO } from "@/lib/gym";
-import { CircuitRunner } from "@/components/gym/CircuitRunner";
+import { useStartWorkout } from "@/components/gym/ActiveWorkout";
 
 /** Starts an empty workout today; exercises are added one by one while training. */
 export function SpontaneousButton({ gymId, size = "default" }: { gymId: string; size?: "default" | "lg" }) {
   const { t } = useLanguage();
   const { readOnly } = useUserView();
-  const [id, setId] = useState<string | null>(null);
+  const startWorkout = useStartWorkout();
   const [busy, setBusy] = useState(false);
   async function start() {
     if (readOnly) return;
@@ -20,12 +20,11 @@ export function SpontaneousButton({ gymId, size = "default" }: { gymId: string; 
     const { data, error } = await supabase.from("workouts").insert({ title: `${t("spontaneousButton.spontaneousWorkout")} ${todayISO()}`, created_by: "user", scheduled_date: todayISO(), gym_id: gymId, is_circuit: true, is_spontaneous: true }).select("id").single();
     setBusy(false);
     if (error) { toast.error(t("spontaneousButton.couldNotStartTheWorkout")); return; }
-    setId(data.id);
+    startWorkout(data.id);
   }
   return (
     <>
       <Button variant="secondary" size={size} className="w-full px-4" disabled={readOnly || busy} onClick={() => void start()}><Zap className="size-4" />{t("spontaneousButton.spontaneous")}</Button>
-      {id && <CircuitRunner workoutId={id} onClose={() => setId(null)} />}
     </>
   );
 }

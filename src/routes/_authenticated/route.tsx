@@ -5,9 +5,11 @@ import { useLanguage } from "@/lib/i18n";
 import { CategoryStyles } from "@/components/gym/CategoryStyles";
 import { ProfileMenu } from "@/components/gym/ProfileMenu";
 import { cn } from "@/lib/utils";
+import { ActiveWorkout } from "@/components/gym/ActiveWorkout";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
+  validateSearch: (search: Record<string, unknown>): { run?: string | undefined } => ({ run: typeof search['run'] === "string" && /^[0-9a-f-]{36}$/i.test(search['run']) ? search['run'] : undefined }),
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
     if (!data.user) throw redirect({ to: "/" });
@@ -61,7 +63,7 @@ function AppLayout() {
         <div className="flex shrink-0 items-center"><ProfileMenu user={user} onSignOut={signOut} /></div>
       </header>
       <CategoryStyles />
-      <Outlet />
+      <ActiveWorkout><Outlet /></ActiveWorkout>
       <nav className="app-navigation fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur">
         <div className="mx-auto grid max-w-2xl grid-cols-5">
           {tabs.map(({ to, label, icon: Icon }) => (

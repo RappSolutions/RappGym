@@ -4,7 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Play, Sparkles } from "lucide-react";
 import { WorkoutBuilder } from "@/components/gym/WorkoutBuilder";
-import { CircuitRunner } from "@/components/gym/CircuitRunner";
+import { useStartWorkout } from "@/components/gym/ActiveWorkout";
 import { SpontaneousButton } from "@/components/gym/SpontaneousButton";
 import { useSelectedGym } from "@/hooks/use-gym";
 import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
@@ -65,7 +65,7 @@ function HomePage() {
     links,
     gym?.id ?? null,
   );
-  const [running, setRunning] = useState<string | null>(null);
+  const startWorkout = useStartWorkout();
   const todaysPlans = new Map<string, PlannedRow[]>();
   for (const r of proposals)
     if (r.date <= todayISO()) {
@@ -115,7 +115,7 @@ function HomePage() {
               size="lg"
               variant="secondary"
               className="h-auto min-h-12 w-full justify-start whitespace-normal text-left"
-              onClick={() => setRunning(id)}
+              onClick={() => startWorkout(id)}
             >
               <Play className="size-4 shrink-0" />
               <span className="min-w-0 flex-1">
@@ -146,7 +146,6 @@ function HomePage() {
           </div>
         )}
       </section>
-      {running && <CircuitRunner workoutId={running} onClose={() => setRunning(null)} />}
       <div className="grid-cols-2 sm:grid-cols-3 md:grid-cols-6">
         <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-3">
           {kpis.map(([l, v]) => (

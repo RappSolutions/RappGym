@@ -1,0 +1,2 @@
+ALTER TABLE public.log_entries ADD COLUMN lap smallint CHECK (lap > 0);
+COMMENT ON COLUMN public.log_entries.lap IS 'Actual circuit lap recorded at completion; NULL for historical or standalone sets, never backfilled by inference.';

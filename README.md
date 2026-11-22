@@ -180,6 +180,9 @@ erDiagram
     text load
     text note
     uuid gym_id FK
+    text phase "intro | main | outro"
+    smallint lap "actual circuit lap; NULL for legacy"
+    smallint set_number "actual set ordinal; NULL for legacy"
   }
   TRAINING_AI_HISTORY {
     uuid id PK

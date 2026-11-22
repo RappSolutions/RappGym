@@ -12,6 +12,7 @@ import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-loca
 import { exercisesQuery, gymsQuery, lastByCode, logQuery, suggestionsQuery } from "@/lib/gym";
 
 export const Route = createFileRoute("/_authenticated/workout")({
+  validateSearch: (search: Record<string, unknown>): { cat?: string | undefined } => ({ cat: typeof search["cat"] === "string" ? search["cat"] : undefined }),
   head: () => ({
     meta: [
       { property: "og:type", content: "website" },

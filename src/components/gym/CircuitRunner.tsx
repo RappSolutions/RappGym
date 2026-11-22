@@ -1,6 +1,6 @@
 import { useUserView } from "@/lib/user-view";
 import { confirmDialog } from "@/components/gym/ConfirmHost";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ExerciseImages } from "@/components/gym/ExerciseImages";
 import { InstructionText } from "@/components/gym/InstructionText";
@@ -15,8 +15,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/lib/i18n";
 import { categoriesOf, categoryToken, exercisesQuery, lastByCode, logQuery, suggestionsQuery, todayISO } from "@/lib/gym";
 import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
-import { adjustLoad, defaultPlannedSets, groupByPhase, remainingSteps, workoutSteps, PHASES, type Phase } from "@/lib/circuit";
-import { addPlannedExercise, finishWorkout, canMove, moveRow, orderedRows, removePlannedRow, setRowPhase } from "@/lib/workout-edit";
+import { adjustLoad, defaultPlannedSets, groupByPhase, workoutSteps, PHASES, type Phase } from "@/lib/circuit";
+import { addPlannedExercise, finishWorkout, canMove, moveRow, orderedRows, removePlannedRow, setRowPhase, updatePlannedRow } from "@/lib/workout-edit";
+import { emptyRunnerState, parseRunnerState, lapMinutes, remainingLapMinutes, completedStepKeys, type RunnerState } from "@/lib/runner-state";
 import { AdminExerciseEdit } from "@/components/gym/AdminExerciseEdit";
 import { repsUnit } from "@/lib/reps-unit";
 import { PhaseSelect } from "@/components/gym/PhaseSelect";
@@ -25,71 +26,99 @@ import { Switch } from "@/components/ui/switch";
 /** Guided runner for one workout. Rows and completed sets are read live, so exercises can be added, reordered and removed mid-workout. */
 export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClose: () => void }) {
   const { t, localize } = useLanguage();
-  const { readOnly } = useUserView();
+  const { readOnly, view } = useUserView();
   const qc = useQueryClient();
   const { data: allExercises = [] } = useQuery(exercisesQuery);
   const { data: log = [] } = useQuery(logQuery);
   const { data: suggestions = [] } = useQuery(suggestionsQuery);
   const { data: links = [] } = useQuery(exerciseLocationsQuery);
-  const { data: workout } = useQuery({
+  const { data: workout, isError: workoutError } = useQuery({
     queryKey: ["workout", workoutId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("workouts").select("id,title,is_circuit,gym_id,is_spontaneous").eq("id", workoutId).single();
+      const { data, error } = await supabase.from("workouts").select("id,title,is_circuit,gym_id,is_spontaneous,started_at,completed_at").eq("id", workoutId).single();
       if (error) throw error;
       return data;
     },
   });
   const rows = useMemo(() => orderedRows(suggestions.filter((r) => r.workout_id === workoutId)), [suggestions, workoutId]);
+  useEffect(() => { if (workoutError || workout?.completed_at) onClose(); }, [workoutError, workout?.completed_at]);
   const doneRows = useMemo(() => log.filter((e) => e.workout_id === workoutId), [log, workoutId]);
   const doneByCode = useMemo(() => { const m = new Map<string, number>(); for (const e of doneRows) m.set(e.code, (m.get(e.code) ?? 0) + Math.max(1, e.sets ?? 1)); return m; }, [doneRows]);
   const circuit = workout?.is_circuit ?? true;
   const showLaps = circuit && !workout?.is_spontaneous;
   const allSteps = useMemo(() => workoutSteps(rows, circuit), [rows, circuit]);
-  const [skipped, setSkipped] = useState<Set<string>>(new Set());
-  const steps = useMemo(() => remainingSteps(allSteps, doneByCode).filter((s) => !skipped.has(`${s.row.id}:${s.set}`)), [allSteps, doneByCode, skipped]);
+  const doneKeys = useMemo(() => completedStepKeys(allSteps, doneRows), [allSteps, doneRows]);
+  const [runtime, setRuntime] = useState<RunnerState>(emptyRunnerState);
+  const [restored, setRestored] = useState(false);
+  const storageKey = `rappgym-run:${view?.actorId}:${view?.userId}:${workoutId}`;
+  useEffect(() => { setRuntime(parseRunnerState(sessionStorage.getItem(storageKey))); setRestored(true); }, [storageKey]);
+  useEffect(() => { if (restored) sessionStorage.setItem(storageKey, JSON.stringify(runtime)); }, [runtime, restored, storageKey]);
+  const skipped = useMemo(() => new Set(runtime.skipped), [runtime.skipped]);
+  const steps = useMemo(() => allSteps.filter((s) => !doneKeys.has(`${s.row.id}:${s.set}`) && !skipped.has(`${s.row.id}:${s.set}`)), [allSteps, doneKeys, skipped]);
   const keyOf = (s: { row: { id: string }; set: number }) => `${s.row.id}:${s.set}`;
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [fromIdx, setFromIdx] = useState(-1);
+  const { cursor, fromIdx } = runtime;
+  const setCursor = (cursor: string | null) => setRuntime((v) => ({ ...v, cursor, pause: null }));
   const remainingKeys = useMemo(() => new Set(steps.map(keyOf)), [steps]);
   const step = (cursor ? allSteps.find((s) => keyOf(s) === cursor) : undefined)
     ?? allSteps.find((s, i) => i > fromIdx && remainingKeys.has(keyOf(s))) ?? steps[0];
   const stepIdx = step ? allSteps.findIndex((s) => keyOf(s) === keyOf(step)) : -1;
-  const advance = () => { setCursor(null); setFromIdx(stepIdx); };
-  const jumpPhase = (ph: Phase) => { setCursor(null); setFromIdx(allSteps.findIndex((s) => s.phase === ph) - 1); };
+  const advance = () => setRuntime((v) => ({ ...v, cursor: null, fromIdx: stepIdx }));
+  const jumpPhase = (ph: Phase) => setRuntime((v) => ({ ...v, cursor: null, fromIdx: allSteps.findIndex((s) => s.phase === ph) - 1, pause: null }));
   const total = allSteps.length;
-  const doneCount = Math.min(total, allSteps.filter((s) => s.set <= (doneByCode.get(s.row.code) ?? 0)).length);
+  const doneCount = doneKeys.size;
   const laps = Math.max(0, ...allSteps.filter((s) => s.phase === (step?.phase ?? "main")).map((s) => s.lap));
   const phases = PHASES.filter((ph) => allSteps.some((s) => s.phase === ph));
-  const phaseDone = (ph: Phase) => allSteps.filter((s) => s.phase === ph).every((s) => s.set <= (doneByCode.get(s.row.code) ?? 0));
+  const phaseDone = (ph: Phase) => allSteps.filter((s) => s.phase === ph).every((s) => doneKeys.has(keyOf(s)));
   const last = useMemo(() => lastByCode(log), [log]);
-  const [loads, setLoads] = useState<Map<string, string>>(new Map());
-  const [reps, setReps] = useState<Map<string, number>>(new Map());
+  const loads = useMemo(() => new Map(runtime.loads), [runtime.loads]);
+  const reps = useMemo(() => new Map(runtime.reps), [runtime.reps]);
   const [busy, setBusy] = useState(false);
   const [listOpen, setListOpen] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [skipOpen, setSkipOpen] = useState(false);
   const [title, setTitle] = useState<string | null>(null);
   const cats = categoriesOf(allExercises);
   const catOf = (code: string) => categoryToken(allExercises.find((e) => e.code === code)?.category ?? "", cats);
   const pickable = exercisesAtLocation(allExercises.filter((e) => e.is_active), links, workout?.gym_id ?? null);
   const refresh = () => Promise.all([qc.invalidateQueries({ queryKey: ["log"] }), qc.invalidateQueries({ queryKey: ["workout-suggestions"] })]);
+  const starting = useRef(false);
+  useEffect(() => {
+    if (!workout || readOnly || starting.current || workout.started_at || workout.completed_at || doneRows.length) return;
+    starting.current = true;
+    void supabase.from("workouts").update({ started_at: new Date().toISOString() }).eq("id", workoutId).is("started_at", null)
+      .then(({ error }) => { if (error) toast.error(t("common.couldNotSaveTryAgain")); else void qc.invalidateQueries({ queryKey: ["workout", workoutId] }); });
+  }, [workout, readOnly, doneRows.length, workoutId, qc, t]);
+  const activeLapKey = step ? `${step.phase}:${step.lap}` : null;
+  useEffect(() => {
+    if (!restored || !activeLapKey || runtime.pause || !workout || runtime.lapKey === activeLapKey) return;
+    setRuntime((v) => ({ ...v, lapKey: activeLapKey, lapStartedAt: v.lapKey === null && doneRows.length === 0 ? (workout.started_at ? Date.parse(workout.started_at) : Date.now()) : Date.now(), durations: v.lapKey?.split(":")[0] === step?.phase ? v.durations : [] }));
+  }, [activeLapKey, restored, runtime.pause, runtime.lapKey, workout, doneRows.length, step?.phase]);
+  const activeBlip = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => { activeBlip.current?.scrollIntoView({ block: "nearest", inline: "center", behavior: "instant" }); }, [cursor, stepIdx]);
 
   async function close(finished: boolean) {
     if (readOnly) { onClose(); return; }
     if (finished) {
       await finishWorkout(workoutId, true);
       toast.success(t("circuitRunner.workoutDoneSetsLogged", { length: doneRows.length }));
-    } else if (rows.length === 0 && doneRows.length === 0) {
-      await finishWorkout(workoutId, false);
+      sessionStorage.removeItem(storageKey);
     }
     await Promise.all([refresh(), qc.invalidateQueries({ queryKey: ["accepted-ai-workouts"] })]);
     onClose();
   }
+  const endWorkout = () => run(async () => {
+    if (doneCount < total || !doneRows.length) {
+      if (!await confirmDialog(t("circuitRunner.endConfirm"))) return;
+    }
+    if (doneRows.length) await close(true);
+    else { await finishWorkout(workoutId, false); sessionStorage.removeItem(storageKey); await refresh(); onClose(); }
+  });
 
   const r = step?.row;
   const load = r ? loads.get(r.id) ?? doneRows.find((e) => e.code === r.code)?.load ?? r.load ?? "" : "";
-  const setLoad = (v: string) => r && setLoads((m) => new Map(m).set(r.id, v));
+  const setLoad = (load: string) => r && setRuntime((v) => ({ ...v, loads: [...new Map(v.loads).set(r.id, load)] }));
   const rep = r ? reps.get(r.id) ?? r.reps ?? 10 : 10;
-  const setRep = (v: number) => r && setReps((m) => new Map(m).set(r.id, Math.max(0, v)));
+  const setRep = (rep: number) => r && setRuntime((v) => ({ ...v, reps: [...new Map(v.reps).set(r.id, Math.max(0, rep))] }));
 
   async function run(fn: () => Promise<unknown>) {
     if (readOnly || busy) return;
@@ -98,10 +127,24 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
   }
 
   const logStep = () => run(async () => {
-    if (!step || !r) return;
-    const { error } = await supabase.from("log_entries").insert({ code: r.code, sets: 1, reps: rep, load, date: todayISO(), gym_id: r.gym_id, status: "completed", workout_id: workoutId, phase: step.phase, note: step.set === 1 ? r.note : null });
+    if (!step || !r || doneKeys.has(keyOf(step))) return;
+    const endedAt = Date.now();
+    const { error } = await supabase.from("log_entries").insert({ code: r.code, exercise_id: r.exercise_id, sets: 1, reps: rep, load, date: todayISO(), gym_id: r.gym_id, status: "completed", workout_id: workoutId, phase: step.phase, lap: circuit ? step.lap : null, set_number: step.set, note: step.set === 1 ? r.note : null });
     if (error) throw error;
     advance();
+    const next = steps.find((s) => allSteps.indexOf(s) > stepIdx);
+    if (circuit && (!next || next.phase !== step.phase || next.lap !== step.lap)) {
+      const minutes = lapMinutes(runtime.lapStartedAt, endedAt);
+      setRuntime((v) => ({ ...v, pause: { phase: step.phase, lap: step.lap, endedAt, minutes }, durations: minutes === null ? v.durations : [...v.durations, minutes] }));
+    }
+    await refresh();
+  });
+
+  const strikeSet = () => run(async () => {
+    if (!r || !await confirmDialog(t("circuitRunner.strikeConfirm"))) return;
+    if (r.sets <= 1) await removePlannedRow(r.id);
+    else await updatePlannedRow(r.id, { sets: r.sets - 1, reps: r.reps ?? 0, load: r.load, note: r.note });
+    setRuntime((v) => ({ ...v, cursor: null }));
     await refresh();
   });
 
@@ -111,6 +154,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
     if (!await confirmDialog(t("circuitRunner.undoLastSet", { code: latest.code }))) return;
     const { error } = await supabase.from("log_entries").delete().eq("id", latest.id).eq("status", "completed");
     if (error) throw error;
+    setRuntime((v) => ({ ...v, cursor: null, fromIdx: -1, pause: null }));
     await refresh();
   });
 
@@ -124,7 +168,15 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
   const rawEx = r ? allExercises.find((e) => e.code === r.code) : undefined;
   const ex = rawEx ? localize(rawEx) : undefined;
   const nameByCode = useMemo(() => { const m = new Map<string, string>(); for (const e of allExercises) m.set(e.code, localize(e).name); return m; }, [allExercises, localize]);
-  const stepNo = Math.min(total, doneCount + 1);
+  const lapNos = [...new Set(allSteps.filter((s) => s.phase === step?.phase).map((s) => s.lap))];
+  const visibleSteps = allSteps.filter((s) => s.phase === step?.phase && (!circuit || s.lap === step.lap));
+  const pause = runtime.pause;
+  const pausedLaps = Math.max(1, ...allSteps.filter((s) => s.phase === pause?.phase).map((s) => s.lap));
+  const estimate = pause ? remainingLapMinutes(runtime.durations, pausedLaps - pause.lap, workout?.is_spontaneous ?? false) : null;
+  function continueLap() {
+    setRuntime((v) => ({ ...v, pause: null, lapStartedAt: Date.now(), lapKey: activeLapKey, durations: pause?.phase === step?.phase ? v.durations : [] }));
+  }
+  if (!restored) return null;
   return (
     <Drawer open onOpenChange={(o) => { if (!o) void close(false); }}>
       <DrawerContent>
@@ -132,23 +184,26 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
           <DrawerHeader className="space-y-2 px-0">
             <div className="relative"><Input disabled={readOnly} aria-label={t("circuitRunner.workoutName")} value={title ?? workout?.title ?? ""} onChange={(e) => setTitle(e.target.value)} onBlur={saveTitle} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} className="h-9 pr-8 text-sm font-semibold" /><Pencil className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /></div>
             <DrawerTitle className="font-display text-2xl">
-              {total === 0 || !step ? t("circuitRunner.addAnExercise") : <>{t(`phase.${step.phase}`)} · {showLaps ? <>{t("circuitRunner.lap", { v0: step?.lap ?? laps, laps })} · </> : !circuit ? <>{`Set ${step?.set ?? 1}/${step?.row.sets ?? 1}`} · </> : null}{t("circuitRunner.step", { stepNo, total })}</>}
+              {total === 0 || !step ? t("circuitRunner.addAnExercise") : <>{phases.length > 1 && <>{t(`phase.${step.phase}`)} · </>}{showLaps && laps > 1 ? <>{t("circuitRunner.lap", { v0: step.lap, laps })} · </> : !circuit && step.row.sets > 1 ? <>{`Set ${step.set}/${step.row.sets}`} · </> : null}{t("circuitRunner.step", { stepNo: stepIdx + 1, total })}</>}
             </DrawerTitle>
             <DrawerDescription className="sr-only">{`${doneCount}/${total}`}</DrawerDescription>
             {phases.length > 1 && <div className="flex flex-wrap items-center gap-1 text-xs" aria-label={t("phase.phases")}>
               {phases.map((ph, i) => {
                 const active = step?.phase === ph;
                 const finished = !active && phaseDone(ph);
-                return <span key={ph} className="flex items-center gap-1">{i > 0 && <span className="text-muted-foreground">→</span>}<button type="button" disabled={finished || active} onClick={() => jumpPhase(ph)} className={`rounded-full border px-2 py-0.5 cursor-pointer hover:border-primary disabled:cursor-not-allowed disabled:hover:border-transparent font-semibold uppercase tracking-wider ${active ? "border-primary bg-primary text-primary-foreground" : finished ? "border-transparent text-muted-foreground" : "border-border text-muted-foreground"}`}>{finished ? "✓ " : ""}{t(`phase.${ph}`)}{active && showLaps ? ` · ${step?.lap}/${laps}` : ""}</button></span>;
+                return <span key={ph} className="flex items-center gap-1">{i > 0 && <span className="text-muted-foreground">→</span>}<Button variant={active ? "secondary" : "ghost"} size="sm" aria-pressed={active} onClick={() => jumpPhase(ph)}>{finished ? "✓ " : ""}{t(`phase.${ph}`)}</Button></span>;
               })}
             </div>}
-            {total > 0 && <div className="flex gap-3" aria-label={`${doneCount}/${total} set`}>
-              {phases.map((ph) => { const ps = allSteps.filter((s) => s.phase === ph); const lapNos = [...new Set(ps.map((s) => s.lap))]; return <div key={ph} className="flex gap-1.5" style={{ flex: ps.length }}>{lapNos.map((lap) => { const ls = ps.filter((s) => s.lap === lap); return <div key={lap} className="flex gap-0.5 border-b-2 border-muted-foreground/30 pb-0.5" style={{ flex: ls.length }}>{ls.map((s) => {
-                const isDone = s.set <= (doneByCode.get(s.row.code) ?? 0);
+            {circuit && lapNos.length > 1 && <div className="flex gap-1 overflow-x-auto py-1" aria-label={t("circuitRunner.laps")}>
+              {lapNos.map((lap) => <Button key={lap} size="sm" variant={lap === step?.lap ? "secondary" : "outline"} className="min-w-10 shrink-0" aria-pressed={lap === step?.lap} onClick={() => { const first = allSteps.find((s) => s.phase === step?.phase && s.lap === lap); if (first) setCursor(keyOf(first)); }}>{lap}</Button>)}
+            </div>}
+            {total > 0 && <div className="flex gap-1.5 overflow-x-auto py-1.5" aria-label={t("circuitRunner.exercisesInWorkout")}>
+              {visibleSteps.map((s) => {
+                const isDone = doneKeys.has(keyOf(s));
                 const isCurrent = step && keyOf(s) === keyOf(step);
                 const name = nameByCode.get(s.row.code) ?? s.row.code;
-                return <button type="button" key={keyOf(s)} aria-label={`${name} · ${s.row.code} · ${lap}`} title={`${t(`phase.${ph}`)} · ${t("circuitRunner.lap", { v0: lap, laps: lapNos.length })} · ${s.row.code} · ${name}`} onClick={() => setCursor(keyOf(s))} data-category={catOf(s.row.code)} className={`category-theme h-3.5 min-w-0 flex-1 cursor-pointer rounded-sm bg-category-fill hover:opacity-100 ${isCurrent ? "animate-pulse ring-2 ring-foreground" : isDone ? "" : "opacity-25"}`} />;
-              })}</div>; })}</div>; })}
+                return <Button variant="outline" size="sm" ref={isCurrent ? activeBlip : undefined} key={keyOf(s)} aria-label={`${name} · ${s.row.code} · ${s.lap}`} aria-current={isCurrent ? "step" : undefined} title={`${s.row.code} · ${name}`} onClick={() => setCursor(keyOf(s))} data-category={catOf(s.row.code)} className={`category-theme min-w-10 shrink-0 border-category-ink bg-category-fill px-2 text-category-on-fill ${isCurrent ? "ring-2 ring-foreground" : isDone ? "" : "opacity-60"}`}>{isDone && <Check className="size-3" />}{s.row.code}{!circuit && s.row.sets > 1 ? ` · ${s.set}` : ""}</Button>;
+              })}
             </div>}
           </DrawerHeader>
 
@@ -158,10 +213,10 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
             <Button disabled={readOnly} variant={adding ? "default" : "outline"} aria-pressed={adding} aria-label={t("common.addExercise")} title={t("common.addExercise")} onClick={() => setAdding((v) => !v)}><Plus className="size-4" /><Dumbbell className="size-4" /></Button>
           </div>
 
-          {adding && <ExercisePickList exercises={pickable} disabled={readOnly || busy} onPick={(e, ph) => void run(async () => { await addPlannedExercise(workoutId, e.code, rows, workout?.gym_id ?? null, last.get(e.code)?.load ?? "", defaultPlannedSets({ spontaneous: workout?.is_spontaneous ?? false, circuit, laps }), last.get(e.code)?.reps ?? 10, ph); await refresh(); setAdding(false); toast.success(`${e.code} ${t("circuitRunner.added")}`); })} />}
+          {adding && <ExercisePickList exercises={pickable} disabled={readOnly || busy} onPick={(e, ph) => void run(async () => { await addPlannedExercise(workoutId, e.code, rows, workout?.gym_id ?? null, last.get(e.code)?.load ?? "", defaultPlannedSets({ spontaneous: workout?.is_spontaneous ?? false, circuit, laps }), last.get(e.code)?.reps ?? 10, ph); await refresh(); if (workout?.is_spontaneous) setRuntime((v) => ({ ...v, pause: null, cursor: null, fromIdx: -1 })); setAdding(false); toast.success(`${e.code} ${t("circuitRunner.added")}`); })} />}
 
           {listOpen && rows.length > 0 && <div className="rounded-md border text-sm">
-            {groupByPhase(rows).map((g) => <div key={g.phase}><p className="border-b bg-muted/50 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t(`phase.${g.phase}`)}</p><div className="divide-y">{g.rows.map((row) => {
+            {groupByPhase(rows).map((g) => <div key={g.phase}>{phases.length > 1 && <p className="border-b bg-muted/50 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t(`phase.${g.phase}`)}</p>}<div className="divide-y">{g.rows.map((row) => {
               const doneSets = doneByCode.get(row.code) ?? 0;
               return <div key={row.id} data-category={catOf(row.code)} className="category-theme flex items-center gap-2 border-l-4 border-category-fill py-1 pl-2 pr-1">
                 <span className="w-10 font-bold text-category-ink">{row.code}</span>
@@ -175,7 +230,15 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
             })}</div></div>)}
           </div>}
 
-          {r && <div className="space-y-3">
+          {pause && <section className="space-y-3 border-y py-6 text-center" aria-live="polite">
+            <Check className="mx-auto size-9 text-primary" />
+            <h2 className="text-2xl font-bold">{workout?.is_spontaneous ? t("circuitRunner.currentDone") : t("circuitRunner.lapDone", { lap: pause.lap, laps: pausedLaps })}</h2>
+            {pause.minutes !== null && <p>{t("circuitRunner.lapTime", { minutes: Math.max(1, Math.round(pause.minutes)) })}</p>}
+            {estimate !== null && <p className="text-sm text-muted-foreground">{t("circuitRunner.remainingTime", { minutes: estimate, phase: t(`phase.${pause.phase}`) })}</p>}
+            {step && <Button onClick={continueLap}>{step.phase === pause.phase ? t("circuitRunner.nextLap", { lap: step.lap }) : t("circuitRunner.nextPhase", { phase: t(`phase.${step.phase}`) })}</Button>}
+            {workout?.is_spontaneous && !step && <Button variant="outline" onClick={() => setAdding(true)}><Plus className="size-4" />{t("common.addExercise")}</Button>}
+          </section>}
+          {r && !pause && <div className="space-y-3">
             <div><p className="flex items-center gap-1 font-bold text-primary">{r.code}<AdminExerciseEdit exercise={rawEx} /></p><p className="flex items-start justify-between gap-2 text-xl font-bold"><span className="min-w-0">{ex?.name ?? r.code}</span>{rawEx && <RatingPicker exerciseId={rawEx.id} />}</p>{r.note && <p className="text-sm text-muted-foreground">{r.note}</p>}</div>
             {ex && <ExerciseImages exercise={ex} />}
             {ex?.instructions && <InstructionText text={ex.instructions} className="text-sm" />}
@@ -186,12 +249,13 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
               <div className="space-y-1"><p className="text-sm font-medium">{t(`repsUnitLong.${repsUnit(rawEx)}`)}</p>
                 <div className="flex items-center gap-1"><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="-1" onClick={() => setRep(rep - 1)}><Minus /></Button><Input inputMode="numeric" value={rep} onChange={(e) => setRep(Number(e.target.value) || 0)} className="h-10 min-w-0 px-1 text-center text-lg font-bold" /><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="+1" onClick={() => setRep(rep + 1)}><Plus /></Button></div></div>
             </fieldset>
-            <div className="flex gap-2"><Button variant="ghost" disabled={readOnly || busy} onClick={() => { if (step) { setSkipped((s) => new Set(s).add(keyOf(step))); advance(); } }}><SkipForward className="size-4" />{t("circuitRunner.skip")}</Button><Button className="h-12 flex-1 text-lg" disabled={readOnly || busy} onClick={() => void logStep()}><Check />{t("circuitRunner.done")}</Button></div>
+            {skipOpen && <div className="flex flex-wrap gap-2 border-y py-2"><Button variant="outline" size="sm" onClick={() => { if (step) setRuntime((v) => ({ ...v, skipped: [...new Set([...v.skipped, keyOf(step)])], cursor: null, fromIdx: stepIdx })); setSkipOpen(false); }}>{t("circuitRunner.goNext")}</Button><Button variant="outline" size="sm" onClick={() => { setSkipOpen(false); void strikeSet(); }}>{t("circuitRunner.strikeSet")}</Button></div>}
+            <div className="flex gap-2"><Button variant="ghost" aria-expanded={skipOpen} disabled={readOnly || busy || (step ? doneKeys.has(keyOf(step)) : false)} onClick={() => setSkipOpen((v) => !v)}><SkipForward className="size-4" />{t("circuitRunner.skip")}</Button><Button className="h-12 flex-1 text-lg" disabled={readOnly || busy || (step ? doneKeys.has(keyOf(step)) : false)} onClick={() => void logStep()}><Check />{t("circuitRunner.done")}</Button></div>
           </div>}
           {!r && total > 0 && <p className="text-sm text-muted-foreground">{t("circuitRunner.allSetsDoneAddThe")}</p>}
           <div className="flex gap-2">
             {doneRows.length > 0 && <Button variant="ghost" size="sm" disabled={readOnly || busy} onClick={() => void undo()}><Undo2 className="size-4" />{t("circuitRunner.undoLastSet2")}</Button>}
-            <Button variant="outline" size="sm" className="ml-auto" disabled={busy} onClick={() => void close(doneRows.length > 0)}>{t("circuitRunner.endWorkout")}</Button>
+            <Button variant="outline" size="sm" className="ml-auto" disabled={readOnly || busy} onClick={() => void endWorkout()}>{t("circuitRunner.endWorkout")}</Button>
           </div>
         </div>
       </DrawerContent>

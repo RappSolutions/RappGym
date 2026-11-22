@@ -281,6 +281,20 @@
       "when": 1795345853464,
       "tag": "0039_workout_exercises_split",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1795347395263,
+      "tag": "0040_logged_set_laps",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1795347526384,
+      "tag": "0041_logged_set_position",
+      "breakpoints": true
     }
   ]
 }

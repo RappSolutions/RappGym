@@ -300,12 +300,14 @@ export type Database = {
           exercise_rating: number | null
           gym_id: string | null
           id: string
+          lap: number | null
           load: string
           note: string | null
           phase: string
           proposal_order: number | null
           reps: number | null
           reps_unit: string
+          set_number: number | null
           sets: number
           status: string
           user_id: string
@@ -320,12 +322,14 @@ export type Database = {
           exercise_rating?: number | null
           gym_id?: string | null
           id?: string
+          lap?: number | null
           load?: string
           note?: string | null
           phase?: string
           proposal_order?: number | null
           reps?: number | null
           reps_unit?: string
+          set_number?: number | null
           sets?: number
           status?: string
           user_id?: string
@@ -340,12 +344,14 @@ export type Database = {
           exercise_rating?: number | null
           gym_id?: string | null
           id?: string
+          lap?: number | null
           load?: string
           note?: string | null
           phase?: string
           proposal_order?: number | null
           reps?: number | null
           reps_unit?: string
+          set_number?: number | null
           sets?: number
           status?: string
           user_id?: string

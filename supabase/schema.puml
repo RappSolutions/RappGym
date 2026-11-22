@@ -124,6 +124,8 @@ entity log_entries {
   proposal_order : int
   * phase : text (intro|main|outro)
   exercise_rating : smallint 1-5 <<snapshot, completed only>>
+  lap : smallint <<actual circuit lap, nullable for legacy>>
+  set_number : smallint <<actual set ordinal, nullable for legacy>>
   * created_at : timestamptz
 }
 entity ai_tiers {

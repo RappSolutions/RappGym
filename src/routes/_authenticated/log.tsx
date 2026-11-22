@@ -4,7 +4,8 @@ import type { RepsUnit } from "@/lib/reps-unit";
 import { loggedName } from "@/lib/log-entry";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
+import { logSectionHeaders } from "@/lib/runner-state";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight, CheckCircle2, Trash2, Repeat, Sparkles, LayoutList, Rows3, Pencil } from "lucide-react";
 import { toast } from "sonner";
@@ -264,6 +265,12 @@ function LogPage() {
       <div className={compact ? "divide-y rounded-xl border bg-card" : "space-y-4"}>
         {groups.map((g) => {
           const entries = workoutRecordingOrder(g.entries);
+          const headers = logSectionHeaders(entries);
+          const sectionHeader = (i: number) => {
+            const h = headers[i];
+            if (!h || (!h.phase && !h.lap)) return null;
+            return <p className="border-y bg-muted px-3 py-1 text-xs font-semibold">{[h.phase ? t(`phase.${h.phase}`) : null, h.lap ? t("circuitRunner.lapNumber", { lap: h.lap }) : null].filter(Boolean).join(" · ")}</p>;
+          };
           const cats = [
             ...new Set(
               entries.map((e) => exercises.find((ex) => ex.code === e.code)?.category).filter((c): c is string => !!c),
@@ -305,7 +312,8 @@ function LogPage() {
                 </button>
                 {open && (
                   <div className="border-t bg-muted/20 text-sm">
-                    {entries.map((e) => (
+                    {entries.map((e, i) => (
+                      <Fragment key={e.id}>{sectionHeader(i)}
                       <button
                         type="button"
                         key={e.id}
@@ -316,7 +324,7 @@ function LogPage() {
                         <span className="w-12 shrink-0 font-semibold text-category-ink">{e.recorded_code ?? e.code}</span>
                         <span className="min-w-0 flex-1 truncate">{loggedName(e, rawByCode.get(e.code), byCode.get(e.code)) || t("log.unknownExercise")}<RatingMark rating={e.exercise_rating} /></span>
                         <span className="font-semibold">{formatSet(e, e.reps_unit === "reps" ? "" : t(`repsUnit.${e.reps_unit as RepsUnit}`).toLowerCase())}</span>
-                      </button>
+                      </button></Fragment>
                     ))}
                     <div className="flex items-center justify-end gap-1 px-2 py-1 text-xs text-muted-foreground">
                       <span className="mr-auto">{sets} {t("common.sets")} · {places.join(", ")}</span>
@@ -408,7 +416,8 @@ function LogPage() {
                 </Button>
               </div>
               <div id={`workout-${g.key}`} hidden={!open} className="divide-y border-t">
-                {entries.map((e) => (
+                {entries.map((e, i) => (
+                  <Fragment key={e.id}>{sectionHeader(i)}
                   <Button
                     variant="ghost"
                     key={e.id}
@@ -428,7 +437,7 @@ function LogPage() {
                       {e.note && <span className="block truncate text-xs text-muted-foreground">{e.note}</span>}
                     </span>
                     <span className="text-lg font-bold">{formatSet(e, e.reps_unit === "reps" ? "" : t(`repsUnit.${e.reps_unit as RepsUnit}`).toLowerCase())}</span>
-                  </Button>
+                  </Button></Fragment>
                 ))}
               </div>
             </section>

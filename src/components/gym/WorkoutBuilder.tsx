@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/lib/i18n";
 import { categoriesOf, categoryToken, todayISO, type Exercise, type LogEntry } from "@/lib/gym";
-import { CircuitRunner } from "@/components/gym/CircuitRunner";
+import { useStartWorkout } from "@/components/gym/ActiveWorkout";
 import { insertPlannedExercises } from "@/lib/workout-edit";
 
 /** Builder for an own workout, stored like AI plans (suggested rows); can be planned for later or started right away. */
@@ -34,7 +34,7 @@ export function WorkoutBuilder({
   const [title, setTitle] = useState("");
   const [busy, setBusy] = useState(false);
   const [openCats, setOpenCats] = useState<Set<string>>(new Set());
-  const [running, setRunning] = useState<string | null>(null);
+  const startWorkout = useStartWorkout();
   const cats = categoriesOf(exercises);
 
   async function save(start: boolean) {
@@ -66,7 +66,7 @@ export function WorkoutBuilder({
     setOpen(false);
     setPicked([]);
     setTitle("");
-    if (start) setRunning(workoutId);
+    if (start) startWorkout(workoutId);
     else toast.success(t("workoutBuilder.workoutPlanned"));
   }
 
@@ -188,7 +188,6 @@ export function WorkoutBuilder({
           </div>
         </DialogContent>
       </Dialog>
-      {running && <CircuitRunner workoutId={running} onClose={() => setRunning(null)} />}
     </>
   );
 }

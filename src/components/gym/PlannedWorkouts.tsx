@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useLanguage } from "@/lib/i18n";
 import { LogSheet } from "@/components/gym/LogSheet";
-import { CircuitRunner } from "@/components/gym/CircuitRunner";
+import { useStartWorkout } from "@/components/gym/ActiveWorkout";
 import { createdStamp } from "@/lib/workout-meta";
 import {
   categoriesOf,
@@ -102,7 +102,7 @@ export function PlannedWorkouts() {
       setDeleting(false);
     }
   }
-  const [circuitId, setCircuitId] = useState<string | null>(null);
+  const startWorkout = useStartWorkout();
   const [addingTo, setAddingTo] = useState<string | null>(null);
   const [editBusy, setEditBusy] = useState(false);
   async function edit(fn: () => Promise<unknown>) {
@@ -200,7 +200,7 @@ export function PlannedWorkouts() {
                       <Button disabled={readOnly} variant={addingTo === id ? "default" : "outline"} className="shrink-0" aria-pressed={addingTo === id} aria-label={t("common.addExercise")} title={t("common.addExercise")} onClick={() => setAddingTo(addingTo === id ? null : id)}><Plus className="size-4" /><Dumbbell className="size-4" /></Button>
                       <Button
                         className="min-w-0 flex-1 whitespace-normal"
-                        onClick={() => setCircuitId(id)}
+                        onClick={() => startWorkout(id)}
                       >
                         <Play className="size-4 shrink-0" />
                         {done ? t("plannedWorkouts.continueWorkout") : t("plannedWorkouts.startWorkout")}
@@ -261,9 +261,6 @@ export function PlannedWorkouts() {
           setGuidedId(null);
         }}
       />
-      {circuitId && (
-        <CircuitRunner workoutId={circuitId} onClose={() => setCircuitId(null)} />
-      )}
     </>
   );
 }
