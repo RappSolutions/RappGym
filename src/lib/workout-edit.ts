@@ -87,3 +87,29 @@ export async function finishWorkout(workoutId: string, anyDone: boolean) {
     : await supabase.from("workouts").delete().eq("id", workoutId);
   if (error) throw error;
 }
+
+/** Flat drag list token: a phase header ("h:<phase>") or a row id. */
+export const headerKey = (p: Phase) => `h:${p}`;
+
+/** Row updates after a drop in a flat list of headers + row ids: each row takes the phase of the nearest header above it. */
+export function placementFromFlat(flat: readonly string[], rows: readonly Orderable[]): { id: string; phase: Phase; proposal_order: number }[] {
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  let phase: Phase = "intro";
+  let order = 0;
+  const out: { id: string; phase: Phase; proposal_order: number }[] = [];
+  for (const k of flat) {
+    if (k.startsWith("h:")) { phase = k.slice(2) as Phase; continue; }
+    const r = byId.get(k);
+    if (!r) continue;
+    const o = order++;
+    if ((r.phase ?? "main") !== phase || r.proposal_order !== o) out.push({ id: k, phase, proposal_order: o });
+  }
+  return out;
+}
+
+export async function applyPlacement(updates: { id: string; phase: Phase; proposal_order: number }[]) {
+  for (const u of updates) {
+    const { error } = await supabase.from("workout_exercises").update({ phase: u.phase, sort_order: u.proposal_order }).eq("id", u.id);
+    if (error) throw error;
+  }
+}

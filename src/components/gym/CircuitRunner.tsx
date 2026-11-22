@@ -6,7 +6,7 @@ import { ExerciseImages } from "@/components/gym/ExerciseImages";
 import { InstructionText } from "@/components/gym/InstructionText";
 import { RatingPicker } from "@/components/gym/RatingPicker";
 import { ExercisePickList } from "@/components/gym/ExercisePickList";
-import { Minus, Plus, Check, SkipForward, ListOrdered, ArrowUp, ArrowDown, Trash2, Undo2, Octagon, Settings, Flag, Redo2 } from "lucide-react";
+import { Minus, Plus, Check, SkipForward, ListOrdered, Trash2, Undo2, Octagon, Settings, Redo2 } from "lucide-react";
 import { toast } from "sonner";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -16,11 +16,12 @@ import { useLanguage } from "@/lib/i18n";
 import { categoriesOf, categoryToken, exercisesQuery, lastByCode, logQuery, suggestionsQuery, todayISO } from "@/lib/gym";
 import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
 import { adjustLoad, defaultPlannedSets, groupByPhase, workoutSteps, PHASES, type Phase } from "@/lib/circuit";
-import { addPlannedExercise, finishWorkout, canMove, moveRow, orderedRows, removePlannedRow, setRowPhase, updatePlannedRow } from "@/lib/workout-edit";
+import { addPlannedExercise, finishWorkout, applyPlacement, orderedRows, removePlannedRow, updatePlannedRow } from "@/lib/workout-edit";
 import { emptyRunnerState, parseRunnerState, lapMinutes, remainingLapMinutes, completedStepKeys, type RunnerState } from "@/lib/runner-state";
 import { AdminExerciseEdit } from "@/components/gym/AdminExerciseEdit";
 import { repsUnit } from "@/lib/reps-unit";
-import { PhaseSelect } from "@/components/gym/PhaseSelect";
+import { SortablePlan } from "@/components/gym/SortablePlan";
+import { FinishFlag } from "@/components/gym/FinishFlag";
 import { Switch } from "@/components/ui/switch";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -198,7 +199,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
                   <DropdownMenuItem disabled={readOnly} onSelect={() => setAdding((v) => !v)}><Plus className="size-4" />{t("common.addExercise")}</DropdownMenuItem>
                   {doneRows.length > 0 && <DropdownMenuItem disabled={readOnly || busy} onSelect={() => void undo()}><Undo2 className="size-4" />{t("circuitRunner.undoLastSet2")}</DropdownMenuItem>}
                 </DropdownMenuContent></DropdownMenu>
-              <Button variant="ghost" size="icon" className="size-9 shrink-0" disabled={readOnly || busy} aria-label={t("circuitRunner.endWorkout")} title={t("circuitRunner.endWorkout")} onClick={() => void endWorkout()}><Flag className="size-4" /></Button></div>
+              <Button variant="ghost" size="icon" className="size-9 shrink-0" disabled={readOnly || busy} aria-label={t("circuitRunner.endWorkout")} title={t("circuitRunner.endWorkout")} onClick={() => void endWorkout()}><FinishFlag className="size-5" /></Button></div>
             <DrawerTitle className="sr-only">{workout?.title ?? t("circuitRunner.workoutName")}</DrawerTitle>
             <DrawerDescription className="sr-only">{`${doneCount}/${total}`}</DrawerDescription>
             <div className="flex items-center justify-between gap-2">
@@ -223,18 +224,15 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
           {adding && <ExercisePickList exercises={pickable} disabled={readOnly || busy} onPick={(e, ph) => void run(async () => { await addPlannedExercise(workoutId, e.code, rows, workout?.gym_id ?? null, last.get(e.code)?.load ?? "", defaultPlannedSets({ spontaneous: workout?.is_spontaneous ?? false, circuit, laps, phase: ph }), last.get(e.code)?.reps ?? 10, ph); await refresh(); if (workout?.is_spontaneous) setRuntime((v) => ({ ...v, pause: null, cursor: null, fromIdx: -1 })); setAdding(false); toast.success(`${e.code} ${t("circuitRunner.added")}`); })} />}
 
           {listOpen && rows.length > 0 && <div className="rounded-md border text-sm">
-            {groupByPhase(rows).map((g) => <div key={g.phase}>{phases.length > 1 && <p className="border-b bg-muted/50 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t(`phase.${g.phase}`)}</p>}<div className="divide-y">{g.rows.map((row) => {
-              const doneSets = doneByCode.get(row.code) ?? 0;
-              return <div key={row.id} data-category={catOf(row.code)} className="category-theme flex items-center gap-2 border-l-4 border-category-fill py-1 pl-2 pr-1">
+            <SortablePlan rows={rows} disabled={readOnly || busy} onPlace={(u) => void run(async () => { await applyPlacement(u); await refresh(); })}
+              renderHeader={(p, empty) => <p className={`border-b bg-muted/50 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground ${empty ? "opacity-50" : ""}`}>{t(`phase.${p}`)}</p>}
+              renderRow={(row, handle) => { const doneSets = doneByCode.get(row.code) ?? 0;
+              return <div data-category={catOf(row.code)} className="category-theme flex items-center gap-2 border-l-4 border-category-fill py-1 pl-0 pr-1">{handle}
                 <span className="w-10 font-bold text-category-ink">{row.code}</span>
                 <span className="flex-1 truncate">{localize(allExercises.find((e) => e.code === row.code) ?? { code: row.code, name: row.code } as never).name}</span>
                 <span className="tabular-nums text-xs text-muted-foreground">{Math.min(doneSets, row.sets)}/{row.sets}</span>
-                <PhaseSelect value={row.phase} disabled={readOnly || busy} onChange={(ph) => void run(async () => { await setRowPhase(row.id, ph); await refresh(); })} />
-                <Button variant="ghost" size="icon" className="size-8" disabled={readOnly || busy || !canMove(rows, row.id, -1)} aria-label={t("common.moveUp")} onClick={() => void run(async () => { await moveRow(rows, row.id, -1); await refresh(); })}><ArrowUp className="size-4" /></Button>
-                <Button variant="ghost" size="icon" className="size-8" disabled={readOnly || busy || !canMove(rows, row.id, 1)} aria-label={t("common.moveDown")} onClick={() => void run(async () => { await moveRow(rows, row.id, 1); await refresh(); })}><ArrowDown className="size-4" /></Button>
                 <Button variant="ghost" size="icon" className="size-8 text-destructive" disabled={readOnly || busy} aria-label={t("common.remove")} onClick={async () => { if (await confirmDialog(t("circuitRunner.removeFromTheWorkoutLogged", { code: row.code }))) void run(async () => { await removePlannedRow(row.id); await refresh(); }); }}><Trash2 className="size-4" /></Button>
-              </div>;
-            })}</div></div>)}
+              </div>; }} />
           </div>}
 
           {pause && <section className="space-y-3 border-y py-6 text-center" aria-live="polite">

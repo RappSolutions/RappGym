@@ -95,7 +95,8 @@
     "sets2": "Sets",
     "users": "Users",
     "weightKg": "Weight (kg)",
-    "workout": "Workout"
+    "workout": "Workout",
+    "dragToMove": "Drag to move"
   },
   "confirmHost": {
     "confirm": "Confirm",

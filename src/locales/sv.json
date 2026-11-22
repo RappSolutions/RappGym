@@ -95,7 +95,8 @@
     "sets2": "Antal set",
     "users": "Användare",
     "weightKg": "Vikt (kg)",
-    "workout": "Pass"
+    "workout": "Pass",
+    "dragToMove": "Dra för att flytta"
   },
   "confirmHost": {
     "confirm": "Bekräfta",
