@@ -7,7 +7,7 @@ import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-quer
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { ChevronDown, ChevronRight, Play, Trash2, Sparkles, X, Plus } from "lucide-react";
+import { ArrowUpDown, ChevronDown, ChevronRight, Play, Trash2, Sparkles, X, Plus } from "lucide-react";
 import { ExercisePickList } from "@/components/gym/ExercisePickList";
 import { addPlannedExercise, finishWorkout, applyPlacement, orderedRows, removePlannedRow } from "@/lib/workout-edit";
 import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
@@ -63,6 +63,7 @@ export function PlannedWorkouts() {
   const [proposalOverrides, setProposalOverrides] = useState<Map<string, boolean>>(new Map());
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [sortingId, setSortingId] = useState<string | null>(null);
   const today = todayISO();
   const categories = categoriesOf(exercises);
   const byCode = new Map(exercises.map((e) => [e.code, localize(e)]));
@@ -177,7 +178,8 @@ export function PlannedWorkouts() {
                   {!finished && <Button variant="ghost" size="icon" className="mt-1 shrink-0" disabled={readOnly} title={done ? t("plannedWorkouts.continueWorkout") : t("plannedWorkouts.startWorkout")} aria-label={`${done ? t("plannedWorkouts.continueWorkout") : t("plannedWorkouts.startWorkout")}: ${first.workout?.title}`} onClick={() => startWorkout(id)}><Play className="size-5" /></Button>}
                   </div>
                   <div id={`proposal-${id}`} hidden={!open} className="space-y-3">
-                    <div className="divide-y divide-border"><SortablePlan rows={rows} disabled={readOnly || finished || editBusy} onPlace={(u) => void edit(() => applyPlacement(u))}
+                    <div className="divide-y divide-border">{!finished && !readOnly && <div className="flex justify-end"><Button variant={sortingId === id ? "secondary" : "ghost"} size="sm" className="h-7 gap-1 px-2 text-xs text-muted-foreground" aria-pressed={sortingId === id} onClick={() => setSortingId((v) => v === id ? null : id)}><ArrowUpDown className="size-3.5" />{sortingId === id ? t("common.doneSorting") : t("common.sort")}</Button></div>}
+                    <SortablePlan rows={rows} disabled={readOnly || finished || editBusy || sortingId !== id} onPlace={(u) => void edit(() => applyPlacement(u))}
                       renderHeader={(p, empty) => <p className={`border-b pb-0.5 pt-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground ${empty ? "opacity-50" : ""}`}>{t(`phase.${p}`)}</p>}
                       renderRow={(row, handle) => (
 <div data-category={categoryToken(byCode.get(row.code)?.category ?? "", categories)} className="category-theme flex items-center border-l-4 border-category-fill">
@@ -191,7 +193,7 @@ export function PlannedWorkouts() {
                           }}
                         >
                           <span className="font-bold text-category-ink">{row.code}</span>
-                          <span className="flex min-w-0 justify-between gap-2 break-words"><span className="min-w-0">{byCode.get(row.code)?.name}</span><span className="shrink-0 tabular-nums text-xs text-muted-foreground">{doneOf(row) ? `${Math.min(doneOf(row), row.sets)}/${row.sets}` : row.sets}</span></span>
+                          <span className="flex min-w-0 justify-between gap-2 break-words"><span className="min-w-0">{byCode.get(row.code)?.name}</span><span className="shrink-0 tabular-nums text-xs text-muted-foreground">{doneOf(row) ? `${Math.min(doneOf(row), row.sets)}/${row.sets}` : t("plannedWorkouts.lapsCount", { count: row.sets })}</span></span>
                           <span className="col-start-2 min-w-0 break-words text-sm font-semibold sm:col-start-auto">
                             {byCode.get(row.code)?.equipment ? <span className="font-normal text-muted-foreground">{byCode.get(row.code)?.equipment} · </span> : null}
                             {formatSet({ ...row, sets: 1 }, repsUnit(exercises.find((e) => e.code === row.code)) === "reps" ? "" : t(`repsUnit.${repsUnit(exercises.find((e) => e.code === row.code))}`).toLowerCase())}

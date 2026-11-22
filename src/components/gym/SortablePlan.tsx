@@ -2,7 +2,7 @@ import { DndContext, PointerSensor, TouchSensor, KeyboardSensor, closestCenter, 
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { PHASES, type Phase } from "@/lib/circuit";
 import { headerKey, orderedRows, placementFromFlat } from "@/lib/workout-edit";
 import { useLanguage } from "@/lib/i18n";
@@ -30,7 +30,10 @@ export function SortablePlan({ rows, disabled, onPlace, renderHeader, renderRow 
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
-  const ordered = orderedRows(rows);
+  // Optimistic order: show the dropped position at once and keep it until fresh rows arrive (no snap-back).
+  const [pending, setPending] = useState<PlannedRow[] | null>(null);
+  useEffect(() => setPending(null), [rows]);
+  const ordered = orderedRows(pending ?? rows);
   const showHeaders = !disabled || new Set(ordered.map((r) => r.phase ?? "main")).size > 1;
   const flat = PHASES.flatMap((p) => [headerKey(p), ...ordered.filter((r) => (r.phase ?? "main") === p).map((r) => r.id)]);
   const byId = new Map(ordered.map((r) => [r.id, r]));
@@ -40,7 +43,10 @@ export function SortablePlan({ rows, disabled, onPlace, renderHeader, renderRow 
     if (to === 0) to = 1; // never above the first header
     const next = arrayMove(flat, flat.indexOf(String(active.id)), to);
     const u = placementFromFlat(next, rows);
-    if (u.length) onPlace(u);
+    if (!u.length) return;
+    const byRow = new Map(u.map((x) => [x.id, x]));
+    setPending(rows.map((r) => { const x = byRow.get(r.id); return x ? { ...r, ...x } : r; }));
+    onPlace(u);
   };
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>

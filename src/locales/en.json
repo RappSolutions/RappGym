@@ -96,6 +96,8 @@
     "users": "Users",
     "weightKg": "Weight (kg)",
     "workout": "Workout",
+    "sort": "Reorder",
+    "doneSorting": "Done",
     "dragToMove": "Drag to move"
   },
   "confirmHost": {
@@ -290,6 +292,8 @@
     "removeFromTheWorkout": "Remove {{code}} from the workout?",
     "removeSuggestedWorkout": "Remove suggested workout?",
     "removeSuggestion": "Remove suggestion",
+    "lapsCount_one": "{{count}} lap",
+    "lapsCount_other": "{{count}} laps",
     "setsDone": "sets done",
     "startWorkout": "Start workout",
     "suggestedWorkouts": "Suggested workouts",

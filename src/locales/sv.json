@@ -96,6 +96,8 @@
     "users": "Användare",
     "weightKg": "Vikt (kg)",
     "workout": "Pass",
+    "sort": "Sortera",
+    "doneSorting": "Klar",
     "dragToMove": "Dra för att flytta"
   },
   "confirmHost": {
@@ -290,6 +292,8 @@
     "removeFromTheWorkout": "Ta bort {{code}} ur passet?",
     "removeSuggestedWorkout": "Ta bort föreslaget pass?",
     "removeSuggestion": "Ta bort förslag",
+    "lapsCount_one": "{{count}} varv",
+    "lapsCount_other": "{{count}} varv",
     "setsDone": "set klara",
     "startWorkout": "Starta passet",
     "suggestedWorkouts": "Föreslagna pass",

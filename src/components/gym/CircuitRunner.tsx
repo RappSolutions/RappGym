@@ -224,6 +224,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
           {adding && <ExercisePickList exercises={pickable} disabled={readOnly || busy} onPick={(e, ph) => void run(async () => { await addPlannedExercise(workoutId, e.code, rows, workout?.gym_id ?? null, last.get(e.code)?.load ?? "", defaultPlannedSets({ spontaneous: workout?.is_spontaneous ?? false, circuit, laps, phase: ph }), last.get(e.code)?.reps ?? 10, ph); await refresh(); if (workout?.is_spontaneous) setRuntime((v) => ({ ...v, pause: null, cursor: null, fromIdx: -1 })); setAdding(false); toast.success(`${e.code} ${t("circuitRunner.added")}`); })} />}
 
           {listOpen && rows.length > 0 && <div className="rounded-md border text-sm">
+            <div className="flex items-center justify-between border-b px-2 py-1"><span className="text-xs font-semibold text-muted-foreground">{t("circuitRunner.exercisesInWorkout")}</span><Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" onClick={() => setListOpen(false)}><Check className="size-3.5" />{t("common.doneSorting")}</Button></div>
             <SortablePlan rows={rows} disabled={readOnly || busy} onPlace={(u) => void run(async () => { await applyPlacement(u); await refresh(); })}
               renderHeader={(p, empty) => <p className={`border-b bg-muted/50 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground ${empty ? "opacity-50" : ""}`}>{t(`phase.${p}`)}</p>}
               renderRow={(row, handle) => { const doneSets = doneByCode.get(row.code) ?? 0;
