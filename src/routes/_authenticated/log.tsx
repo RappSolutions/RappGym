@@ -269,7 +269,7 @@ function LogPage() {
           const sectionHeader = (i: number) => {
             const h = headers[i];
             if (!h || (!h.phase && !h.lap)) return null;
-            return <p className="border-y bg-muted px-3 py-1 text-xs font-semibold">{[h.phase ? t(`phase.${h.phase}`) : null, h.lap ? t(h.estimated ? "circuitRunner.estimatedLapNumber" : "circuitRunner.lapNumber", { lap: h.lap }) : null].filter(Boolean).join(" · ")}</p>;
+            return <p className="border-y bg-muted px-3 py-1 text-xs font-semibold">{[h.phase ? t(`phase.${h.phase}`) : null, h.lap ? t("circuitRunner.lapNumber", { lap: h.lap }) : null].filter(Boolean).join(" · ")}</p>;
           };
           const cats = [
             ...new Set(

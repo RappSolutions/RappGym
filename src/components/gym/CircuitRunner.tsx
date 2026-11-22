@@ -6,7 +6,7 @@ import { ExerciseImages } from "@/components/gym/ExerciseImages";
 import { InstructionText } from "@/components/gym/InstructionText";
 import { RatingPicker } from "@/components/gym/RatingPicker";
 import { ExercisePickList } from "@/components/gym/ExercisePickList";
-import { Minus, Plus, Check, SkipForward, Dumbbell, ListOrdered, ArrowUp, ArrowDown, Trash2, Undo2, Pencil, Octagon } from "lucide-react";
+import { Minus, Plus, Check, SkipForward, ListOrdered, ArrowUp, ArrowDown, Trash2, Undo2, Octagon, Settings, Flag, Redo2 } from "lucide-react";
 import { toast } from "sonner";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ import { AdminExerciseEdit } from "@/components/gym/AdminExerciseEdit";
 import { repsUnit } from "@/lib/reps-unit";
 import { PhaseSelect } from "@/components/gym/PhaseSelect";
 import { Switch } from "@/components/ui/switch";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 /** Guided runner for one workout. Rows and completed sets are read live, so exercises can be added, reordered and removed mid-workout. */
 export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClose: () => void }) {
@@ -156,6 +157,14 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
     await refresh();
   });
 
+  const stepEntry = step ? doneRows.find((e) => e.code === step.row.code && e.phase === step.phase && e.set_number === step.set && (!circuit || e.lap === null || e.lap === step.lap)) : undefined;
+  const undoStep = () => run(async () => {
+    if (!stepEntry || !await confirmDialog(t("circuitRunner.undoLastSet", { code: stepEntry.code }))) return;
+    const { error } = await supabase.from("log_entries").delete().eq("id", stepEntry.id).eq("status", "completed");
+    if (error) throw error;
+    await refresh();
+  });
+
   const saveTitle = () => {
     const v = title?.trim();
     setTitle(null);
@@ -180,7 +189,16 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
       <DrawerContent>
         <div className="mx-auto max-h-[85vh] w-full max-w-md space-y-3 overflow-y-auto px-4 pb-8">
           <DrawerHeader className="space-y-2 px-0">
-            <div className="relative"><Input disabled={readOnly} aria-label={t("circuitRunner.workoutName")} value={title ?? workout?.title ?? ""} onChange={(e) => setTitle(e.target.value)} onBlur={saveTitle} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} className="h-9 pr-8 text-sm font-semibold" /><Pencil className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /></div>
+            <div className="flex items-center gap-1"><Input disabled={readOnly} aria-label={t("circuitRunner.workoutName")} value={title ?? workout?.title ?? ""} onChange={(e) => setTitle(e.target.value)} onBlur={saveTitle} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} className="h-9 flex-1 border-transparent px-1 text-sm font-semibold shadow-none" />
+              <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="size-9 shrink-0" aria-label={t("circuitRunner.settings")} title={t("circuitRunner.settings")}><Settings className="size-4" /></Button></DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel className="flex items-center justify-between gap-3 font-normal"><span>{t("common.runAsCircuit")}</span><Switch checked={circuit} disabled={readOnly || busy} onCheckedChange={(value) => void run(async () => { const { error } = await supabase.from("workouts").update({ is_circuit: value }).eq("id", workoutId); if (error) throw error; await qc.invalidateQueries({ queryKey: ["workout", workoutId] }); })} /></DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => setListOpen((v) => !v)}><ListOrdered className="size-4" />{t("circuitRunner.exercisesInWorkout")}</DropdownMenuItem>
+                  <DropdownMenuItem disabled={readOnly} onSelect={() => setAdding((v) => !v)}><Plus className="size-4" />{t("common.addExercise")}</DropdownMenuItem>
+                  {doneRows.length > 0 && <DropdownMenuItem disabled={readOnly || busy} onSelect={() => void undo()}><Undo2 className="size-4" />{t("circuitRunner.undoLastSet2")}</DropdownMenuItem>}
+                </DropdownMenuContent></DropdownMenu>
+              <Button variant="ghost" size="icon" className="size-9 shrink-0" disabled={readOnly || busy} aria-label={t("circuitRunner.endWorkout")} title={t("circuitRunner.endWorkout")} onClick={() => void endWorkout()}><Flag className="size-4" /></Button></div>
             <DrawerTitle className="sr-only">{workout?.title ?? t("circuitRunner.workoutName")}</DrawerTitle>
             <DrawerDescription className="sr-only">{`${doneCount}/${total}`}</DrawerDescription>
             <div className="flex items-center justify-between gap-2">
@@ -195,17 +213,12 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
               {visibleSteps.map((s) => {
                 const isDone = doneKeys.has(keyOf(s));
                 const isCurrent = step && keyOf(s) === keyOf(step);
+                const isSkipped = !isDone && skipped.has(keyOf(s));
                 const name = nameByCode.get(s.row.code) ?? s.row.code;
-                return <Button variant="outline" size="sm" ref={isCurrent ? activeBlip : undefined} key={keyOf(s)} aria-label={`${name} · ${s.row.code} · ${s.lap}`} aria-current={isCurrent ? "step" : undefined} title={`${s.row.code} · ${name}`} onClick={() => setCursor(keyOf(s))} data-category={catOf(s.row.code)} className={`category-theme min-w-10 shrink-0 border-category-ink bg-category-fill px-2 text-category-on-fill ${isCurrent ? "ring-2 ring-foreground" : isDone ? "" : "opacity-60"}`}>{isDone && <Check className="size-3" />}{s.row.code}{!circuit && s.row.sets > 1 ? ` · ${s.set}` : ""}</Button>;
+                return <Button variant="outline" size="sm" ref={isCurrent ? activeBlip : undefined} key={keyOf(s)} aria-label={`${name} · ${s.row.code} · ${s.lap}`} aria-current={isCurrent ? "step" : undefined} title={`${s.row.code} · ${name}`} onClick={() => setCursor(keyOf(s))} data-category={catOf(s.row.code)} className={`category-theme relative min-w-10 shrink-0 border-category-ink bg-category-fill px-2 text-category-on-fill ${isCurrent ? "ring-2 ring-foreground" : isDone || isSkipped ? "" : "opacity-60"}`}>{s.row.code}{isDone ? <Check aria-hidden className="absolute -right-1 -top-1 size-3.5 rounded-full bg-background p-0.5 text-foreground" /> : isSkipped ? <Redo2 aria-hidden className="absolute -right-1 -top-1 size-3.5 rounded-full bg-background p-0.5 text-foreground" /> : null}{!circuit && s.row.sets > 1 ? ` · ${s.set}` : ""}</Button>;
               })}
             </div>}
           </DrawerHeader>
-
-          <div className="flex items-center gap-2">
-            <label className="flex flex-1 items-center justify-between gap-2 rounded-lg border px-3 py-1.5 text-sm"><span className="font-medium">{t("common.runAsCircuit")}</span><Switch checked={circuit} disabled={readOnly || busy} onCheckedChange={(value) => void run(async () => { const { error } = await supabase.from("workouts").update({ is_circuit: value }).eq("id", workoutId); if (error) throw error; await qc.invalidateQueries({ queryKey: ["workout", workoutId] }); })} /></label>
-            <Button variant={listOpen ? "default" : "outline"} size="icon" aria-pressed={listOpen} aria-label={t("circuitRunner.exercisesInWorkout")} title={t("circuitRunner.exercisesInWorkout")} onClick={() => setListOpen((v) => !v)}><ListOrdered className="size-4" /></Button>
-            <Button disabled={readOnly} variant={adding ? "default" : "outline"} aria-pressed={adding} aria-label={t("common.addExercise")} title={t("common.addExercise")} onClick={() => setAdding((v) => !v)}><Plus className="size-4" /><Dumbbell className="size-4" /></Button>
-          </div>
 
           {adding && <ExercisePickList exercises={pickable} disabled={readOnly || busy} onPick={(e, ph) => void run(async () => { await addPlannedExercise(workoutId, e.code, rows, workout?.gym_id ?? null, last.get(e.code)?.load ?? "", defaultPlannedSets({ spontaneous: workout?.is_spontaneous ?? false, circuit, laps, phase: ph }), last.get(e.code)?.reps ?? 10, ph); await refresh(); if (workout?.is_spontaneous) setRuntime((v) => ({ ...v, pause: null, cursor: null, fromIdx: -1 })); setAdding(false); toast.success(`${e.code} ${t("circuitRunner.added")}`); })} />}
 
@@ -243,17 +256,16 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
               <div className="space-y-1"><p className="text-sm font-medium">{t(`repsUnitLong.${repsUnit(rawEx)}`)}</p>
                 <div className="flex items-center gap-1"><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="-1" onClick={() => setRep(rep - 1)}><Minus /></Button><Input inputMode="numeric" value={rep} onChange={(e) => setRep(Number(e.target.value) || 0)} className="h-10 min-w-0 px-1 text-center text-lg font-bold" /><Button variant="outline" size="icon" className="size-10 shrink-0" aria-label="+1" onClick={() => setRep(rep + 1)}><Plus /></Button></div></div>
             </fieldset>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="icon" className="h-12 w-12 shrink-0 text-destructive" title={t("circuitRunner.strikeSet")} aria-label={t("circuitRunner.strikeSet")} disabled={readOnly || busy || (step ? doneKeys.has(keyOf(step)) : false)} onClick={() => void strikeSet()}><Octagon className="size-5" /></Button>
-              <Button variant="outline" className="h-12" title={t("circuitRunner.goNext")} disabled={readOnly || busy || (step ? doneKeys.has(keyOf(step)) : false)} onClick={() => { if (step) setRuntime((v) => ({ ...v, skipped: [...new Set([...v.skipped, keyOf(step)])], cursor: null, fromIdx: stepIdx })); }}><SkipForward className="size-4" />{t("circuitRunner.moveOn")}</Button>
-              <Button className="h-12 flex-1 text-lg" disabled={readOnly || busy || (step ? doneKeys.has(keyOf(step)) : false)} onClick={() => void logStep()}><Check />{t("circuitRunner.done")}</Button>
-            </div>
+            {step && doneKeys.has(keyOf(step)) ? <div className="flex items-center gap-2 rounded-lg border px-3 py-2">
+              <Check className="size-5 text-primary" /><span className="flex-1 font-semibold">{t("circuitRunner.doneResult", { reps: stepEntry?.reps ?? "", load: stepEntry?.load ? ` @ ${stepEntry.load} kg` : "" })}</span>
+              {stepEntry && <Button variant="outline" size="sm" disabled={readOnly || busy} onClick={() => void undoStep()}><Undo2 className="size-4" />{t("circuitRunner.undoSet")}</Button>}
+            </div> : <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="icon" className="h-12 w-12 shrink-0 text-destructive" title={t("circuitRunner.strikeSet")} aria-label={t("circuitRunner.strikeSet")} disabled={readOnly || busy} onClick={() => void strikeSet()}><Octagon className="size-5" /></Button>
+              <Button variant="outline" className="h-12" title={t("circuitRunner.goNext")} disabled={readOnly || busy} onClick={() => { if (step) setRuntime((v) => ({ ...v, skipped: [...new Set([...v.skipped, keyOf(step)])], cursor: null, fromIdx: stepIdx })); }}><SkipForward className="size-4" />{t("circuitRunner.moveOn")}</Button>
+              <Button className="h-12 flex-1 text-lg" disabled={readOnly || busy} onClick={() => void logStep()}><Check />{t("circuitRunner.done")}</Button>
+            </div>}
           </div>}
           {!r && total > 0 && <p className="text-sm text-muted-foreground">{t("circuitRunner.allSetsDoneAddThe")}</p>}
-          <div className="flex gap-2">
-            {doneRows.length > 0 && <Button variant="ghost" size="sm" disabled={readOnly || busy} onClick={() => void undo()}><Undo2 className="size-4" />{t("circuitRunner.undoLastSet2")}</Button>}
-            <Button variant="outline" size="sm" className="ml-auto" disabled={readOnly || busy} onClick={() => void endWorkout()}>{t("circuitRunner.endWorkout")}</Button>
-          </div>
         </div>
       </DrawerContent>
     </Drawer>

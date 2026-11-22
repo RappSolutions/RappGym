@@ -3,10 +3,11 @@ import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { defaultPlannedSets, groupByPhase, isWorkoutFinished, workoutSetProgress } from "@/lib/circuit";
 import { repsUnit } from "@/lib/reps-unit";
 import { PhaseSelect } from "@/components/gym/PhaseSelect";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, Play, Trash2, Sparkles, ArrowUp, ArrowDown, X, Plus, Dumbbell } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { ChevronDown, ChevronRight, Play, Trash2, Sparkles, ArrowUp, ArrowDown, X, Plus } from "lucide-react";
 import { ExercisePickList } from "@/components/gym/ExercisePickList";
 import { addPlannedExercise, finishWorkout, canMove, moveRow, orderedRows, removePlannedRow, setRowPhase } from "@/lib/workout-edit";
 import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
@@ -39,6 +40,7 @@ import {
   formatSet,
   todayISO,
   isProposalExpanded,
+  finishedPlansQuery,
   lastByCode,
 } from "@/lib/gym";
 
@@ -53,6 +55,8 @@ export function PlannedWorkouts() {
   const { data: gyms } = useSuspenseQuery(gymsQuery);
   const { data: links } = useSuspenseQuery(exerciseLocationsQuery);
   const lastDone = lastByCode(log);
+  const [showFinished, setShowFinished] = useState(false);
+  const { data: finishedRows = [] } = useQuery({ ...finishedPlansQuery, enabled: showFinished });
   const [guidedId, setGuidedId] = useState<string | null>(null);
   const [entry, setEntry] = useState<PlannedRow | null>(null);
   const [expandedOverrides, setExpandedOverrides] = useState<Map<string, boolean>>(new Map());
@@ -65,7 +69,7 @@ export function PlannedWorkouts() {
   const days = new Map<string, LogEntry[]>();
   for (const e of log) days.set(e.date, [...(days.get(e.date) ?? []), e]);
   const planned = new Map<string, PlannedRow[]>();
-  for (const row of proposals) {
+  for (const row of showFinished ? [...proposals, ...finishedRows] : proposals) {
     const key = row.workout_id ?? row.id;
     planned.set(key, [...(planned.get(key) ?? []), row]);
   }
@@ -114,7 +118,8 @@ export function PlannedWorkouts() {
   }
   return (
     <>
-      {proposals.length > 0 && (
+      <label className="flex items-center justify-end gap-2 text-sm text-muted-foreground"><span>{t("plannedWorkouts.showFinished")}</span><Switch checked={showFinished} onCheckedChange={setShowFinished} /></label>
+      {planned.size > 0 && (
         <section className="space-y-3" aria-label={t("plannedWorkouts.suggestedWorkouts")}>
           <div id="proposed-workouts" className="space-y-3">
             {[...planned].map(([id, unsorted]) => {
@@ -122,13 +127,15 @@ export function PlannedWorkouts() {
               const first = rows[0];
               if (!first) return null;
               const { done, total } = workoutSetProgress(id, rows, log);
-              if (isWorkoutFinished(done, total)) return null;
+              const finished = Boolean(first.workout?.completed_at) || isWorkoutFinished(done, total);
+              if (finished && !showFinished) return null;
+              const doneOf = (row: PlannedRow) => log.filter((e) => e.workout_id === id && e.code === row.code && e.phase === row.phase).length;
               const gym = gyms.find((gym) => gym.id === first.gym_id);
               const open = isProposalExpanded(first.date, today, proposalOverrides, id);
               return (
                 <article
                   key={id}
-                  className="space-y-3 rounded-lg border-2 border-dashed border-primary bg-secondary p-3"
+                  className={`space-y-3 rounded-lg border-2 p-3 ${finished ? "border-border bg-muted opacity-80" : "border-dashed border-primary bg-secondary"}`}
                 >
                   <div className="flex items-start gap-2">
                   <Button
@@ -167,11 +174,11 @@ export function PlannedWorkouts() {
                       </span>
                     </span>
                   </Button>
-                  <Button variant="ghost" size="icon" className="mt-1 shrink-0" disabled={readOnly} title={done ? t("plannedWorkouts.continueWorkout") : t("plannedWorkouts.startWorkout")} aria-label={`${done ? t("plannedWorkouts.continueWorkout") : t("plannedWorkouts.startWorkout")}: ${first.workout?.title}`} onClick={() => startWorkout(id)}><Play className="size-5" /></Button>
+                  {!finished && <Button variant="ghost" size="icon" className="mt-1 shrink-0" disabled={readOnly} title={done ? t("plannedWorkouts.continueWorkout") : t("plannedWorkouts.startWorkout")} aria-label={`${done ? t("plannedWorkouts.continueWorkout") : t("plannedWorkouts.startWorkout")}: ${first.workout?.title}`} onClick={() => startWorkout(id)}><Play className="size-5" /></Button>}
                   </div>
                   <div id={`proposal-${id}`} hidden={!open} className="space-y-3">
                     {groupByPhase(rows).map((g, gi, all) => <div key={g.phase}>
-                    {all.length > 1 && <p className="border-b pb-0.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t(`phase.${g.phase}`)} · {g.rows.reduce((n, r) => n + Math.max(1, r.sets), 0)} set</p>}
+                    {all.length > 1 && <p className="border-b pb-0.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t(`phase.${g.phase}`)}</p>}
                     <div className="divide-y divide-border">
                       {g.rows.map((row) => { return (
                         <div key={row.id} data-category={categoryToken(byCode.get(row.code)?.category ?? "", categories)} className="category-theme flex items-center border-l-4 border-category-fill">
@@ -184,23 +191,23 @@ export function PlannedWorkouts() {
                           }}
                         >
                           <span className="font-bold text-category-ink">{row.code}</span>
-                          <span className="min-w-0 break-words">{byCode.get(row.code)?.name}</span>
+                          <span className="flex min-w-0 justify-between gap-2 break-words"><span className="min-w-0">{byCode.get(row.code)?.name}</span><span className="shrink-0 tabular-nums text-xs text-muted-foreground">{doneOf(row) ? `${Math.min(doneOf(row), row.sets)}/${row.sets}` : row.sets}</span></span>
                           <span className="col-start-2 min-w-0 break-words text-sm font-semibold sm:col-start-auto">
                             {byCode.get(row.code)?.equipment ? <span className="font-normal text-muted-foreground">{byCode.get(row.code)?.equipment} · </span> : null}
                             {formatSet(row, repsUnit(exercises.find((e) => e.code === row.code)) === "reps" ? "" : t(`repsUnit.${repsUnit(exercises.find((e) => e.code === row.code))}`).toLowerCase())}
                           </span>
                         </Button>
-                        <PhaseSelect value={row.phase} disabled={readOnly || editBusy} onChange={(ph) => void edit(() => setRowPhase(row.id, ph))} />
-                        <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={readOnly || editBusy || !canMove(rows, row.id, -1)} aria-label={t("common.moveUp")} onClick={() => void edit(() => moveRow(rows, row.id, -1))}><ArrowUp className="size-4" /></Button>
-                        <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={readOnly || editBusy || !canMove(rows, row.id, 1)} aria-label={t("common.moveDown")} onClick={() => void edit(() => moveRow(rows, row.id, 1))}><ArrowDown className="size-4" /></Button>
-                        <Button variant="ghost" size="icon" className="size-8 shrink-0 text-destructive" disabled={readOnly || editBusy} aria-label={`${t("common.remove")} ${row.code}`} onClick={async () => { if (await confirmDialog(t("plannedWorkouts.removeFromTheWorkout", { code: row.code }))) void edit(() => removePlannedRow(row.id)); }}><X className="size-4" /></Button>
+                        <PhaseSelect value={row.phase} disabled={readOnly || finished || editBusy} onChange={(ph) => void edit(() => setRowPhase(row.id, ph))} />
+                        <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={readOnly || finished || editBusy || !canMove(rows, row.id, -1)} aria-label={t("common.moveUp")} onClick={() => void edit(() => moveRow(rows, row.id, -1))}><ArrowUp className="size-4" /></Button>
+                        <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={readOnly || finished || editBusy || !canMove(rows, row.id, 1)} aria-label={t("common.moveDown")} onClick={() => void edit(() => moveRow(rows, row.id, 1))}><ArrowDown className="size-4" /></Button>
+                        <Button variant="ghost" size="icon" className="size-8 shrink-0 text-destructive" disabled={readOnly || finished || editBusy} aria-label={`${t("common.remove")} ${row.code}`} onClick={async () => { if (await confirmDialog(t("plannedWorkouts.removeFromTheWorkout", { code: row.code }))) void edit(() => removePlannedRow(row.id)); }}><X className="size-4" /></Button>
                         </div>
                       ); })}
                     </div>
                     </div>)}
-                    {addingTo === id && <ExercisePickList exercises={exercisesAtLocation(exercises.filter((e) => e.is_active), links, first.gym_id)} disabled={readOnly || editBusy} onPick={(e, ph) => void edit(async () => { await addPlannedExercise(id, e.code, rows, first.gym_id, lastDone.get(e.code)?.load ?? "", defaultPlannedSets({ spontaneous: first.workout?.is_spontaneous ?? false, circuit: first.workout?.is_circuit ?? true, laps: Math.max(1, ...rows.filter((r) => r.phase === ph).map((r) => r.sets)), phase: ph }), lastDone.get(e.code)?.reps ?? 10, ph); setAddingTo(null); })} />}
-                    <div className="flex items-center justify-between gap-2">
-                      <Button disabled={readOnly} variant={addingTo === id ? "default" : "outline"} className="shrink-0" aria-pressed={addingTo === id} aria-label={t("common.addExercise")} title={t("common.addExercise")} onClick={() => setAddingTo(addingTo === id ? null : id)}><Plus className="size-4" /><Dumbbell className="size-4" /></Button>
+                    {addingTo === id && <ExercisePickList exercises={exercisesAtLocation(exercises.filter((e) => e.is_active), links, first.gym_id)} disabled={readOnly || finished || editBusy} onPick={(e, ph) => void edit(async () => { await addPlannedExercise(id, e.code, rows, first.gym_id, lastDone.get(e.code)?.load ?? "", defaultPlannedSets({ spontaneous: first.workout?.is_spontaneous ?? false, circuit: first.workout?.is_circuit ?? true, laps: Math.max(1, ...rows.filter((r) => r.phase === ph).map((r) => r.sets)), phase: ph }), lastDone.get(e.code)?.reps ?? 10, ph); setAddingTo(null); })} />}
+                    {!finished && <div className="flex items-center justify-between gap-2">
+                      <Button disabled={readOnly} variant={addingTo === id ? "default" : "outline"} className="shrink-0" aria-pressed={addingTo === id} aria-label={t("common.addExercise")} title={t("common.addExercise")} onClick={() => setAddingTo(addingTo === id ? null : id)}><Plus className="size-4" /></Button>
                       <Button
                         className="min-w-0 flex-1 whitespace-normal"
                         onClick={() => startWorkout(id)}
@@ -219,7 +226,7 @@ export function PlannedWorkouts() {
                       >
                         <Trash2 className="size-5" />
                       </Button>
-                    </div>
+                    </div>}
                   </div>
                 </article>
               );

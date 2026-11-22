@@ -43,8 +43,7 @@
     "remainingTime": "Cirka {{minutes}} minuter kvar i {{phase}}, inklusive 1 minuts paus per varv",
     "nextLap": "Starta varv {{lap}}",
     "nextPhase": "Fortsätt till {{phase}}",
-    "moveOn": "Move on",
-    "estimatedLapNumber": "Varv ≈{{lap}}",
+    "moveOn": "Hoppa",
     "goNext": "Gå till nästa (behåll setet)",
     "strikeSet": "Stryk ett set ur planen",
     "strikeConfirm": "Minska planen med ett set för denna övning? Genomförda set ändras inte.",
@@ -56,7 +55,10 @@
     "undoLastSet": "Ångra senaste set ({{code}})?",
     "undoLastSet2": "Ångra senaste set",
     "workoutDoneSetsLogged": "Passet klart – {{length}} set loggade",
-    "workoutName": "Passets namn"
+    "workoutName": "Passets namn",
+    "settings": "Passinställningar",
+    "doneResult": "Klart: {{reps}}{{load}}",
+    "undoSet": "Ångra set"
   },
   "common": {
     "add": "Lägg till",
@@ -291,7 +293,8 @@
     "startWorkout": "Starta passet",
     "suggestedWorkouts": "Föreslagna pass",
     "suggestionRemoved": "Förslaget borttaget",
-    "uncompletedExercisesWillBeRemoved": "Ej genomförda övningar tas bort. Genomförda övningar och AI-svaret i historiken behålls."
+    "uncompletedExercisesWillBeRemoved": "Ej genomförda övningar tas bort. Genomförda övningar och AI-svaret i historiken behålls.",
+    "showFinished": "Visa avslutade pass"
   },
   "profileMenu": {
     "allDetailsAreOptionalAnd": "Alla uppgifter är valfria och privata. Ange bara det du vill dela.",
