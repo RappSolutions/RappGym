@@ -1,7 +1,7 @@
 import { useLanguage } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Search, Lightbulb } from "lucide-react";
+import { Search, Lightbulb, ChevronRight } from "lucide-react";
 import { useUserView } from "@/lib/user-view";
 import { ExerciseSuggestionDialog } from "@/components/gym/ExerciseSuggestionDialog";
 import { Input } from "@/components/ui/input";
@@ -57,7 +57,13 @@ function ExercisesPage() {
   const { cat } = Route.useSearch();
   const navigate = Route.useNavigate();
   const cats = categoriesOf(exercises);
-  const active = cat && cats.includes(cat) ? cat : (cats[0] ?? "");
+  const [openCats, setOpenCats] = useState<Set<string>>(() => new Set(cat ? [cat] : []));
+  const toggle = (c: string) => {
+    const next = new Set(openCats);
+    if (next.has(c)) next.delete(c); else next.add(c);
+    setOpenCats(next);
+    navigate({ search: next.has(c) ? { cat: c } : {}, replace: true });
+  };
   const last = useMemo(() => lastByCode(log), [log]);
   const today = todayISO();
   const todayCount = useMemo(() => {
@@ -67,7 +73,7 @@ function ExercisesPage() {
   }, [log, today, gym?.id]);
   const [open, setOpen] = useState<Exercise | null>(null);
   const s = q.trim().toLowerCase();
-  const list = s ? exercises.filter((e) => { const l = localize(e); return [l.code, l.name, l.equipment, l.category].some((v) => v.toLowerCase().includes(s)); }) : exercises.filter((e) => e.category === active);
+  const list = s ? exercises.filter((e) => { const l = localize(e); return [l.code, l.name, l.equipment, l.category].some((v) => v.toLowerCase().includes(s)); }) : exercises;
 
   if (!gym)
     return (
@@ -87,39 +93,35 @@ function ExercisesPage() {
       {!showAll && atPlace.length === 0 && <p className="text-sm text-muted-foreground">{t("exercisesIndex.noExercisesLinkedToThis")}</p>}
       <div className="relative"><Search className="absolute top-3.5 left-3 h-5 w-5 text-muted-foreground" /><Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("exercisesIndex.searchExercise")} className="h-12 pl-10" /></div>
       {todayCount.size > 0 && <p className="text-sm text-muted-foreground">{`${[...todayCount.values()].reduce((a, b) => a + b, 0)} ${t("exercisesIndex.setsLoggedToday")}`}</p>}
-      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+      <div className="space-y-2">
         {cats.map((c) => {
+          const items = (s ? list : exercises).filter((e) => e.category === c);
+          if (s && !items.length) return null;
+          const isOpen = !!s || openCats.has(c);
           const token = categoryToken(c, cats);
           return (
-            <Button
-              variant="outline"
-              key={c}
-              data-category={token}
-              aria-pressed={c === active}
-              onClick={() => { setQ(""); navigate({ search: { cat: c }, replace: true }); }}
-              className={cn(
-                "category-theme h-12 shrink-0 rounded-lg border-2 border-category-fill px-5 font-display text-lg font-bold uppercase",
-                c === active && !s ? "bg-category-fill text-category-on hover:bg-category-fill hover:text-category-on" : "bg-background text-category-ink hover:bg-category-fill/15 hover:text-category-ink",
+            <section key={c} data-category={token} className="category-theme">
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                onClick={() => toggle(c)}
+                className="flex w-full items-center gap-2 border-l-4 border-category-fill bg-category-fill/10 px-3 py-2 text-left font-display font-bold uppercase text-category-ink"
+              >
+                <ChevronRight className={cn("size-4 transition-transform", isOpen && "rotate-90")} />
+                <span className="flex-1">{c}</span>
+                <span className="text-sm font-normal text-muted-foreground">{items.length}</span>
+              </button>
+              {isOpen && (
+                <div className="mt-2 space-y-2">
+                  {items.map((ex) => (
+                    <ExerciseCard key={ex.id} ex={ex} last={last.get(ex.code)} doneToday={todayCount.get(ex.code)} token={token} rating={ratingOf(ratings, ex.id)} onClick={() => setOpen(ex)} />
+                  ))}
+                </div>
               )}
-            >
-              {c}
-            </Button>
+            </section>
           );
         })}
-      </div>
-      <div className="space-y-2">
-        {list.map((ex) => (
-          <ExerciseCard
-            key={ex.id}
-            ex={ex}
-            last={last.get(ex.code)}
-            doneToday={todayCount.get(ex.code)}
-            token={categoryToken(ex.category, cats)}
-            rating={ratingOf(ratings, ex.id)}
-            onClick={() => setOpen(ex)}
-          />
-        ))}
-        {!list.length && <p className="text-muted-foreground">{s ? t("exercisesIndex.noMatches") : t("exercisesIndex.noExercisesYetAddOne")}</p>}
+        {!(s ? list : exercises).length && <p className="text-muted-foreground">{s ? t("exercisesIndex.noMatches") : t("exercisesIndex.noExercisesYetAddOne")}</p>}
       </div>
       <LogSheet
         exercise={open}
