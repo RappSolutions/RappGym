@@ -1,4 +1,5 @@
 import { useUserView } from "@/lib/user-view";
+import { insertPlannedExercises } from "@/lib/workout-edit";
 import type { RepsUnit } from "@/lib/reps-unit";
 import { loggedName } from "@/lib/log-entry";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -130,16 +131,7 @@ function LogPage() {
         .select("id")
         .single();
       if (head.error) throw head.error;
-      const rows = replanRows(g.entries).map((r, index) => ({
-        ...r,
-        date: form.date,
-        gym_id: gymId,
-        status: "suggested",
-        workout_id: head.data.id,
-        proposal_order: index,
-      }));
-      const { error } = await supabase.from("log_entries").insert(rows);
-      if (error) throw error;
+      await insertPlannedExercises(head.data.id, replanRows(g.entries));
       await queryClient.invalidateQueries({ queryKey: ["workout-suggestions"] });
       setCopying(null);
       toast.success(t("log.plannedUnderWorkouts", { date: form.date }));

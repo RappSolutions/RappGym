@@ -10,6 +10,7 @@ import { Sparkles, LoaderCircle, Send, CalendarPlus, Check, RotateCcw, Square } 
 import { estimateUsage, formatAiCost } from "@/lib/ai-cost";
 import { supabase } from "@/integrations/supabase/client";
 import { analysisDateTime, suggestionRows } from "@/lib/workout-suggestions";
+import { insertPlannedExercises } from "@/lib/workout-edit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -246,18 +247,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
           if (head.error.code === "23505") continue;
           throw head.error;
         }
-        const { error } = await supabase
-          .from("log_entries")
-          .insert(
-            suggestionRows(
-              workout.exercises,
-              planStartDate(current.request, current.today),
-              workout.dayOffset,
-              current.gymId,
-              head.data.id,
-            ),
-          );
-        if (error) throw error;
+        await insertPlannedExercises(head.data.id, suggestionRows(workout.exercises));
       }
 
       setSaved((previous) => new Set([...previous, ...keys.map((key) => `${historyId}:${key}`)]));

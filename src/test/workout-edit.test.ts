@@ -25,3 +25,11 @@ describe("workout editing", () => {
     expect(reorderRows(p, "m1", -1)).toEqual([]);
   });
 });
+
+import { toPlannedRow } from "@/lib/gym";
+describe("planned rows come from workout_exercises", () => {
+  it("maps targets, order and the workout's date/gym, never a log status", () => {
+    const row = toPlannedRow({ id: "p", user_id: "u", workout_id: "w", exercise_id: "e", phase: "outro", sort_order: 4, target_sets: 3, target_reps: 12, target_load: "20", note: null, created_at: "2026-11-22T10:00:00Z", ex: { code: "PL7" }, workout: { id: "w", title: "T", created_by: "ai", is_circuit: true, scheduled_date: "2026-11-23", created_at: "2026-11-20T10:00:00Z", gym_id: "g" } });
+    expect(row).toMatchObject({ code: "PL7", sets: 3, reps: 12, load: "20", phase: "outro", proposal_order: 4, date: "2026-11-23", gym_id: "g", workout_id: "w", status: "suggested" });
+  });
+});

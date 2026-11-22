@@ -1,5 +1,4 @@
 import type { TrainingInsights } from "@/lib/training-insights-schema";
-import { plannedWorkoutDate } from "@/lib/training-request";
 import { appendLoadAdvice, splitSuggestedLoad } from "@/lib/suggested-load";
 
 export function completedEntries<T extends { status?: string }>(rows: readonly T[]): T[] {
@@ -11,14 +10,12 @@ export function removableSuggestionIds(rows: readonly { id: string; status: stri
   return rows.filter((row) => row.status === "suggested" && (row.workout_id ?? row.id) === workoutId).map((row) => row.id);
 }
 
-export function suggestionRows(items: TrainingInsights["exercises"], today: string, dayOffset: number, gymId: string | null, workoutId: string) {
-  return items.map((item, index) => {
+/** AI exercises as plan items; explicit kg loads are split from advice text. */
+export function suggestionRows(items: TrainingInsights["exercises"]) {
+  return items.map((item) => {
     const split = splitSuggestedLoad(item.load);
-    return {
-    code: item.code, sets: item.sets, reps: item.reps, load: split.load,
-    date: plannedWorkoutDate(today, dayOffset), note: appendLoadAdvice(item.reason, split.advice) || null,
-    gym_id: gymId, status: "suggested" as const, workout_id: workoutId, proposal_order: index, phase: item.phase,
-  }; });
+    return { code: item.code, sets: item.sets, reps: item.reps, load: split.load, note: appendLoadAdvice(item.reason, split.advice) || null, phase: item.phase };
+  });
 }
 
 /** Local calendar date and 24-hour clock, independent of UI language. */

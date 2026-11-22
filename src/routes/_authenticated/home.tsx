@@ -21,7 +21,7 @@ import {
   logQuery,
   suggestionsQuery,
   todayISO,
-  type LogEntry,
+  type PlannedRow,
 } from "@/lib/gym";
 import { useLanguage } from "@/lib/i18n";
 import rappgymLogo from "@/assets/RappGym_1024.png";
@@ -66,7 +66,7 @@ function HomePage() {
     gym?.id ?? null,
   );
   const [running, setRunning] = useState<string | null>(null);
-  const todaysPlans = new Map<string, LogEntry[]>();
+  const todaysPlans = new Map<string, PlannedRow[]>();
   for (const r of proposals)
     if (r.date <= todayISO()) {
       const k = r.workout_id ?? r.id;

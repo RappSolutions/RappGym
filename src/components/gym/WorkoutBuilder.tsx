@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/lib/i18n";
 import { categoriesOf, categoryToken, todayISO, type Exercise, type LogEntry } from "@/lib/gym";
 import { CircuitRunner } from "@/components/gym/CircuitRunner";
+import { insertPlannedExercises } from "@/lib/workout-edit";
 
 /** Builder for an own workout, stored like AI plans (suggested rows); can be planned for later or started right away. */
 export function WorkoutBuilder({
@@ -55,18 +56,7 @@ export function WorkoutBuilder({
       toast.error(t("workoutBuilder.couldNotSaveTheWorkout"));
       return;
     }
-    const rows = picked.map((code, index) => ({
-      code,
-      sets: Math.max(1, laps),
-      reps,
-      load: last.get(code)?.load ?? "",
-      date: todayISO(),
-      gym_id: gymId,
-      status: "suggested",
-      workout_id: workoutId,
-      proposal_order: index,
-    }));
-    const { error } = await supabase.from("log_entries").insert(rows);
+    const error = await insertPlannedExercises(workoutId, picked.map((code) => ({ code, sets: Math.max(1, laps), reps, load: last.get(code)?.load ?? "" }))).then(() => null, (e: unknown) => e);
     setBusy(false);
     if (error) {
       toast.error(t("workoutBuilder.couldNotSaveTheWorkout"));

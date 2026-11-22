@@ -618,10 +618,68 @@ export type Database = {
         }
         Relationships: []
       }
+      workout_exercises: {
+        Row: {
+          created_at: string
+          exercise_id: string
+          id: string
+          note: string | null
+          phase: string
+          sort_order: number
+          target_load: string
+          target_reps: number | null
+          target_sets: number
+          user_id: string
+          workout_id: string
+        }
+        Insert: {
+          created_at?: string
+          exercise_id: string
+          id?: string
+          note?: string | null
+          phase?: string
+          sort_order?: number
+          target_load?: string
+          target_reps?: number | null
+          target_sets?: number
+          user_id?: string
+          workout_id: string
+        }
+        Update: {
+          created_at?: string
+          exercise_id?: string
+          id?: string
+          note?: string | null
+          phase?: string
+          sort_order?: number
+          target_load?: string
+          target_reps?: number | null
+          target_sets?: number
+          user_id?: string
+          workout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_exercises_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workout_exercises_workout_id_fkey"
+            columns: ["workout_id"]
+            isOneToOne: false
+            referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workouts: {
         Row: {
           ai_history_id: string | null
           ai_workout_key: string | null
+          completed_at: string | null
           created_at: string
           created_by: string
           gym_id: string | null
@@ -631,12 +689,14 @@ export type Database = {
           note: string | null
           scheduled_date: string | null
           source_workout_id: string | null
+          started_at: string | null
           title: string
           user_id: string
         }
         Insert: {
           ai_history_id?: string | null
           ai_workout_key?: string | null
+          completed_at?: string | null
           created_at?: string
           created_by?: string
           gym_id?: string | null
@@ -646,12 +706,14 @@ export type Database = {
           note?: string | null
           scheduled_date?: string | null
           source_workout_id?: string | null
+          started_at?: string | null
           title: string
           user_id?: string
         }
         Update: {
           ai_history_id?: string | null
           ai_workout_key?: string | null
+          completed_at?: string | null
           created_at?: string
           created_by?: string
           gym_id?: string | null
@@ -661,6 +723,7 @@ export type Database = {
           note?: string | null
           scheduled_date?: string | null
           source_workout_id?: string | null
+          started_at?: string | null
           title?: string
           user_id?: string
         }

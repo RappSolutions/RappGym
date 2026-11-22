@@ -67,7 +67,7 @@ describe("stored AI history", () => {
   });
   it("carries the AI phase into planned rows", async () => {
     const { suggestionRows } = await import("@/lib/workout-suggestions");
-    const rows = suggestionRows([{ code: "MO1", phase: "intro", sets: 1, reps: 300, load: "", reason: "" }, { code: "RX1", phase: "outro", sets: 1, reps: 300, load: "", reason: "" }], "2026-11-20", 0, null, "w");
+    const rows = suggestionRows([{ code: "MO1", phase: "intro", sets: 1, reps: 300, load: "", reason: "" }, { code: "RX1", phase: "outro", sets: 1, reps: 300, load: "", reason: "" }]);
     expect(rows.map((r) => r.phase)).toEqual(["intro", "outro"]);
   });
 });

@@ -12,12 +12,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { gymsQuery, todayISO, useInvalidateGym, formatSet, type Exercise, type LogEntry } from "@/lib/gym";
+import { gymsQuery, todayISO, useInvalidateGym, formatSet, type Exercise, type LogEntry, type PlannedRow } from "@/lib/gym";
 import { ExerciseImages } from "./ExerciseImages";
 import { RatingPicker } from "./RatingPicker";
 import { Link } from "@tanstack/react-router";
 import { Info } from "lucide-react";
 import { LogDatePicker } from "./LogDatePicker";
+import { removePlannedRow, updatePlannedRow } from "@/lib/workout-edit";
 import { appendLoadAdvice, splitSuggestedLoad } from "@/lib/suggested-load";
 
 function Stepper({ label, value, onChange }: { label: string; value: number; onChange: (n: number) => void }) {
@@ -44,7 +45,7 @@ export function LogSheet({
 }: {
   exercise: Exercise | null;
   last?: LogEntry | undefined;
-  entry?: LogEntry | null;
+  entry?: LogEntry | PlannedRow | null;
   gymId?: string | null;
   onClose: () => void;
   onCompleted?: (() => void) | undefined;
@@ -78,10 +79,13 @@ export function LogSheet({
   async function save(complete = true) {
     if (!exercise || readOnly) return;
     setBusy(true);
-    const row = { code: exercise.code, sets: Math.max(1, round), load, reps, note: note || null, date, status: entry?.status === "suggested" && !complete ? "suggested" : "completed", ...(entry?.status === "suggested" && complete ? { created_at: new Date().toISOString() } : {}), gym_id: place || null };
-    const { error } = entry
-      ? await supabase.from("log_entries").update(row).eq("id", entry.id)
-      : await supabase.from("log_entries").insert(row);
+    const plan = entry?.status === "suggested" ? (entry as PlannedRow) : null;
+    const row = { code: exercise.code, sets: Math.max(1, round), load, reps, note: note || null, date, gym_id: place || null };
+    let error: { message: string } | null = null;
+    if (plan && !complete) error = await updatePlannedRow(plan.id, row).then(() => null, (e: Error) => e);
+    // Completing a plan records a new fact; the plan itself stays for plan-vs-actual.
+    else if (plan) error = (await supabase.from("log_entries").insert({ ...row, workout_id: plan.workout_id, phase: plan.phase })).error;
+    else error = (entry ? await supabase.from("log_entries").update(row).eq("id", entry.id) : await supabase.from("log_entries").insert(row)).error;
     setBusy(false);
     if (error) {
       toast.error(error.message);
@@ -107,7 +111,9 @@ export function LogSheet({
   async function remove() {
     if (!entry || readOnly) return;
     if (!await confirmDialog(t("logSheet.deleteThisLogEntry"))) return;
-    const { error } = await supabase.from("log_entries").delete().eq("id", entry.id);
+    const { error } = entry.status === "suggested"
+      ? await removePlannedRow(entry.id).then(() => ({ error: null }), (e: Error) => ({ error: e }))
+      : await supabase.from("log_entries").delete().eq("id", entry.id);
     if (error) {
       toast.error(error.message);
       return;

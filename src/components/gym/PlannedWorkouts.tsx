@@ -8,11 +8,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight, Play, Trash2, Sparkles, ArrowUp, ArrowDown, X, Plus, Dumbbell } from "lucide-react";
 import { ExercisePickList } from "@/components/gym/ExercisePickList";
-import { addPlannedExercise, canMove, moveRow, orderedRows, removePlannedRow, setRowPhase } from "@/lib/workout-edit";
+import { addPlannedExercise, finishWorkout, canMove, moveRow, orderedRows, removePlannedRow, setRowPhase } from "@/lib/workout-edit";
 import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { removableSuggestionIds } from "@/lib/workout-suggestions";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -36,6 +35,7 @@ import {
   formatDateWithWeekday,
   logQuery,
   type LogEntry,
+  type PlannedRow,
   formatSet,
   todayISO,
   isProposalExpanded,
@@ -54,7 +54,7 @@ export function PlannedWorkouts() {
   const { data: links } = useSuspenseQuery(exerciseLocationsQuery);
   const lastDone = lastByCode(log);
   const [guidedId, setGuidedId] = useState<string | null>(null);
-  const [entry, setEntry] = useState<LogEntry | null>(null);
+  const [entry, setEntry] = useState<PlannedRow | null>(null);
   const [expandedOverrides, setExpandedOverrides] = useState<Map<string, boolean>>(new Map());
   const [proposalOverrides, setProposalOverrides] = useState<Map<string, boolean>>(new Map());
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -64,7 +64,7 @@ export function PlannedWorkouts() {
   const byCode = new Map(exercises.map((e) => [e.code, localize(e)]));
   const days = new Map<string, LogEntry[]>();
   for (const e of log) days.set(e.date, [...(days.get(e.date) ?? []), e]);
-  const planned = new Map<string, LogEntry[]>();
+  const planned = new Map<string, PlannedRow[]>();
   for (const row of proposals) {
     const key = row.workout_id ?? row.id;
     planned.set(key, [...(planned.get(key) ?? []), row]);
@@ -82,15 +82,10 @@ export function PlannedWorkouts() {
 
   async function deleteProposal() {
     if (readOnly || !deletingId || deleting) return;
-    const ids = removableSuggestionIds(proposals, deletingId);
-    if (!ids.length) {
-      setDeletingId(null);
-      return;
-    }
     setDeleting(true);
     try {
-      const { error } = await supabase.from("log_entries").delete().in("id", ids).eq("status", "suggested");
-      if (error) throw error;
+      // Completed sets stay in the log; an untouched plan disappears with its workout.
+      await finishWorkout(deletingId, log.some((row) => row.workout_id === deletingId));
       if (guidedId === deletingId) {
         setGuidedId(null);
         setEntry(null);

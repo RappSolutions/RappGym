@@ -17,7 +17,7 @@ Live: https://gym.rappen.net
 
 ## Principles
 
-- Suggestions (`status = 'suggested'`) and completed facts (`status = 'completed'`) are kept strictly apart. Completed history is never rewritten retroactively.
+- Plans (`workout_exercises`) and completed facts (`log_entries`) live in separate tables. Completed history is never rewritten retroactively.
 - Every delete requires confirmation.
 - Dates are always ISO 8601 (`YYYY-MM-DD`).
 - The relational model is normalized and uses real foreign keys. Row-level security scopes personal data to its owner.
@@ -72,6 +72,8 @@ erDiagram
   EXERCISES ||--o{ EXERCISE_LOCATIONS : "available at"
   GYMS ||--o{ EXERCISE_LOCATIONS : offers
   EXERCISES ||--o{ LOG_ENTRIES : "RESTRICT"
+  EXERCISES ||--o{ WORKOUT_EXERCISES : "RESTRICT"
+  WORKOUTS ||--o{ WORKOUT_EXERCISES : "CASCADE"
   EXERCISE_CATEGORIES ||--o{ EXERCISES : "RESTRICT"
   EXERCISE_EQUIPMENT |o--o{ EXERCISES : "RESTRICT"
   USERS ||--o{ EXERCISE_SUGGESTIONS : proposes
@@ -151,7 +153,20 @@ erDiagram
     boolean is_spontaneous
     uuid ai_history_id FK
     uuid source_workout_id FK
+    timestamptz started_at
+    timestamptz completed_at
     timestamptz created_at
+  }
+  WORKOUT_EXERCISES {
+    uuid id PK
+    uuid workout_id FK
+    uuid exercise_id FK
+    text phase "intro | main | outro"
+    int sort_order
+    int target_sets
+    int target_reps
+    text target_load
+    text note
   }
   LOG_ENTRIES {
     uuid id PK
@@ -159,7 +174,7 @@ erDiagram
     uuid workout_id FK
     uuid exercise_id FK
     date date
-    text status "suggested | completed"
+    text status "completed"
     int sets
     int reps
     text load

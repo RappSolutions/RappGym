@@ -16,7 +16,7 @@ import { useLanguage } from "@/lib/i18n";
 import { categoriesOf, categoryToken, exercisesQuery, lastByCode, logQuery, suggestionsQuery, todayISO } from "@/lib/gym";
 import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
 import { adjustLoad, defaultPlannedSets, groupByPhase, remainingSteps, workoutSteps, PHASES, type Phase } from "@/lib/circuit";
-import { addPlannedExercise, canMove, moveRow, orderedRows, removePlannedRow, setRowPhase } from "@/lib/workout-edit";
+import { addPlannedExercise, finishWorkout, canMove, moveRow, orderedRows, removePlannedRow, setRowPhase } from "@/lib/workout-edit";
 import { AdminExerciseEdit } from "@/components/gym/AdminExerciseEdit";
 import { repsUnit } from "@/lib/reps-unit";
 import { PhaseSelect } from "@/components/gym/PhaseSelect";
@@ -76,10 +76,10 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
   async function close(finished: boolean) {
     if (readOnly) { onClose(); return; }
     if (finished) {
-      await supabase.from("log_entries").delete().eq("workout_id", workoutId).eq("status", "suggested");
+      await finishWorkout(workoutId, true);
       toast.success(t("circuitRunner.workoutDoneSetsLogged", { length: doneRows.length }));
     } else if (rows.length === 0 && doneRows.length === 0) {
-      await supabase.from("workouts").delete().eq("id", workoutId);
+      await finishWorkout(workoutId, false);
     }
     await Promise.all([refresh(), qc.invalidateQueries({ queryKey: ["accepted-ai-workouts"] })]);
     onClose();

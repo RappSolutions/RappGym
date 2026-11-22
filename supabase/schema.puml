@@ -87,6 +87,22 @@ entity workouts {
   ai_workout_key : text
   source_workout_id : uuid <<FK>>
   note : text
+  started_at : timestamptz
+  completed_at : timestamptz
+  * created_at : timestamptz
+}
+entity workout_exercises {
+  * id : uuid <<PK>>
+  --
+  * user_id : uuid
+  * workout_id : uuid <<FK CASCADE>>
+  * exercise_id : uuid <<FK RESTRICT>>
+  * phase : text (intro|main|outro)
+  * sort_order : int
+  * target_sets : int
+  target_reps : int
+  * target_load : text
+  note : text
   * created_at : timestamptz
 }
 entity log_entries {
@@ -99,7 +115,7 @@ entity log_entries {
   * exercise_name : text <<snapshot>>
   * reps_unit : text <<snapshot>>
   * date : date
-  * status : text (suggested|completed)
+  * status : text (completed)
   * sets : int
   reps : int
   load : text
@@ -175,6 +191,8 @@ users ||..o| training_profiles
 exercises ||--o{ exercise_locations : "CASCADE"
 gyms ||--o{ exercise_locations : "CASCADE"
 exercises ||--o{ log_entries : "RESTRICT"
+exercises ||--o{ workout_exercises : "RESTRICT"
+workouts ||--o{ workout_exercises : "CASCADE"
 exercise_categories ||--o{ exercises : "RESTRICT"
 exercise_equipment |o--o{ exercises : "RESTRICT"
 workouts |o--o{ log_entries : "SET NULL"
