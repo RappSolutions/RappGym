@@ -33,7 +33,7 @@ function AiPage() {
   const { mode } = Route.useSearch();
   return (
     <main className="px-4">
-      <TrainingInsights exercises={exercises} hasLog={log.length > 0} initialMode={mode === "plan" ? "plan" : "summary"} key={mode ?? "summary"} />
+      <TrainingInsights exercises={exercises} hasLog={log.length > 0} initialMode={mode === "plan" ? "plan" : undefined} key={mode ?? "plan"} />
     </main>
   );
 }

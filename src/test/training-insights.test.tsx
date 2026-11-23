@@ -39,11 +39,11 @@ describe("TrainingInsights initial request mode", () => {
     })));
   });
 
-  it("defaults to analysis without an initial mode", async () => {
+  it("defaults to planning without an initial mode", async () => {
     render(<TrainingInsights exercises={[]} hasLog />);
-    fireEvent.click(screen.getByRole("button", { name: "Analysera mina pass" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ge mig passförslag" }));
     await waitFor(() => expect(generate).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining({ request: expect.objectContaining({ mode: "summary" }) }),
+      data: expect.objectContaining({ request: expect.objectContaining({ mode: "plan" }) }),
     })));
   });
 

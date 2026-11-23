@@ -47,7 +47,7 @@ let finishedRun: { id: string; mode: "summary" | "plan" } | null = null;
 type TrainingInsightsProps = {
   exercises: Exercise[];
   hasLog: boolean;
-  initialMode?: "summary" | "plan";
+  initialMode?: "summary" | "plan" | undefined;
 };
 
 export function TrainingInsights(props: TrainingInsightsProps) {
@@ -64,7 +64,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
   const [gymId] = useSelectedGym();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const id = useId();
-  const [mode, setMode] = useState<"summary" | "plan">(props.initialMode ?? "summary");
+  const [mode, setMode] = useState<"summary" | "plan">(props.initialMode ?? "plan");
   const [question, setQuestion] = useState("");
   const [workoutCount, setWorkoutCount] = useState("");
   const [periodDays, setPeriodDays] = useState("");
@@ -346,8 +346,8 @@ export function TrainingInsights(props: TrainingInsightsProps) {
         >
           {(
             [
-              ["summary", t("trainingInsights.analysisQuestions")],
               ["plan", t("trainingInsights.planWorkouts")],
+              ["summary", t("trainingInsights.analysisQuestions")],
             ] as const
           ).map(([m, label]) => (
             <button
@@ -393,7 +393,6 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                 min={1}
                 max={14}
                 step={1}
-                placeholder="4"
                 value={workoutCount}
                 disabled={busy}
                 onChange={(event) => setWorkoutCount(event.target.value)}
@@ -409,7 +408,6 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                 min={1}
                 max={90}
                 step={1}
-                placeholder="7"
                 value={periodDays}
                 disabled={busy}
                 onChange={(event) => setPeriodDays(event.target.value)}
