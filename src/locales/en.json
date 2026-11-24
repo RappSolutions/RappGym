@@ -324,10 +324,10 @@
     "suggestionRemoved": "Suggestion removed",
     "uncompletedExercisesWillBeRemoved": "Uncompleted exercises will be removed. Completed exercises and the AI answer in history are kept.",
     "showFinished": "Show finished workouts",
-    "print": "Print / PDF",
+    "print": "Download PDF",
     "printLap": "Lap",
     "printNote": "Note",
-    "printBlocked": "The browser blocked the print window"
+    "printBlocked": "Could not create PDF"
   },
   "profileMenu": {
     "allDetailsAreOptionalAnd": "All details are optional and private. Enter only what you want to share.",

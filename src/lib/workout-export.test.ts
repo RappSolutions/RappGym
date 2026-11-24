@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { logExportRows, workoutPrintHtml } from "./workout-export";
+import { logExportRows, workoutSheet } from "./workout-export";
 
 const ex = [{ id: "e1", code: "LE1", name: "Knäböj", category: "Legs", equipment: "Stång", reps_unit: "reps" }];
 
@@ -11,11 +11,13 @@ describe("log export", () => {
   });
 });
 
-describe("workout print", () => {
-  it("renders one lap box per planned set and escapes text", () => {
-    const html = workoutPrintHtml({ title: "<A>", date: "2026-03-01", labels: { lap: "Varv", note: "Not", phases: { main: "Träning" } } }, [{ code: "LE1", exercise_id: "e1", sets: 3, reps: 8, load: "40 kg", note: null, phase: "main" }], ex);
-    expect(html).toContain("&#60;A&#62;");
-    expect(html.match(/class="box"/g)?.length).toBe(3);
-    expect(html).toContain("40 kg × 8");
+describe("workout sheet", () => {
+  it("one lap column per max set, dash where a row has fewer, target with load × reps", () => {
+    const s = workoutSheet({ title: "Ben", date: "2026-03-01", labels: { lap: "Varv", note: "Not", phases: { main: "Träning" } } }, [
+      { code: "LE1", exercise_id: "e1", sets: 3, reps: 8, load: "40 kg", note: null, phase: "main" },
+      { code: "LE1", exercise_id: "e1", sets: 1, reps: 8, load: "", note: null, phase: "main" }], ex);
+    expect(s.head.filter((h) => h.startsWith("Varv")).length).toBe(3);
+    expect(s.sections[0]?.body[0]?.[2]).toBe("40 kg × 8");
+    expect(s.sections[0]?.body[1]?.slice(4, 7)).toEqual(["", "—", "—"]);
   });
 });

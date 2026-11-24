@@ -7,7 +7,7 @@ import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-quer
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Printer, ArrowUpDown, ChevronDown, ChevronRight, Play, Trash2, Sparkles, X, Plus } from "lucide-react";
+import { FileDown, ArrowUpDown, ChevronDown, ChevronRight, Play, Trash2, Sparkles, X, Plus } from "lucide-react";
 import { ExercisePickList } from "@/components/gym/ExercisePickList";
 import { addPlannedExercise, finishWorkout, applyPlacement, orderedRows, removePlannedRow } from "@/lib/workout-edit";
 import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
@@ -27,7 +27,7 @@ import { useLanguage } from "@/lib/i18n";
 import { LogSheet } from "@/components/gym/LogSheet";
 import { useStartWorkout } from "@/components/gym/ActiveWorkout";
 import { createdStamp } from "@/lib/workout-meta";
-import { printHtml, workoutPrintHtml } from "@/lib/workout-export";
+import { downloadWorkoutPdf } from "@/lib/workout-export";
 import {
   categoriesOf,
   categoryToken,
@@ -176,7 +176,7 @@ export function PlannedWorkouts() {
                       </span>
                     </span>
                   </Button>
-                  <Button variant="ghost" size="icon" className="mt-1 shrink-0 text-muted-foreground" title={t("plannedWorkouts.print")} aria-label={`${t("plannedWorkouts.print")}: ${first.workout?.title}`} onClick={() => { if (!printHtml(workoutPrintHtml({ title: first.workout?.title ?? "", date: first.date, gym: gym?.name, labels: { lap: t("plannedWorkouts.printLap"), note: t("plannedWorkouts.printNote"), phases: { intro: t("phase.intro"), main: t("phase.main"), outro: t("phase.outro") } } }, rows, exercises))) toast.error(t("plannedWorkouts.printBlocked")); }}><Printer className="size-4" /></Button>
+                  <Button variant="ghost" size="icon" className="mt-1 shrink-0 text-muted-foreground" title={t("plannedWorkouts.print")} aria-label={`${t("plannedWorkouts.print")}: ${first.workout?.title}`} onClick={() => { try { downloadWorkoutPdf({ title: first.workout?.title ?? "", date: first.date, gym: gym?.name, labels: { lap: t("plannedWorkouts.printLap"), note: t("plannedWorkouts.printNote"), phases: { intro: t("phase.intro"), main: t("phase.main"), outro: t("phase.outro") } } }, rows, exercises); } catch { toast.error(t("plannedWorkouts.printBlocked")); } }}><FileDown className="size-4" /></Button>
                   {!finished && <Button variant="ghost" size="icon" className="mt-1 shrink-0" disabled={readOnly} title={done ? t("plannedWorkouts.continueWorkout") : t("plannedWorkouts.startWorkout")} aria-label={`${done ? t("plannedWorkouts.continueWorkout") : t("plannedWorkouts.startWorkout")}: ${first.workout?.title}`} onClick={() => startWorkout(id)}><Play className="size-5" /></Button>}
                   </div>
                   <div id={`proposal-${id}`} hidden={!open} className="space-y-3">

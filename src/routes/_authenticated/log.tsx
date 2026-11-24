@@ -246,7 +246,7 @@ function LogPage() {
             {groups.length} {t("log.workouts")} · {log.reduce((n, x) => n + (x.sets ?? 1), 0)} {t("common.sets")}
           </span>
           <span className="flex gap-1">
-            <Button variant="ghost" size="icon" disabled={!log.length} aria-label={t("log.exportExcel")} title={t("log.exportExcel")} onClick={() => downloadLogXlsx(LOG_EXPORT_COLUMNS.map((c) => t(`log.col.${c}`)), logExportRows(log, exercises, gyms), todayISO()).catch(() => toast.error(t("log.exportFailed")))}><FileSpreadsheet className="size-4" /></Button>
+            <Button variant="ghost" size="icon" disabled={!log.length} aria-label={t("log.exportExcel")} title={t("log.exportExcel")} onClick={() => { try { downloadLogXlsx(LOG_EXPORT_COLUMNS.map((c) => t(`log.col.${c}`)), logExportRows(log, exercises, gyms), todayISO()); } catch { toast.error(t("log.exportFailed")); } }}><FileSpreadsheet className="size-4" /></Button>
             {[false, true].map((c) => (
               <Button
                 key={String(c)}

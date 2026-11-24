@@ -324,10 +324,10 @@
     "suggestionRemoved": "Förslaget borttaget",
     "uncompletedExercisesWillBeRemoved": "Ej genomförda övningar tas bort. Genomförda övningar och AI-svaret i historiken behålls.",
     "showFinished": "Visa avslutade pass",
-    "print": "Skriv ut / PDF",
+    "print": "Ladda ner PDF",
     "printLap": "Varv",
     "printNote": "Anteckning",
-    "printBlocked": "Webbläsaren blockerade utskriftsfönstret"
+    "printBlocked": "Kunde inte skapa PDF"
   },
   "profileMenu": {
     "allDetailsAreOptionalAnd": "Alla uppgifter är valfria och privata. Ange bara det du vill dela.",
