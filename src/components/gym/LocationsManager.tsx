@@ -38,6 +38,13 @@ export function LocationsManager() {
     if (error) toast.error(error.message);
     await refreshLinks();
   }
+  async function setMax(gymId: string, equipmentId: string, raw: string) {
+    const v = raw.trim() === "" ? null : Number(raw.replace(",", "."));
+    if (v !== null && !(v > 0)) { toast.error(t("locationsManager.maxLoadInvalid")); return; }
+    const { error } = await supabase.from("gym_equipment").update({ max_load_kg: v }).eq("gym_id", gymId).eq("equipment_id", equipmentId);
+    if (error) toast.error(error.message);
+    await refreshLinks();
+  }
   async function applyScan(g: Gym, ids: string[], note0: string) {
     const keep = new Set(ids);
     const drop = [...equipmentAt(links, g.id)].filter((id) => !keep.has(id));
@@ -134,7 +141,9 @@ export function LocationsManager() {
               </div>
               <div className="grid gap-1 sm:grid-cols-2">{equipment.map((q) => {
                 const n = exercises.filter((e) => e.equipment_id === q.id).length;
-                return <label key={q.id} className="flex items-center gap-2 text-sm"><input type="checkbox" className="size-4" checked={here.has(q.id)} disabled={busy} onChange={() => void (here.has(q.id) ? removeLinks(g.id, [q.id]) : addLinks(g.id, [q.id]))} />{q.name}<span className="text-xs text-muted-foreground">({n})</span></label>;
+                const link = links.find((l) => l.gym_id === g.id && l.equipment_id === q.id);
+                return <div key={q.id} className="flex items-center gap-2 text-sm"><label className="flex min-w-0 flex-1 items-center gap-2"><input type="checkbox" className="size-4" checked={!!link} disabled={busy} onChange={() => void (link ? removeLinks(g.id, [q.id]) : addLinks(g.id, [q.id]))} /><span className="truncate">{q.name}</span><span className="text-xs text-muted-foreground">({n})</span></label>
+                  {link && <Input key={`${link.max_load_kg ?? ""}`} inputMode="decimal" defaultValue={link.max_load_kg ?? ""} placeholder={t("locationsManager.maxKg")} aria-label={t("locationsManager.maxLoadFor", { name: q.name })} className="h-7 w-20 text-xs" onBlur={(e) => { if (e.target.value.trim() !== String(link.max_load_kg ?? "")) void setMax(g.id, q.id, e.target.value); }} />}</div>;
               })}</div>
               <p className="text-xs text-muted-foreground">{t("locationsManager.noEquipmentAlways")}</p>
             </div>}

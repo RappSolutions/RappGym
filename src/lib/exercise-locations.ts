@@ -2,12 +2,12 @@ import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 /** Equipment/station present at a location (gym_equipment row). */
-export type GymEquipment = { gym_id: string; equipment_id: string };
+export type GymEquipment = { gym_id: string; equipment_id: string; max_load_kg?: number | null };
 
 export const gymEquipmentQuery = queryOptions({
   queryKey: ["gym-equipment"],
   queryFn: async () => {
-    const { data, error } = await supabase.from("gym_equipment").select("gym_id,equipment_id");
+    const { data, error } = await supabase.from("gym_equipment").select("gym_id,equipment_id,max_load_kg");
     if (error) throw error;
     return data as GymEquipment[];
   },

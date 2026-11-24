@@ -240,7 +240,10 @@
     "whereYouTrainEveryLogged": "Where you train. Every logged set remembers the location.",
     "equipmentHere": "Equipment here",
     "equipmentCount": "{{have}} / {{all}} · {{exercises}} exercises",
-    "noEquipmentAlways": "Exercises without equipment (bodyweight, cardio) are always available everywhere."
+    "noEquipmentAlways": "Exercises without equipment (bodyweight, cardio) are always available everywhere.",
+    "maxKg": "max kg",
+    "maxLoadFor": "Max load for {{name}} (kg)",
+    "maxLoadInvalid": "Max load must be a positive number or empty."
   },
   "log": {
     "cards": "Cards",
@@ -392,7 +395,9 @@
   "refsManager": {
     "edit": "Edit",
     "isUsedByExercisesAnd": "{{name}} is used by {{used}} exercises and can't be deleted.",
-    "permanentlyDelete": "Permanently delete {{name}}?"
+    "permanentlyDelete": "Permanently delete {{name}}?",
+    "noLocations": "No location has this equipment.",
+    "noExercises": "No exercises use this equipment."
   },
   "settings": {
     "aiQuotasUsage": "AI quotas & stats",

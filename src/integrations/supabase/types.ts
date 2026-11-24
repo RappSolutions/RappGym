@@ -268,16 +268,19 @@ export type Database = {
           created_at: string
           equipment_id: string
           gym_id: string
+          max_load_kg: number | null
         }
         Insert: {
           created_at?: string
           equipment_id: string
           gym_id: string
+          max_load_kg?: number | null
         }
         Update: {
           created_at?: string
           equipment_id?: string
           gym_id?: string
+          max_load_kg?: number | null
         }
         Relationships: [
           {

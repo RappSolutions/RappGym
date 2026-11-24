@@ -240,7 +240,10 @@
     "whereYouTrainEveryLogged": "Var du tränar. Varje loggat set sparar platsen.",
     "equipmentHere": "Redskap här",
     "equipmentCount": "{{have}} / {{all}} · {{exercises}} övningar",
-    "noEquipmentAlways": "Övningar utan redskap (kroppsvikt, kondition) finns alltid på alla platser."
+    "noEquipmentAlways": "Övningar utan redskap (kroppsvikt, kondition) finns alltid på alla platser.",
+    "maxKg": "max kg",
+    "maxLoadFor": "Maxvikt för {{name}} (kg)",
+    "maxLoadInvalid": "Maxvikt måste vara ett positivt tal eller tomt."
   },
   "log": {
     "cards": "Kort",
@@ -392,7 +395,9 @@
   "refsManager": {
     "edit": "Ändra",
     "isUsedByExercisesAnd": "{{name}} används av {{used}} övningar och kan inte raderas.",
-    "permanentlyDelete": "Radera {{name}} permanent?"
+    "permanentlyDelete": "Radera {{name}} permanent?",
+    "noLocations": "Ingen plats har detta redskap.",
+    "noExercises": "Inga övningar använder detta redskap."
   },
   "settings": {
     "aiQuotasUsage": "AI-kvoter & stats",

@@ -71,6 +71,7 @@ entity gym_equipment {
   * equipment_id : uuid <<PK,FK>>
   --
   created_at : timestamptz
+  max_load_kg : numeric(6,1)
 }
 entity workouts {
   * id : uuid <<PK>>
