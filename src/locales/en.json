@@ -260,7 +260,27 @@
     "singleExercises": "Single exercises",
     "unknownExercise": "Unknown exercise",
     "workoutRemovedFromTheLog": "Workout removed from the log",
-    "workouts": "workouts"
+    "workouts": "workouts",
+    "exportExcel": "Export log to Excel",
+    "exportFailed": "Export failed",
+    "col": {
+      "date": "Date",
+      "time": "Time",
+      "location": "Location",
+      "workout": "Workout",
+      "phase": "Phase",
+      "category": "Category",
+      "code": "Code",
+      "exercise": "Exercise",
+      "equipment": "Equipment",
+      "lap": "Lap",
+      "set": "Set",
+      "load": "Load",
+      "reps": "Reps/time",
+      "unit": "Unit",
+      "rating": "Rating",
+      "note": "Note"
+    }
   },
   "logSheet": {
     "1IdenticalSet": "+1 identical set",
@@ -303,7 +323,11 @@
     "suggestedWorkouts": "Suggested workouts",
     "suggestionRemoved": "Suggestion removed",
     "uncompletedExercisesWillBeRemoved": "Uncompleted exercises will be removed. Completed exercises and the AI answer in history are kept.",
-    "showFinished": "Show finished workouts"
+    "showFinished": "Show finished workouts",
+    "print": "Print / PDF",
+    "printLap": "Lap",
+    "printNote": "Note",
+    "printBlocked": "The browser blocked the print window"
   },
   "profileMenu": {
     "allDetailsAreOptionalAnd": "All details are optional and private. Enter only what you want to share.",

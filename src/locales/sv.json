@@ -260,7 +260,27 @@
     "singleExercises": "Enskilda övningar",
     "unknownExercise": "Okänd övning",
     "workoutRemovedFromTheLog": "Passet borttaget från loggen",
-    "workouts": "pass"
+    "workouts": "pass",
+    "exportExcel": "Exportera loggen till Excel",
+    "exportFailed": "Exporten misslyckades",
+    "col": {
+      "date": "Datum",
+      "time": "Tid",
+      "location": "Plats",
+      "workout": "Pass",
+      "phase": "Fas",
+      "category": "Kategori",
+      "code": "Kod",
+      "exercise": "Övning",
+      "equipment": "Redskap",
+      "lap": "Varv",
+      "set": "Set",
+      "load": "Belastning",
+      "reps": "Reps/tid",
+      "unit": "Enhet",
+      "rating": "Betyg",
+      "note": "Anteckning"
+    }
   },
   "logSheet": {
     "1IdenticalSet": "+1 likadant set",
@@ -303,7 +323,11 @@
     "suggestedWorkouts": "Föreslagna pass",
     "suggestionRemoved": "Förslaget borttaget",
     "uncompletedExercisesWillBeRemoved": "Ej genomförda övningar tas bort. Genomförda övningar och AI-svaret i historiken behålls.",
-    "showFinished": "Visa avslutade pass"
+    "showFinished": "Visa avslutade pass",
+    "print": "Skriv ut / PDF",
+    "printLap": "Varv",
+    "printNote": "Anteckning",
+    "printBlocked": "Webbläsaren blockerade utskriftsfönstret"
   },
   "profileMenu": {
     "allDetailsAreOptionalAnd": "Alla uppgifter är valfria och privata. Ange bara det du vill dela.",
