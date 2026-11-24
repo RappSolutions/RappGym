@@ -7,7 +7,7 @@ import { WorkoutBuilder } from "@/components/gym/WorkoutBuilder";
 import { useStartWorkout } from "@/components/gym/ActiveWorkout";
 import { SpontaneousButton } from "@/components/gym/SpontaneousButton";
 import { useSelectedGym } from "@/hooks/use-gym";
-import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
+import { gymEquipmentQuery, exercisesAtLocation } from "@/lib/exercise-locations";
 import { StatsCorner } from "@/components/gym/StatsCorner";
 import { GoalsCard } from "@/components/gym/GoalsCard";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,7 @@ export const Route = createFileRoute("/_authenticated/home")({
       context.queryClient.ensureQueryData(goalsQuery),
       context.queryClient.ensureQueryData(gymsQuery),
       context.queryClient.ensureQueryData(suggestionsQuery),
-      context.queryClient.ensureQueryData(exerciseLocationsQuery),
+      context.queryClient.ensureQueryData(gymEquipmentQuery),
     ]),
   component: HomePage,
 });
@@ -55,7 +55,7 @@ function HomePage() {
   const { data: log } = useSuspenseQuery(logQuery);
   const { data: proposals } = useSuspenseQuery(suggestionsQuery);
   const { data: gyms } = useSuspenseQuery(gymsQuery);
-  const { data: links } = useSuspenseQuery(exerciseLocationsQuery);
+  const { data: links } = useSuspenseQuery(gymEquipmentQuery);
   const [gymId] = useSelectedGym();
   const [spinning, setSpinning] = useState(false);
   const gym = gyms.find((g) => g.id === gymId) ?? gyms[0];

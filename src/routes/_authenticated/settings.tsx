@@ -5,8 +5,8 @@ import { AiUsageManager } from "@/components/gym/AiUsageManager";
 import { RefsManager } from "@/components/gym/RefsManager";
 import { SettingsBlock } from "@/components/gym/SettingsBlock";
 import { LocationsManager } from "@/components/gym/LocationsManager";
-import { exerciseLocationsQuery } from "@/lib/exercise-locations";
-import { exercisesQuery, gymsQuery, logQuery } from "@/lib/gym";
+import { gymEquipmentQuery } from "@/lib/exercise-locations";
+import { exerciseEquipmentQuery, exercisesQuery, gymsQuery, logQuery } from "@/lib/gym";
 import { useIsAdmin } from "@/lib/roles";
 import { useLanguage } from "@/lib/i18n";
 
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/settings")({
     ],
   }),
   loader: ({ context }) =>
-    Promise.all([context.queryClient.ensureQueryData(gymsQuery), context.queryClient.ensureQueryData(exercisesQuery), context.queryClient.ensureQueryData(logQuery), context.queryClient.ensureQueryData(exerciseLocationsQuery)]),
+    Promise.all([context.queryClient.ensureQueryData(gymsQuery), context.queryClient.ensureQueryData(exercisesQuery), context.queryClient.ensureQueryData(logQuery), context.queryClient.ensureQueryData(gymEquipmentQuery), context.queryClient.ensureQueryData(exerciseEquipmentQuery)]),
   component: SettingsPage,
 });
 

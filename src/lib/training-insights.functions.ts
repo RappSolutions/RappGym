@@ -1,3 +1,4 @@
+import { exercisesAtLocation } from "@/lib/exercise-locations";
 import { i18n } from "@/lib/i18n-core";
 import { assertUserViewWritable } from "@/lib/user-view-guard";
 import { EXERCISE_SELECT, normalizeExercise } from "@/lib/exercise-refs";
@@ -59,10 +60,9 @@ export const getTrainingInsights = createServerFn({ method: "POST" })
     if (!key) return fail(i18n.getFixedT(data.language)("server.aiIsNotConfiguredYet"));
     let usable = exercises;
     if (data.gymId) {
-      const { data: links, error: linkError } = await supabase.from("exercise_locations").select("exercise_id").eq("gym_id", data.gymId);
+      const { data: links, error: linkError } = await supabase.from("gym_equipment").select("gym_id,equipment_id").eq("gym_id", data.gymId);
       if (linkError) throw new Error(linkError.message);
-      const ids = new Set(links.map((l) => l.exercise_id));
-      usable = exercises.filter((e) => ids.has(e.id));
+      usable = exercisesAtLocation(exercises, links, data.gymId);
       if (!usable.length) return fail(i18n.getFixedT(data.language)("server.thisLocationHasNoExercises"));
     }
     const { data: prefRows, error: prefError } = await supabase.from("user_exercise_preferences").select("exercise_id, rating").eq("user_id", userId);

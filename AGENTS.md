@@ -43,7 +43,7 @@ use the editor.
 - Derive approximate age at request time from profile birth year and request date; never infer birth year from legacy age because the birthday is unknown.
 - Exercises, categories and gyms come only from the database (exercises/gyms tables), never from code constants — the user edits them in the app.
 - Data is read client-side via the browser client + React Query under the `_authenticated` layout (ssr: false); RLS scopes log entries per user.
-- Selected gym is stored in localStorage (`src/lib/gym.ts`); exercises show at a gym only when linked in exercise_locations, and no selected gym shows every exercise.
+- Selected gym is stored in localStorage (`src/lib/gym.ts`); exercise availability per gym is defined below via gym_equipment; no selected gym shows every exercise.
 - Store exercise illustrations and localized field values on each database exercise; never use a code-keyed exercise bank in application code, so edits and new exercises remain data-driven.
 - UI texts are i18next keys in src/locales/{lang}.json (sv source/fallback) typed from sv.json and read via useLanguage().t or i18n.getFixedT on the server; never inline sv/en pairs, so languages can be added without touching components.
 - Use the shared language context for Swedish/English UI and browser language persistence; preserve original user notes and exercise fields while storing translations separately.
@@ -55,8 +55,8 @@ use the editor.
 - Sort rows within displayed workout dates by recording timestamp ascending without changing the newest-first shared log query, so latest-set prefills remain correct.
 - Derive the Home logo and favicon from the same logo artwork; use only the circular badge for the favicon so it stays legible at browser-tab sizes.
 - Use canonical English file routes for app navigation and retain legacy Swedish routes only as redirects, preserving exercise codes and workout filters so existing bookmarks continue working.
-- AI plans carry an optional startDate in the validated request and use the plan's chosen location (name/description as untrusted context); available exercises come from the owner-scoped exercise_locations link table (shared helpers in src/lib/exercise-locations.ts), with no location meaning all.
-- Location photo scans run only on explicit request via an authenticated server function; AI output only toggles existing exercise_locations links (plus an equipment note in the location description), so planning keeps using the same link table.
+- AI plans carry an optional startDate in the validated request and use the plan's chosen location (name/description as untrusted context); an exercise is available when it needs no equipment or the location has it in gym_equipment (exercisesAtLocation, src/lib/exercise-locations.ts; exercise_locations deprecated).
+- Location photo scans run only on explicit request via an authenticated server function; AI-matched exercises reduce to their equipment and only toggle gym_equipment (plus a description note), so locations never store per-exercise links.
 - log_entries.exercise_id is the real FK to exercises (ON DELETE RESTRICT); DB triggers fill it from code on insert and cascade code renames to log rows, so renames never orphan history.
 - Exercises used by any log row are hidden via exercises.is_active=false instead of deleted; Train, AI planning and photo scans offer active exercises only.
 - Exercise pictures live in the private exercise-images storage bucket as "storage:<path>" refs resolved to signed URLs; AI pictures are generated only on explicit click via an authenticated server function.

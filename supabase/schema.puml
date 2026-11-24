@@ -66,11 +66,10 @@ entity exercise_equipment {
   --
   * name : text <<UQ>>
 }
-entity exercise_locations {
-  * exercise_id : uuid <<PK,FK>>
+entity gym_equipment {
   * gym_id : uuid <<PK,FK>>
+  * equipment_id : uuid <<PK,FK>>
   --
-  * user_id : uuid
   created_at : timestamptz
 }
 entity workouts {
@@ -190,8 +189,8 @@ users ||..o| user_ai_quotas
 ai_tiers ||--o{ user_ai_quotas : "RESTRICT"
 users ||..o{ training_goals
 users ||..o| training_profiles
-exercises ||--o{ exercise_locations : "CASCADE"
-gyms ||--o{ exercise_locations : "CASCADE"
+gyms ||--o{ gym_equipment : "CASCADE"
+exercise_equipment ||--o{ gym_equipment : "RESTRICT"
 exercises ||--o{ log_entries : "RESTRICT"
 exercises ||--o{ workout_exercises : "RESTRICT"
 workouts ||--o{ workout_exercises : "CASCADE"

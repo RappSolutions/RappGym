@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/lib/i18n";
 import { categoriesOf, categoryToken, exercisesQuery, lastByCode, logQuery, suggestionsQuery, todayISO } from "@/lib/gym";
-import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
+import { gymEquipmentQuery, exercisesAtLocation } from "@/lib/exercise-locations";
 import { adjustLoad, defaultPlannedSets, groupByPhase, workoutSteps, PHASES, type Phase } from "@/lib/circuit";
 import { addPlannedExercise, finishWorkout, applyPlacement, orderedRows, removePlannedRow, updatePlannedRow } from "@/lib/workout-edit";
 import { emptyRunnerState, parseRunnerState, lapMinutes, remainingLapMinutes, completedStepKeys, type RunnerState } from "@/lib/runner-state";
@@ -33,7 +33,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
   const { data: allExercises = [] } = useQuery(exercisesQuery);
   const { data: log = [] } = useQuery(logQuery);
   const { data: suggestions = [] } = useQuery(suggestionsQuery);
-  const { data: links = [] } = useQuery(exerciseLocationsQuery);
+  const { data: links = [] } = useQuery(gymEquipmentQuery);
   const { data: workout, isError: workoutError } = useQuery({
     queryKey: ["workout", workoutId],
     queryFn: async () => {

@@ -8,7 +8,7 @@ import { Sparkles } from "lucide-react";
 import { PlannedWorkouts } from "@/components/gym/PlannedWorkouts";
 import { SpontaneousButton } from "@/components/gym/SpontaneousButton";
 import { WorkoutBuilder } from "@/components/gym/WorkoutBuilder";
-import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
+import { gymEquipmentQuery, exercisesAtLocation } from "@/lib/exercise-locations";
 import { exercisesQuery, gymsQuery, lastByCode, logQuery, suggestionsQuery } from "@/lib/gym";
 
 export const Route = createFileRoute("/_authenticated/workout")({
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/workout")({
       context.queryClient.ensureQueryData(gymsQuery),
       context.queryClient.ensureQueryData(exercisesQuery),
       context.queryClient.ensureQueryData(logQuery),
-      context.queryClient.ensureQueryData(exerciseLocationsQuery),
+      context.queryClient.ensureQueryData(gymEquipmentQuery),
       context.queryClient.ensureQueryData(suggestionsQuery),
     ]),
   component: PassPage,
@@ -40,7 +40,7 @@ function PassPage() {
   const { data: gyms } = useSuspenseQuery(gymsQuery);
   const [gymId] = useSelectedGym();
   const gym = gyms.find((g) => g.id === gymId);
-  const { data: links } = useSuspenseQuery(exerciseLocationsQuery);
+  const { data: links } = useSuspenseQuery(gymEquipmentQuery);
   const atPlace = exercisesAtLocation(allExercises, links, gymId);
   const { data: log } = useSuspenseQuery(logQuery);
   const last = useMemo(() => lastByCode(log), [log]);

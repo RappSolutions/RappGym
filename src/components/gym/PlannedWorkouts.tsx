@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { FileDown, ArrowUpDown, ChevronDown, ChevronRight, Play, Trash2, Sparkles, X, Plus } from "lucide-react";
 import { ExercisePickList } from "@/components/gym/ExercisePickList";
 import { addPlannedExercise, finishWorkout, applyPlacement, orderedRows, removePlannedRow } from "@/lib/workout-edit";
-import { exerciseLocationsQuery, exercisesAtLocation } from "@/lib/exercise-locations";
+import { gymEquipmentQuery, exercisesAtLocation } from "@/lib/exercise-locations";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -54,7 +54,7 @@ export function PlannedWorkouts() {
   const { data: log } = useSuspenseQuery(logQuery);
   const { data: proposals } = useSuspenseQuery(suggestionsQuery);
   const { data: gyms } = useSuspenseQuery(gymsQuery);
-  const { data: links } = useSuspenseQuery(exerciseLocationsQuery);
+  const { data: links } = useSuspenseQuery(gymEquipmentQuery);
   const lastDone = lastByCode(log);
   const [showFinished, setShowFinished] = useState(false);
   const { data: finishedRows = [] } = useQuery({ ...finishedPlansQuery, enabled: showFinished });

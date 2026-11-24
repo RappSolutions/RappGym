@@ -7,41 +7,43 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/lib/i18n";
-import { categoriesOf, exercisesQuery, gymsQuery, type Gym } from "@/lib/gym";
-import { exerciseLocationsQuery, missingLinks } from "@/lib/exercise-locations";
+import { exerciseEquipmentQuery, exercisesQuery, gymsQuery, type Gym } from "@/lib/gym";
+import { equipmentAt, exercisesAtLocation, gymEquipmentQuery } from "@/lib/exercise-locations";
 import { useSelectedGym } from "@/hooks/use-gym";
 import { LocationPhotoScan } from "@/components/gym/LocationPhotoScan";
 
 export function LocationsManager() {
   const { t, localize } = useLanguage();
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
-  const { data: links } = useSuspenseQuery(exerciseLocationsQuery);
+  const { data: links } = useSuspenseQuery(gymEquipmentQuery);
+  const { data: equipment } = useSuspenseQuery(exerciseEquipmentQuery);
   const [openId, setOpenId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const refreshLinks = () => qc.invalidateQueries({ queryKey: ["exercise-locations"] });
+  const refreshLinks = () => qc.invalidateQueries({ queryKey: ["gym-equipment"] });
   async function addLinks(gymId: string, ids: string[]) {
-    const rows = missingLinks(ids, links, gymId);
+    const have = equipmentAt(links, gymId);
+    const rows = ids.filter((id) => !have.has(id)).map((equipment_id) => ({ gym_id: gymId, equipment_id }));
     if (!rows.length) return;
     setBusy(true);
-    const { error } = await supabase.from("exercise_locations").insert(rows);
+    const { error } = await supabase.from("gym_equipment").insert(rows);
     setBusy(false);
     if (error) toast.error(error.message);
     await refreshLinks();
   }
   async function removeLinks(gymId: string, ids: string[]) {
+    if (!ids.length) return;
     setBusy(true);
-    const { error } = await supabase.from("exercise_locations").delete().eq("gym_id", gymId).in("exercise_id", ids);
+    const { error } = await supabase.from("gym_equipment").delete().eq("gym_id", gymId).in("equipment_id", ids);
     setBusy(false);
     if (error) toast.error(error.message);
     await refreshLinks();
   }
-  async function applyScan(g: Gym, ids: string[], equipment: string) {
+  async function applyScan(g: Gym, ids: string[], note0: string) {
     const keep = new Set(ids);
-    const current = links.filter((l) => l.gym_id === g.id).map((l) => l.exercise_id);
-    const drop = current.filter((id) => !keep.has(id));
-    if (drop.length) await removeLinks(g.id, drop);
+    const drop = [...equipmentAt(links, g.id)].filter((id) => !keep.has(id));
+    await removeLinks(g.id, drop);
     await addLinks(g.id, ids);
-    const note = `${t("locationsManager.equipment")}: ${equipment}`;
+    const note = `${t("locationsManager.equipment")}: ${note0}`;
     const description = (g.description ? `${g.description.split(/\s*—?\s*(?:Utrustning|Equipment): /)[0]!.trim()} — ${note}` : note).slice(0, 300);
     await supabase.from("gyms").update({ description }).eq("id", g.id);
     refresh();
@@ -59,8 +61,8 @@ export function LocationsManager() {
     if (!fresh.name.trim()) return;
     const { data: created, error } = await supabase.from("gyms").insert({ name: fresh.name.trim(), description: fresh.description.trim() }).select("id").single();
     if (error) { toast.error(error.message); return; }
-    if (exercises.length) {
-      const { error: linkError } = await supabase.from("exercise_locations").insert(exercises.map((e) => ({ exercise_id: e.id, gym_id: created.id })));
+    if (equipment.length) {
+      const { error: linkError } = await supabase.from("gym_equipment").insert(equipment.map((q) => ({ equipment_id: q.id, gym_id: created.id })));
       if (linkError) toast.error(linkError.message);
       await refreshLinks();
     }
@@ -116,28 +118,25 @@ export function LocationsManager() {
           <Button size="icon" variant="ghost" onClick={() => void remove(g)} aria-label={t("common.delete")}><Trash2 /></Button>
         </div>
         {(() => {
-          const here = new Set(links.filter((l) => l.gym_id === g.id).map((l) => l.exercise_id));
+          const here = equipmentAt(links, g.id);
           const open = openId === g.id;
-          const allIds = exercises.map((e) => e.id);
+          const allIds = equipment.map((q) => q.id);
+          const available = exercisesAtLocation(exercises, links, g.id).length;
           return <div className="border-t px-3 py-2">
             <Button variant="ghost" className="h-auto w-full justify-start gap-2 px-0" aria-expanded={open} onClick={() => setOpenId(open ? null : g.id)}>
-              {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}<Dumbbell className="size-4 text-primary" />{t("locationsManager.exercisesHere")}<span className="ml-auto text-sm text-muted-foreground">{here.size} / {exercises.length}</span>
+              {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}<Dumbbell className="size-4 text-primary" />{t("locationsManager.equipmentHere")}<span className="ml-auto text-sm text-muted-foreground">{t("locationsManager.equipmentCount", { have: here.size, all: equipment.length, exercises: available })}</span>
             </Button>
             {open && <div className="space-y-3 pb-2">
               <LocationPhotoScan gymId={g.id} onApply={(ids, eq) => applyScan(g, ids, eq)} />
               <div className="flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" disabled={busy || here.size === exercises.length} onClick={() => void addLinks(g.id, allIds)}>{t("locationsManager.addAll")}</Button>
+                <Button size="sm" variant="outline" disabled={busy || here.size === equipment.length} onClick={() => void addLinks(g.id, allIds)}>{t("locationsManager.addAll")}</Button>
                 <Button size="sm" variant="outline" disabled={busy || here.size === 0} onClick={() => void removeLinks(g.id, [...here])}>{t("locationsManager.removeAll")}</Button>
               </div>
-              {categoriesOf(exercises).map((cat) => {
-                const inCat = exercises.filter((e) => e.category === cat);
-                const ids = inCat.map((e) => e.id);
-                const allIn = ids.every((id) => here.has(id));
-                return <div key={cat} className="space-y-1">
-                  <label className="flex items-center gap-2 font-semibold"><input type="checkbox" className="size-4" checked={allIn} disabled={busy} onChange={() => void (allIn ? removeLinks(g.id, ids) : addLinks(g.id, ids))} />{localize(inCat[0]!).category}</label>
-                  <div className="grid gap-1 pl-6 sm:grid-cols-2">{inCat.map((e) => <label key={e.id} className="flex items-center gap-2 text-sm"><input type="checkbox" className="size-4" checked={here.has(e.id)} disabled={busy} onChange={() => void (here.has(e.id) ? removeLinks(g.id, [e.id]) : addLinks(g.id, [e.id]))} /><span className="font-semibold">{e.code}</span> {localize(e).name}</label>)}</div>
-                </div>;
-              })}
+              <div className="grid gap-1 sm:grid-cols-2">{equipment.map((q) => {
+                const n = exercises.filter((e) => e.equipment_id === q.id).length;
+                return <label key={q.id} className="flex items-center gap-2 text-sm"><input type="checkbox" className="size-4" checked={here.has(q.id)} disabled={busy} onChange={() => void (here.has(q.id) ? removeLinks(g.id, [q.id]) : addLinks(g.id, [q.id]))} />{q.name}<span className="text-xs text-muted-foreground">({n})</span></label>;
+              })}</div>
+              <p className="text-xs text-muted-foreground">{t("locationsManager.noEquipmentAlways")}</p>
             </div>}
           </div>;
         })()}

@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { exercisesAtLocation, missingLinks } from "@/lib/exercise-locations";
+import { exercisesAtLocation } from "@/lib/exercise-locations";
 
-const ex = [{ id: "a" }, { id: "b" }, { id: "c" }];
-const links = [{ exercise_id: "a", gym_id: "G1" }, { exercise_id: "b", gym_id: "G2" }];
+const ex = [{ id: "a", equipment_id: "cable" }, { id: "b", equipment_id: "press" }, { id: "c", equipment_id: null }];
+const links = [{ gym_id: "G1", equipment_id: "cable" }, { gym_id: "G2", equipment_id: "press" }];
 
-describe("exercises per location", () => {
-  it("shows only the exercises linked to a location", () => {
-    expect(exercisesAtLocation(ex, links, "G1").map((e) => e.id)).toEqual(["a"]);
+describe("exercisesAtLocation", () => {
+  it("keeps exercises whose equipment is at the location plus equipment-free ones", () => {
+    expect(exercisesAtLocation(ex, links, "G1").map((e) => e.id)).toEqual(["a", "c"]);
   });
-  it("shows every exercise when no location is chosen", () => {
+  it("location without equipment only offers equipment-free exercises", () => {
+    expect(exercisesAtLocation(ex, links, "G3").map((e) => e.id)).toEqual(["c"]);
+  });
+  it("no location means every exercise", () => {
     expect(exercisesAtLocation(ex, links, null)).toHaveLength(3);
-  });
-  it("adding all exercises to a location only adds the missing ones", () => {
-    expect(missingLinks(["a", "b", "c"], links, "G1")).toEqual([{ exercise_id: "b", gym_id: "G1" }, { exercise_id: "c", gym_id: "G1" }]);
   });
 });

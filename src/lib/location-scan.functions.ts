@@ -11,10 +11,10 @@ const imageSchema = z.string().max(4_000_000).refine((s) => /^https?:\/\//i.test
 export const scanLocationPhoto = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ gymId: z.string().uuid(), image: imageSchema, language: z.enum(["sv", "en"]) }))
-  .handler(async ({ data, context }): Promise<{ exerciseIds: string[]; equipment: string; error: string | null }> => {
+  .handler(async ({ data, context }): Promise<{ equipmentIds: string[]; equipment: string; error: string | null }> => {
     const { supabase, userId } = context;
     await assertUserViewWritable(supabase, data.language);
-    const fail = (error: string) => ({ exerciseIds: [], equipment: "", error });
+    const fail = (error: string) => ({ equipmentIds: [], equipment: "", error });
     const { data: gym } = await supabase.from("gyms").select("id").eq("id", data.gymId).maybeSingle();
     if (!gym) return fail(i18n.getFixedT(data.language)("server.locationNotFound"));
     const { data: exerciseRows, error } = await supabase.from("exercises").select(EXERCISE_SELECT).eq("is_active", true);
@@ -27,7 +27,9 @@ export const scanLocationPhoto = createServerFn({ method: "POST" })
       const result = scanLocationImage(getRequest(), key, data.image, exercises.map(({ code, name, equipment, category }) => ({ code, name, equipment, category })), data.language);
       const output = await result.output;
       const wanted = new Set(output.codes.map((c) => c.toUpperCase()));
-      return { exerciseIds: exercises.filter((e) => wanted.has(e.code.toUpperCase())).map((e) => e.id), equipment: output.equipment.slice(0, 300), error: null };
+      // Matched exercises only reveal which stations exist; the location stores equipment, never exercise links.
+      const equipmentIds = [...new Set(exercises.filter((e) => wanted.has(e.code.toUpperCase()) && e.equipment_id).map((e) => e.equipment_id as string))];
+      return { equipmentIds, equipment: output.equipment.slice(0, 300), error: null };
     } catch (err) {
       const { APICallError } = await import("ai");
       if (APICallError.isInstance(err)) {

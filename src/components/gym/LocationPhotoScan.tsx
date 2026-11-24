@@ -18,7 +18,7 @@ async function fileToDataUrl(file: File): Promise<string> {
   return canvas.toDataURL("image/jpeg", 0.85);
 }
 
-export function LocationPhotoScan({ gymId, onApply }: { gymId: string; onApply: (ids: string[], equipment: string) => Promise<void> }) {
+export function LocationPhotoScan({ gymId, onApply }: { gymId: string; onApply: (equipmentIds: string[], equipment: string) => Promise<void> }) {
   const { t, language } = useLanguage();
   const scan = useServerFn(scanLocationPhoto);
   const [url, setUrl] = useState("");
@@ -32,9 +32,9 @@ export function LocationPhotoScan({ gymId, onApply }: { gymId: string; onApply: 
     try {
       const res = await scan({ data: { gymId, image: src, language } });
       if (res.error) { toast.error(res.error); return; }
-      if (!res.exerciseIds.length) { toast.error(t("locationPhotoScan.aiFoundNoMatchingExercises")); return; }
-      if (!await confirmDialog(t("locationPhotoScan.aiSeesSetExercisesFor", { equipment: res.equipment, length: res.exerciseIds.length }))) return;
-      await onApply(res.exerciseIds, res.equipment);
+      if (!res.equipmentIds.length) { toast.error(t("locationPhotoScan.aiFoundNoMatchingExercises")); return; }
+      if (!await confirmDialog(t("locationPhotoScan.aiSeesSetExercisesFor", { equipment: res.equipment, length: res.equipmentIds.length }))) return;
+      await onApply(res.equipmentIds, res.equipment);
       setImage(null); setUrl("");
       toast.success(t("locationPhotoScan.exercisesUpdatedFromThePhoto"));
     } catch {

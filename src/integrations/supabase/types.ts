@@ -263,6 +263,39 @@ export type Database = {
           },
         ]
       }
+      gym_equipment: {
+        Row: {
+          created_at: string
+          equipment_id: string
+          gym_id: string
+        }
+        Insert: {
+          created_at?: string
+          equipment_id: string
+          gym_id: string
+        }
+        Update: {
+          created_at?: string
+          equipment_id?: string
+          gym_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_equipment_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_equipment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_equipment_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gyms: {
         Row: {
           created_at: string

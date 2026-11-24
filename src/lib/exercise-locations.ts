@@ -1,31 +1,25 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type ExerciseLocation = { exercise_id: string; gym_id: string };
+/** Equipment/station present at a location (gym_equipment row). */
+export type GymEquipment = { gym_id: string; equipment_id: string };
 
-export const exerciseLocationsQuery = queryOptions({
-  queryKey: ["exercise-locations"],
+export const gymEquipmentQuery = queryOptions({
+  queryKey: ["gym-equipment"],
   queryFn: async () => {
-    const all: ExerciseLocation[] = [];
-    for (let from = 0; ; from += 1000) {
-      const { data, error } = await supabase.from("exercise_locations").select("exercise_id,gym_id").range(from, from + 999);
-      if (error) throw error;
-      all.push(...data);
-      if (data.length < 1000) break;
-    }
-    return all;
+    const { data, error } = await supabase.from("gym_equipment").select("gym_id,equipment_id");
+    if (error) throw error;
+    return data as GymEquipment[];
   },
 });
 
-/** Exercises available at a location; no location means every exercise. */
-export function exercisesAtLocation<T extends { id: string }>(exercises: T[], links: ExerciseLocation[], gymId: string | null): T[] {
-  if (!gymId) return exercises;
-  const ids = new Set(links.filter((l) => l.gym_id === gymId).map((l) => l.exercise_id));
-  return exercises.filter((e) => ids.has(e.id));
+export function equipmentAt(links: GymEquipment[], gymId: string): Set<string> {
+  return new Set(links.filter((l) => l.gym_id === gymId).map((l) => l.equipment_id));
 }
 
-/** Links to add so that every listed exercise is at the location (skips existing ones). */
-export function missingLinks(exerciseIds: string[], links: ExerciseLocation[], gymId: string): ExerciseLocation[] {
-  const have = new Set(links.filter((l) => l.gym_id === gymId).map((l) => l.exercise_id));
-  return exerciseIds.filter((id) => !have.has(id)).map((exercise_id) => ({ exercise_id, gym_id: gymId }));
+/** Exercises available at a location: no equipment required, or the location has it. No location means every exercise. */
+export function exercisesAtLocation<T extends { equipment_id: string | null }>(exercises: T[], links: GymEquipment[], gymId: string | null): T[] {
+  if (!gymId) return exercises;
+  const have = equipmentAt(links, gymId);
+  return exercises.filter((e) => !e.equipment_id || have.has(e.equipment_id));
 }
