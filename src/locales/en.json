@@ -279,8 +279,10 @@
       "reps": "Reps/time",
       "unit": "Unit",
       "rating": "Rating",
-      "note": "Note"
-    }
+      "note": "Note",
+      "tonnage": "Tonnage (kg)"
+    },
+    "tonnagePerMin": "kg/min"
   },
   "logSheet": {
     "1IdenticalSet": "+1 identical set",
@@ -425,7 +427,9 @@
     "period": "Period",
     "setsByCategory": "Sets by category",
     "setsByEquipment": "Sets by equipment",
-    "statistics": "Statistics"
+    "statistics": "Statistics",
+    "tonnage": "Tonnage",
+    "perWorkout": "per workout"
   },
   "trainingInsights": {
     "acceptAllWorkoutsAsSuggestions": "Accept all workouts as suggestions",

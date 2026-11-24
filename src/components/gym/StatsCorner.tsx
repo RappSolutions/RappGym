@@ -1,3 +1,4 @@
+import { formatTonnage, tonnageSummary } from "@/lib/tonnage";
 import { useUserView } from "@/lib/user-view";
 import { useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -65,7 +66,7 @@ function Bars({
 
 /** Collapsed statistics corner at the bottom of Home (replaces the former Statistics page). */
 export function StatsCorner() {
-  const { t, localize } = useLanguage();
+  const { t, localize, language } = useLanguage();
   const { readOnly } = useUserView();
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
   const { data: allLog } = useSuspenseQuery(logQuery);
@@ -137,6 +138,11 @@ export function StatsCorner() {
               <option value="365">{t("statsCorner.lastYear")}</option>
             </select>
           </div>
+          {(() => {
+            const kg = tonnageSummary(log).kg;
+            const n = new Set(log.map((e) => e.workout_id ?? `day:${e.date}`)).size;
+            return kg > 0 ? <p className="text-sm"><span className="font-semibold">{t("statsCorner.tonnage")}:</span> {formatTonnage(kg, language)} · {formatTonnage(Math.round(kg / Math.max(1, n)), language)} {t("statsCorner.perWorkout")}</p> : null;
+          })()}
           {s.totalSets > 0 && (
             <Bars
               title={t("statsCorner.setsByCategory")}

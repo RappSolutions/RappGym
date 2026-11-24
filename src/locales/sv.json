@@ -279,8 +279,10 @@
       "reps": "Reps/tid",
       "unit": "Enhet",
       "rating": "Betyg",
-      "note": "Anteckning"
-    }
+      "note": "Anteckning",
+      "tonnage": "Tonnage (kg)"
+    },
+    "tonnagePerMin": "kg/min"
   },
   "logSheet": {
     "1IdenticalSet": "+1 likadant set",
@@ -425,7 +427,9 @@
     "period": "Period",
     "setsByCategory": "Set per kategori",
     "setsByEquipment": "Set per redskap",
-    "statistics": "Statistik"
+    "statistics": "Statistik",
+    "tonnage": "Tonnage",
+    "perWorkout": "per pass"
   },
   "trainingInsights": {
     "acceptAllWorkoutsAsSuggestions": "Acceptera alla pass som förslag",

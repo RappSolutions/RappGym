@@ -31,6 +31,7 @@ import { LogDatePicker } from "@/components/gym/LogDatePicker";
 import { createdStamp } from "@/lib/workout-meta";
 import { downloadLogXlsx, LOG_EXPORT_COLUMNS, logExportRows } from "@/lib/workout-export";
 import { groupLogByWorkout, replanRows } from "@/lib/log-workouts";
+import { formatTonnage, tonnageSummary } from "@/lib/tonnage";
 import {
   categoriesOf,
   categoryToken,
@@ -243,7 +244,7 @@ function LogPage() {
       {!!log.length && (
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>
-            {groups.length} {t("log.workouts")} · {log.reduce((n, x) => n + (x.sets ?? 1), 0)} {t("common.sets")}
+            {groups.length} {t("log.workouts")} · {log.reduce((n, x) => n + (x.sets ?? 1), 0)} {t("common.sets")}{(() => { const kg = tonnageSummary(log).kg; return kg ? ` · ${formatTonnage(kg, language)}` : ""; })()}
           </span>
           <span className="flex gap-1">
             <Button variant="ghost" size="icon" disabled={!log.length} aria-label={t("log.exportExcel")} title={t("log.exportExcel")} onClick={() => { try { downloadLogXlsx(LOG_EXPORT_COLUMNS.map((c) => t(`log.col.${c}`)), logExportRows(log, exercises, gyms), todayISO()); } catch { toast.error(t("log.exportFailed")); } }}><FileSpreadsheet className="size-4" /></Button>
@@ -285,6 +286,8 @@ function LogPage() {
             ),
           ];
           const sets = entries.reduce((n, x) => n + (x.sets ?? 1), 0);
+          const ton = tonnageSummary(entries);
+          const tonText = [ton.kg ? formatTonnage(ton.kg, language) : null, ton.minutes ? `${ton.minutes} min` : null, ton.kgPerMin ? `${ton.kgPerMin} ${t("log.tonnagePerMin")}` : null].filter(Boolean).map((x) => ` · ${x}`).join("");
           if (compact)
             return (
               <section key={g.key}>
@@ -329,7 +332,7 @@ function LogPage() {
                       </button></Fragment>
                     ))}
                     <div className="flex items-center justify-end gap-1 px-2 py-1 text-xs text-muted-foreground">
-                      <span className="mr-auto">{sets} {t("common.sets")} · {places.join(", ")}</span>
+                      <span className="mr-auto">{sets} {t("common.sets")}{tonText} · {places.join(", ")}</span>
                       {g.workoutId && <Button variant="ghost" size="icon" disabled={readOnly || busy} title={t("log.rename")} aria-label={`${t("log.rename")}: ${titleOf(g)}`} onClick={() => setRenaming({ id: g.workoutId!, title: titleOf(g) })}>
                         <Pencil className="size-4" />
                       </Button>}
@@ -367,7 +370,7 @@ function LogPage() {
                       )}
                     </span>
                     <span className="block text-sm">
-                      {formatDateWithWeekday(g.date, language)} · {sets} {t("common.sets")} · {places.join(", ")}
+                      {formatDateWithWeekday(g.date, language)} · {sets} {t("common.sets")}{tonText} · {places.join(", ")}
                       {g.entries[0]?.workout && (
                         <span className="text-xs text-muted-foreground">
                           {" "}
