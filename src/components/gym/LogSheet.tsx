@@ -80,7 +80,7 @@ export function LogSheet({
     if (!exercise || readOnly) return;
     setBusy(true);
     const plan = entry?.status === "suggested" ? (entry as PlannedRow) : null;
-    const row = { code: exercise.code, sets: entry?.status === "suggested" && !complete ? Math.max(1, round) : entry?.status === "completed" ? entry.sets ?? 1 : 1, load, reps, note: note || null, date, gym_id: place || null };
+    const row = { code: exercise.code, sets: entry?.status === "suggested" ? Math.max(1, round) : entry?.status === "completed" ? entry.sets ?? 1 : 1, load, reps, note: note || null, date, gym_id: place || null };
     let error: { message: string } | null = null;
     if (plan && !complete) error = await updatePlannedRow(plan.id, row).then(() => null, (e: Error) => e);
     // Completing a plan records a new fact; the plan itself stays for plan-vs-actual.

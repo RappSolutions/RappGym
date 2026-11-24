@@ -9,7 +9,7 @@ import { useLanguage } from "@/lib/i18n";
 import type { PlannedRow } from "@/lib/gym";
 
 function Item({ id, header, disabled, children }: { id: string; header?: boolean; disabled?: boolean; children: (handle: ReactNode) => ReactNode }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id, disabled: !!(header || disabled) });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id, disabled: { draggable: !!(header || disabled), droppable: !!disabled } });
   const { t } = useLanguage();
   const handle = header || disabled ? null : (
     <button type="button" {...attributes} {...listeners} aria-label={t("common.dragToMove")} className="flex size-8 shrink-0 touch-none cursor-grab items-center justify-center text-muted-foreground active:cursor-grabbing"><GripVertical className="size-4" /></button>
@@ -40,8 +40,11 @@ export function SortablePlan({ rows, disabled, onPlace, renderHeader, renderRow 
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return;
     let to = flat.indexOf(String(over.id));
+    const from = flat.indexOf(String(active.id));
+    // Dropping on a header always lands directly under it (that phase), also when dragging upwards.
+    if (String(over.id).startsWith("h:") && from > to) to += 1;
     if (to === 0) to = 1; // never above the first header
-    const next = arrayMove(flat, flat.indexOf(String(active.id)), to);
+    const next = arrayMove(flat, from, to);
     const u = placementFromFlat(next, rows);
     if (!u.length) return;
     const byRow = new Map(u.map((x) => [x.id, x]));
