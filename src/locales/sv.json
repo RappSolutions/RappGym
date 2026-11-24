@@ -327,6 +327,9 @@
     "print": "Ladda ner PDF",
     "printLap": "Varv",
     "printNote": "Anteckning",
+    "printImages": "Inkludera övningsbilder",
+    "printLoading": "Hämtar bilder…",
+    "printTitle": "PDF för passet",
     "printBlocked": "Kunde inte skapa PDF"
   },
   "profileMenu": {

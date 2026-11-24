@@ -12,12 +12,11 @@ describe("log export", () => {
 });
 
 describe("workout sheet", () => {
-  it("one lap column per max set, dash where a row has fewer, target with load × reps", () => {
+  it("one set per exercise per lap in circuit order: 2 exercises × 3 laps = 6 sets", () => {
     const s = workoutSheet({ title: "Ben", date: "2026-03-01", labels: { lap: "Varv", note: "Not", phases: { main: "Träning" } } }, [
       { code: "LE1", exercise_id: "e1", sets: 3, reps: 8, load: "40 kg", note: null, phase: "main" },
-      { code: "LE1", exercise_id: "e1", sets: 1, reps: 8, load: "", note: null, phase: "main" }], ex);
-    expect(s.head.filter((h) => h.startsWith("Varv")).length).toBe(3);
-    expect(s.sections[0]?.body[0]?.[2]).toBe("40 kg × 8");
-    expect(s.sections[0]?.body[1]?.slice(4, 7)).toEqual(["", "—", "—"]);
+      { code: "LE2", exercise_id: "e2", sets: 3, reps: 10, load: "", note: null, phase: "main" }], ex);
+    expect(s.sets.map((x) => `${x.lap}${x.code}`)).toEqual(["1LE1", "1LE2", "2LE1", "2LE2", "3LE1", "3LE2"]);
+    expect(s.sets[0]?.target).toBe("40 kg × 8");
   });
 });

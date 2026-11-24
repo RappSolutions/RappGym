@@ -27,7 +27,7 @@ import { useLanguage } from "@/lib/i18n";
 import { LogSheet } from "@/components/gym/LogSheet";
 import { useStartWorkout } from "@/components/gym/ActiveWorkout";
 import { createdStamp } from "@/lib/workout-meta";
-import { downloadWorkoutPdf } from "@/lib/workout-export";
+import { WorkoutPdfButton } from "@/components/gym/WorkoutPdfButton";
 import {
   categoriesOf,
   categoryToken,
@@ -176,7 +176,7 @@ export function PlannedWorkouts() {
                       </span>
                     </span>
                   </Button>
-                  <Button variant="ghost" size="icon" className="mt-1 shrink-0 text-muted-foreground" title={t("plannedWorkouts.print")} aria-label={`${t("plannedWorkouts.print")}: ${first.workout?.title}`} onClick={() => { try { downloadWorkoutPdf({ title: first.workout?.title ?? "", date: first.date, gym: gym?.name, labels: { lap: t("plannedWorkouts.printLap"), note: t("plannedWorkouts.printNote"), phases: { intro: t("phase.intro"), main: t("phase.main"), outro: t("phase.outro") } } }, rows, exercises); } catch { toast.error(t("plannedWorkouts.printBlocked")); } }}><FileDown className="size-4" /></Button>
+                  <WorkoutPdfButton title={first.workout?.title ?? ""} date={first.date} gym={gym?.name} rows={rows} exercises={exercises} />
                   {!finished && <Button variant="ghost" size="icon" className="mt-1 shrink-0" disabled={readOnly} title={done ? t("plannedWorkouts.continueWorkout") : t("plannedWorkouts.startWorkout")} aria-label={`${done ? t("plannedWorkouts.continueWorkout") : t("plannedWorkouts.startWorkout")}: ${first.workout?.title}`} onClick={() => startWorkout(id)}><Play className="size-5" /></Button>}
                   </div>
                   <div id={`proposal-${id}`} hidden={!open} className="space-y-3">

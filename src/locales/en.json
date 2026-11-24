@@ -327,6 +327,9 @@
     "print": "Download PDF",
     "printLap": "Lap",
     "printNote": "Note",
+    "printImages": "Include exercise pictures",
+    "printLoading": "Loading pictures…",
+    "printTitle": "Workout PDF",
     "printBlocked": "Could not create PDF"
   },
   "profileMenu": {
