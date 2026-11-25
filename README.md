@@ -2,7 +2,7 @@
 
 A mobile-first training log for a home gym (Gymstick HomeGym 3.0 and other locations). Browse illustrated exercise instructions, plan workouts (yourself or with AI), run them as circuits, log every set and follow your progress over time.
 
-Live: https://gym.rappen.net
+Live: https://gym.rappsol.com
 
 ## Features
 
