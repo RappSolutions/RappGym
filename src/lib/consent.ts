@@ -1,5 +1,5 @@
 /** Bump to re-prompt every user for the data/privacy terms. */
-export const CURRENT_TERMS_VERSION = 2;
+export const CURRENT_TERMS_VERSION = 1;
 
 export type ConsentRow = { terms_version: number; consented_at: string };
 export type ConsentPrompt = "first" | "update" | null;
