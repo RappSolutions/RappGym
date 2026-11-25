@@ -2,7 +2,7 @@ import { weightKg } from "./progress";
 import { isoWeek, rowTonnage } from "./tonnage";
 
 /** Multi-sheet log report (pure). All values derived from completed log facts at export time; never stored. Weeks are ISO 8601 (Monday start). */
-export type ReportRow = { sets?: number | null; date: string; created_at: string; code: string; exercise_id: string | null; exercise_name: string; gym_id: string | null; workout_id?: string | null; reps: number | null; load: string; reps_unit: string; exercise_rating: number | null };
+export type ReportRow = { sets?: number | null; date: string; created_at: string; code: string; exercise_id: string | null; exercise_name: string; gym_id: string | null; workout_id?: string | null; reps: number | null; load: string; reps_unit: string };
 type Ex = { id: string; code: string; name: string; category: string; equipment: string };
 type Gym = { id: string; name: string };
 export type Cell = string | number;
@@ -30,8 +30,7 @@ export function buildLogReport(log: readonly ReportRow[], exercises: readonly Ex
 
   const workouts: Cell[][] = [...group(rows, workoutKey)].map(([k, rs]) => {
     const f = rs[0]!; const kg = rs.reduce((n, r) => n + ton(r), 0); const min = minutes(rs);
-    const ratings = rs.map((r) => r.exercise_rating).filter((x): x is number => x != null);
-    return [f.date, weekdays[isoWeekday(f.date) - 1] ?? "", isoWeek(f.date), gym(f.gym_id), (f.workout_id && titles.get(f.workout_id)) || "", rs.reduce((n, r) => n + sets(r), 0), new Set(rs.map((r) => r.code)).size, min || "", Math.round(kg), min ? r1(kg / min) : "", avg(ratings)];
+    return [f.date, weekdays[isoWeekday(f.date) - 1] ?? "", isoWeek(f.date), gym(f.gym_id), (f.workout_id && titles.get(f.workout_id)) || "", rs.reduce((n, r) => n + sets(r), 0), new Set(rs.map((r) => r.code)).size, min || "", Math.round(kg), min ? r1(kg / min) : ""];
   });
 
   const perExercise: Cell[][] = [...group(rows, (r) => r.exercise_id ?? r.code)].map(([, rs]) => {
@@ -64,7 +63,7 @@ export function buildLogReport(log: readonly ReportRow[], exercises: readonly Ex
 }
 
 export const REPORT_COLUMNS = {
-  workouts: ["date", "weekday", "week", "location", "workout", "sets", "exercises", "minutes", "tonnage", "density", "rating"],
+  workouts: ["date", "weekday", "week", "location", "workout", "sets", "exercises", "minutes", "tonnage", "density"],
   perExercise: ["code", "exercise", "category", "equipment", "first", "last", "days", "sets", "reps", "pb", "pbDate", "latest", "delta", "tonnage"],
   weeks: ["week", "monday", "workouts", "days", "sets", "tonnage"],
   categories: ["category", "sets", "setsPct", "tonnage", "tonnagePct", "kgPerSet"],
