@@ -4,7 +4,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { Segmented } from "@/components/gym/Segmented";
 import { useLanguage } from "@/lib/i18n";
 import type { LogEntry } from "@/lib/gym";
-import { densityByWorkout, formatTonnage, tonnageByDay, tonnageByWeek } from "@/lib/tonnage";
+import { densityByWorkout, fillDays, fillWeeks, formatTonnage, tonnageByDay, tonnageByWeek } from "@/lib/tonnage";
 
 type Mode = "day" | "week" | "density";
 
@@ -12,10 +12,11 @@ type Mode = "day" | "week" | "density";
 export function TonnageChart({ log }: { log: LogEntry[] }) {
   const { t, language } = useLanguage();
   const [mode, setMode] = useState<Mode>("day");
-  const data: { x: string; v: number }[] =
-    mode === "day" ? tonnageByDay(log).map((d) => ({ x: d.date, v: d.kg }))
-    : mode === "week" ? tonnageByWeek(log).map((d) => ({ x: d.week, v: d.kg }))
-    : densityByWorkout(log).map((d) => ({ x: d.date, v: d.kgPerMin }));
+  const days = tonnageByDay(log);
+  const data: { x: string; v: number | null }[] =
+    mode === "day" ? fillDays(days.map((d) => ({ x: d.date, v: d.kg })))
+    : mode === "week" ? (days.length ? fillWeeks(tonnageByWeek(log).map((d) => ({ x: d.week, v: d.kg })), days[0]!.date, days[days.length - 1]!.date) : [])
+    : fillDays(densityByWorkout(log).map((d) => ({ x: d.date, v: d.kgPerMin })));
   const unit = mode === "density" ? "kg/min" : "kg";
   const fmt = (v: number) => (mode === "density" ? `${v.toLocaleString(language)} kg/min` : formatTonnage(v, language));
   const config = { v: { label: mode === "density" ? t("tonnageChart.density") : t("statsCorner.tonnage"), color: "var(--chart-1)" } };

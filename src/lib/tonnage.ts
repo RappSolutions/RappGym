@@ -60,3 +60,25 @@ export function densityByWorkout(rows: readonly DatedRow[]): { date: string; kgP
     .filter((x): x is { date: string; kgPerMin: number } => x.kgPerMin !== null && x.kgPerMin > 0)
     .sort((a, b) => a.date.localeCompare(b.date));
 }
+
+const addDays = (iso: string, n: number) => { const d = new Date(`${iso}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+
+/** Continuous calendar axis: every ISO date from first to last point; missing days get null (no bar), so gaps are proportional. Multiple points per day are summed. */
+export function fillDays(points: readonly { x: string; v: number }[]): { x: string; v: number | null }[] {
+  if (!points.length) return [];
+  const m = new Map<string, number>();
+  for (const p of points) m.set(p.x, (m.get(p.x) ?? 0) + p.v);
+  const xs = [...m.keys()].sort();
+  const out: { x: string; v: number | null }[] = [];
+  for (let d = xs[0]!; d <= xs[xs.length - 1]!; d = addDays(d, 1)) out.push({ x: d, v: m.get(d) ?? null });
+  return out;
+}
+
+/** Continuous ISO-week axis (YYYY-Www) from first to last week; empty weeks get null. */
+export function fillWeeks(points: readonly { x: string; v: number }[], firstDate: string, lastDate: string): { x: string; v: number | null }[] {
+  const m = new Map(points.map((p) => [p.x, p.v]));
+  const out: { x: string; v: number | null }[] = [];
+  const seen = new Set<string>();
+  for (let d = firstDate; d <= lastDate; d = addDays(d, 1)) { const w = isoWeek(d); if (!seen.has(w)) { seen.add(w); out.push({ x: w, v: m.get(w) ?? null }); } }
+  return out;
+}

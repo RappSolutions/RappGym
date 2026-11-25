@@ -24,3 +24,16 @@ describe("tonnage series", () => {
   it("sums per week", () => expect(tonnageByWeek(rows)).toEqual([{ week: "2026-W48", kg: 600 }]));
   it("density skips workouts without duration", () => expect(densityByWorkout(rows)).toEqual([{ date: "2026-11-23", kgPerMin: 40 }]));
 });
+
+import { fillDays as _fd, fillWeeks as _fw } from "./tonnage";
+describe("calendar axis", () => {
+  it("fills rest days with null so 21→24 is three steps", () => {
+    const r = _fd([{ x: "2026-11-21", v: 1 }, { x: "2026-11-24", v: 2 }, { x: "2026-11-25", v: 3 }]);
+    expect(r.map((p) => p.x)).toEqual(["2026-11-21", "2026-11-22", "2026-11-23", "2026-11-24", "2026-11-25"]);
+    expect(r[1]!.v).toBeNull();
+  });
+  it("fills empty ISO weeks", () => {
+    const r = _fw([{ x: "2026-W44", v: 5 }, { x: "2026-W46", v: 7 }], "2026-10-26", "2026-11-09");
+    expect(r).toEqual([{ x: "2026-W44", v: 5 }, { x: "2026-W45", v: null }, { x: "2026-W46", v: 7 }]);
+  });
+});
