@@ -286,7 +286,52 @@
       "note": "Note",
       "tonnage": "Tonnage (kg)"
     },
-    "tonnagePerMin": "kg/min"
+    "tonnagePerMin": "kg/min",
+    "report": {
+      "weekdays": "Mon,Tue,Wed,Thu,Fri,Sat,Sun",
+      "sheet": {
+        "raw": "Raw data",
+        "workouts": "Workouts",
+        "weeks": "Weeks",
+        "weekdayRows": "Weekdays",
+        "perExercise": "Exercises",
+        "categories": "Categories",
+        "places": "Locations"
+      },
+      "col": {
+        "date": "Date",
+        "weekday": "Weekday",
+        "week": "ISO week",
+        "location": "Location",
+        "workout": "Workout",
+        "sets": "Sets",
+        "exercises": "Unique exercises",
+        "minutes": "Minutes",
+        "tonnage": "Tonnage (kg)",
+        "density": "kg/min",
+        "rating": "Avg rating",
+        "code": "Code",
+        "exercise": "Exercise",
+        "category": "Category",
+        "equipment": "Equipment",
+        "first": "First",
+        "last": "Latest",
+        "days": "Days",
+        "reps": "Total reps",
+        "pb": "PB (kg)",
+        "pbDate": "PB date",
+        "latest": "Latest (kg)",
+        "delta": "Δ first→latest (kg)",
+        "monday": "Monday",
+        "workoutsCount": "Workouts",
+        "setsPct": "Share of sets (%)",
+        "tonnagePct": "Share of tonnage (%)",
+        "kgPerSet": "kg/set",
+        "avgMinutes": "Avg minutes/workout",
+        "topExercise": "Most frequent exercise",
+        "workouts": "Workouts"
+      }
+    }
   },
   "logSheet": {
     "1IdenticalSet": "+1 identical set",

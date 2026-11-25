@@ -286,7 +286,52 @@
       "note": "Anteckning",
       "tonnage": "Tonnage (kg)"
     },
-    "tonnagePerMin": "kg/min"
+    "tonnagePerMin": "kg/min",
+    "report": {
+      "weekdays": "mån,tis,ons,tor,fre,lör,sön",
+      "sheet": {
+        "raw": "Rådata",
+        "workouts": "Pass",
+        "weeks": "Veckor",
+        "weekdayRows": "Veckodagar",
+        "perExercise": "Övningar",
+        "categories": "Kategorier",
+        "places": "Platser"
+      },
+      "col": {
+        "date": "Datum",
+        "weekday": "Veckodag",
+        "week": "ISO-vecka",
+        "location": "Plats",
+        "workout": "Pass",
+        "sets": "Set",
+        "exercises": "Unika övningar",
+        "minutes": "Minuter",
+        "tonnage": "Tonnage (kg)",
+        "density": "kg/min",
+        "rating": "Snittbetyg",
+        "code": "Kod",
+        "exercise": "Övning",
+        "category": "Kategori",
+        "equipment": "Redskap",
+        "first": "Första",
+        "last": "Senaste",
+        "days": "Dagar",
+        "reps": "Reps totalt",
+        "pb": "PB (kg)",
+        "pbDate": "PB-datum",
+        "latest": "Senast (kg)",
+        "delta": "Δ första→senast (kg)",
+        "monday": "Måndag",
+        "workoutsCount": "Pass",
+        "setsPct": "Andel set (%)",
+        "tonnagePct": "Andel tonnage (%)",
+        "kgPerSet": "kg/set",
+        "avgMinutes": "Snitt minuter/pass",
+        "topExercise": "Vanligaste övning",
+        "workouts": "Antal pass"
+      }
+    }
   },
   "logSheet": {
     "1IdenticalSet": "+1 likadant set",

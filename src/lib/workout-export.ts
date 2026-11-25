@@ -86,15 +86,23 @@ export function logExportRows(log: readonly LogRow[], exercises: readonly Ex[], 
   const gym = new Map(gyms.map((g) => [g.id, g.name]));
   return [...log].sort((a, b) => a.date.localeCompare(b.date) || a.created_at.localeCompare(b.created_at)).map((r) => {
     const e = r.exercise_id ? byId.get(r.exercise_id) : undefined;
-    return [r.date, r.created_at.slice(11, 16), r.gym_id ? gym.get(r.gym_id) ?? "" : "", r.workout?.title ?? "", r.phase, e?.category ?? "", r.code, r.exercise_name || e?.name || "", e?.equipment ?? "", r.lap ?? "", r.set_number ?? "", r.load, r.reps ?? "", r.reps_unit, r.exercise_rating ?? "", r.note ?? "", rowTonnage({ sets: r.sets ?? 1, reps: r.reps, load: r.load, reps_unit: r.reps_unit }) || ""];
+    return [r.date, r.created_at.slice(11, 16), r.gym_id ? gym.get(r.gym_id) ?? "" : "", r.workout?.title ?? "", r.phase, e?.category ?? "", r.code, r.exercise_name || e?.name || "", e?.equipment ?? "", r.lap ?? "", r.set_number ?? "", /^\d+([.,]\d+)?$/.test(r.load.trim()) ? Number(r.load.trim().replace(",", ".")) : r.load, r.reps ?? "", r.reps_unit, r.exercise_rating ?? "", r.note ?? "", rowTonnage({ sets: r.sets ?? 1, reps: r.reps, load: r.load, reps_unit: r.reps_unit }) || ""];
   });
 }
 
-export function downloadLogXlsx(header: readonly string[], rows: (string | number)[][], today: string) {
-  const ws = XLSX.utils.aoa_to_sheet([[...header], ...rows]);
-  ws["!cols"] = header.map((_, i) => ({ wch: [11, 6, 14, 22, 9, 10, 7, 26, 14, 5, 5, 8, 6, 6, 6, 30, 9][i] ?? 10 }));
+export type XlsxSheet = { name: string; header: readonly string[]; rows: readonly (readonly (string | number)[])[] };
+
+/** Synchronous multi-sheet workbook; column widths fit content (max 40). */
+export function downloadLogXlsx(sheets: readonly XlsxSheet[], today: string) {
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Log");
+  for (const sh of sheets) {
+    const aoa = [[...sh.header], ...sh.rows.map((r) => [...r])];
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws["!cols"] = sh.header.map((_, i) => ({ wch: Math.min(40, Math.max(5, ...aoa.map((r) => String(r[i] ?? "").length + 1))) }));
+    ws["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: Math.max(0, aoa.length - 1), c: sh.header.length - 1 } }) };
+    ws["!freeze"] = { xSplit: 0, ySplit: 1 };
+    XLSX.utils.book_append_sheet(wb, ws, sh.name.slice(0, 31));
+  }
   const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as ArrayBuffer;
   downloadBlob(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), `rappgym-log-${today}.xlsx`);
 }

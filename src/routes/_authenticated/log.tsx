@@ -30,6 +30,7 @@ import { Switch } from "@/components/ui/switch";
 import { LogDatePicker } from "@/components/gym/LogDatePicker";
 import { createdStamp } from "@/lib/workout-meta";
 import { downloadLogXlsx, LOG_EXPORT_COLUMNS, logExportRows } from "@/lib/workout-export";
+import { buildLogReport, REPORT_COLUMNS } from "@/lib/log-report";
 import { groupLogByWorkout, replanRows } from "@/lib/log-workouts";
 import { formatTonnage, tonnageSummary } from "@/lib/tonnage";
 import {
@@ -247,7 +248,9 @@ function LogPage() {
             {groups.length} {t("log.workouts")} · {log.reduce((n, x) => n + (x.sets ?? 1), 0)} {t("common.sets")}{(() => { const kg = tonnageSummary(log).kg; return kg ? ` · ${formatTonnage(kg, language)}` : ""; })()}
           </span>
           <span className="flex gap-1">
-            <Button variant="ghost" size="icon" disabled={!log.length} aria-label={t("log.exportExcel")} title={t("log.exportExcel")} onClick={() => { try { downloadLogXlsx(LOG_EXPORT_COLUMNS.map((c) => t(`log.col.${c}`)), logExportRows(log, exercises, gyms), todayISO()); } catch { toast.error(t("log.exportFailed")); } }}><FileSpreadsheet className="size-4" /></Button>
+            <Button variant="ghost" size="icon" disabled={!log.length} aria-label={t("log.exportExcel")} title={t("log.exportExcel")} onClick={() => { try { const rep = buildLogReport(log, exercises, gyms, t("log.report.weekdays").split(","), new Map(log.flatMap((x) => (x.workout_id && x.workout?.title ? [[x.workout_id, x.workout.title] as const] : []))));
+                  const sheet = (k: keyof typeof REPORT_COLUMNS) => ({ name: t(`log.report.sheet.${k}`), header: REPORT_COLUMNS[k].map((c) => t(`log.report.col.${c}`)), rows: rep[k] });
+                  downloadLogXlsx([{ name: t("log.report.sheet.raw"), header: LOG_EXPORT_COLUMNS.map((c) => t(`log.col.${c}`)), rows: logExportRows(log, exercises, gyms) }, sheet("workouts"), sheet("weeks"), sheet("weekdayRows"), sheet("perExercise"), sheet("categories"), sheet("places")], todayISO()); } catch { toast.error(t("log.exportFailed")); } }}><FileSpreadsheet className="size-4" /></Button>
             {[false, true].map((c) => (
               <Button
                 key={String(c)}
