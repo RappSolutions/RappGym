@@ -435,7 +435,8 @@
     "setsByEquipment": "Set per redskap",
     "statistics": "Statistik",
     "tonnage": "Tonnage",
-    "perWorkout": "per pass"
+    "perWorkout": "per pass",
+    "tonnageByCategory": "Tonnage per kategori"
   },
   "trainingInsights": {
     "acceptAllWorkoutsAsSuggestions": "Acceptera alla pass som förslag",
@@ -635,5 +636,14 @@
     "notAccepted": "Inte godkänd ännu",
     "close": "Stäng",
     "menu": "Data och integritet"
+  },
+  "tonnageChart": {
+    "title": "Tonnage",
+    "densityTitle": "Densitet per pass",
+    "density": "Densitet",
+    "view": "Visa",
+    "day": "Dag",
+    "week": "Vecka",
+    "empty": "Inget mätbart tonnage i urvalet."
   }
 }

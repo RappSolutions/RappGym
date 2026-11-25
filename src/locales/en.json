@@ -435,7 +435,8 @@
     "setsByEquipment": "Sets by equipment",
     "statistics": "Statistics",
     "tonnage": "Tonnage",
-    "perWorkout": "per workout"
+    "perWorkout": "per workout",
+    "tonnageByCategory": "Tonnage by category"
   },
   "trainingInsights": {
     "acceptAllWorkoutsAsSuggestions": "Accept all workouts as suggestions",
@@ -635,5 +636,14 @@
     "notAccepted": "Not accepted yet",
     "close": "Close",
     "menu": "Data and privacy"
+  },
+  "tonnageChart": {
+    "title": "Tonnage",
+    "densityTitle": "Density per workout",
+    "density": "Density",
+    "view": "View",
+    "day": "Day",
+    "week": "Week",
+    "empty": "No measurable tonnage in the selection."
   }
 }

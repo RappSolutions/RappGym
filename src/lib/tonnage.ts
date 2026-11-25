@@ -23,3 +23,40 @@ export function tonnageSummary(rows: readonly Row[]) {
 export function formatTonnage(kg: number, locale: string): string {
   return kg < 1000 ? `${kg.toLocaleString(locale)} kg` : `${(kg / 1000).toLocaleString(locale, { maximumFractionDigits: 1 })} t`;
 }
+
+type DatedRow = Row & { date: string; workout_id?: string | null };
+const completed = <T extends Row>(rows: readonly T[]) => rows.filter((r) => !r.status || r.status === "completed");
+
+/** Tonnage per ISO date (YYYY-MM-DD), ascending. */
+export function tonnageByDay(rows: readonly DatedRow[]): { date: string; kg: number }[] {
+  const m = new Map<string, number>();
+  for (const r of completed(rows)) m.set(r.date, (m.get(r.date) ?? 0) + rowTonnage(r));
+  return [...m].sort((a, b) => a[0].localeCompare(b[0])).map(([date, kg]) => ({ date, kg: Math.round(kg) }));
+}
+
+/** ISO 8601 week label "YYYY-Www" for an ISO date. */
+export function isoWeek(date: string): string {
+  const d = new Date(`${date}T00:00:00Z`);
+  const day = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - day);
+  const year = d.getUTCFullYear();
+  const week = Math.ceil(((d.getTime() - Date.UTC(year, 0, 1)) / 86400000 + 1) / 7);
+  return `${year}-W${String(week).padStart(2, "0")}`;
+}
+
+/** Tonnage per ISO week, ascending. */
+export function tonnageByWeek(rows: readonly DatedRow[]): { week: string; kg: number }[] {
+  const m = new Map<string, number>();
+  for (const r of completed(rows)) { const w = isoWeek(r.date); m.set(w, (m.get(w) ?? 0) + rowTonnage(r)); }
+  return [...m].sort((a, b) => a[0].localeCompare(b[0])).map(([week, kg]) => ({ week, kg: Math.round(kg) }));
+}
+
+/** kg/min per workout (rows grouped by workout_id, else date); workouts without measurable duration are skipped. */
+export function densityByWorkout(rows: readonly DatedRow[]): { date: string; kgPerMin: number }[] {
+  const g = new Map<string, DatedRow[]>();
+  for (const r of completed(rows)) { const k = r.workout_id ?? `day:${r.date}`; g.set(k, [...(g.get(k) ?? []), r]); }
+  return [...g.values()]
+    .map((rs) => ({ date: rs.map((r) => r.date).sort()[0]!, kgPerMin: tonnageSummary(rs).kgPerMin }))
+    .filter((x): x is { date: string; kgPerMin: number } => x.kgPerMin !== null && x.kgPerMin > 0)
+    .sort((a, b) => a.date.localeCompare(b.date));
+}

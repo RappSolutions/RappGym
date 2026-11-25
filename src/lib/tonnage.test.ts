@@ -14,3 +14,13 @@ describe("tonnage", () => {
     expect(rowTonnage({ sets: 3, reps: 10, load: "40" })).toBe(1200);
   });
 });
+
+import { densityByWorkout, isoWeek, tonnageByDay, tonnageByWeek } from "./tonnage";
+describe("tonnage series", () => {
+  const r = (date: string, reps: number, load: string, created_at: string, workout_id = date) => ({ date, reps, load, sets: 1, created_at, workout_id, status: "completed" });
+  const rows = [r("2026-11-23", 10, "20", "2026-11-23T10:00:00Z"), r("2026-11-23", 10, "20", "2026-11-23T10:10:00Z"), r("2026-11-25", 5, "40", "2026-11-25T10:00:00Z"), { ...r("2026-11-25", 10, "99", "2026-11-25T10:05:00Z"), status: "suggested" }];
+  it("sums per day, ignoring suggestions", () => expect(tonnageByDay(rows)).toEqual([{ date: "2026-11-23", kg: 400 }, { date: "2026-11-25", kg: 200 }]));
+  it("ISO weeks", () => { expect(isoWeek("2026-11-23")).toBe("2026-W48"); expect(isoWeek("2027-01-01")).toBe("2026-W53"); });
+  it("sums per week", () => expect(tonnageByWeek(rows)).toEqual([{ week: "2026-W48", kg: 600 }]));
+  it("density skips workouts without duration", () => expect(densityByWorkout(rows)).toEqual([{ date: "2026-11-23", kgPerMin: 40 }]));
+});

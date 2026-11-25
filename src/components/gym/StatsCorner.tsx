@@ -1,10 +1,13 @@
-import { formatTonnage, tonnageSummary } from "@/lib/tonnage";
+import { formatTonnage, rowTonnage, tonnageSummary } from "@/lib/tonnage";
+import { TonnageChart } from "@/components/gym/TonnageChart";
+import { completedEntries } from "@/lib/workout-suggestions";
 import { useUserView } from "@/lib/user-view";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Segmented } from "@/components/gym/Segmented";
 import { ProgressOverview } from "@/components/gym/ProgressOverview";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/lib/i18n";
@@ -25,15 +28,19 @@ function Bars({
   data,
   total,
   tokenOf,
+  format,
+  action,
 }: {
   title: string;
+  format?: (v: number) => string;
+  action?: ReactNode;
   data: Map<string, number>;
   total: number;
   tokenOf?: (key: string) => string;
 }) {
   return (
     <section className="space-y-2 rounded-xl border bg-card p-4">
-      <h2 className="text-xl font-bold uppercase">{title}</h2>
+      <div className="flex items-center justify-between gap-2"><h2 className="text-xl font-bold uppercase">{title}</h2>{action}</div>
       {[...data]
         .sort((a, b) => b[1] - a[1])
         .map(([k, v]) => {
@@ -46,7 +53,7 @@ function Bars({
               <div className="flex justify-between text-sm">
                 <span className={token ? "text-category-ink" : ""}>{k}</span>
                 <span className="text-muted-foreground">
-                  {v} · {Math.round((v / total) * 100)}%
+                  {format ? format(v) : v} · {Math.round((v / total) * 100)}%
                 </span>
               </div>
               <div className="mt-1 h-2 rounded bg-muted">
@@ -80,6 +87,14 @@ export function StatsCorner() {
   const log = allLog.filter((e) => (!place || e.gym_id === place) && (!from || e.date >= from));
   const s = computeStats(log, exercises.map(localize));
   const categories = categoriesOf(exercises);
+  const [catMetric, setCatMetric] = useState<"sets" | "kg">("sets");
+  const catByCode = new Map(exercises.map((e) => [e.code, e.category]));
+  const perCatKg = new Map<string, number>();
+  for (const e of completedEntries(log)) {
+    const c = catByCode.get(e.code) ?? "Okänd";
+    perCatKg.set(c, (perCatKg.get(c) ?? 0) + Math.round(rowTonnage(e)));
+  }
+  const totalKg = [...perCatKg.values()].reduce((a, b) => a + b, 0);
 
   async function importExcel() {
     if (readOnly) return;
@@ -138,6 +153,7 @@ export function StatsCorner() {
               <option value="365">{t("statsCorner.lastYear")}</option>
             </select>
           </div>
+          {log.length > 0 && <TonnageChart log={log} />}
           {(() => {
             const kg = tonnageSummary(log).kg;
             const n = new Set(log.map((e) => e.workout_id ?? `day:${e.date}`)).size;
@@ -145,9 +161,11 @@ export function StatsCorner() {
           })()}
           {s.totalSets > 0 && (
             <Bars
-              title={t("statsCorner.setsByCategory")}
-              data={s.perCat}
-              total={s.totalSets}
+              title={catMetric === "kg" ? t("statsCorner.tonnageByCategory") : t("statsCorner.setsByCategory")}
+              data={catMetric === "kg" ? perCatKg : s.perCat}
+              total={catMetric === "kg" ? Math.max(1, totalKg) : s.totalSets}
+              {...(catMetric === "kg" ? { format: (v: number) => formatTonnage(v, language) } : {})}
+              action={<Segmented value={catMetric} onChange={setCatMetric} label={t("tonnageChart.view")} options={[{ value: "sets", label: t("common.sets2") }, { value: "kg", label: "kg" }]} />}
               tokenOf={(k) => categoryToken(k, categories)}
             />
           )}
