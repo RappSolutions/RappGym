@@ -460,7 +460,6 @@
     "couldNotSaveWorkout": "Could not save workout",
     "days": "Spread over (days)",
     "eGSkiingStrengthOr": "E.g. skiing, strength or variety",
-    "estimatedCost": "Estimated cost",
     "keepItRunningInThe": "Keep it running in the background? The answer is saved in AI history.",
     "keepRunning": "Keep running",
     "leftThisMonthOfResets": "Left this month: {{v0}} of {{quota}} · Resets {{periodEnd}}",
@@ -491,8 +490,7 @@
     "workoutsAndDaysAreOptional": "Optional: how many workouts to create and over how many days to spread them (at most one per day). Leave both empty and the AI decides a suitable setup from your purpose. Your profile's age, height, weight, and pace are used.",
     "yourGoals": "Your goals",
     "yourQuestionOrRequest": "Your question or request",
-    "yourWorkoutPlan": "Your workout plan",
-    "paidByRapp": "Free for you · paid by Rapp Solutions"
+    "yourWorkoutPlan": "Your workout plan"
   },
   "usersManager": {
     "created": "Created",
@@ -617,13 +615,6 @@
   },
   "consent": {
     "title": "Data and privacy",
-    "intro": "Before you continue, please read how your data is handled.",
-    "storage": "Your training logs, workouts, locations and training profile are stored in the cloud (EU) and visible only to you.",
-    "identity": "Only name, email and profile picture from your Google/Microsoft account are kept for sign-in.",
-    "ai": "AI analysis runs only when you ask for it. Training data and optional profile are then sent without name or email to the AI service, which does not train on it.",
-    "cost": "AI requests are free for you – Rapp Solutions pays the cost.",
-    "rights": "You can delete your training profile at any time and ask for everything to be removed.",
-    "accept": "I agree",
     "error": "Could not save your consent. Please try again.",
     "titleFirst": "Welcome to RappGym",
     "introFirst": "Before you start training, please accept how your data is handled.",
@@ -635,7 +626,30 @@
     "acceptedStatus": "Accepted version {{version}} ({{date}})",
     "notAccepted": "Not accepted yet",
     "close": "Close",
-    "menu": "Data and privacy"
+    "menu": "Data and privacy",
+    "points": {
+      "data": {
+        "label": "Training data",
+        "text": "Your logs, workouts, training locations (gyms and equipment) and training profile are stored in the EU and visible only to you."
+      },
+      "login": {
+        "label": "Sign-in",
+        "text": "Only name, email and profile picture from your Google or Microsoft account are kept."
+      },
+      "ai": {
+        "label": "Optional AI analysis",
+        "text": "Runs only when you ask. Training data and profile are sent anonymised (without name or email) and are not stored for model training."
+      },
+      "control": {
+        "label": "Full control",
+        "text": "You can delete your training profile in the app at any time, or contact gym@rappsol.com to remove your whole account and all data."
+      }
+    },
+    "policyLink": "Read the full privacy policy",
+    "pageTitle": "Privacy and data",
+    "pageIntro": "This is how RappGym (Rapp Solutions AB) handles your data.",
+    "back": "Back to RappGym",
+    "footerLink": "Privacy & data"
   },
   "tonnageChart": {
     "title": "Tonnage",

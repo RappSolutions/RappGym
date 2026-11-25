@@ -5,6 +5,7 @@ import { useLanguage } from "@/lib/i18n";
 import { CURRENT_TERMS_VERSION, consentPrompt, latestConsent, type ConsentRow } from "@/lib/consent";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { ConsentPoints } from "@/components/gym/ConsentPoints";
 
 export const consentsQuery = (userId: string) => queryOptions({
   queryKey: ["user_consents", userId],
@@ -42,13 +43,8 @@ export function ConsentDialog({ mode, open, rows, onAccept, onOpenChange, saving
             {latest ? t("consent.acceptedStatus", { version: latest.terms_version, date: latest.consented_at.slice(0, 10) }) : t("consent.notAccepted")}
           </p>
         )}
-        <ul className="list-disc space-y-2 pl-5 text-sm">
-          <li>{t("consent.storage")}</li>
-          <li>{t("consent.identity")}</li>
-          <li>{t("consent.ai")}</li>
-          <li>{t("consent.cost")}</li>
-          <li>{t("consent.rights")}</li>
-        </ul>
+        <ConsentPoints />
+        <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground">{t("consent.policyLink")}</a>
         {error && <p className="text-sm text-destructive">{t("consent.error")}</p>}
         <DialogFooter>
           {blocking

@@ -7,7 +7,6 @@ import { getMyAiQuota } from "@/lib/ai-quota.functions";
 import { quotaAllowed, quotaRemaining } from "@/lib/ai-quota";
 import { Link } from "@tanstack/react-router";
 import { Sparkles, LoaderCircle, Send, CalendarPlus, Check, RotateCcw, Square } from "lucide-react";
-import { estimateUsage, formatAiCost } from "@/lib/ai-cost";
 import { supabase } from "@/integrations/supabase/client";
 import { analysisDateTime, suggestionRows } from "@/lib/workout-suggestions";
 import { insertPlannedExercises } from "@/lib/workout-edit";
@@ -552,17 +551,6 @@ export function TrainingInsights(props: TrainingInsightsProps) {
             </AlertDialogContent>
           </AlertDialog>
         )}
-        {(() => {
-          const e = estimateUsage(
-            mode,
-            history.map((h) => ({ mode: h.request.mode, inputTokens: h.inputTokens, outputTokens: h.outputTokens })),
-          );
-          return (
-            <p className="text-xs text-muted-foreground">
-              {t("trainingInsights.estimatedCost")}: {formatAiCost(e.input, e.output, language, true)} · {t("trainingInsights.paidByRapp")}
-            </p>
-          );
-        })()}
       </form>
       {scopedHistory.length > 0 && (
         <div className="space-y-1">
@@ -602,12 +590,6 @@ export function TrainingInsights(props: TrainingInsightsProps) {
               <p className="text-xs text-muted-foreground">
                 {sections.plan ? t("trainingInsights.planned") : t("trainingInsights.analyzed")}{" "}
                 {analysisDateTime(current.generatedAt)}
-                {(() => {
-                  const u = history.find((h) => h.id === current.id);
-                  return u && u.inputTokens != null && u.outputTokens != null
-                    ? ` · ${formatAiCost(u.inputTokens, u.outputTokens, language)}`
-                    : "";
-                })()}
               </p>
               <Button
                 type="button"

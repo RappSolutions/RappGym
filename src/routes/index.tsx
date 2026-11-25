@@ -171,6 +171,7 @@ function Index() {
         <span>
           Provided by <a href="https://rappsol.com" target="_blank" rel="noopener noreferrer" className="font-semibold text-foreground/80 hover:underline">Rapp Solutions AB</a> · Sweden
         </span>
+        <a href="/privacy" className="hover:underline">{t("consent.footerLink")}</a>
       </footer>
     </div>
   );
