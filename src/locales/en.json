@@ -615,7 +615,7 @@
     "failed": "Could not send"
   },
   "consent": {
-    "title": "Your data in RappGym",
+    "title": "Data and privacy",
     "intro": "Before you continue, please read how your data is handled.",
     "storage": "Your training logs, workouts, locations and training profile are stored in the cloud (EU) and visible only to you.",
     "identity": "Only name, email and profile picture from your Google/Microsoft account are kept for sign-in.",
@@ -623,6 +623,17 @@
     "cost": "AI requests are free for you – Rapp Solutions pays the cost.",
     "rights": "You can delete your training profile at any time and ask for everything to be removed.",
     "accept": "I agree",
-    "error": "Could not save your consent. Please try again."
+    "error": "Could not save your consent. Please try again.",
+    "titleFirst": "Welcome to RappGym",
+    "introFirst": "Before you start training, please accept how your data is handled.",
+    "titleUpdate": "Updated terms (version {{version}})",
+    "introUpdate": "We have updated the terms since you accepted version {{version}}. Please review them to continue.",
+    "introView": "This is how your data is handled.",
+    "acceptFirst": "I understand and accept",
+    "acceptUpdate": "Accept updated terms",
+    "acceptedStatus": "Accepted version {{version}} ({{date}})",
+    "notAccepted": "Not accepted yet",
+    "close": "Close",
+    "menu": "Data and privacy"
   }
 }

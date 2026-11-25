@@ -615,7 +615,7 @@
     "failed": "Kunde inte skicka"
   },
   "consent": {
-    "title": "Din data i RappGym",
+    "title": "Data och integritet",
     "intro": "Innan du fortsätter, läs hur dina uppgifter hanteras.",
     "storage": "Dina träningsloggar, pass, platser och träningsprofil lagras i molnet (EU) och är endast synliga för dig.",
     "identity": "Från ditt Google-/Microsoft-konto sparas bara namn, e-post och profilbild för inloggning.",
@@ -623,6 +623,17 @@
     "cost": "AI-anropen är kostnadsfria för dig – Rapp Solutions står för kostnaden.",
     "rights": "Du kan när som helst radera din träningsprofil och be om att allt tas bort.",
     "accept": "Jag godkänner",
-    "error": "Kunde inte spara godkännandet. Försök igen."
+    "error": "Kunde inte spara godkännandet. Försök igen.",
+    "titleFirst": "Välkommen till RappGym",
+    "introFirst": "Innan du börjar träna behöver du godkänna hur dina uppgifter hanteras.",
+    "titleUpdate": "Uppdaterade villkor (version {{version}})",
+    "introUpdate": "Vi har uppdaterat villkoren sedan du godkände version {{version}}. Läs igenom dem för att fortsätta.",
+    "introView": "Så här hanteras dina uppgifter.",
+    "acceptFirst": "Jag förstår och godkänner",
+    "acceptUpdate": "Godkänn uppdaterade villkor",
+    "acceptedStatus": "Godkänd version {{version}} ({{date}})",
+    "notAccepted": "Inte godkänd ännu",
+    "close": "Stäng",
+    "menu": "Data och integritet"
   }
 }
