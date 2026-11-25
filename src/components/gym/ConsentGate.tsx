@@ -44,7 +44,6 @@ export function ConsentDialog({ mode, open, rows, onAccept, onOpenChange, saving
           </p>
         )}
         <ConsentPoints />
-        <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground">{t("consent.policyLink")}</a>
         {error && <p className="text-sm text-destructive">{t("consent.error")}</p>}
         <DialogFooter>
           {blocking
