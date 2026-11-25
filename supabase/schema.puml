@@ -224,4 +224,10 @@ entity exercise_suggestions {
 users ||..o{ exercise_suggestions
 exercise_categories |o--o{ exercise_suggestions : "RESTRICT"
 exercise_equipment |o--o{ exercise_suggestions : "RESTRICT"
+entity user_consents {
+  * user_id : uuid <<PK>>
+  * terms_version : integer <<PK>>
+  * consented_at : timestamptz
+}
+users ||..o{ user_consents
 @enduml

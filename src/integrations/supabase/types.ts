@@ -613,6 +613,24 @@ export type Database = {
           },
         ]
       }
+      user_consents: {
+        Row: {
+          consented_at: string
+          terms_version: number
+          user_id: string
+        }
+        Insert: {
+          consented_at?: string
+          terms_version: number
+          user_id: string
+        }
+        Update: {
+          consented_at?: string
+          terms_version?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_exercise_preferences: {
         Row: {
           exercise_id: string

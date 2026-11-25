@@ -559,7 +559,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
           );
           return (
             <p className="text-xs text-muted-foreground">
-              {t("trainingInsights.estimatedCost")}: {formatAiCost(e.input, e.output, language, true)}
+              {t("trainingInsights.estimatedCost")}: {formatAiCost(e.input, e.output, language, true)} · {t("trainingInsights.paidByRapp")}
             </p>
           );
         })()}

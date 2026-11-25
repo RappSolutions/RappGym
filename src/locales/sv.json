@@ -490,7 +490,8 @@
     "workoutsAndDaysAreOptional": "Valfritt: hur många pass som skapas och över hur många dagar de fördelas (högst ett pass per dag). Lämnas fälten tomma avgör AI:n lämpligt upplägg utifrån ditt syfte. Din profils ålder, längd, vikt och tempo används.",
     "yourGoals": "Dina mål",
     "yourQuestionOrRequest": "Din fråga eller önskemål",
-    "yourWorkoutPlan": "Din träningsplan"
+    "yourWorkoutPlan": "Din träningsplan",
+    "paidByRapp": "Gratis för dig · bekostas av Rapp Solutions"
   },
   "usersManager": {
     "created": "Skapad",
@@ -612,5 +613,16 @@
     "sent": "Tack! Meddelandet är skickat.",
     "savedNotSent": "Meddelandet är sparat, men mejlet kunde inte skickas. Skicka inte igen.",
     "failed": "Kunde inte skicka"
+  },
+  "consent": {
+    "title": "Din data i RappGym",
+    "intro": "Innan du fortsätter, läs hur dina uppgifter hanteras.",
+    "storage": "Dina träningsloggar, pass, platser och träningsprofil lagras i molnet (EU) och är endast synliga för dig.",
+    "identity": "Från ditt Google-/Microsoft-konto sparas bara namn, e-post och profilbild för inloggning.",
+    "ai": "AI-analys körs bara när du själv ber om den. Då skickas träningsdata och frivillig profil utan namn eller e-post till AI-tjänsten, som inte tränar på datan.",
+    "cost": "AI-anropen är kostnadsfria för dig – Rapp Solutions står för kostnaden.",
+    "rights": "Du kan när som helst radera din träningsprofil och be om att allt tas bort.",
+    "accept": "Jag godkänner",
+    "error": "Kunde inte spara godkännandet. Försök igen."
   }
 }

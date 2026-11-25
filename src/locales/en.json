@@ -490,7 +490,8 @@
     "workoutsAndDaysAreOptional": "Optional: how many workouts to create and over how many days to spread them (at most one per day). Leave both empty and the AI decides a suitable setup from your purpose. Your profile's age, height, weight, and pace are used.",
     "yourGoals": "Your goals",
     "yourQuestionOrRequest": "Your question or request",
-    "yourWorkoutPlan": "Your workout plan"
+    "yourWorkoutPlan": "Your workout plan",
+    "paidByRapp": "Free for you · paid by Rapp Solutions"
   },
   "usersManager": {
     "created": "Created",
@@ -612,5 +613,16 @@
     "sent": "Thanks! Your message was sent.",
     "savedNotSent": "Your message was saved, but the email could not be sent. Please do not send it again.",
     "failed": "Could not send"
+  },
+  "consent": {
+    "title": "Your data in RappGym",
+    "intro": "Before you continue, please read how your data is handled.",
+    "storage": "Your training logs, workouts, locations and training profile are stored in the cloud (EU) and visible only to you.",
+    "identity": "Only name, email and profile picture from your Google/Microsoft account are kept for sign-in.",
+    "ai": "AI analysis runs only when you ask for it. Training data and optional profile are then sent without name or email to the AI service, which does not train on it.",
+    "cost": "AI requests are free for you – Rapp Solutions pays the cost.",
+    "rights": "You can delete your training profile at any time and ask for everything to be removed.",
+    "accept": "I agree",
+    "error": "Could not save your consent. Please try again."
   }
 }
