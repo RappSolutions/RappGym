@@ -29,6 +29,11 @@ describe("effortPhrase", () => {
     expect(selected.size).toBeGreaterThan(1);
   });
 
+  it("uses one theme index for all levels of a set", () => {
+    const indexes = new Set(EFFORT_LEVELS.map((level) => effortPhraseIndex("set-42", level, phrases.length)));
+    expect(indexes.size).toBe(1);
+  });
+
   it("falls back when no phrases are available", () => {
     expect(effortPhrase("set", 3, [], "Moderate")).toBe("Moderate");
   });

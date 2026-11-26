@@ -13,11 +13,11 @@ export function effortAtPosition(x: number, left: number, width: number): Effort
   return Math.min(5, Math.max(1, zone)) as Effort;
 }
 
-/** Stable phrase selection for one set and effort level; changing effort cannot reshuffle the set's variant. */
+/** One theme index per set (seed only), so all five levels of a set come from the same theme. */
 export function effortPhraseIndex(seed: string, effort: Effort, phraseCount: number): number {
   if (!Number.isInteger(phraseCount) || phraseCount < 1) return 0;
   let hash = 2166136261;
-  for (const char of `${seed}:${effort}`) {
+  for (const char of seed) {
     hash ^= char.codePointAt(0) ?? 0;
     hash = Math.imul(hash, 16777619);
   }
