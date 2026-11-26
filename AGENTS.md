@@ -64,3 +64,5 @@ use the editor.
 - Exercise bank: all read, admin (user_roles) writes; one CircuitRunner with circuit toggle.
 - Admin inspection retains actor auth; session-scoped RLS selects the target, blocks writes, and audits start/end. Future write support needs explicit capabilities and operation audits.
 - Preserve queries on view bootstrap/navigation; pending loaders can reject.
+
+- Exercises, categories and equipment store English in base columns and other languages in `translations` jsonb keyed by ISO 639-1; read via `translated`/`localizeExercise`/`refName` so a new language needs only data + a locale file.

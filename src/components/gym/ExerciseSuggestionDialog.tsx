@@ -16,7 +16,7 @@ import { useExerciseTitle } from "@/hooks/use-exercise-title";
 import { exerciseNameUrl, withExerciseDescription } from "@/lib/exercise-title";
 
 export function ExerciseSuggestionDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
-  const { t } = useLanguage();
+  const { t, refName } = useLanguage();
   const { readOnly } = useUserView();
   const [form, setForm] = useState({ ...emptyExerciseSuggestion });
   const [busy, setBusy] = useState(false);
@@ -51,7 +51,7 @@ export function ExerciseSuggestionDialog({ open, onOpenChange }: { open: boolean
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">{(["category_id", "equipment_id"] as const).map((field) => <div key={field} className="space-y-1">
           <Label htmlFor={`suggestion-${field}`}>{t(field === "category_id" ? "exerciseSuggestion.category" : "exerciseSuggestion.equipment")}</Label>
           <select id={`suggestion-${field}`} className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm" value={form[field] ?? ""} disabled={busy || readOnly || isPending || isError} onChange={(event) => setForm({ ...form, [field]: event.target.value || null })}>
-            <option value="">{t("exerciseSuggestion.unspecified")}</option>{(field === "category_id" ? lookups?.categories : lookups?.equipment)?.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+            <option value="">{t("exerciseSuggestion.unspecified")}</option>{(field === "category_id" ? lookups?.categories : lookups?.equipment)?.map((item) => <option key={item.id} value={item.id}>{refName(item)}</option>)}
           </select>
         </div>)}</div>
         {isError && <p className="text-sm text-destructive">{t("exerciseSuggestion.lookupFailed")}</p>}

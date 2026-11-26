@@ -136,7 +136,7 @@ function ExercisesPage() {
         <SheetContent side="bottom" className="mx-auto max-h-[90dvh] max-w-2xl overflow-y-auto rounded-t-lg p-4">
           {open && <div data-category={categoryToken(open.category, cats)} className="category-theme min-w-0 space-y-4">
             <SheetHeader className="pr-6 text-left">
-              <SheetDescription className="text-category-ink">{open.code} · {open.category}</SheetDescription>
+              <SheetDescription className="text-category-ink">{open.code} · {localize(open).category}</SheetDescription>
               <div className="flex items-start justify-between gap-2"><SheetTitle className="min-w-0 break-words font-display text-2xl uppercase">{localize(open).name}</SheetTitle><RatingPicker exerciseId={open.id} /></div>
             </SheetHeader>
             <SpontaneousButton gymId={gym.id} exercise={open} last={last.get(open.code)} onStarted={() => setOpen(null)} />

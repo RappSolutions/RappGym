@@ -33,7 +33,7 @@ export function ExerciseForm({
   all: Exercise[];
   onClose: (saved?: Exercise) => void;
 }) {
-  const { t, language } = useLanguage();
+  const { t, language, refName } = useLanguage();
   const invalidate = useInvalidateGym();
   const [f, setF] = useState(empty);
   const qc = useQueryClient();
@@ -52,8 +52,8 @@ export function ExerciseForm({
     if (!open) return;
     const pick = (lang: "sv" | "en") => { const l = exercise ? localizeExercise(exercise, lang) : null; return { name: l?.name ?? "", instructions: l?.instructions ?? "" }; };
     const tr = exercise?.translations as Record<string, unknown> | null | undefined;
-    const hasEn = !!(tr && typeof tr === "object" && tr["en"]);
-    setTexts({ sv: pick("sv"), en: hasEn ? pick("en") : { name: "", instructions: "" } });
+    const hasSv = !!(tr && typeof tr === "object" && tr["sv"]);
+    setTexts({ en: pick("en"), sv: hasSv ? pick("sv") : { name: "", instructions: "" } });
     setF(exercise ? { code_number: String(exercise.code_number), category_id: exercise.category_id ?? "", equipment_id: exercise.equipment_id ?? "", reps_unit: repsUnit(exercise), name: "", instructions: "" } : { ...empty });
   }, [open, exercise]);
   const text = texts[textLanguage];
@@ -97,14 +97,15 @@ export function ExerciseForm({
     e.preventDefault();
     if (titleLookup.loading || exerciseNameUrl(text.name)) return;
     if (!f.category_id) { toast.error(t("exerciseForm.chooseACategory")); return; }
-    const sv = { name: (texts.sv.name || texts.en.name).trim(), instructions: texts.sv.instructions || texts.en.instructions };
-    if (!sv.name) { toast.error(t("common.name")); return; }
+    // English is the base; Swedish (and future languages) live in translations.
+    const base = { name: (texts.en.name || texts.sv.name).trim(), instructions: texts.en.instructions || texts.sv.instructions };
+    if (!base.name) { toast.error(t("common.name")); return; }
     const existing = exercise?.translations;
     const translations = existing && typeof existing === "object" && !Array.isArray(existing) ? existing : {};
-    const en = texts.en.name.trim() || texts.en.instructions.trim() ? { name: texts.en.name.trim(), instructions: texts.en.instructions } : null;
+    const sv = texts.sv.name.trim() || texts.sv.instructions.trim() ? { name: texts.sv.name.trim(), instructions: texts.sv.instructions } : null;
     const num = Number(f.code_number);
     if (!Number.isInteger(num) || num < 1) { toast.error(t("exerciseForm.code")); return; }
-    const row = { code_number: num, category_id: f.category_id, equipment_id: f.equipment_id || null, reps_unit: f.reps_unit, name: sv.name, instructions: sv.instructions, translations: en ? { ...translations, en } : translations };
+    const row = { code_number: num, category_id: f.category_id, equipment_id: f.equipment_id || null, reps_unit: f.reps_unit, name: base.name, instructions: base.instructions, translations: sv ? { ...translations, sv } : translations };
     const res = exercise
       ? await supabase.from("exercises").update(row).eq("id", exercise.id).select(EXERCISE_SELECT).single()
       : await supabase.from("exercises").insert({ ...row, code: "", sort_order: all.length }).select(EXERCISE_SELECT).single(); // code is derived by the DB trigger
@@ -132,7 +133,7 @@ export function ExerciseForm({
               <Label htmlFor="ex-cat">{t("common.category")}</Label>
               <select id="ex-cat" required value={newCat ? NEW : f.category_id} onChange={(e) => pickCategory(e.target.value)} className={selectCls}>
                 <option value="" disabled>{t("exerciseForm.choose")}</option>
-                {categories.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.code_prefix})</option>)}
+                {categories.map((c) => <option key={c.id} value={c.id}>{refName(c)} ({c.code_prefix})</option>)}
                 <option value={NEW}>{t("exerciseForm.newCategory")}</option>
               </select>
             </div>
@@ -150,7 +151,7 @@ export function ExerciseForm({
             <Label htmlFor="ex-eq">{t("common.equipment")}</Label>
             <select id="ex-eq" value={newEq !== null ? NEW : f.equipment_id} onChange={(e) => e.target.value === NEW ? setNewEq("") : setF({ ...f, equipment_id: e.target.value })} className={selectCls}>
               <option value="">{t("exerciseForm.none")}</option>
-              {equipment.map((q) => <option key={q.id} value={q.id}>{q.name}</option>)}
+              {equipment.map((q) => <option key={q.id} value={q.id}>{refName(q)}</option>)}
               <option value={NEW}>{t("exerciseForm.newEquipment")}</option>
             </select>
           </div>

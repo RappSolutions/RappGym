@@ -18,8 +18,8 @@ describe("nextExerciseCode", () => {
 
 describe("normalizeExercise", () => {
   it("takes category and equipment from the FK rows", () => {
-    const row = normalizeExercise({ category: "old", equipment: "old", cat: { name: "Push", code_prefix: "PU", color_token: "cat-1", sort_order: 1 }, eq: { name: "Hantel" } } as never);
-    expect([row.category, row.equipment, row.category_token]).toEqual(["Push", "Hantel", "cat-1"]);
+    const row = normalizeExercise({ category: "old", equipment: "old", cat: { name: "Push", code_prefix: "PU", color_token: "cat-1", sort_order: 1, translations: {} }, eq: { name: "Dumbbell", translations: { sv: { name: "Hantel" } } } } as never);
+    expect([row.category, row.equipment, row.category_token]).toEqual(["Push", "Dumbbell", "cat-1"]);
   });
 });
 
@@ -48,4 +48,12 @@ describe("loggedName", () => {
   it("uses the localized name while the snapshot matches the current name", () => {
     expect(loggedName({ exercise_name: "Situps" }, { name: "Situps" }, { name: "Sit-ups EN" })).toBe("Sit-ups EN");
   });
+});
+
+import { translated } from "@/lib/exercise-refs";
+describe("translated", () => {
+  const tr = { sv: { name: "Hantel" } };
+  it("uses the Swedish translation for sv", () => expect(translated(tr, "sv", "name", "Dumbbell")).toBe("Hantel"));
+  it("falls back to the English base when a language is missing", () => expect(translated(tr, "fi", "name", "Dumbbell")).toBe("Dumbbell"));
+  it("returns the English base for en", () => expect(translated(tr, "en", "name", "Dumbbell")).toBe("Dumbbell"));
 });

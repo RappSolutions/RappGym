@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useQueryClient, useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Check, ChevronDown, ChevronRight, Pencil, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Pencil, Plus, Trash2, X } from "lucide-react";
+import type { Json } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,11 +12,19 @@ import { exerciseCategoriesQuery, exerciseEquipmentQuery, exercisesQuery, gymsQu
 import { gymEquipmentQuery } from "@/lib/exercise-locations";
 import { tokenToHex } from "@/lib/category-color";
 
-type Draft = { id: string; name: string; prefix: string; color: string };
+type Draft = { id: string; name: string; sv: string; prefix: string; color: string };
+const NEW = "new";
+/** Merge the Swedish name into existing translations; empty removes it so the English base shows. */
+function withSv(existing: Json | undefined, sv: string): Json {
+  const base = existing && typeof existing === "object" && !Array.isArray(existing) ? { ...existing } : {};
+  if (sv.trim()) base["sv"] = { name: sv.trim() }; else delete base["sv"];
+  return base;
+}
 
 /** Admin CRUD for the category and equipment lookup tables; used rows are protected by FK RESTRICT. */
 export function RefsManager({ only }: { only: "cat" | "eq" }) {
-  const { t } = useLanguage();
+  const { t, refName, localize } = useLanguage();
+  const svOf = (r: { translations: Json }) => { const v = r.translations; return v && typeof v === "object" && !Array.isArray(v) && v["sv"] && typeof v["sv"] === "object" && !Array.isArray(v["sv"]) && typeof v["sv"]["name"] === "string" ? v["sv"]["name"] : ""; };
   const qc = useQueryClient();
   const invalidate = useInvalidateGym();
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
@@ -32,13 +41,21 @@ export function RefsManager({ only }: { only: "cat" | "eq" }) {
 
   async function saveCat() {
     if (!draft) return;
-    const { error } = await supabase.from("exercise_categories").update({ name: draft.name.trim(), code_prefix: draft.prefix.trim().toUpperCase(), color_token: draft.color.toLowerCase() }).eq("id", draft.id);
+    const cur = categories.find((c) => c.id === draft.id);
+    const row = { name: draft.name.trim(), code_prefix: draft.prefix.trim().toUpperCase(), color_token: draft.color.toLowerCase(), translations: withSv(cur?.translations, draft.sv) };
+    const { error } = draft.id === NEW
+      ? await supabase.from("exercise_categories").insert({ ...row, sort_order: categories.length + 1 })
+      : await supabase.from("exercise_categories").update(row).eq("id", draft.id);
     if (error) { toast.error(dup(error.code) ? t("common.nameOrPrefixAlreadyExists") : error.message); return; }
     setDraft(null); await refresh();
   }
   async function saveEq() {
     if (!draft) return;
-    const { error } = await supabase.from("exercise_equipment").update({ name: draft.name.trim() }).eq("id", draft.id);
+    const cur = equipment.find((q) => q.id === draft.id);
+    const row = { name: draft.name.trim(), translations: withSv(cur?.translations, draft.sv) };
+    const { error } = draft.id === NEW
+      ? await supabase.from("exercise_equipment").insert(row)
+      : await supabase.from("exercise_equipment").update(row).eq("id", draft.id);
     if (error) { toast.error(dup(error.code) ? t("common.equipmentAlreadyExists") : error.message); return; }
     setDraft(null); await refresh();
   }
@@ -67,9 +84,23 @@ export function RefsManager({ only }: { only: "cat" | "eq" }) {
       <div><div className="font-medium text-muted-foreground">{t("settings.locations")}</div>
         {at.length ? <div className="flex flex-wrap gap-1 pt-1">{at.map((x) => <span key={x.gym!.id} className="rounded border px-1.5 py-0.5">{x.gym!.name}{x.max != null && ` · max ${x.max} kg`}</span>)}</div> : <div className="text-muted-foreground">{t("refsManager.noLocations")}</div>}</div>
       <div><div className="font-medium text-muted-foreground">{t("common.exercises")}</div>
-        {byCat.length ? byCat.map(({ c, list }) => <div key={c.id} data-category={c.color_token} className="category-theme flex flex-wrap gap-1 pt-1">{list.map((e) => <span key={e.id} className={`rounded bg-category-fill px-1.5 py-0.5 text-category-on ${e.is_active === false ? "opacity-50" : ""}`}><span className="font-mono">{e.code}</span> {e.name}</span>)}</div>) : <div className="text-muted-foreground">{t("refsManager.noExercises")}</div>}</div>
+        {byCat.length ? byCat.map(({ c, list }) => <div key={c.id} data-category={c.color_token} className="category-theme flex flex-wrap gap-1 pt-1">{list.map((e) => <span key={e.id} className={`rounded bg-category-fill px-1.5 py-0.5 text-category-on ${e.is_active === false ? "opacity-50" : ""}`}><span className="font-mono">{e.code}</span> {localize(e).name}</span>)}</div>) : <div className="text-muted-foreground">{t("refsManager.noExercises")}</div>}</div>
     </div>;
   }
+
+  const names = (ed: Draft) => <>
+    <Input value={ed.name} placeholder={t("refsManager.nameEn")} aria-label={t("refsManager.nameEn")} onChange={(e) => setDraft({ ...ed, name: e.target.value })} className="h-8 min-w-0 flex-1" />
+    <Input value={ed.sv} placeholder={t("refsManager.nameSv")} aria-label={t("refsManager.nameSv")} onChange={(e) => setDraft({ ...ed, sv: e.target.value })} className="h-8 min-w-0 flex-1" />
+  </>;
+  const catEditor = (ed: Draft) => <>
+    <input type="color" aria-label={t("common.colour")} value={ed.color} onChange={(e) => setDraft({ ...ed, color: e.target.value })} className="size-8 shrink-0 cursor-pointer rounded border bg-background p-0.5" />
+    {names(ed)}
+    <Input value={ed.prefix} maxLength={4} placeholder="XX" aria-label={t("refsManager.prefix")} onChange={(e) => setDraft({ ...ed, prefix: e.target.value.toUpperCase().replace(/[^A-Z]/g, "") })} className="h-8 w-14" />
+    {saveCancel(() => void saveCat(), !!ed.name.trim() && !!ed.prefix)}
+  </>;
+  const eqEditor = (ed: Draft) => <>{names(ed)}{saveCancel(() => void saveEq(), !!ed.name.trim())}</>;
+  const newDraft = draft?.id === NEW ? draft : null;
+  const addButton = (label: string, d: Draft) => !newDraft && <Button size="sm" variant="ghost" className="h-8 gap-1 px-2 text-muted-foreground" onClick={() => setDraft(d)}><Plus className="size-4" />{label}</Button>;
 
   return (
     <section className="space-y-1">
@@ -77,29 +108,28 @@ export function RefsManager({ only }: { only: "cat" | "eq" }) {
         const used = catCount(c.id);
         const ed = draft?.id === c.id ? draft : null;
         return <div key={c.id} data-category={c.color_token} className="category-theme flex items-center gap-2 py-0.5">
-          {ed ? <>
-            <input type="color" aria-label={t("common.colour")} value={ed.color} onChange={(e) => setDraft({ ...ed, color: e.target.value })} className="size-8 shrink-0 cursor-pointer rounded border bg-background p-0.5" />
-            <Input value={ed.name} onChange={(e) => setDraft({ ...ed, name: e.target.value })} className="h-8 flex-1" />
-            <Input value={ed.prefix} maxLength={4} onChange={(e) => setDraft({ ...ed, prefix: e.target.value.toUpperCase().replace(/[^A-Z]/g, "") })} className="h-8 w-16" />
-            {saveCancel(() => void saveCat(), !!ed.name.trim() && !!ed.prefix)}
-          </> : <>
+          {ed ? catEditor(ed) : <>
             <span className="size-4 shrink-0 rounded-full bg-category-fill" aria-hidden />
-            <span className="flex-1 truncate text-sm">{c.name}</span>
+            <span className="flex-1 truncate text-sm">{refName(c)}</span>
             <span className="font-mono text-xs text-muted-foreground">{c.code_prefix}</span>
-            {actions(() => setDraft({ id: c.id, name: c.name, prefix: c.code_prefix, color: tokenToHex(c.color_token) }), () => void remove("exercise_categories", c.id, c.name, used), used)}
+            {actions(() => setDraft({ id: c.id, name: c.name, sv: svOf(c), prefix: c.code_prefix, color: tokenToHex(c.color_token) }), () => void remove("exercise_categories", c.id, refName(c), used), used)}
           </>}
         </div>;
-      })}</div>}
-      {only === "eq" && <div className="space-y-1">{equipment.map((q) => {
+      })}
+        {newDraft ? <div className="flex items-center gap-2 py-0.5">{catEditor(newDraft)}</div> : addButton(t("refsManager.newCategory"), { id: NEW, name: "", sv: "", prefix: "", color: "#0063ff" })}
+      </div>}
+      {only === "eq" && <div className="space-y-1">{[...equipment].sort((a, b) => refName(a).localeCompare(refName(b))).map((q) => {
         const used = eqCount(q.id);
         const ed = draft?.id === q.id ? draft : null;
         return <div key={q.id}><div className="flex items-center gap-2 py-0.5">
-          {ed ? <><Input value={ed.name} onChange={(e) => setDraft({ ...ed, name: e.target.value })} className="h-8 flex-1" />{saveCancel(() => void saveEq(), !!ed.name.trim())}</>
-            : <><button type="button" className="flex min-w-0 flex-1 items-center gap-1 text-left text-sm" aria-expanded={openEq === q.id} onClick={() => setOpenEq(openEq === q.id ? null : q.id)}>{openEq === q.id ? <ChevronDown className="size-4 shrink-0" /> : <ChevronRight className="size-4 shrink-0" />}<span className="truncate">{q.name}</span></button>{actions(() => setDraft({ id: q.id, name: q.name, prefix: "", color: "" }), () => void remove("exercise_equipment", q.id, q.name, used), used)}</>}
+          {ed ? eqEditor(ed)
+            : <><button type="button" className="flex min-w-0 flex-1 items-center gap-1 text-left text-sm" aria-expanded={openEq === q.id} onClick={() => setOpenEq(openEq === q.id ? null : q.id)}>{openEq === q.id ? <ChevronDown className="size-4 shrink-0" /> : <ChevronRight className="size-4 shrink-0" />}<span className="truncate">{refName(q)}</span></button>{actions(() => setDraft({ id: q.id, name: q.name, sv: svOf(q), prefix: "", color: "" }), () => void remove("exercise_equipment", q.id, refName(q), used), used)}</>}
         </div>
         {openEq === q.id && !ed && <EquipmentDetails eqId={q.id} />}
         </div>;
-      })}</div>}
+      })}
+        {newDraft ? <div className="flex items-center gap-2 py-0.5">{eqEditor(newDraft)}</div> : addButton(t("refsManager.newEquipment"), { id: NEW, name: "", sv: "", prefix: "", color: "" })}
+      </div>}
     </section>
   );
 }

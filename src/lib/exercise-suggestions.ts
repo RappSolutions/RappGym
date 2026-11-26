@@ -16,8 +16,8 @@ export const suggestionLookupsQuery = queryOptions({
   queryKey: ["exercise-suggestion-lookups"],
   queryFn: async () => {
     const [categories, equipment] = await Promise.all([
-      supabase.from("exercise_categories").select("id,name").order("sort_order").order("name"),
-      supabase.from("exercise_equipment").select("id,name").order("name"),
+      supabase.from("exercise_categories").select("id,name,translations").order("sort_order").order("name"),
+      supabase.from("exercise_equipment").select("id,name,translations").order("name"),
     ]);
     if (categories.error) throw categories.error;
     if (equipment.error) throw equipment.error;

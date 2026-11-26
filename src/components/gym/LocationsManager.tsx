@@ -13,7 +13,7 @@ import { useSelectedGym } from "@/hooks/use-gym";
 import { LocationPhotoScan } from "@/components/gym/LocationPhotoScan";
 
 export function LocationsManager() {
-  const { t, localize } = useLanguage();
+  const { t, localize, refName } = useLanguage();
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
   const { data: links } = useSuspenseQuery(gymEquipmentQuery);
   const { data: equipment } = useSuspenseQuery(exerciseEquipmentQuery);
@@ -139,11 +139,11 @@ export function LocationsManager() {
                 <Button size="sm" variant="outline" disabled={busy || here.size === equipment.length} onClick={() => void addLinks(g.id, allIds)}>{t("locationsManager.addAll")}</Button>
                 <Button size="sm" variant="outline" disabled={busy || here.size === 0} onClick={() => void removeLinks(g.id, [...here])}>{t("locationsManager.removeAll")}</Button>
               </div>
-              <div className="grid gap-1 sm:grid-cols-2">{equipment.map((q) => {
+              <div className="grid gap-1 sm:grid-cols-2">{[...equipment].sort((a, b) => refName(a).localeCompare(refName(b))).map((q) => {
                 const n = exercises.filter((e) => e.equipment_id === q.id).length;
                 const link = links.find((l) => l.gym_id === g.id && l.equipment_id === q.id);
-                return <div key={q.id} className="flex items-center gap-2 text-sm"><label className="flex min-w-0 flex-1 items-center gap-2"><input type="checkbox" className="size-4" checked={!!link} disabled={busy} onChange={() => void (link ? removeLinks(g.id, [q.id]) : addLinks(g.id, [q.id]))} /><span className="truncate">{q.name}</span><span className="text-xs text-muted-foreground">({n})</span></label>
-                  {link && <Input key={`${link.max_load_kg ?? ""}`} inputMode="decimal" defaultValue={link.max_load_kg ?? ""} placeholder={t("locationsManager.maxKg")} aria-label={t("locationsManager.maxLoadFor", { name: q.name })} className="h-7 w-20 text-xs" onBlur={(e) => { if (e.target.value.trim() !== String(link.max_load_kg ?? "")) void setMax(g.id, q.id, e.target.value); }} />}</div>;
+                return <div key={q.id} className="flex items-center gap-2 text-sm"><label className="flex min-w-0 flex-1 items-center gap-2"><input type="checkbox" className="size-4" checked={!!link} disabled={busy} onChange={() => void (link ? removeLinks(g.id, [q.id]) : addLinks(g.id, [q.id]))} /><span className="truncate">{refName(q)}</span><span className="text-xs text-muted-foreground">({n})</span></label>
+                  {link && <Input key={`${link.max_load_kg ?? ""}`} inputMode="decimal" defaultValue={link.max_load_kg ?? ""} placeholder={t("locationsManager.maxKg")} aria-label={t("locationsManager.maxLoadFor", { name: refName(q) })} className="h-7 w-20 text-xs" onBlur={(e) => { if (e.target.value.trim() !== String(link.max_load_kg ?? "")) void setMax(g.id, q.id, e.target.value); }} />}</div>;
               })}</div>
               <p className="text-xs text-muted-foreground">{t("locationsManager.noEquipmentAlways")}</p>
             </div>}

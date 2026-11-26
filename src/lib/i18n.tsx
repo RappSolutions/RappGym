@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { i18n, type Language } from "./i18n-core";
 import type { Exercise } from "./gym";
+import type { Json } from "@/integrations/supabase/types";
+import { translated } from "./exercise-refs";
 import { Button } from "@/components/ui/button";
 import swedishFlag from "@/assets/flags/sweden.svg.asset.json";
 import britishFlag from "@/assets/flags/united-kingdom.svg.asset.json";
@@ -17,18 +19,21 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 export function useLanguage() {
   const context = useContext(LanguageContext);
   const t = i18n.getFixedT(context.language);
-  return { ...context, t, localize: (ex: Exercise) => localizeExercise(ex, context.language) };
+  return { ...context, t, localize: (ex: Exercise) => localizeExercise(ex, context.language), refName: (row: { name: string; translations?: Json }) => refName(row, context.language) };
 }
+/** Base fields are English; every other language is read from translations[language]. */
 export function localizeExercise(ex: Exercise, language: Language): Exercise {
-  if (language === "sv" || !ex.translations || typeof ex.translations !== "object" || Array.isArray(ex.translations)) return ex;
-  const translation = ex.translations[language];
-  if (!translation || typeof translation !== "object" || Array.isArray(translation)) return ex;
-  const result = { ...ex };
-  for (const key of ["name", "instructions"] as const) {
-    const value = translation[key];
-    if (typeof value === "string" && value) result[key] = value;
-  }
-  return result;
+  return {
+    ...ex,
+    name: translated(ex.translations, language, "name", ex.name),
+    instructions: translated(ex.translations, language, "instructions", ex.instructions),
+    category: translated(ex.category_translations, language, "name", ex.category),
+    equipment: translated(ex.equipment_translations, language, "name", ex.equipment),
+  };
+}
+/** Localized name of a category or equipment row. */
+export function refName(row: { name: string; translations?: Json }, language: Language): string {
+  return translated(row.translations, language, "name", row.name);
 }
 export function LanguagePicker({ flagsOnly = false }: { flagsOnly?: boolean }) {
   const { language, setLanguage, t } = useLanguage();

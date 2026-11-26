@@ -13,12 +13,12 @@ declare module "i18next" {
   }
 }
 
-/** Single app-wide i18next instance; Swedish is source and fallback language. */
+/** Single app-wide i18next instance; English is the fallback language (sv.json still types the keys). */
 export const i18n = i18next.createInstance();
 void i18n.init({
   resources,
   lng: "sv",
-  fallbackLng: "sv",
+  fallbackLng: "en",
   supportedLngs: [...supportedLanguages],
   interpolation: { escapeValue: false },
   returnNull: false,

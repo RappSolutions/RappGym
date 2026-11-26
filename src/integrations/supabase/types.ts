@@ -76,6 +76,7 @@ export type Database = {
           id: string
           name: string
           sort_order: number
+          translations: Json
         }
         Insert: {
           code_prefix: string
@@ -84,6 +85,7 @@ export type Database = {
           id?: string
           name: string
           sort_order?: number
+          translations?: Json
         }
         Update: {
           code_prefix?: string
@@ -92,6 +94,7 @@ export type Database = {
           id?: string
           name?: string
           sort_order?: number
+          translations?: Json
         }
         Relationships: []
       }
@@ -100,16 +103,19 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          translations: Json
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
+          translations?: Json
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
+          translations?: Json
         }
         Relationships: []
       }

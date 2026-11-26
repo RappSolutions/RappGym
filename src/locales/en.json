@@ -442,7 +442,12 @@
     "isUsedByExercisesAnd": "{{name}} is used by {{used}} exercises and can't be deleted.",
     "permanentlyDelete": "Permanently delete {{name}}?",
     "noLocations": "No location has this equipment.",
-    "noExercises": "No exercises use this equipment."
+    "noExercises": "No exercises use this equipment.",
+    "nameEn": "Name (English)",
+    "nameSv": "Name (Swedish)",
+    "prefix": "Prefix",
+    "newCategory": "New category",
+    "newEquipment": "New equipment"
   },
   "settings": {
     "aiQuotasUsage": "AI quotas & stats",
