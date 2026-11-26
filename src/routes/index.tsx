@@ -9,6 +9,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { authProviders, type AuthProvider } from "@/lib/auth-providers";
 import rappgymLogo from "@/assets/RappGym_1024.png";
 import rappSolutionsLogo from "@/assets/RappSolutionsAB_200x112.png";
+import { StartupSplash } from "@/components/gym/StartupSplash";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -64,6 +65,8 @@ function Index() {
     if (result.redirected) return;
     navigate({ to: "/home", replace: true });
   }
+
+  if (checking) return <StartupSplash />;
 
   return (
     <div aria-busy={waiting} className={`app-sheet mx-auto flex min-h-screen${waiting ? " cursor-wait" : ""} max-w-2xl flex-col pb-12 md:max-w-4xl`}>

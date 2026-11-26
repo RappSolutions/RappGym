@@ -30,6 +30,7 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## Gym log app
+- Home-screen support is manifest-only (no app-shell service worker); reuse StartupSplash for hydration/session/route waiting and derive public install icons from the shared logo, so startup remains consistent without stale preview caches.
 - Split explicit single-kg suggested loads into numeric load and preserved note advice at acceptance/editing boundaries, never retroactively reinterpret completed history.
 - Use the shared ISO log date picker with an interactive Shadcn calendar inside the drawer, so selecting dates is independent of native browser picker support.
 - Keep AI analysis/planning/history on the dedicated authenticated AI route; shared navigation provides access without crowding dashboard or statistics.

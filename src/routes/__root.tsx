@@ -14,6 +14,7 @@ import { ConfirmHost } from "@/components/gym/ConfirmHost";
 import { supabase } from "@/integrations/supabase/client";
 import { LanguageProvider } from "@/lib/i18n";
 import { UserViewProvider } from "@/lib/user-view";
+import { StartupSplash } from "@/components/gym/StartupSplash";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -86,6 +87,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "theme-color", content: "#0063FF" },
       { title: "RappGym" },
       { name: "description", content: "Logga dina gympass och bläddra i din övningsbank." },
       { property: "og:title", content: "RappGym" },
@@ -100,6 +102,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "icon", href: "/favicon.ico?v=rappgym", type: "image/x-icon" },
       { rel: "icon", href: "/favicon.png?v=rappgym", type: "image/png", sizes: "64x64" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -115,6 +119,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
   return (
     <html lang="sv">
       <head>
@@ -122,6 +128,7 @@ function RootShell({ children }: { children: ReactNode }) {
       </head>
       <body>
         {children}
+        {!hydrated && <StartupSplash />}
         <Scripts />
       </body>
     </html>
