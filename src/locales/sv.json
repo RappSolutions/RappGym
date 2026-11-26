@@ -283,6 +283,7 @@
       "reps": "Reps/tid",
       "unit": "Enhet",
       "rating": "AI-prio",
+      "effort": "Ansträngning",
       "note": "Anteckning",
       "tonnage": "Tonnage (kg)"
     },
@@ -702,5 +703,13 @@
     "day": "Dag",
     "week": "Vecka",
     "empty": "Inget mätbart tonnage i urvalet."
+  },
+  "effort": {
+    "label": "Ansträngning",
+    "l1": "Lätt",
+    "l2": "Kontrollerat",
+    "l3": "Lagom",
+    "l4": "Tungt",
+    "l5": "Max"
   }
 }

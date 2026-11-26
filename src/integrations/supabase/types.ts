@@ -331,6 +331,7 @@ export type Database = {
           code: string
           created_at: string
           date: string
+          effort: number | null
           exercise_id: string | null
           exercise_name: string
           exercise_rating: number | null
@@ -353,6 +354,7 @@ export type Database = {
           code: string
           created_at?: string
           date?: string
+          effort?: number | null
           exercise_id?: string | null
           exercise_name?: string
           exercise_rating?: number | null
@@ -375,6 +377,7 @@ export type Database = {
           code?: string
           created_at?: string
           date?: string
+          effort?: number | null
           exercise_id?: string | null
           exercise_name?: string
           exercise_rating?: number | null

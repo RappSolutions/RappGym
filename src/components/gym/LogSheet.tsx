@@ -1,4 +1,6 @@
 import { useUserView } from "@/lib/user-view";
+import { EffortRuler } from "@/components/gym/EffortRuler";
+import { DEFAULT_EFFORT, isEffort, type Effort } from "@/lib/effort";
 import { AdminExerciseEdit } from "@/components/gym/AdminExerciseEdit";
 import { repsUnit } from "@/lib/reps-unit";
 import { confirmDialog } from "@/components/gym/ConfirmHost";
@@ -58,6 +60,7 @@ export function LogSheet({
   const [load, setLoad] = useState("");
   const [reps, setReps] = useState(10);
   const [note, setNote] = useState("");
+  const [effort, setEffort] = useState<Effort>(DEFAULT_EFFORT);
   const [date, setDate] = useState(todayISO());
   const [busy, setBusy] = useState(false);
   const { data: gyms = [] } = useQuery(gymsQuery);
@@ -73,6 +76,7 @@ export function LogSheet({
     setReps(src?.reps ?? 10);
     setNote(appendLoadAdvice(entry?.note ?? "", split.advice));
     setDate(entry?.date ?? todayISO());
+    setEffort(entry?.status === "completed" && "effort" in entry && isEffort(entry.effort) ? entry.effort : DEFAULT_EFFORT);
     setPlace((entry ? entry.gym_id : gymId) ?? "");
   }, [exercise, entry, last, gymId]);
 
@@ -82,10 +86,11 @@ export function LogSheet({
     const plan = entry?.status === "suggested" ? (entry as PlannedRow) : null;
     const row = { code: exercise.code, sets: entry?.status === "suggested" ? Math.max(1, round) : entry?.status === "completed" ? entry.sets ?? 1 : 1, load, reps, note: note || null, date, gym_id: place || null };
     let error: { message: string } | null = null;
+    const fact = { ...row, effort };
     if (plan && !complete) error = await updatePlannedRow(plan.id, row).then(() => null, (e: Error) => e);
     // Completing a plan records a new fact; the plan itself stays for plan-vs-actual.
-    else if (plan) error = (await supabase.from("log_entries").insert({ ...row, workout_id: plan.workout_id, phase: plan.phase })).error;
-    else error = (entry ? await supabase.from("log_entries").update(row).eq("id", entry.id) : await supabase.from("log_entries").insert(row)).error;
+    else if (plan) error = (await supabase.from("log_entries").insert({ ...fact, workout_id: plan.workout_id, phase: plan.phase })).error;
+    else error = (entry ? await supabase.from("log_entries").update(fact).eq("id", entry.id) : await supabase.from("log_entries").insert(fact)).error;
     setBusy(false);
     if (error) {
       toast.error(error.message);
@@ -97,7 +102,7 @@ export function LogSheet({
       action: {
         label: t("logSheet.1IdenticalSet"),
         onClick: async () => {
-          const { error: e2 } = await supabase.from("log_entries").insert({ ...row, sets: 1 });
+          const { error: e2 } = await supabase.from("log_entries").insert({ ...fact, sets: 1 });
           if (e2) toast.error(e2.message);
           else { toast.success(`${code}: ${t("logSheet.oneMoreSet")}`); invalidate(); }
         },
@@ -162,6 +167,7 @@ export function LogSheet({
             <Label htmlFor="log-note">{t("logSheet.notesFeel")}</Label>
             <Textarea id="log-note" value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
           </div>
+          <EffortRuler value={effort} onChange={setEffort} disabled={readOnly || busy} />
           <Button onClick={() => void save()} disabled={readOnly || busy} className="h-14 w-full text-lg font-bold uppercase">
             {entry?.status === "suggested" ? t("logSheet.confirmCompleted") : entry ? t("logSheet.saveChanges") : t("common.logSets")}
           </Button>

@@ -283,6 +283,7 @@
       "reps": "Reps/time",
       "unit": "Unit",
       "rating": "AI prio",
+      "effort": "Effort",
       "note": "Note",
       "tonnage": "Tonnage (kg)"
     },
@@ -702,5 +703,13 @@
     "day": "Day",
     "week": "Week",
     "empty": "No measurable tonnage in the selection."
+  },
+  "effort": {
+    "label": "Effort",
+    "l1": "Easy",
+    "l2": "Controlled",
+    "l3": "Moderate",
+    "l4": "Hard",
+    "l5": "Max"
   }
 }

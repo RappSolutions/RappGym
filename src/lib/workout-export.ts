@@ -76,9 +76,9 @@ export function downloadWorkoutPdf(w: SheetMeta, rows: readonly PrintRow[], exer
   downloadBlob(doc.output("blob"), `rappgym-${w.date}-${w.title.replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").toLowerCase() || "pass"}.pdf`);
 }
 
-type LogRow = { sets?: number | null; date: string; created_at: string; code: string; exercise_id: string | null; exercise_name: string; gym_id: string | null; phase: string; lap: number | null; set_number: number | null; load: string; reps: number | null; reps_unit: string; exercise_rating: number | null; note: string | null; workout?: { title: string } | null };
+type LogRow = { sets?: number | null; date: string; created_at: string; code: string; exercise_id: string | null; exercise_name: string; gym_id: string | null; phase: string; lap: number | null; set_number: number | null; load: string; reps: number | null; reps_unit: string; exercise_rating: number | null; effort?: number | null; note: string | null; workout?: { title: string } | null };
 
-export const LOG_EXPORT_COLUMNS = ["date", "time", "location", "workout", "phase", "category", "code", "exercise", "equipment", "lap", "set", "load", "reps", "unit", "rating", "note", "tonnage"] as const;
+export const LOG_EXPORT_COLUMNS = ["date", "time", "location", "workout", "phase", "category", "code", "exercise", "equipment", "lap", "set", "load", "reps", "unit", "rating", "effort", "note", "tonnage"] as const;
 
 /** Completed log facts as sheet rows, oldest first; dates ISO, time HH:MM (UTC). */
 export function logExportRows(log: readonly LogRow[], exercises: readonly Ex[], gyms: readonly Gym[]) {
@@ -86,7 +86,7 @@ export function logExportRows(log: readonly LogRow[], exercises: readonly Ex[], 
   const gym = new Map(gyms.map((g) => [g.id, g.name]));
   return [...log].sort((a, b) => a.date.localeCompare(b.date) || a.created_at.localeCompare(b.created_at)).map((r) => {
     const e = r.exercise_id ? byId.get(r.exercise_id) : undefined;
-    return [r.date, r.created_at.slice(11, 16), r.gym_id ? gym.get(r.gym_id) ?? "" : "", r.workout?.title ?? "", r.phase, e?.category ?? "", r.code, r.exercise_name || e?.name || "", e?.equipment ?? "", r.lap ?? "", r.set_number ?? "", /^\d+([.,]\d+)?$/.test(r.load.trim()) ? Number(r.load.trim().replace(",", ".")) : r.load, r.reps ?? "", r.reps_unit, r.exercise_rating ?? "", r.note ?? "", rowTonnage({ sets: r.sets ?? 1, reps: r.reps, load: r.load, reps_unit: r.reps_unit }) || ""];
+    return [r.date, r.created_at.slice(11, 16), r.gym_id ? gym.get(r.gym_id) ?? "" : "", r.workout?.title ?? "", r.phase, e?.category ?? "", r.code, r.exercise_name || e?.name || "", e?.equipment ?? "", r.lap ?? "", r.set_number ?? "", /^\d+([.,]\d+)?$/.test(r.load.trim()) ? Number(r.load.trim().replace(",", ".")) : r.load, r.reps ?? "", r.reps_unit, r.exercise_rating ?? "", r.effort ?? "", r.note ?? "", rowTonnage({ sets: r.sets ?? 1, reps: r.reps, load: r.load, reps_unit: r.reps_unit }) || ""];
   });
 }
 

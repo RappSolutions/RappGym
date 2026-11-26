@@ -12,3 +12,4 @@
 - Log Excel export is a multi-sheet report (raw + workouts, ISO weeks Monday-start, weekdays, exercises, categories, locations) built by pure src/lib/log-report.ts, so summaries are tested and derived only at export.
 - Home statistics lead with the tonnage chart (day / ISO week / kg per min) from pure series functions in src/lib/tonnage.ts, so charts and exports share one formula.
 - Terms consent: append-only user_consents(user_id, terms_version int); ConsentGate prompts when max accepted < CURRENT_TERMS_VERSION (src/lib/consent.ts), so bumping the constant re-prompts everyone.
+- Per-set effort (1–5, default 3) is stored on completed log_entries.effort via the shared EffortRuler above every set confirm; NULL means not recorded, so legacy rows are never backfilled.

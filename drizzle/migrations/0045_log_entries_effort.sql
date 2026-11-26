@@ -1,0 +1,2 @@
+ALTER TABLE public.log_entries ADD COLUMN effort smallint NULL CHECK (effort BETWEEN 1 AND 5);
+COMMENT ON COLUMN public.log_entries.effort IS 'Self-reported effort per completed set: 1 easy .. 5 max (RIR-based). NULL = not recorded.';

@@ -6,6 +6,8 @@ import { ExerciseImages } from "@/components/gym/ExerciseImages";
 import { InstructionText } from "@/components/gym/InstructionText";
 import { RatingPicker } from "@/components/gym/RatingPicker";
 import { ExercisePickList } from "@/components/gym/ExercisePickList";
+import { EffortRuler } from "@/components/gym/EffortRuler";
+import { DEFAULT_EFFORT, type Effort } from "@/lib/effort";
 import { Minus, Plus, Check, SkipForward, ListOrdered, Trash2, Undo2, Octagon, Settings, Redo2 } from "lucide-react";
 import { toast } from "sonner";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
@@ -51,6 +53,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
   const doneKeys = useMemo(() => completedStepKeys(allSteps, doneRows), [allSteps, doneRows]);
   const [runtime, setRuntime] = useState<RunnerState>(emptyRunnerState);
   const [restored, setRestored] = useState(false);
+  const [effort, setEffort] = useState<Effort>(DEFAULT_EFFORT);
   const storageKey = `rappgym-run:${view?.actorId}:${view?.userId}:${workoutId}`;
   useEffect(() => { setRuntime(parseRunnerState(sessionStorage.getItem(storageKey))); setRestored(true); }, [storageKey]);
   useEffect(() => { if (restored) sessionStorage.setItem(storageKey, JSON.stringify(runtime)); }, [runtime, restored, storageKey]);
@@ -129,7 +132,8 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
   const logStep = () => run(async () => {
     if (!step || !r || doneKeys.has(keyOf(step))) return;
     const endedAt = Date.now();
-    const { error } = await supabase.from("log_entries").insert({ code: r.code, exercise_id: r.exercise_id, sets: 1, reps: rep, load, date: todayISO(), gym_id: r.gym_id, status: "completed", workout_id: workoutId, phase: step.phase, lap: circuit ? step.lap : null, set_number: step.set, note: step.set === 1 ? r.note : null });
+    const { error } = await supabase.from("log_entries").insert({ code: r.code, exercise_id: r.exercise_id, sets: 1, reps: rep, load, date: todayISO(), gym_id: r.gym_id, status: "completed", workout_id: workoutId, phase: step.phase, lap: circuit ? step.lap : null, set_number: step.set, note: step.set === 1 ? r.note : null, effort });
+    setEffort(DEFAULT_EFFORT);
     if (error) throw error;
     advance();
     const next = steps.find((s) => allSteps.indexOf(s) > stepIdx);
@@ -258,11 +262,11 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
             {step && doneKeys.has(keyOf(step)) ? <div className="flex items-center gap-2 rounded-lg border px-3 py-2">
               <Check className="size-5 text-primary" /><span className="flex-1 font-semibold">{t("circuitRunner.doneResult", { reps: stepEntry?.reps ?? "", load: stepEntry?.load ? ` @ ${stepEntry.load} kg` : "" })}</span>
               {stepEntry && <Button variant="outline" size="sm" disabled={readOnly || busy} onClick={() => void undoStep()}><Undo2 className="size-4" />{t("circuitRunner.undoSet")}</Button>}
-            </div> : <div className="flex flex-wrap gap-2">
+            </div> : <div className="space-y-2"><EffortRuler value={effort} onChange={setEffort} disabled={readOnly || busy} /><div className="flex flex-wrap gap-2">
               <Button variant="outline" size="icon" className="h-12 w-12 shrink-0 text-destructive" title={t("circuitRunner.strikeSet")} aria-label={t("circuitRunner.strikeSet")} disabled={readOnly || busy} onClick={() => void strikeSet()}><Octagon className="size-5" /></Button>
               <Button variant="outline" className="h-12" title={t("circuitRunner.goNext")} disabled={readOnly || busy} onClick={() => { if (step) setRuntime((v) => ({ ...v, skipped: [...new Set([...v.skipped, keyOf(step)])], cursor: null, fromIdx: stepIdx })); }}><SkipForward className="size-4" />{t("circuitRunner.moveOn")}</Button>
               <Button className="h-12 flex-1 text-lg" disabled={readOnly || busy} onClick={() => void logStep()}><Check />{t("circuitRunner.done")}</Button>
-            </div>}
+            </div></div>}
           </div>}
           {!r && total > 0 && <p className="text-sm text-muted-foreground">{t("circuitRunner.allSetsDoneAddThe")}</p>}
         </div>

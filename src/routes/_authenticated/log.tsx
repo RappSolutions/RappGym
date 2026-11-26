@@ -442,7 +442,7 @@ function LogPage() {
                         {loggedName(e, rawByCode.get(e.code), byCode.get(e.code)) || t("log.unknownExercise")}
                         <RatingMark rating={e.exercise_rating} />
                       </span>
-                      {e.note && <span className="block truncate text-xs text-muted-foreground">{e.note}</span>}
+                      {(e.note || e.effort) && <span className="block truncate text-xs text-muted-foreground">{e.effort ? `${t("effort.label")} ${e.effort} · ${t(`effort.l${e.effort}` as "effort.l1")}` : ""}{e.effort && e.note ? " · " : ""}{e.note}</span>}
                     </span>
                     <span className="text-lg font-bold">{formatSet(e, e.reps_unit === "reps" ? "" : t(`repsUnit.${e.reps_unit as RepsUnit}`).toLowerCase())}</span>
                   </Button></Fragment>
