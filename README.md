@@ -210,3 +210,14 @@ erDiagram
   }
 ```
 
+
+## Adding a language (i18n)
+
+Example: Finnish, ISO 639-1 code `fi`. Translating texts is a separate later step.
+
+1. **Locale file:** copy `src/locales/en.json` to `src/locales/fi.json`. Keys must match `sv.json` (the typed source); values may stay untranslated.
+2. **Registration:** in `src/lib/i18n-core.ts`, import `fi.json`, add `fi: { translation: fi }` to `resources` and `"fi"` to `supportedLanguages`.
+3. **Flag:** upload a flag SVG as a lovable asset into `src/assets/flags/` (e.g. `finland.svg.asset.json`), import it in `src/lib/i18n.tsx` and add it to `LanguagePicker` (it currently lists `["sv", "en"]` and picks flag/label inline; extend both). Use image assets, not emoji flags.
+4. **Server functions:** add `"fi"` to `language: z.enum([...])` in `src/lib/training-insights.functions.ts`, `src/lib/location-scan.functions.ts` and `src/lib/user-view.functions.ts`.
+5. **Database:** no migration. Exercises, categories and equipment store English in base columns and other languages in `translations` jsonb keyed by language code (`{ "fi": { "name": "..." } }`). The category/equipment dialog shows one field per entry in `supportedLanguages` automatically.
+6. Run typecheck and tests.
