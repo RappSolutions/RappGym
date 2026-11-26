@@ -727,7 +727,7 @@
     "d3": "1–2 repetitions left. Effective work without sacrificing technique. Default.",
     "d4": "0–1 repetition left. High effort; the final repetition requires real force.",
     "d5": "0 repetitions left. The muscle cannot complete another repetition with good technique.",
-    "humorNote": "The confirmation button varies its wording for fun. The saved value is always the integer 1–5; Log and Excel use the fixed level names.",
+    "humorNote": "The colour on the band always governs the actual effort level (1–5). The button text varies for flavour, but always reflects the selected zone. The log, statistics and export strictly use the fixed level names.",
     "fun": {
       "1": ["Breeze", "Feather", "Barely felt it", "Cache hit", "Is it even on?", "Did you cheat?", "Sunday stroll"],
       "2": ["Smooth", "Steady", "Cruising", "200 OK", "Joints cooperating", "Clean & tidy", "Coffee & cake"],

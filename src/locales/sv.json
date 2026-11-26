@@ -727,7 +727,7 @@
     "d3": "1–2 repetitioner kvar. Effektivt arbete utan att offra tekniken. Standardval.",
     "d4": "0–1 repetition kvar. Hög ansträngning; sista repetitionen kräver verklig kraft.",
     "d5": "0 repetitioner kvar. Muskeln kan inte slutföra en repetition till med god teknik.",
-    "humorNote": "Bekräftelseknappen varierar uttrycken med humor. Det sparade värdet är alltid heltalet 1–5; Logg och Excel använder de fasta nivånamnen.",
+    "humorNote": "Färgen på bandet styr alltid den faktiska ansträngningsnivån (1–5). Texten på knappen varierar med glimten i ögat, men speglar alltid vald zon. I logg, statistik och export används uteslutande de fasta nivånamnen.",
     "fun": {
       "1": ["Kaffepaus", "Fjäderlätt", "Märktes knappt", "Cache hit", "Är den ens på?", "Fuskade du?", "Söndagspromenad"],
       "2": ["Bekvämt", "Stabilt", "Under kontroll", "200 OK", "Lederna samarbetar", "Stiligt & prydligt", "Kaffe & bulle"],
