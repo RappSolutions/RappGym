@@ -7,7 +7,7 @@ import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Fragment, useEffect, useState } from "react";
 import { logSectionHeaders } from "@/lib/runner-state";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, CheckCircle2, Trash2, Repeat, Sparkles, LayoutList, Rows3, Pencil, FileSpreadsheet } from "lucide-react";
+import { ChevronDown, ChevronRight, CheckCircle2, Trash2, Repeat, Sparkles, LayoutList, Rows3, Pencil, FileSpreadsheet, ChartNoAxesColumn } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useLanguage } from "@/lib/i18n";
 import { LogSheet } from "@/components/gym/LogSheet";
+import { WorkoutSummary } from "@/components/gym/WorkoutSummary";
 import { RatingMark } from "@/components/gym/RatingPicker";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
@@ -77,6 +78,7 @@ function LogPage() {
   const { data: log } = useSuspenseQuery(logQuery);
   const { data: gyms } = useSuspenseQuery(gymsQuery);
   const [entry, setEntry] = useState<LogEntry | null>(null);
+  const [summaryId, setSummaryId] = useState<string | null>(null);
   const [overrides, setOverrides] = useState<Map<string, boolean>>(new Map());
   const [deleting, setDeleting] = useState<Group | null>(null);
   const [busy, setBusy] = useState(false);
@@ -105,6 +107,11 @@ function LogPage() {
   const groups = groupLogByWorkout(log);
   const titleOf = (g: Group) => g.entries[0]?.workout?.title ?? t("log.singleExercises");
   const isOpen = (g: Group) => overrides.get(g.key) ?? g.date === today;
+  const summaryAction = (g: Group) => {
+    const workoutId = g.workoutId;
+    if (!workoutId) return null;
+    return <Button variant="ghost" size="icon" title={t("log.showSummary")} aria-label={`${t("log.showSummary")}: ${titleOf(g)} · ${g.date}`} onClick={() => setSummaryId(workoutId)}><ChartNoAxesColumn className="size-4" /></Button>;
+  };
 
   function openCopy(g: Group) {
     setForm({
@@ -294,11 +301,12 @@ function LogPage() {
           if (compact)
             return (
               <section key={g.key}>
+                <div className="flex items-center pr-2">
                 <button
                   type="button"
                   aria-expanded={open}
                   onClick={() => setOverrides((m) => new Map(m).set(g.key, !open))}
-                  className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-muted/50"
+                  className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2 text-left text-sm hover:bg-muted/50"
                 >
                   <span className="w-24 shrink-0 tabular-nums text-muted-foreground">{g.date}</span>
                   <span className="min-w-0 flex-1 truncate">
@@ -318,6 +326,8 @@ function LogPage() {
                     ))}
                   </span>
                 </button>
+                {summaryAction(g)}
+                </div>
                 {open && (
                   <div className="border-t bg-muted/20 text-sm">
                     {entries.map((e, i) => (
@@ -352,13 +362,13 @@ function LogPage() {
             );
           return (
             <section key={g.key} className="rounded-xl border bg-card">
-              <div className="flex items-start gap-1 p-2">
+              <div className="flex flex-wrap items-start gap-1 p-2">
                 <Button
                   variant="ghost"
                   aria-expanded={open}
                   aria-controls={`workout-${g.key}`}
                   onClick={() => setOverrides((m) => new Map(m).set(g.key, !open))}
-                  className="h-auto min-h-12 min-w-0 flex-1 justify-start gap-2 whitespace-normal px-1 text-left"
+                  className="h-auto min-h-12 min-w-0 basis-full justify-start gap-2 whitespace-normal px-1 text-left"
                 >
                   {open ? (
                     <ChevronDown className="mt-1 size-4 shrink-0 self-start" />
@@ -398,6 +408,8 @@ function LogPage() {
                     </span>
                   </span>
                 </Button>
+                <div className="ml-auto flex items-center gap-1">
+                {summaryAction(g)}
                 {g.workoutId && <Button variant="ghost" size="icon" disabled={readOnly || busy} title={t("log.rename")} aria-label={`${t("log.rename")}: ${titleOf(g)}`} onClick={() => setRenaming({ id: g.workoutId!, title: titleOf(g) })}>
                   <Pencil className="size-4" />
                 </Button>}
@@ -422,6 +434,7 @@ function LogPage() {
                 >
                   <Trash2 className="size-5" />
                 </Button>
+                </div>
               </div>
               <div id={`workout-${g.key}`} hidden={!open} className="divide-y border-t">
                 {entries.map((e, i) => (
@@ -494,6 +507,7 @@ function LogPage() {
         entry={entry}
         onClose={() => setEntry(null)}
       />
+      {summaryId && <WorkoutSummary workoutId={summaryId} onClose={() => setSummaryId(null)} />}
     </main>
   );
 }

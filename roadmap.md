@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Open the shared workout summary from historical workouts in both Log views; 12 targeted tests pass and build OK (Lean, no browser verification).
 - [x] Spontaneous workout UX: empty start opens exercise picker directly, phases stay hidden and default to main, next exercise is primary after the current round; 227 tests pass (Lean, no browser verification).
 - [x] Manifest-only home-screen icons (192/512/maskable/apple touch) and shared 240px animated startup logo during hydration/session/route waiting; no offline cache or artificial delay (Lean).
 - [x] Effort humour: seven stable phrase variants per level on confirmation buttons, effort-scale information dialog, canonical log/Excel labels; 225 tests and signed-in mobile LogSheet/CircuitRunner checks passed, including drag release; no test data saved.

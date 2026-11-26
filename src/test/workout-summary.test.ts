@@ -23,6 +23,10 @@ describe("summarizeWorkout", () => {
   it("reports a PR only when max kg beats earlier history", () => {
     expect(s.prs).toEqual([{ code: "PU1", kg: 25, previousKg: 22 }]);
   });
+  it("reopening a historical workout ignores later records when comparing personal bests", () => {
+    const later = row({ workout_id: "later", created_at: "2026-11-27T10:00:00Z", load: "100", effort: 1 });
+    expect(summarizeWorkout("w", [...log, later], cat)).toEqual(s);
+  });
   it("does not count a first-time exercise as PR", () => {
     expect(summarizeWorkout("w", log.filter((r) => r.workout_id === "w"), cat).prs).toEqual([]);
   });

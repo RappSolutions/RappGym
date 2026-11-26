@@ -8,7 +8,7 @@ import { useLanguage } from "@/lib/i18n";
 import { formatTonnage } from "@/lib/tonnage";
 import { summarizeWorkout } from "@/lib/workout-summary";
 
-/** Shown once after a workout is finished; derived from completed log rows only. */
+/** Shared by workout completion and historical log actions; derived from completed log rows only. */
 export function WorkoutSummary({ workoutId, onClose }: { workoutId: string; onClose: () => void }) {
   const { t, localize, language } = useLanguage();
   const { data: log = [] } = useQuery(logQuery);
