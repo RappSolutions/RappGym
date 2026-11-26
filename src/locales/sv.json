@@ -443,11 +443,14 @@
     "permanentlyDelete": "Radera {{name}} permanent?",
     "noLocations": "Ingen plats har detta redskap.",
     "noExercises": "Inga övningar använder detta redskap.",
-    "nameEn": "Namn (engelska)",
-    "nameSv": "Namn (svenska)",
     "prefix": "Prefix",
     "newCategory": "Ny kategori",
-    "newEquipment": "Nytt redskap"
+    "newEquipment": "Nytt redskap",
+    "nameIn": "Namn – {{lang}}",
+    "baseLanguage": "grundspråk, obligatoriskt",
+    "editCategory": "Ändra kategori",
+    "editEquipment": "Ändra redskap",
+    "colour": "Färg"
   },
   "settings": {
     "aiQuotasUsage": "AI-kvoter & stats",

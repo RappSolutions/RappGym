@@ -443,11 +443,14 @@
     "permanentlyDelete": "Permanently delete {{name}}?",
     "noLocations": "No location has this equipment.",
     "noExercises": "No exercises use this equipment.",
-    "nameEn": "Name (English)",
-    "nameSv": "Name (Swedish)",
     "prefix": "Prefix",
     "newCategory": "New category",
-    "newEquipment": "New equipment"
+    "newEquipment": "New equipment",
+    "nameIn": "Name – {{lang}}",
+    "baseLanguage": "base language, required",
+    "editCategory": "Edit category",
+    "editEquipment": "Edit equipment",
+    "colour": "Colour"
   },
   "settings": {
     "aiQuotasUsage": "AI quotas & stats",

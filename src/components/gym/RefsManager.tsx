@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { useQueryClient, useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Check, ChevronDown, ChevronRight, Pencil, Plus, Trash2, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { supportedLanguages } from "@/lib/i18n-core";
 import type { Json } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,19 +15,28 @@ import { exerciseCategoriesQuery, exerciseEquipmentQuery, exercisesQuery, gymsQu
 import { gymEquipmentQuery } from "@/lib/exercise-locations";
 import { tokenToHex } from "@/lib/category-color";
 
-type Draft = { id: string; name: string; sv: string; prefix: string; color: string };
+type Draft = { id: string; name: string; tr: Record<string, string>; prefix: string; color: string };
 const NEW = "new";
-/** Merge the Swedish name into existing translations; empty removes it so the English base shows. */
-function withSv(existing: Json | undefined, sv: string): Json {
-  const base = existing && typeof existing === "object" && !Array.isArray(existing) ? { ...existing } : {};
-  if (sv.trim()) base["sv"] = { name: sv.trim() }; else delete base["sv"];
-  return base;
+/** Non-base languages; English is the base column, every other supported language is a translations key. */
+const TR_LANGS = supportedLanguages.filter((l) => l !== "en");
+const obj = (v: Json | undefined): Record<string, Json | undefined> => v && typeof v === "object" && !Array.isArray(v) ? v : {};
+function trNames(v: Json): Record<string, string> {
+  const o = obj(v); const out: Record<string, string> = {};
+  for (const l of TR_LANGS) { const n = obj(o[l])["name"]; out[l] = typeof n === "string" ? n : ""; }
+  return out;
+}
+/** Merge edited names per language into existing translations; empty removes the key so the English base shows. */
+function withNames(existing: Json | undefined, tr: Record<string, string>): Json {
+  const base = { ...obj(existing) };
+  for (const l of TR_LANGS) { const v = (tr[l] ?? "").trim(); if (v) base[l] = { ...obj(base[l]), name: v }; else delete base[l]; }
+  return base as Json;
 }
 
 /** Admin CRUD for the category and equipment lookup tables; used rows are protected by FK RESTRICT. */
 export function RefsManager({ only }: { only: "cat" | "eq" }) {
   const { t, refName, localize } = useLanguage();
-  const svOf = (r: { translations: Json }) => { const v = r.translations; return v && typeof v === "object" && !Array.isArray(v) && v["sv"] && typeof v["sv"] === "object" && !Array.isArray(v["sv"]) && typeof v["sv"]["name"] === "string" ? v["sv"]["name"] : ""; };
+  const { language } = useLanguage();
+  const langName = (l: string) => { try { return new Intl.DisplayNames([language], { type: "language" }).of(l) ?? l; } catch { return l; } };
   const qc = useQueryClient();
   const invalidate = useInvalidateGym();
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
@@ -42,7 +54,7 @@ export function RefsManager({ only }: { only: "cat" | "eq" }) {
   async function saveCat() {
     if (!draft) return;
     const cur = categories.find((c) => c.id === draft.id);
-    const row = { name: draft.name.trim(), code_prefix: draft.prefix.trim().toUpperCase(), color_token: draft.color.toLowerCase(), translations: withSv(cur?.translations, draft.sv) };
+    const row = { name: draft.name.trim(), code_prefix: draft.prefix.trim().toUpperCase(), color_token: draft.color.toLowerCase(), translations: withNames(cur?.translations, draft.tr) };
     const { error } = draft.id === NEW
       ? await supabase.from("exercise_categories").insert({ ...row, sort_order: categories.length + 1 })
       : await supabase.from("exercise_categories").update(row).eq("id", draft.id);
@@ -52,7 +64,7 @@ export function RefsManager({ only }: { only: "cat" | "eq" }) {
   async function saveEq() {
     if (!draft) return;
     const cur = equipment.find((q) => q.id === draft.id);
-    const row = { name: draft.name.trim(), translations: withSv(cur?.translations, draft.sv) };
+    const row = { name: draft.name.trim(), translations: withNames(cur?.translations, draft.tr) };
     const { error } = draft.id === NEW
       ? await supabase.from("exercise_equipment").insert(row)
       : await supabase.from("exercise_equipment").update(row).eq("id", draft.id);
@@ -72,11 +84,6 @@ export function RefsManager({ only }: { only: "cat" | "eq" }) {
       <Button size="icon" variant="ghost" className="size-8" aria-label={t("refsManager.edit")} onClick={onEdit}><Pencil className="size-4" /></Button>
       <Button size="icon" variant="ghost" className="size-8" aria-label={t("common.delete")} onClick={onDelete}><Trash2 className="size-4" /></Button></>
   );
-  const saveCancel = (onSave: () => void, ok: boolean) => (
-    <><Button size="icon" variant="ghost" className="size-8" aria-label={t("common.save")} disabled={!ok} onClick={onSave}><Check className="size-4" /></Button>
-      <Button size="icon" variant="ghost" className="size-8" aria-label={t("common.cancel")} onClick={() => setDraft(null)}><X className="size-4" /></Button></>
-  );
-
   function EquipmentDetails({ eqId }: { eqId: string }) {
     const at = links.filter((l) => l.equipment_id === eqId).map((l) => ({ gym: gyms.find((g) => g.id === l.gym_id), max: l.max_load_kg })).filter((x) => x.gym);
     const byCat = categories.map((c) => ({ c, list: exercises.filter((e) => e.equipment_id === eqId && e.category_id === c.id) })).filter((x) => x.list.length);
@@ -88,17 +95,25 @@ export function RefsManager({ only }: { only: "cat" | "eq" }) {
     </div>;
   }
 
-  const names = (ed: Draft) => <>
-    <Input value={ed.name} placeholder={t("refsManager.nameEn")} aria-label={t("refsManager.nameEn")} onChange={(e) => setDraft({ ...ed, name: e.target.value })} className="h-8 min-w-0 flex-1" />
-    <Input value={ed.sv} placeholder={t("refsManager.nameSv")} aria-label={t("refsManager.nameSv")} onChange={(e) => setDraft({ ...ed, sv: e.target.value })} className="h-8 min-w-0 flex-1" />
-  </>;
-  const catEditor = (ed: Draft) => <>
-    <input type="color" aria-label={t("common.colour")} value={ed.color} onChange={(e) => setDraft({ ...ed, color: e.target.value })} className="size-8 shrink-0 cursor-pointer rounded border bg-background p-0.5" />
-    {names(ed)}
-    <Input value={ed.prefix} maxLength={4} placeholder="XX" aria-label={t("refsManager.prefix")} onChange={(e) => setDraft({ ...ed, prefix: e.target.value.toUpperCase().replace(/[^A-Z]/g, "") })} className="h-8 w-14" />
-    {saveCancel(() => void saveCat(), !!ed.name.trim() && !!ed.prefix)}
-  </>;
-  const eqEditor = (ed: Draft) => <>{names(ed)}{saveCancel(() => void saveEq(), !!ed.name.trim())}</>;
+  const editor = (ed: Draft, kind: "cat" | "eq") => {
+    const ok = !!ed.name.trim() && (kind === "eq" || !!ed.prefix);
+    const field = (id: string, label: string, value: string, set: (v: string) => void, required = false) =>
+      <div className="space-y-1"><Label htmlFor={id}>{label}</Label><Input id={id} value={value} required={required} onChange={(e) => set(e.target.value)} /></div>;
+    return <Dialog open onOpenChange={(o) => { if (!o) setDraft(null); }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle>{ed.id === NEW ? t(kind === "cat" ? "refsManager.newCategory" : "refsManager.newEquipment") : t(kind === "cat" ? "refsManager.editCategory" : "refsManager.editEquipment")}</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          {field("ref-name-en", `${t("refsManager.nameIn", { lang: langName("en") })} (${t("refsManager.baseLanguage")})`, ed.name, (v) => setDraft({ ...ed, name: v }), true)}
+          {TR_LANGS.map((l) => <div key={l}>{field(`ref-name-${l}`, t("refsManager.nameIn", { lang: langName(l) }), ed.tr[l] ?? "", (v) => setDraft({ ...ed, tr: { ...ed.tr, [l]: v } }))}</div>)}
+          {kind === "cat" && <div className="flex items-end gap-4">
+            <div className="space-y-1"><Label htmlFor="ref-prefix">{t("refsManager.prefix")}</Label><Input id="ref-prefix" value={ed.prefix} maxLength={4} placeholder="XX" className="w-24 font-mono" onChange={(e) => setDraft({ ...ed, prefix: e.target.value.toUpperCase().replace(/[^A-Z]/g, "") })} /></div>
+            <div className="space-y-1"><Label htmlFor="ref-color">{t("refsManager.colour")}</Label><input id="ref-color" type="color" value={ed.color} onChange={(e) => setDraft({ ...ed, color: e.target.value })} className="block h-9 w-14 cursor-pointer rounded border bg-background p-0.5" /></div>
+          </div>}
+        </div>
+        <DialogFooter className="gap-2"><Button variant="ghost" onClick={() => setDraft(null)}>{t("common.cancel")}</Button><Button variant="outline" disabled={!ok} onClick={() => void (kind === "cat" ? saveCat() : saveEq())}>{t("common.save")}</Button></DialogFooter>
+      </DialogContent>
+    </Dialog>;
+  };
   const newDraft = draft?.id === NEW ? draft : null;
   const addButton = (label: string, d: Draft) => !newDraft && <Button size="sm" variant="ghost" className="h-8 gap-1 px-2 text-muted-foreground" onClick={() => setDraft(d)}><Plus className="size-4" />{label}</Button>;
 
@@ -106,29 +121,28 @@ export function RefsManager({ only }: { only: "cat" | "eq" }) {
     <section className="space-y-1">
       {only === "cat" && <div className="space-y-1">{categories.map((c) => {
         const used = catCount(c.id);
-        const ed = draft?.id === c.id ? draft : null;
-        return <div key={c.id} data-category={c.color_token} className="category-theme flex items-center gap-2 py-0.5">
-          {ed ? catEditor(ed) : <>
+                return <div key={c.id} data-category={c.color_token} className="category-theme flex items-center gap-2 py-0.5">
+          {<>
             <span className="size-4 shrink-0 rounded-full bg-category-fill" aria-hidden />
             <span className="flex-1 truncate text-sm">{refName(c)}</span>
             <span className="font-mono text-xs text-muted-foreground">{c.code_prefix}</span>
-            {actions(() => setDraft({ id: c.id, name: c.name, sv: svOf(c), prefix: c.code_prefix, color: tokenToHex(c.color_token) }), () => void remove("exercise_categories", c.id, refName(c), used), used)}
+            {actions(() => setDraft({ id: c.id, name: c.name, tr: trNames(c.translations), prefix: c.code_prefix, color: tokenToHex(c.color_token) }), () => void remove("exercise_categories", c.id, refName(c), used), used)}
           </>}
         </div>;
       })}
-        {newDraft ? <div className="flex items-center gap-2 py-0.5">{catEditor(newDraft)}</div> : addButton(t("refsManager.newCategory"), { id: NEW, name: "", sv: "", prefix: "", color: "#0063ff" })}
+        {addButton(t("refsManager.newCategory"), { id: NEW, name: "", tr: {}, prefix: "", color: "#0063ff" })}
+        {draft && editor(draft, "cat")}
       </div>}
       {only === "eq" && <div className="space-y-1">{[...equipment].sort((a, b) => refName(a).localeCompare(refName(b))).map((q) => {
         const used = eqCount(q.id);
-        const ed = draft?.id === q.id ? draft : null;
-        return <div key={q.id}><div className="flex items-center gap-2 py-0.5">
-          {ed ? eqEditor(ed)
-            : <><button type="button" className="flex min-w-0 flex-1 items-center gap-1 text-left text-sm" aria-expanded={openEq === q.id} onClick={() => setOpenEq(openEq === q.id ? null : q.id)}>{openEq === q.id ? <ChevronDown className="size-4 shrink-0" /> : <ChevronRight className="size-4 shrink-0" />}<span className="truncate">{refName(q)}</span></button>{actions(() => setDraft({ id: q.id, name: q.name, sv: svOf(q), prefix: "", color: "" }), () => void remove("exercise_equipment", q.id, refName(q), used), used)}</>}
+                return <div key={q.id}><div className="flex items-center gap-2 py-0.5">
+          {<><button type="button" className="flex min-w-0 flex-1 items-center gap-1 text-left text-sm" aria-expanded={openEq === q.id} onClick={() => setOpenEq(openEq === q.id ? null : q.id)}>{openEq === q.id ? <ChevronDown className="size-4 shrink-0" /> : <ChevronRight className="size-4 shrink-0" />}<span className="truncate">{refName(q)}</span></button>{actions(() => setDraft({ id: q.id, name: q.name, tr: trNames(q.translations), prefix: "", color: "" }), () => void remove("exercise_equipment", q.id, refName(q), used), used)}</>}
         </div>
-        {openEq === q.id && !ed && <EquipmentDetails eqId={q.id} />}
+        {openEq === q.id && <EquipmentDetails eqId={q.id} />}
         </div>;
       })}
-        {newDraft ? <div className="flex items-center gap-2 py-0.5">{eqEditor(newDraft)}</div> : addButton(t("refsManager.newEquipment"), { id: NEW, name: "", sv: "", prefix: "", color: "" })}
+        {addButton(t("refsManager.newEquipment"), { id: NEW, name: "", tr: {}, prefix: "", color: "" })}
+        {draft && editor(draft, "eq")}
       </div>}
     </section>
   );
