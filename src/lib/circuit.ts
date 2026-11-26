@@ -35,6 +35,11 @@ export function adjustLoad(load: string, delta: number): string {
   return String(Math.max(0, Math.round((n + delta) * 100) / 100));
 }
 
+/** Spontaneous workouts do not expose phase selection; every added exercise belongs to main. */
+export function newExercisePhase(spontaneous: boolean, selected: Phase): Phase {
+  return spontaneous ? "main" : selected;
+}
+
 /** Planned sets for a newly added exercise: spontaneous workouts always start at 1 set per exercise; otherwise circuit mode uses the lap count and station mode 3. */
 export function defaultPlannedSets(opts: { spontaneous: boolean; circuit: boolean; laps: number; phase?: Phase }): number {
   if (opts.spontaneous || (opts.phase !== undefined && opts.phase !== "main")) return 1;

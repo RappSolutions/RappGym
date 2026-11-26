@@ -29,6 +29,8 @@
   },
   "circuitRunner": {
     "addAnExercise": "Add an exercise",
+    "chooseFirstExercise": "Choose your first exercise",
+    "addNextExercise": "Add the next exercise",
     "added": "added",
     "allSetsDoneAddThe": "All sets done. Add the next exercise with + or end the workout.",
     "done": "Done",

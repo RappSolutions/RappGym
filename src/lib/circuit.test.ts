@@ -1,5 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { defaultPlannedSets } from "./circuit";
+import { defaultPlannedSets, newExercisePhase } from "./circuit";
+
+describe("newExercisePhase", () => {
+  it("always uses main for spontaneous workouts", () => {
+    expect(newExercisePhase(true, "intro")).toBe("main");
+    expect(newExercisePhase(true, "outro")).toBe("main");
+  });
+
+  it("preserves the selected phase in planned workouts", () => {
+    expect(newExercisePhase(false, "intro")).toBe("intro");
+    expect(newExercisePhase(false, "outro")).toBe("outro");
+  });
+});
 
 describe("defaultPlannedSets", () => {
   it("intro and outro default to one set even when training has four laps", () => {

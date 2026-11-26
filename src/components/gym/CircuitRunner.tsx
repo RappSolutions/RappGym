@@ -34,7 +34,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
   const qc = useQueryClient();
   const { data: allExercises = [] } = useQuery(exercisesQuery);
   const { data: log = [] } = useQuery(logQuery);
-  const { data: suggestions = [] } = useQuery(suggestionsQuery);
+  const { data: suggestions = [], isLoading: suggestionsLoading } = useQuery(suggestionsQuery);
   const { data: links = [] } = useQuery(gymEquipmentQuery);
   const { data: workout, isError: workoutError } = useQuery({
     queryKey: ["workout", workoutId],
@@ -190,6 +190,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
   function continueLap() {
     setRuntime((v) => ({ ...v, pause: null, lapStartedAt: Date.now(), lapKey: activeLapKey, durations: pause?.phase === step?.phase ? v.durations : [] }));
   }
+  const showExercisePicker = adding || (workout?.is_spontaneous === true && !suggestionsLoading && rows.length === 0);
   if (!restored) return null;
   return (
     <Drawer open onOpenChange={(o) => { if (!o) void close(false); }}>
@@ -227,7 +228,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
             </div>}
           </DrawerHeader>
 
-          {adding && <ExercisePickList exercises={pickable} disabled={readOnly || busy} onPick={(e, ph) => void run(async () => { await addPlannedExercise(workoutId, e.code, rows, workout?.gym_id ?? null, last.get(e.code)?.load ?? "", defaultPlannedSets({ spontaneous: workout?.is_spontaneous ?? false, circuit, laps, phase: ph }), last.get(e.code)?.reps ?? 10, ph); await refresh(); if (workout?.is_spontaneous) setRuntime((v) => ({ ...v, pause: null, cursor: null, fromIdx: -1 })); setAdding(false); toast.success(`${e.code} ${t("circuitRunner.added")}`); })} />}
+          {showExercisePicker && <ExercisePickList exercises={pickable} disabled={readOnly || busy} spontaneous={workout?.is_spontaneous ?? false} title={t(workout?.is_spontaneous ? (rows.length === 0 ? "circuitRunner.chooseFirstExercise" : "circuitRunner.addNextExercise") : "common.addExercise")} onPick={(e, ph) => void run(async () => { await addPlannedExercise(workoutId, e.code, rows, workout?.gym_id ?? null, last.get(e.code)?.load ?? "", defaultPlannedSets({ spontaneous: workout?.is_spontaneous ?? false, circuit, laps, phase: ph }), last.get(e.code)?.reps ?? 10, ph); await refresh(); if (workout?.is_spontaneous) setRuntime((v) => ({ ...v, pause: null, cursor: null, fromIdx: -1 })); setAdding(false); toast.success(`${e.code} ${t("circuitRunner.added")}`); })} />}
 
           {listOpen && rows.length > 0 && <div className="rounded-md border text-sm">
             <div className="flex items-center justify-between border-b px-2 py-1"><span className="text-xs font-semibold text-muted-foreground">{t("circuitRunner.exercisesInWorkout")}</span><Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" onClick={() => setListOpen(false)}><Check className="size-3.5" />{t("common.doneSorting")}</Button></div>
@@ -247,8 +248,11 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
             <h2 className="text-2xl font-bold">{workout?.is_spontaneous ? t("circuitRunner.currentDone") : t("circuitRunner.lapDone", { lap: pause.lap, laps: pausedLaps })}</h2>
             {pause.minutes !== null && <p>{t("circuitRunner.lapTime", { minutes: Math.max(1, Math.round(pause.minutes)) })}</p>}
             {estimate !== null && <p className="text-sm text-muted-foreground">{t("circuitRunner.remainingTime", { minutes: estimate, phase: t(`phase.${pause.phase}`) })}</p>}
-            {step && <Button onClick={continueLap}>{step.phase === pause.phase ? t("circuitRunner.nextLap", { lap: step.lap }) : t("circuitRunner.nextPhase", { phase: t(`phase.${step.phase}`) })}</Button>}
-            {workout?.is_spontaneous && !step && <Button variant="outline" onClick={() => setAdding(true)}><Plus className="size-4" />{t("common.addExercise")}</Button>}
+            {workout?.is_spontaneous ? <div className="grid gap-2">
+              <Button disabled={readOnly || busy || adding} onClick={() => { setListOpen(false); setAdding(true); }}><Plus className="size-4" />{t("circuitRunner.addNextExercise")}</Button>
+              {step && <Button variant="outline" onClick={continueLap}>{step.phase === pause.phase ? t("circuitRunner.nextLap", { lap: step.lap }) : t("circuitRunner.nextPhase", { phase: t(`phase.${step.phase}`) })}</Button>}
+              <Button variant={step ? "ghost" : "outline"} disabled={readOnly || busy} onClick={() => void endWorkout()}><FinishFlag className="size-4" />{t("circuitRunner.endWorkout")}</Button>
+            </div> : step && <Button onClick={continueLap}>{step.phase === pause.phase ? t("circuitRunner.nextLap", { lap: step.lap }) : t("circuitRunner.nextPhase", { phase: t(`phase.${step.phase}`) })}</Button>}
           </section>}
           {r && !pause && <div className="space-y-3">
             <div><p className="flex items-center gap-1 font-bold text-primary">{r.code}<AdminExerciseEdit exercise={rawEx} /></p><p className="flex items-start justify-between gap-2 text-xl font-bold"><span className="min-w-0">{ex?.name ?? r.code}</span>{rawEx && <RatingPicker exerciseId={rawEx.id} />}</p>{r.note && <p className="text-sm text-muted-foreground">{r.note}</p>}</div>

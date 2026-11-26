@@ -29,6 +29,8 @@
   },
   "circuitRunner": {
     "addAnExercise": "Lägg till en övning",
+    "chooseFirstExercise": "Välj första övningen",
+    "addNextExercise": "Lägg till nästa övning",
     "added": "tillagd",
     "allSetsDoneAddThe": "Alla set är klara. Lägg till nästa övning med + eller avsluta passet.",
     "done": "Klar",
