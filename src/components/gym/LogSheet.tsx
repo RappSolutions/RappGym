@@ -169,7 +169,7 @@ export function LogSheet({
           </div>
           <EffortRuler value={effort} onChange={setEffort} disabled={readOnly || busy} />
           <Button onClick={() => void save()} disabled={readOnly || busy} className="h-14 w-full text-lg font-bold uppercase">
-            {entry?.status === "suggested" ? t("logSheet.confirmCompleted") : entry ? t("logSheet.saveChanges") : t("common.logSets")}
+            {entry?.status === "suggested" ? t("logSheet.confirmCompleted") : entry ? t("logSheet.saveChanges") : t("common.logSets")} – {t(`effort.l${effort}`)}
           </Button>
           {entry?.status === "suggested" && <Button variant="outline" disabled={readOnly || busy} className="w-full" onClick={() => void save(false)}>{t("logSheet.saveAdjustedSuggestion")}</Button>}
           {entry && (

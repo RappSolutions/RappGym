@@ -66,3 +66,4 @@ use the editor.
 - Preserve queries on view bootstrap/navigation; pending loaders can reject.
 
 - Exercises, categories and equipment store English in base columns and other languages in `translations` jsonb keyed by ISO 639-1; read via `translated`/`localizeExercise`/`refName` so a new language needs only data + a locale file.
+- Keep effort selection in the shared EffortRuler as five integer radio zones over a token-defined colour band; confirmation buttons show the localized selection so duplicate scale labels are unnecessary.

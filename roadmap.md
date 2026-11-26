@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Replace effort number buttons with a continuous five-zone colour band and selection marker; show selected effort in circuit/manual confirmation buttons, preserving integer storage and default 3 (Lean, no browser verification).
 - [x] Modernize Exercises: recorded-unit latest set, shared read-only details with equipment/personal progress, selected-exercise spontaneous start and shared admin form; 42 tests pass, own-history isolation and mobile/desktop verified signed-in, test workout/exercise removed through confirmations.
 - [x] Name / URL in exercise creation and suggestions: authenticated bounded title lookup, preserved links, stale-request protection; signed-in YouTube/generic title and failure flows verified without saving test data.
 - [x] Alt 1: compact runner, unclipped blips, direct confirmed strike/Move on, header play, phase-preserving copy, phase-scoped laps, log lap headings (inferred legacy laps marked ≈) and no redundant factual set input; 31 targeted tests pass, no Playwright by agreement. Historical facts and aggregate import counts preserved.

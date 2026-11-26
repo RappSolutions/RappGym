@@ -94,6 +94,13 @@
   --brand-blue: oklch(0.557876271 0.244214792 261.203800404);
   --brand-yellow: oklch(0.967983 0.211006 109.769);
   --page-surround: var(--brand-royal);
+  --effort-easy: oklch(0.88 0.13 150);
+  --effort-controlled: oklch(0.86 0.19 125);
+  --effort-moderate: oklch(0.87 0.18 90);
+  --effort-hard: oklch(0.75 0.20 55);
+  --effort-max: oklch(0.63 0.25 27);
+  --effort-marker: oklch(0.22 0 0);
+  --effort-marker-outline: oklch(1 0 0);
   --radius: 0.5rem;
   --background: oklch(1.000000 0.000000 89.876);
   --foreground: oklch(0.371495 0.000000 89.876);
@@ -140,6 +147,22 @@
   --sidebar-border: oklch(0.897547 0.000000 89.876);
   --sidebar-ring: var(--brand-blue);
 }
+
+/* Continuous effort colour band; each equal-width hit area selects an integer. */
+.effort-band {
+  background: linear-gradient(to right, var(--effort-easy) 10%, var(--effort-controlled) 30%, var(--effort-moderate) 50%, var(--effort-hard) 70%, var(--effort-max) 90%);
+}
+.effort-zone:hover, .effort-zone:focus-visible { background: transparent; }
+.effort-selected::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 2px solid var(--effort-marker);
+  outline: 2px solid var(--effort-marker-outline);
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+}
+.effort-check { color: var(--effort-marker); stroke-width: 3; }
 
 /* Brand font: Berlin Sans (BRLNSR.TTF), served as a CDN asset. */
 @font-face {
