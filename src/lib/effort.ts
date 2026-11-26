@@ -12,3 +12,19 @@ export function effortAtPosition(x: number, left: number, width: number): Effort
   const zone = Math.ceil(((x - left) / width) * 5);
   return Math.min(5, Math.max(1, zone)) as Effort;
 }
+
+/** Stable phrase selection for one set and effort level; changing effort cannot reshuffle the set's variant. */
+export function effortPhraseIndex(seed: string, effort: Effort, phraseCount: number): number {
+  if (!Number.isInteger(phraseCount) || phraseCount < 1) return 0;
+  let hash = 2166136261;
+  for (const char of `${seed}:${effort}`) {
+    hash ^= char.codePointAt(0) ?? 0;
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0) % phraseCount;
+}
+
+export function effortPhrase(seed: string, effort: Effort, phrases: readonly string[], fallback: string): string {
+  if (!phrases.length) return fallback;
+  return phrases[effortPhraseIndex(seed, effort, phrases.length)] ?? fallback;
+}

@@ -7,7 +7,7 @@ import { InstructionText } from "@/components/gym/InstructionText";
 import { RatingPicker } from "@/components/gym/RatingPicker";
 import { ExercisePickList } from "@/components/gym/ExercisePickList";
 import { EffortRuler } from "@/components/gym/EffortRuler";
-import { DEFAULT_EFFORT, type Effort } from "@/lib/effort";
+import { DEFAULT_EFFORT, effortPhrase, type Effort } from "@/lib/effort";
 import { Minus, Plus, Check, SkipForward, ListOrdered, Trash2, Undo2, Octagon, Settings, Redo2 } from "lucide-react";
 import { toast } from "sonner";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
@@ -183,6 +183,8 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
   const lapNos = [...new Set(allSteps.filter((s) => s.phase === step?.phase).map((s) => s.lap))];
   const visibleSteps = allSteps.filter((s) => s.phase === step?.phase && (!circuit || s.lap === step.lap));
   const pause = runtime.pause;
+  const effortPhrases = t("effort.fun", { returnObjects: true }) as Record<Effort, string[]>;
+  const effortButtonText = effortPhrase(step ? keyOf(step) : workoutId, effort, effortPhrases[effort], t(`effort.l${effort}`));
   const pausedLaps = Math.max(1, ...allSteps.filter((s) => s.phase === pause?.phase).map((s) => s.lap));
   const estimate = pause ? remainingLapMinutes(runtime.durations, pausedLaps - pause.lap, workout?.is_spontaneous ?? false) : null;
   function continueLap() {
@@ -265,7 +267,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
             </div> : <div className="space-y-2"><EffortRuler value={effort} onChange={setEffort} disabled={readOnly || busy} /><div className="flex flex-wrap gap-2">
               <Button variant="outline" size="icon" className="h-12 w-12 shrink-0 text-destructive" title={t("circuitRunner.strikeSet")} aria-label={t("circuitRunner.strikeSet")} disabled={readOnly || busy} onClick={() => void strikeSet()}><Octagon className="size-5" /></Button>
               <Button variant="outline" className="h-12" title={t("circuitRunner.goNext")} disabled={readOnly || busy} onClick={() => { if (step) setRuntime((v) => ({ ...v, skipped: [...new Set([...v.skipped, keyOf(step)])], cursor: null, fromIdx: stepIdx })); }}><SkipForward className="size-4" />{t("circuitRunner.moveOn")}</Button>
-              <Button className="h-12 min-w-0 flex-1 whitespace-normal text-base leading-tight" disabled={readOnly || busy} onClick={() => void logStep()}><Check /><span>{t("circuitRunner.done")} ({t(`effort.l${effort}`)})</span></Button>
+              <Button className="h-12 min-w-0 flex-1 whitespace-normal text-base leading-tight" disabled={readOnly || busy} onClick={() => void logStep()}><Check /><span>{t("circuitRunner.done")} – {effortButtonText}</span></Button>
             </div></div>}
           </div>}
           {!r && total > 0 && <p className="text-sm text-muted-foreground">{t("circuitRunner.allSetsDoneAddThe")}</p>}

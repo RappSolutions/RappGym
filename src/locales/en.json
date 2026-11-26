@@ -718,6 +718,22 @@
     "l2": "Controlled",
     "l3": "Moderate",
     "l4": "Hard",
-    "l5": "Max"
+    "l5": "Max",
+    "infoButton": "Explain the effort scale",
+    "infoTitle": "How hard was the set?",
+    "infoIntro": "The scale is based on RIR (Reps in Reserve): how many more repetitions you could have completed with good technique. Pick the best match after the set.",
+    "d1": "More than 3 repetitions left. Warm-up or very light work.",
+    "d2": "About 3 repetitions left. Controlled work with good technique.",
+    "d3": "1–2 repetitions left. Effective work without sacrificing technique. Default.",
+    "d4": "0–1 repetition left. High effort; the final repetition requires real force.",
+    "d5": "0 repetitions left. The muscle cannot complete another repetition with good technique.",
+    "humorNote": "The confirmation button varies its wording for fun. The saved value is always the integer 1–5; Log and Excel use the fixed level names.",
+    "fun": {
+      "1": ["Breeze", "Feather", "Barely felt it", "Cache hit", "Is it even on?", "Did you cheat?", "Sunday stroll"],
+      "2": ["Smooth", "Steady", "Cruising", "200 OK", "Joints cooperating", "Clean & tidy", "Coffee & cake"],
+      "3": ["Solid", "Spot on", "Sweet spot", "In production", "Feels human", "Nailed it!", "Right on the mark"],
+      "4": ["Tough", "Heavy", "Pushing it", "High CPU", "Now it's creaking!", "Grit your teeth!", "Not for free!"],
+      "5": ["Brutal", "All out!", "Send help", "Kernel Panic!", "Call 911", "My soul just left", "Holy smokes"]
+    }
   }
 }

@@ -718,6 +718,22 @@
     "l2": "Kontrollerat",
     "l3": "Lagom",
     "l4": "Tungt",
-    "l5": "Max"
+    "l5": "Max",
+    "infoButton": "Förklara ansträngningsskalan",
+    "infoTitle": "Hur jobbigt var setet?",
+    "infoIntro": "Skalan bygger på RIR (Reps in Reserve): hur många repetitioner du hade kunnat göra till med god teknik. Välj det som stämmer bäst efter setet.",
+    "d1": "Fler än 3 repetitioner kvar. Uppvärmning eller mycket lätt arbete.",
+    "d2": "Cirka 3 repetitioner kvar. Kontrollerat arbete med god teknik.",
+    "d3": "1–2 repetitioner kvar. Effektivt arbete utan att offra tekniken. Standardval.",
+    "d4": "0–1 repetition kvar. Hög ansträngning; sista repetitionen kräver verklig kraft.",
+    "d5": "0 repetitioner kvar. Muskeln kan inte slutföra en repetition till med god teknik.",
+    "humorNote": "Bekräftelseknappen varierar uttrycken med humor. Det sparade värdet är alltid heltalet 1–5; Logg och Excel använder de fasta nivånamnen.",
+    "fun": {
+      "1": ["Kaffepaus", "Fjäderlätt", "Märktes knappt", "Cache hit", "Är den ens på?", "Fuskade du?", "Söndagspromenad"],
+      "2": ["Bekvämt", "Stabilt", "Under kontroll", "200 OK", "Lederna samarbetar", "Stiligt & prydligt", "Kaffe & bulle"],
+      "3": ["Sitter!", "Pang på", "Perfekt", "I produktion", "Känns mänskligt", "Där satt den!", "Lagom på millimetern"],
+      "4": ["Svettigt", "Blytungt", "Nu bränns det", "High CPU", "Nu knakar det!", "Bit ihop nu!", "Inte gratis!"],
+      "5": ["Tametusan!", "In i kaklet!", "Nära döden", "Kernel Panic!", "Ring 112", "Där dog själen", "Jäklar i min låda"]
+    }
   }
 }

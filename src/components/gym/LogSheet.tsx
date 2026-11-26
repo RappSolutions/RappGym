@@ -1,6 +1,6 @@
 import { useUserView } from "@/lib/user-view";
 import { EffortRuler } from "@/components/gym/EffortRuler";
-import { DEFAULT_EFFORT, isEffort, type Effort } from "@/lib/effort";
+import { DEFAULT_EFFORT, effortPhrase, isEffort, type Effort } from "@/lib/effort";
 import { AdminExerciseEdit } from "@/components/gym/AdminExerciseEdit";
 import { repsUnit } from "@/lib/reps-unit";
 import { confirmDialog } from "@/components/gym/ConfirmHost";
@@ -66,6 +66,8 @@ export function LogSheet({
   const { data: gyms = [] } = useQuery(gymsQuery);
   const [place, setPlace] = useState<string>("");
   const shown = exercise ? localize(exercise) : null;
+  const effortPhrases = t("effort.fun", { returnObjects: true }) as Record<Effort, string[]>;
+  const effortButtonText = effortPhrase(entry?.id ?? `${exercise?.code ?? "set"}:${date}`, effort, effortPhrases[effort], t(`effort.l${effort}`));
 
   useEffect(() => {
     if (!exercise) return;
@@ -168,8 +170,8 @@ export function LogSheet({
             <Textarea id="log-note" value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
           </div>
           <EffortRuler value={effort} onChange={setEffort} disabled={readOnly || busy} />
-          <Button onClick={() => void save()} disabled={readOnly || busy} className="h-14 w-full text-lg font-bold uppercase">
-            {entry?.status === "suggested" ? t("logSheet.confirmCompleted") : entry ? t("logSheet.saveChanges") : t("common.logSets")} – {t(`effort.l${effort}`)}
+          <Button onClick={() => void save()} disabled={readOnly || busy} className="h-auto min-h-14 w-full whitespace-normal py-2 text-lg font-bold uppercase leading-tight">
+            {entry?.status === "suggested" ? t("logSheet.confirmCompleted") : entry ? t("logSheet.saveChanges") : t("common.logSets")} – {effortButtonText}
           </Button>
           {entry?.status === "suggested" && <Button variant="outline" disabled={readOnly || busy} className="w-full" onClick={() => void save(false)}>{t("logSheet.saveAdjustedSuggestion")}</Button>}
           {entry && (
