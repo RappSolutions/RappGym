@@ -28,7 +28,7 @@ import { Switch } from "@/components/ui/switch";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 /** Guided runner for one workout. Rows and completed sets are read live, so exercises can be added, reordered and removed mid-workout. */
-export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClose: () => void }) {
+export function CircuitRunner({ workoutId, onClose, onFinished }: { workoutId: string; onClose: () => void; onFinished?: (id: string) => void }) {
   const { t, localize } = useLanguage();
   const { readOnly, view } = useUserView();
   const qc = useQueryClient();
@@ -103,7 +103,7 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
     if (readOnly) { onClose(); return; }
     if (finished) {
       await finishWorkout(workoutId, true);
-      toast.success(t("circuitRunner.workoutDoneSetsLogged", { length: doneRows.length }));
+      onFinished?.(workoutId);
       sessionStorage.removeItem(storageKey);
     }
     await Promise.all([refresh(), qc.invalidateQueries({ queryKey: ["accepted-ai-workouts"] })]);

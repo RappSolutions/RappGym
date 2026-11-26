@@ -1,7 +1,8 @@
-import { createContext, useContext, useEffect, useRef, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { useUserView } from "@/lib/user-view";
 import { CircuitRunner } from "./CircuitRunner";
+import { WorkoutSummary } from "./WorkoutSummary";
 
 const ActiveWorkoutContext = createContext<(id: string) => void>(() => undefined);
 export const useStartWorkout = () => useContext(ActiveWorkoutContext);
@@ -17,6 +18,7 @@ export function ActiveWorkout({ children }: { children: ReactNode }) {
   const initialized = useRef(false);
   const previous = useRef<string | undefined>(undefined);
   const pushed = useRef(false);
+  const [summary, setSummary] = useState<string | null>(null);
   useEffect(() => {
     if (!initialized.current) {
       initialized.current = true;
@@ -41,5 +43,5 @@ export function ActiveWorkout({ children }: { children: ReactNode }) {
     else if (pathname === "/home") void navigate({ to: "/home", search: (prev) => ({ ...prev, run: undefined }), replace: true });
     else void navigate({ to: "/workout", search: (prev) => ({ ...prev, run: undefined }), replace: true });
   }
-  return <ActiveWorkoutContext.Provider value={start}>{children}{run && <CircuitRunner key={`${key}:${run}`} workoutId={run} onClose={close} />}</ActiveWorkoutContext.Provider>;
+  return <ActiveWorkoutContext.Provider value={start}>{children}{run && <CircuitRunner key={`${key}:${run}`} workoutId={run} onClose={close} onFinished={setSummary} />}{summary && <WorkoutSummary workoutId={summary} onClose={() => setSummary(null)} />}</ActiveWorkoutContext.Provider>;
 }

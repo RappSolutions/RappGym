@@ -781,5 +781,20 @@
         "Holy smokes"
       ]
     }
+  },
+  "workoutSummary": {
+    "title": "Great work!",
+    "tonnage": "Tonnage",
+    "time": "Time",
+    "kgPerMin": "kg/min",
+    "sets": "Sets",
+    "reps": "Reps",
+    "effort": "Avg effort",
+    "prs": "New personal bests",
+    "categories": "Per category",
+    "setsCount": "{{count}} sets",
+    "close": "Close",
+    "subtitle_one": "{{count}} exercise completed",
+    "subtitle_other": "{{count}} exercises completed"
   }
 }

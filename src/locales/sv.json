@@ -781,5 +781,20 @@
         "Jäklar i min låda"
       ]
     }
+  },
+  "workoutSummary": {
+    "title": "Bra jobbat!",
+    "tonnage": "Tonnage",
+    "time": "Tid",
+    "kgPerMin": "kg/min",
+    "sets": "Set",
+    "reps": "Reps",
+    "effort": "Snitt-ansträngning",
+    "prs": "Nya personbästa",
+    "categories": "Per kategori",
+    "setsCount": "{{count}} set",
+    "close": "Stäng",
+    "subtitle_one": "{{count}} övning genomförd",
+    "subtitle_other": "{{count}} övningar genomförda"
   }
 }
