@@ -137,7 +137,8 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
     if (error) throw error;
     advance();
     const next = steps.find((s) => allSteps.indexOf(s) > stepIdx);
-    if (circuit && (!next || next.phase !== step.phase || next.lap !== step.lap)) {
+    const isLast = steps.every((s) => keyOf(s) === keyOf(step));
+    if (circuit && !isLast && (!next || next.phase !== step.phase || next.lap !== step.lap)) {
       const minutes = lapMinutes(runtime.lapStartedAt, endedAt);
       setRuntime((v) => ({ ...v, pause: { phase: step.phase, lap: step.lap, endedAt, minutes }, durations: minutes === null ? v.durations : [...v.durations, minutes] }));
     }
@@ -182,7 +183,8 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
   const nameByCode = useMemo(() => { const m = new Map<string, string>(); for (const e of allExercises) m.set(e.code, localize(e).name); return m; }, [allExercises, localize]);
   const lapNos = [...new Set(allSteps.filter((s) => s.phase === step?.phase).map((s) => s.lap))];
   const visibleSteps = allSteps.filter((s) => s.phase === step?.phase && (!circuit || s.lap === step.lap));
-  const pause = runtime.pause;
+  const complete = total > 0 && steps.length === 0 && !cursor && !adding;
+  const pause = complete ? null : runtime.pause;
   const effortPhrases = t("effort.fun", { returnObjects: true }) as Record<Effort, string[]>;
   const effortButtonText = effortPhrase(step ? keyOf(step) : workoutId, effort, effortPhrases[effort], t(`effort.l${effort}`));
   const pausedLaps = Math.max(1, ...allSteps.filter((s) => s.phase === pause?.phase).map((s) => s.lap));
@@ -274,7 +276,14 @@ export function CircuitRunner({ workoutId, onClose }: { workoutId: string; onClo
               <Button className="h-12 min-w-0 flex-1 whitespace-normal text-base leading-tight" disabled={readOnly || busy} onClick={() => void logStep()}><Check /><span>{t("circuitRunner.done")} – {effortButtonText}</span></Button>
             </div></div>}
           </div>}
-          {!r && total > 0 && <p className="text-sm text-muted-foreground">{t("circuitRunner.allSetsDoneAddThe")}</p>}
+          {complete && <section className="space-y-4 border-y py-8 text-center" aria-live="polite">
+            <FinishFlag className="mx-auto size-12 text-primary" />
+            <h2 className="text-2xl font-bold">{t("circuitRunner.workoutComplete")}</h2>
+            <p className="text-sm text-muted-foreground">{t("circuitRunner.workoutCompleteSets", { count: doneRows.length })}</p>
+            <Button className="h-14 w-full text-lg" disabled={readOnly || busy} onClick={() => void endWorkout()}><FinishFlag className="size-5" />{t("circuitRunner.finishWorkout")}</Button>
+            <Button variant="ghost" size="sm" disabled={readOnly || busy} onClick={() => { setListOpen(false); setAdding(true); }}><Plus className="size-4" />{t("circuitRunner.addAnotherExercise")}</Button>
+          </section>}
+          {!r && !complete && total > 0 && <p className="text-sm text-muted-foreground">{t("circuitRunner.allSetsDoneAddThe")}</p>}
         </div>
       </DrawerContent>
     </Drawer>

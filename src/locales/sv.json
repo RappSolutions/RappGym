@@ -60,7 +60,11 @@
     "workoutName": "Passets namn",
     "settings": "Passinställningar",
     "doneResult": "Klart: {{reps}}{{load}}",
-    "undoSet": "Ångra set"
+    "undoSet": "Ångra set",
+    "workoutComplete": "Passet är klart!",
+    "workoutCompleteSets": "{{count}} set loggade",
+    "finishWorkout": "Slutför passet",
+    "addAnotherExercise": "Lägg till en övning till"
   },
   "common": {
     "add": "Lägg till",
@@ -731,11 +735,51 @@
     "d5": "0 repetitioner kvar. Muskeln kan inte slutföra en repetition till med god teknik.",
     "humorNote": "Färgen på bandet styr alltid den faktiska ansträngningsnivån (1–5). Texten på knappen varierar med glimten i ögat, men speglar alltid vald zon. I logg, statistik och export används uteslutande de fasta nivånamnen.",
     "fun": {
-      "1": ["Kaffepaus", "Fjäderlätt", "Märktes knappt", "Cache hit", "Är den ens på?", "Fuskade du?", "Söndagspromenad"],
-      "2": ["Bekvämt", "Stabilt", "Under kontroll", "200 OK", "Lederna samarbetar", "Stiligt & prydligt", "Kaffe & bulle"],
-      "3": ["Sitter!", "Pang på", "Perfekt", "I produktion", "Känns mänskligt", "Där satt den!", "Lagom på millimetern"],
-      "4": ["Svettigt", "Blytungt", "Nu bränns det", "High CPU", "Nu knakar det!", "Bit ihop nu!", "Inte gratis!"],
-      "5": ["Tametusan!", "In i kaklet!", "Nära döden", "Kernel Panic!", "Ring 112", "Där dog själen", "Jäklar i min låda"]
+      "1": [
+        "Kaffepaus",
+        "Fjäderlätt",
+        "Märktes knappt",
+        "Cache hit",
+        "Är den ens på?",
+        "Fuskade du?",
+        "Söndagspromenad"
+      ],
+      "2": [
+        "Bekvämt",
+        "Stabilt",
+        "Under kontroll",
+        "200 OK",
+        "Lederna samarbetar",
+        "Stiligt & prydligt",
+        "Kaffe & bulle"
+      ],
+      "3": [
+        "Sitter!",
+        "Pang på",
+        "Perfekt",
+        "I produktion",
+        "Känns mänskligt",
+        "Där satt den!",
+        "Lagom på millimetern"
+      ],
+      "4": [
+        "Svettigt",
+        "Blytungt",
+        "Nu bränns det",
+        "High CPU",
+        "Nu knakar det!",
+        "Bit ihop nu!",
+        "Inte gratis!"
+      ],
+      "5": [
+        "Tametusan!",
+        "In i kaklet!",
+        "Nära döden",
+        "Kernel Panic!",
+        "Ring 112",
+        "Där dog själen",
+        "Jäklar i min låda"
+      ]
     }
   }
 }

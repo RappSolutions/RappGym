@@ -60,7 +60,11 @@
     "workoutName": "Workout name",
     "settings": "Workout settings",
     "doneResult": "Done: {{reps}}{{load}}",
-    "undoSet": "Undo set"
+    "undoSet": "Undo set",
+    "workoutComplete": "Workout complete!",
+    "workoutCompleteSets": "{{count}} sets logged",
+    "finishWorkout": "Finish workout",
+    "addAnotherExercise": "Add another exercise"
   },
   "common": {
     "add": "Add",
@@ -731,11 +735,51 @@
     "d5": "0 repetitions left. The muscle cannot complete another repetition with good technique.",
     "humorNote": "The colour on the band always governs the actual effort level (1–5). The button text varies for flavour, but always reflects the selected zone. The log, statistics and export strictly use the fixed level names.",
     "fun": {
-      "1": ["Breeze", "Feather", "Barely felt it", "Cache hit", "Is it even on?", "Did you cheat?", "Sunday stroll"],
-      "2": ["Smooth", "Steady", "Cruising", "200 OK", "Joints cooperating", "Clean & tidy", "Coffee & cake"],
-      "3": ["Solid", "Spot on", "Sweet spot", "In production", "Feels human", "Nailed it!", "Right on the mark"],
-      "4": ["Tough", "Heavy", "Pushing it", "High CPU", "Now it's creaking!", "Grit your teeth!", "Not for free!"],
-      "5": ["Brutal", "All out!", "Send help", "Kernel Panic!", "Call 911", "My soul just left", "Holy smokes"]
+      "1": [
+        "Breeze",
+        "Feather",
+        "Barely felt it",
+        "Cache hit",
+        "Is it even on?",
+        "Did you cheat?",
+        "Sunday stroll"
+      ],
+      "2": [
+        "Smooth",
+        "Steady",
+        "Cruising",
+        "200 OK",
+        "Joints cooperating",
+        "Clean & tidy",
+        "Coffee & cake"
+      ],
+      "3": [
+        "Solid",
+        "Spot on",
+        "Sweet spot",
+        "In production",
+        "Feels human",
+        "Nailed it!",
+        "Right on the mark"
+      ],
+      "4": [
+        "Tough",
+        "Heavy",
+        "Pushing it",
+        "High CPU",
+        "Now it's creaking!",
+        "Grit your teeth!",
+        "Not for free!"
+      ],
+      "5": [
+        "Brutal",
+        "All out!",
+        "Send help",
+        "Kernel Panic!",
+        "Call 911",
+        "My soul just left",
+        "Holy smokes"
+      ]
     }
   }
 }
