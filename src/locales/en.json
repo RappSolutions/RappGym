@@ -142,7 +142,7 @@
     "noPicturesYet": "No pictures yet.",
     "pictureLink": "Picture link",
     "pictures": "Pictures",
-    "picturesInTheExerciseBank": "Pictures in the exercise bank are visible to all signed-in users.",
+    "picturesInTheExerciseBank": "Shared exercise-bank pictures also appear on the public exercise page. Upload only pictures you have the right to share.",
     "removePicture": "Remove picture",
     "removeThisPicture": "Remove this picture?",
     "theLinkMustStartWith": "The link must start with https://",
@@ -690,7 +690,7 @@
     "points": {
       "data": {
         "label": "Training data",
-        "text": "Your logs, workouts, training locations (gyms and equipment) and training profile are stored in the EU and visible only to you."
+        "text": "Your logs, workouts, private locations and training profile are not public. Authorised administrators can read data for support; user inspection is recorded."
       },
       "login": {
         "label": "Sign-in",
@@ -698,17 +698,19 @@
       },
       "ai": {
         "label": "Optional AI analysis",
-        "text": "Runs only when you ask. Training data and profile are sent anonymised (without name or email) and are not stored for model training."
+        "text": "Runs only when you ask. Training data and your optional profile are sent without your account name or email. Free text can still contain personal information: do not enter details you do not want sent to AI."
       },
       "control": {
         "label": "Full control",
-        "text": "You can delete your training profile in the app at any time, or contact gym@rappsol.com to remove your whole account and all data."
+        "text": "You can delete your training profile or entire account from the account menu. Contact gym@rappsol.com for access, correction or other privacy requests."
       }
     },
     "pageTitle": "Privacy and data",
     "pageIntro": "This is how RappGym (Rapp Solutions AB) handles your data.",
     "back": "Back to RappGym",
-    "footerLink": "Privacy & data"
+    "footerLink": "Privacy & data",
+    "medicalTitle": "Training, not healthcare",
+    "medicalText": "RappGym is a workout diary. AI suggestions are general training information, not medical advice, diagnosis or treatment. Choose loads within your ability. Stop for pain, dizziness or other warning signs and seek appropriate medical care when needed."
   },
   "tonnageChart": {
     "title": "Tonnage",
@@ -797,5 +799,31 @@
     "close": "Close",
     "subtitle_one": "{{count}} exercise completed",
     "subtitle_other": "{{count}} exercises completed"
+  },
+  "account": {
+    "manage": "Account and membership",
+    "identityNote": "Membership is linked to your account ID. The receipt email can differ. Google and Microsoft share your data only when linked to the same account ID.",
+    "supporter": "Supporter",
+    "activeUntil": "Active through",
+    "free": "No active membership",
+    "accountId": "Account ID",
+    "delete": "Delete entire account",
+    "deleteWarning": "This permanently deletes your account, logs, workouts, training profile, goals, AI history and private locations. Shared exercises remain without a creator link. Export your log first if you want to keep it. Email copies and backups are not erased immediately; contact gym@rappsol.com with questions. Type DELETE to confirm.",
+    "confirmDelete": "Type DELETE to delete the entire account",
+    "locationTeaser": "Supporter lets you create your own locations and choose the equipment available there.",
+    "searchUsers": "Search name, email or account ID",
+    "allUsers": "All users",
+    "paidUsers": "Active supporters",
+    "freeUsers": "No active membership",
+    "disabledUsers": "Disabled",
+    "verifyPayment": "Verify Stripe payment",
+    "paymentHelp": "Check the payment in Stripe before saving. Enter its reference and paid period; the receipt email does not need to match the account email.",
+    "startsOn": "Valid from",
+    "endsOn": "Valid through",
+    "stripeReference": "Stripe reference",
+    "saveMembership": "Save membership",
+    "consentVersion": "Consent v{{version}}",
+    "counts": "{{sets}} sets · {{workouts}} workouts",
+    "membershipSaved": "Membership saved"
   }
 }

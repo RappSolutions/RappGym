@@ -6,10 +6,10 @@ const POINTS = ["data", "login", "ai", "control"] as const;
 export function ConsentPoints() {
   const { t } = useLanguage();
   return (
-    <ul className="list-disc space-y-2 pl-5 text-sm">
+    <div className="space-y-4"><ul className="list-disc space-y-2 pl-5 text-sm">
       {POINTS.map((k) => (
         <li key={k}><strong className="font-semibold text-foreground">{t(`consent.points.${k}.label`)}:</strong> {t(`consent.points.${k}.text`)}</li>
       ))}
-    </ul>
+    </ul><p className="text-sm leading-relaxed"><strong>{t("consent.medicalTitle")}:</strong> {t("consent.medicalText")}</p></div>
   );
 }

@@ -142,7 +142,7 @@
     "noPicturesYet": "Inga bilder ännu.",
     "pictureLink": "Bildlänk",
     "pictures": "Bilder",
-    "picturesInTheExerciseBank": "Bilder i övningsbanken blir synliga för alla inloggade användare.",
+    "picturesInTheExerciseBank": "Bilder i den gemensamma övningsbanken visas även på den publika övningssidan. Ladda bara upp bilder du har rätt att dela.",
     "removePicture": "Ta bort bild",
     "removeThisPicture": "Ta bort bilden?",
     "theLinkMustStartWith": "Länken måste börja med https://",
@@ -690,7 +690,7 @@
     "points": {
       "data": {
         "label": "Träningsdata",
-        "text": "Dina loggar, pass, träningsplatser (gym och utrustning) och träningsprofil lagras i EU och är endast synliga för dig."
+        "text": "Dina loggar, pass, privata platser och träningsprofil är inte publika. Behöriga administratörer kan läsa uppgifterna för support; sådan användarinspektion registreras."
       },
       "login": {
         "label": "Inloggning",
@@ -698,17 +698,19 @@
       },
       "ai": {
         "label": "Frivillig AI-analys",
-        "text": "Körs endast på ditt initiativ. Träningsdata och profil skickas anonymiserat (utan namn eller e-post) och sparas inte för modellträning."
+        "text": "Körs bara när du ber om det. Träningsdata och din valfria profil skickas utan kontots namn eller e-post. Fritext kan ändå innehålla personuppgifter: ange inte sådana du inte vill skicka till AI."
       },
       "control": {
         "label": "Full kontroll",
-        "text": "Du kan när som helst radera din träningsprofil i appen, eller kontakta gym@rappsol.com för att ta bort hela kontot och all data."
+        "text": "Du kan radera träningsprofilen eller hela kontot via avatar-menyn. Kontakta gym@rappsol.com för registerutdrag, rättelse eller andra dataskyddsfrågor."
       }
     },
     "pageTitle": "Integritet och data",
     "pageIntro": "Så här hanterar RappGym (Rapp Solutions AB) dina uppgifter.",
     "back": "Till RappGym",
-    "footerLink": "Integritet & data"
+    "footerLink": "Integritet & data",
+    "medicalTitle": "Träning, inte vård",
+    "medicalText": "RappGym är en träningslogg. AI-förslag är allmän träningsinformation, inte medicinsk rådgivning, diagnos eller behandling. Anpassa belastningen till din förmåga. Avbryt vid smärta, yrsel eller andra varningssignaler och sök lämplig vård vid behov."
   },
   "tonnageChart": {
     "title": "Tonnage",
@@ -797,5 +799,31 @@
     "close": "Stäng",
     "subtitle_one": "{{count}} övning genomförd",
     "subtitle_other": "{{count}} övningar genomförda"
+  },
+  "account": {
+    "manage": "Konto och medlemskap",
+    "identityNote": "Medlemskap kopplas till ditt konto-ID. Kvittots e-post kan vara en annan. Google och Microsoft ger samma data endast när de hör till samma konto-ID.",
+    "supporter": "Supporter",
+    "activeUntil": "Aktivt till och med",
+    "free": "Inget aktivt medlemskap",
+    "accountId": "Konto-ID",
+    "delete": "Radera hela kontot",
+    "deleteWarning": "Detta raderar ditt konto, loggar, pass, träningsprofil, mål, AI-historik och privata platser permanent. Gemensamma övningar behålls utan skaparkoppling. Exportera din logg först om du vill behålla den. Mejlkopior och säkerhetskopior omfattas inte av omedelbar radering; kontakta gym@rappsol.com vid frågor. Skriv DELETE för att bekräfta.",
+    "confirmDelete": "Skriv DELETE för att radera hela kontot",
+    "locationTeaser": "Med Supporter kan du skapa egna platser och välja vilka redskap som finns där.",
+    "searchUsers": "Sök namn, e-post eller konto-ID",
+    "allUsers": "Alla användare",
+    "paidUsers": "Aktiva supporters",
+    "freeUsers": "Utan aktivt medlemskap",
+    "disabledUsers": "Inaktiverade",
+    "verifyPayment": "Verifiera Stripe-betalning",
+    "paymentHelp": "Kontrollera betalningen i Stripe innan du sparar. Ange betalningsreferens och betald period; e-post på kvittot behöver inte vara samma som kontots.",
+    "startsOn": "Gäller från",
+    "endsOn": "Gäller till och med",
+    "stripeReference": "Stripe-referens",
+    "saveMembership": "Spara medlemskap",
+    "consentVersion": "Samtycke v{{version}}",
+    "counts": "{{sets}} set · {{workouts}} pass",
+    "membershipSaved": "Medlemskap sparat"
   }
 }
