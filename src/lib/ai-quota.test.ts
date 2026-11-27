@@ -13,9 +13,10 @@ describe("AI quota", () => {
     expect(quotaRemaining({ ...base, isBlocked: true })).toBe(0);
   });
   it("custom quota 0 throttles", () => { expect(quotaAllowed({ ...base, quota: 0 })).toBe(false); });
-  it("null quota (supporter) is unlimited", () => {
-    expect(quotaAllowed({ ...base, quota: null, used: 999 })).toBe(true);
-    expect(quotaRemaining({ ...base, quota: null })).toBeNull();
+  it("non-admin missing quota is finite at 30", () => {
+    expect(quotaAllowed({ ...base, quota: null, used: 29 })).toBe(true);
+    expect(quotaAllowed({ ...base, quota: null, used: 30 })).toBe(false);
+    expect(quotaRemaining({ ...base, quota: null })).toBe(30);
   });
   it("admin is always unlimited", () => { expect(quotaAllowed({ ...base, used: 50, isAdmin: true })).toBe(true); });
   it("lastMonths spans year boundary", () => { expect(lastMonths("2026-02-15", 3)).toEqual(["2025-12", "2026-01", "2026-02"]); });

@@ -10,7 +10,7 @@ Live: https://gym.rappsol.com
 - **Train:** planned workouts (own or AI) with a guided circuit runner. Each lap logs one completed set per exercise, and you can adjust loads between laps.
 - **Log:** completed facts only, grouped per workout with ISO dates and weekday. "Plan again" copies a workout with a new name, date, location and circuit setting.
 - **Statistics:** weight and set trends per exercise, filtered by location and period. Planned work is never counted.
-- **AI:** analysis and structured workout planning through Lovable AI Gateway, on explicit request only. It shows an estimated and actual cost per request and keeps a persistent history.
+- **AI:** analysis and structured workout planning through Lovable AI Gateway, on explicit request only. It keeps a persistent history and uses finite per-user quotas.
 - **Home:** dashboard with key figures, the ongoing or today's workout, and soft goals.
 - **Access:** sign in with Google or Microsoft only. A global admin manages exercises, locations and users. Everyone else is a normal user who sees only their own data.
 - **Admin user view:** view an ordinary user's app read-only, retaining the admin identity. A persistent banner ends the view; session-scoped database rules block writes and audit start/end. Future support writes require explicit capabilities and operation-level auditing.
@@ -69,8 +69,8 @@ erDiagram
   USERS ||--o{ TRAINING_AI_HISTORY : owns
   USERS ||--o{ TRAINING_GOALS : owns
   USERS ||--o| TRAINING_PROFILES : has
-  EXERCISES ||--o{ EXERCISE_LOCATIONS : "available at"
-  GYMS ||--o{ EXERCISE_LOCATIONS : offers
+  GYMS ||--o{ GYM_EQUIPMENT : "CASCADE"
+  EXERCISE_EQUIPMENT ||--o{ GYM_EQUIPMENT : "RESTRICT"
   EXERCISES ||--o{ LOG_ENTRIES : "RESTRICT"
   EXERCISES ||--o{ WORKOUT_EXERCISES : "RESTRICT"
   WORKOUTS ||--o{ WORKOUT_EXERCISES : "CASCADE"
@@ -114,6 +114,7 @@ erDiagram
     text name
     text description
     boolean is_public
+    boolean is_default "unique when true"
   }
   EXERCISES {
     uuid id PK
@@ -138,9 +139,10 @@ erDiagram
     uuid id PK
     text name UK
   }
-  EXERCISE_LOCATIONS {
-    uuid exercise_id PK, FK
+  GYM_EQUIPMENT {
     uuid gym_id PK, FK
+    uuid equipment_id PK, FK
+    numeric max_load_kg
   }
   WORKOUTS {
     uuid id PK
@@ -179,6 +181,7 @@ erDiagram
     int reps
     text load
     text note
+    smallint effort "1-5, nullable"
     uuid gym_id FK
     text phase "intro | main | outro"
     smallint lap "actual circuit lap; NULL for legacy"
@@ -208,6 +211,43 @@ erDiagram
     text pace
     boolean use_for_ai
   }
+  AI_TIERS ||--o{ USER_MEMBERSHIPS : "RESTRICT"
+  AI_TIERS ||--o{ BILLING_SUBSCRIPTIONS : "RESTRICT"
+  BILLING_ACCOUNTS ||--o{ BILLING_SUBSCRIPTIONS : "CASCADE"
+  USER_MEMBERSHIPS {
+    uuid user_id PK
+    text tier_id FK
+    date starts_on
+    date ends_on "CHECK >= starts_on"
+    text stripe_reference UK
+    uuid verified_by
+    timestamptz verified_at
+  }
+  BILLING_ACCOUNTS {
+    uuid user_id PK
+    text stripe_customer_id UK
+  }
+  BILLING_SUBSCRIPTIONS {
+    text stripe_subscription_id PK
+    uuid user_id FK
+    text tier_id FK
+    text stripe_price_id
+    text status
+    timestamptz period_end
+    boolean cancel_at_period_end
+    timestamptz updated_at
+  }
+  AI_TIERS {
+    text id PK
+    text name
+    int monthly_ai_quota
+    boolean is_default
+  }
+  USER_CONSENTS {
+    uuid user_id PK
+    int terms_version PK
+    timestamptz consented_at
+  }
 ```
 
 
@@ -221,3 +261,11 @@ Example: Finnish, ISO 639-1 code `fi`. Translating texts is a separate later ste
 4. **Server functions:** add `"fi"` to `language: z.enum([...])` in `src/lib/training-insights.functions.ts`, `src/lib/location-scan.functions.ts` and `src/lib/user-view.functions.ts`.
 5. **Database:** no migration. Exercises, categories and equipment store English in base columns and other languages in `translations` jsonb keyed by language code (`{ "fi": { "name": "..." } }`). The category/equipment dialog shows one field per entry in `supportedLanguages` automatically.
 6. Run typecheck and tests.
+
+## Public pages, memberships and launch
+
+- `/about`, `/features`, `/membership` and `/exercises` are public English pages; `/exercise-bank` retains the signed-in exercise workflow.
+- New ordinary users start at Gymmet with all equipment. Active supporters manage private locations in Settings.
+- Users can delete their account from the avatar menu; admins can search users and verify manual Stripe payments by account ID and date range.
+- Stripe Checkout/webhook code is prepared but charging is disabled pending approved product/price, VAT and webhook configuration.
+- See [LAUNCH.md](LAUNCH.md) for setup, pricing proposal, LinkedIn copy, legal checks and remaining security/verification work.

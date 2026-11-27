@@ -1,10 +1,13 @@
 # Roadmap
-- [ ] Expand and renumber the exercise bank, preserving completed receipts.
-- [ ] Public English product/features/exercise pages and launch copy.
-- [ ] Account deletion, medical disclaimer and detailed privacy disclosure.
-- [ ] Searchable user administration and manual paid-access verification.
-- [ ] Default Gymmet for new users, no filtering there, paid-location teaser.
-- [ ] Stripe automated payments using existing RappSol account, separate RappGym product: blocked until Stripe credentials/product configuration.
+- [ ] Commercial launch checks: controller details/legal bases, processor/AI transfer and retention terms, subscription terms; owner decisions required (LAUNCH.md).
+- [ ] Verify real signed-in account deletion and membership/location flow end-to-end; Lean excludes browser verification, Stripe lifecycle tests need test configuration.
+- [ ] Before broad promotion, enforce atomic AI concurrency/spending reservations and external abuse/WAF limits; hosting configuration and budget decisions required.
+- [x] Added 7 equipment/station rows and 18 EN/SV exercises (69 total), renumbered within categories; completed receipts unchanged.
+- [x] Public English /about, /features, /exercises, /membership, detailed /privacy; real SSR content and anonymous DB boundaries verified; launch/pricing/LinkedIn proposal in LAUNCH.md.
+- [x] Account deletion with DELETE confirmation and shared transactional private-data erasure; medical disclaimer and expanded privacy. Signed-in deletion flow not browser-tested (Lean).
+- [x] Searchable user administration, training counts, consent, provider identities, manual Stripe-reference/date verification and automatic subscription status.
+- [x] Shared default Gymmet with all 26 equipment rows and automatic future-equipment linking; ordinary users see default + own places, supporter-only private-location writes via RLS, teaser.
+- [ ] Activate/test Stripe payments: Checkout, customer mapping, subscriptions, portal and verified webhook implemented, disabled pending approved price/VAT, separate product/price IDs and published webhook signing secret.
 
 - [x] Open the shared workout summary from historical workouts in both Log views; 12 targeted tests pass and build OK (Lean, no browser verification).
 - [x] Spontaneous workout UX: empty start opens exercise picker directly, phases stay hidden and default to main, next exercise is primary after the current round; 227 tests pass (Lean, no browser verification).

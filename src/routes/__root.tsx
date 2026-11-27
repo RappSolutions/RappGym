@@ -13,7 +13,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { ConfirmHost } from "@/components/gym/ConfirmHost";
 import { supabase } from "@/integrations/supabase/client";
 import { LanguageProvider } from "@/lib/i18n";
-import { UserViewProvider } from "@/lib/user-view";
 import { StartupSplash } from "@/components/gym/StartupSplash";
 
 import appCss from "../styles.css?url";
@@ -154,7 +153,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <UserViewProvider key={identityVersion}><Outlet /></UserViewProvider>
+      <Outlet key={identityVersion} />
       <Toaster position="top-center" />
       <ConfirmHost />
       </LanguageProvider>

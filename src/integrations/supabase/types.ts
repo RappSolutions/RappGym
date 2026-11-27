@@ -68,6 +68,69 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_accounts: {
+        Row: {
+          stripe_customer_id: string
+          user_id: string
+        }
+        Insert: {
+          stripe_customer_id: string
+          user_id: string
+        }
+        Update: {
+          stripe_customer_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      billing_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          period_end: string
+          status: string
+          stripe_price_id: string
+          stripe_subscription_id: string
+          tier_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          period_end: string
+          status: string
+          stripe_price_id: string
+          stripe_subscription_id: string
+          tier_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          period_end?: string
+          status?: string
+          stripe_price_id?: string
+          stripe_subscription_id?: string
+          tier_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_subscriptions_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "ai_tiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "billing_accounts"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       exercise_categories: {
         Row: {
           code_prefix: string
@@ -892,6 +955,10 @@ export type Database = {
       }
       has_supporter_access: { Args: { _user_id: string }; Returns: boolean }
       is_exercise_image: { Args: { _path: string }; Returns: boolean }
+      public_active_exercise_image: {
+        Args: { _path: string }
+        Returns: boolean
+      }
       public_exercise_catalogue: {
         Args: never
         Returns: {

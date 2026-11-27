@@ -31,10 +31,11 @@ entity admin_user_views {
 entity gyms {
   * id : uuid <<PK>>
   --
-  * user_id : uuid
+  user_id : uuid
   * name : text
   description : text
   * is_public : boolean
+  * is_default : boolean <<UQ when true>>
   created_at : timestamptz
 }
 entity exercises {
@@ -51,7 +52,7 @@ entity exercises {
   translations : jsonb
   * is_active : boolean
   sort_order : int
-  * user_id : uuid
+  user_id : uuid
 }
 entity exercise_categories {
   * id : uuid <<PK>>
@@ -126,13 +127,14 @@ entity log_entries {
   exercise_rating : smallint 1-5 <<snapshot, completed only>>
   lap : smallint <<actual circuit lap, nullable for legacy>>
   set_number : smallint <<actual set ordinal, nullable for legacy>>
+  effort : smallint (1-5, nullable for legacy)
   * created_at : timestamptz
 }
 entity ai_tiers {
   * id : text <<PK>>
   --
   * name : text
-  monthly_ai_quota : integer (NULL = unlimited)
+  monthly_ai_quota : integer (non-admin NULL falls back to 30)
   * is_default : boolean (unique when true)
 }
 
@@ -230,4 +232,32 @@ entity user_consents {
   * consented_at : timestamptz
 }
 users ||..o{ user_consents
+entity user_memberships {
+  * user_id : uuid <<PK>>
+  * tier_id : text <<FK ai_tiers RESTRICT>>
+  * starts_on : date
+  * ends_on : date <<CHECK >= starts_on>>
+  stripe_reference : text <<UQ>>
+  * verified_by : uuid
+  * verified_at : timestamptz
+}
+entity billing_accounts {
+  * user_id : uuid <<PK>>
+  * stripe_customer_id : text <<UQ>>
+}
+entity billing_subscriptions {
+  * stripe_subscription_id : text <<PK>>
+  * user_id : uuid <<FK billing_accounts CASCADE>>
+  * tier_id : text <<FK ai_tiers RESTRICT>>
+  * stripe_price_id : text
+  * status : text <<CHECK Stripe statuses>>
+  * period_end : timestamptz
+  * cancel_at_period_end : boolean
+  * updated_at : timestamptz
+}
+users ||..o| user_memberships : "dated manual verification"
+users ||..o| billing_accounts : "app UUID, not receipt email"
+ai_tiers ||--o{ user_memberships : "RESTRICT"
+ai_tiers ||--o{ billing_subscriptions : "RESTRICT"
+billing_accounts ||--o{ billing_subscriptions : "CASCADE"
 @enduml

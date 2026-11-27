@@ -69,3 +69,8 @@ use the editor.
 - Exercises, categories and equipment store English in base columns and other languages in `translations` jsonb keyed by ISO 639-1; read via `translated`/`localizeExercise`/`refName` so a new language needs only data + a locale file.
 - Keep effort selection in the shared EffortRuler as five integer radio zones over a token-defined colour band; confirmation buttons show the localized selection so duplicate scale labels are unnecessary.
 - Log workout actions reuse WorkoutSummary by workout ID, including read-only viewing; this keeps historical and completion statistics on the same completed-fact calculation.
+
+- Public English catalogue uses a projection-only database RPC and anonymous signed images for active shared exercises; personal exercise browsing remains under /exercise-bank, while /exercises is public, preventing duplicate route paths and personal-data exposure.
+- The shared default location automatically gains each database equipment row; ordinary users list only that location and their own, and private-location writes require dated supporter access enforced by RLS.
+
+- User-view bootstrap runs only inside the authenticated layout; public pages SSR their content without waiting for browser auth, while identity changes remount the Outlet.

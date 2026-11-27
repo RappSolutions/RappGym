@@ -1,5 +1,5 @@
 import { useLanguage, LanguagePicker } from "@/lib/i18n";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { parseAuthCallbackError, type AuthCallbackError } from "@/lib/auth-callback-error";
 import { toast } from "sonner";
@@ -174,6 +174,7 @@ function Index() {
         <span>
           Provided by <a href="https://rappsol.com" target="_blank" rel="noopener noreferrer" className="font-semibold text-foreground/80 hover:underline">Rapp Solutions AB</a> · Sweden
         </span>
+        <nav aria-label="About RappGym" className="flex flex-wrap justify-center gap-4"><Link to="/about" className="hover:underline">Meet RappGym</Link><Link to="/exercises" className="hover:underline">Exercise bank</Link><Link to="/features" className="hover:underline">Features</Link></nav>
         <a href="/privacy" className="hover:underline">{t("consent.footerLink")}</a>
       </footer>
     </div>

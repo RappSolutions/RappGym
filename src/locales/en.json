@@ -824,6 +824,8 @@
     "saveMembership": "Save membership",
     "consentVersion": "Consent v{{version}}",
     "counts": "{{sets}} sets · {{workouts}} workouts",
-    "membershipSaved": "Membership saved"
+    "membershipSaved": "Membership saved",
+    "managePayment": "Manage subscription",
+    "subscribe": "Open Stripe Checkout"
   }
 }

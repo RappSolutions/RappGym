@@ -14,3 +14,7 @@
 - Terms consent: append-only user_consents(user_id, terms_version int); ConsentGate prompts when max accepted < CURRENT_TERMS_VERSION (src/lib/consent.ts), so bumping the constant re-prompts everyone.
 - Per-set effort (1–5, default 3) is stored on completed log_entries.effort via the shared EffortRuler above every set confirm; NULL means not recorded, so legacy rows are never backfilled.
 - Workout completion summary is derived by pure src/lib/workout-summary.ts from completed log rows (PR = max kg above earlier history, first-time exercises excluded) and shown by ActiveWorkout after finishWorkout, so it never stores derived values.
+
+- Memberships are dated manual records; automated Stripe subscriptions have separate customer mappings and a tier FK, with server-derived access independent of receipt email, so payments never become roles or profile flags.
+- Stripe uses a separate product and app metadata; Checkout requires explicit enablement, and verified webhooks upsert current subscription state.
+- Account deletion shares one privileged erasure helper after caller authorisation; it cancels only stored app subscriptions, erases private tables transactionally, then deletes Auth, preserving shared exercise definitions without creator IDs.

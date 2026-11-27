@@ -824,6 +824,8 @@
     "saveMembership": "Spara medlemskap",
     "consentVersion": "Samtycke v{{version}}",
     "counts": "{{sets}} set · {{workouts}} pass",
-    "membershipSaved": "Medlemskap sparat"
+    "membershipSaved": "Medlemskap sparat",
+    "managePayment": "Hantera prenumeration",
+    "subscribe": "Till Stripe Checkout"
   }
 }

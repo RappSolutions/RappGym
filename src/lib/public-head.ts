@@ -1,1 +1,12 @@
-export function publicHead(title: string, description: string) { return { meta: [{ title: `${title} – RappGym` }, { name: 'description', content: description }, { property: 'og:title', content: `${title} – RappGym` }, { property: 'og:description', content: description }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }; }
+export function publicHead(title: string, description: string) {
+  return {
+    meta: [
+      { title: `${title} – RappGym` },
+      { name: "description", content: description },
+      { property: "og:title", content: `${title} – RappGym` },
+      { property: "og:description", content: description },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  };
+}

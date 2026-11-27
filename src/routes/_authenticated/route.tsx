@@ -6,6 +6,7 @@ import { CategoryStyles } from "@/components/gym/CategoryStyles";
 import { ProfileMenu } from "@/components/gym/ProfileMenu";
 import { cn } from "@/lib/utils";
 import { ActiveWorkout } from "@/components/gym/ActiveWorkout";
+import { UserViewProvider } from "@/lib/user-view";
 import { ConsentGate } from "@/components/gym/ConsentGate";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -42,7 +43,9 @@ const pageLabels: [RegExp, NavLabelKey][] = [
   [/^\/settings/, "nav.tabs.settings"],
 ];
 
-function AppLayout() {
+function AppLayout() { return <UserViewProvider><AppFrame /></UserViewProvider>; }
+
+function AppFrame() {
   const { user } = Route.useRouteContext();
   const { t } = useLanguage();
   const navigate = useNavigate();

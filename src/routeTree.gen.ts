@@ -30,6 +30,7 @@ import { Route as AuthenticatedWorkoutRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedExercisesCodeRouteImport } from './routes/_authenticated/exercises.$code'
 import { Route as AuthenticatedOvningarIndexRouteImport } from './routes/_authenticated/ovningar.index'
 import { Route as AuthenticatedOvningarCodeRouteImport } from './routes/_authenticated/ovningar.$code'
+import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 
 const IndexRoute = IndexRouteImport.update({
@@ -140,6 +141,11 @@ const AuthenticatedOvningarCodeRoute =
     path: '/ovningar/$code',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
+  id: '/api/public/stripe-webhook',
+  path: '/api/public/stripe-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
     id: '/lovable/email/transactional/preview',
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/workout': typeof AuthenticatedWorkoutRoute
   '/exercises/$code': typeof AuthenticatedExercisesCodeRoute
   '/ovningar/$code': typeof AuthenticatedOvningarCodeRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/ovningar/': typeof AuthenticatedOvningarIndexRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
@@ -190,6 +197,7 @@ export interface FileRoutesByTo {
   '/workout': typeof AuthenticatedWorkoutRoute
   '/exercises/$code': typeof AuthenticatedExercisesCodeRoute
   '/ovningar/$code': typeof AuthenticatedOvningarCodeRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/ovningar': typeof AuthenticatedOvningarIndexRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
@@ -215,6 +223,7 @@ export interface FileRoutesById {
   '/_authenticated/workout': typeof AuthenticatedWorkoutRoute
   '/_authenticated/exercises/$code': typeof AuthenticatedExercisesCodeRoute
   '/_authenticated/ovningar/$code': typeof AuthenticatedOvningarCodeRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/_authenticated/ovningar/': typeof AuthenticatedOvningarIndexRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
@@ -240,6 +249,7 @@ export interface FileRouteTypes {
     | '/workout'
     | '/exercises/$code'
     | '/ovningar/$code'
+    | '/api/public/stripe-webhook'
     | '/ovningar/'
     | '/lovable/email/transactional/preview'
   fileRoutesByTo: FileRoutesByTo
@@ -263,6 +273,7 @@ export interface FileRouteTypes {
     | '/workout'
     | '/exercises/$code'
     | '/ovningar/$code'
+    | '/api/public/stripe-webhook'
     | '/ovningar'
     | '/lovable/email/transactional/preview'
   id:
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/_authenticated/workout'
     | '/_authenticated/exercises/$code'
     | '/_authenticated/ovningar/$code'
+    | '/api/public/stripe-webhook'
     | '/_authenticated/ovningar/'
     | '/lovable/email/transactional/preview'
   fileRoutesById: FileRoutesById
@@ -300,6 +312,7 @@ export interface RootRouteChildren {
   FeaturesRoute: typeof FeaturesRoute
   MembershipRoute: typeof MembershipRoute
   PrivacyRoute: typeof PrivacyRoute
+  ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
 
@@ -452,6 +465,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOvningarCodeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/stripe-webhook': {
+      id: '/api/public/stripe-webhook'
+      path: '/api/public/stripe-webhook'
+      fullPath: '/api/public/stripe-webhook'
+      preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/transactional/preview': {
       id: '/lovable/email/transactional/preview'
       path: '/lovable/email/transactional/preview'
@@ -506,6 +526,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeaturesRoute: FeaturesRoute,
   MembershipRoute: MembershipRoute,
   PrivacyRoute: PrivacyRoute,
+  ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }
 export const routeTree = rootRouteImport
