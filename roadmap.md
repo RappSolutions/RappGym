@@ -7,7 +7,7 @@
 - [x] Account deletion with DELETE confirmation and shared transactional private-data erasure; medical disclaimer and expanded privacy. Signed-in deletion flow not browser-tested (Lean).
 - [x] Searchable user administration, training counts, consent, provider identities, manual Stripe-reference/date verification and automatic subscription status.
 - [x] Shared default Gymmet with all 26 equipment rows and automatic future-equipment linking; ordinary users see default + own places, supporter-only private-location writes via RLS, teaser.
-- [ ] Activate/test Stripe payments: Checkout, customer mapping, subscriptions, portal and verified webhook implemented, disabled pending approved price/VAT, separate product/price IDs and published webhook signing secret.
+- [x] Stripe Supporter €4/month or €40/year live (RappGym product in RappSol account); status syncs from Stripe on read, link on Home, account dialog and AI page. Open: VAT setup (Stripe Tax) owner decision.
 
 - [x] Open the shared workout summary from historical workouts in both Log views; 12 targeted tests pass and build OK (Lean, no browser verification).
 - [x] Spontaneous workout UX: empty start opens exercise picker directly, phases stay hidden and default to main, next exercise is primary after the current round; 227 tests pass (Lean, no browser verification).

@@ -2,7 +2,7 @@
 
 ## Pricing proposal, not an activated price
 
-Start with **39 SEK/month including applicable VAT** as a hypothesis. 50 SEK was an exploratory suggestion, not a requirement. Private locations with actual equipment are the paid benefit; core logging, history and exports remain free. The supporter default is 30 successful training-AI answers per UTC month, not unlimited. Free remains 10. This is not a hard limit on spending: parallel requests and admin calls still need a separate cost/concurrency budget before broad promotion.
+Price: **€4/month or €40/year** (approved), charged in EUR. Private locations with actual equipment are the paid benefit; core logging, history and exports remain free. The supporter default is 30 successful training-AI answers per UTC month, not unlimited. Free remains 10. This is not a hard limit on spending: parallel requests and admin calls still need a separate cost/concurrency budget before broad promotion.
 
 Validate willingness to pay with the first 10–20 active users, then reconsider 39 vs 49 SEK. Do not create or activate the Stripe price before the owner confirms the price and VAT treatment. No profitability claim: model usage, hosting, support, payment fees and taxes determine actual margin.
 
