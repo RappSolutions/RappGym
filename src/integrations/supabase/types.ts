@@ -218,7 +218,7 @@ export type Database = {
           reps_unit: string
           sort_order: number
           translations: Json
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           category_id: string
@@ -234,7 +234,7 @@ export type Database = {
           reps_unit?: string
           sort_order?: number
           translations?: Json
-          user_id?: string
+          user_id?: string | null
         }
         Update: {
           category_id?: string
@@ -250,7 +250,7 @@ export type Database = {
           reps_unit?: string
           sort_order?: number
           translations?: Json
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -310,25 +310,28 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          is_default: boolean
           is_public: boolean
           name: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           description?: string
           id?: string
+          is_default?: boolean
           is_public?: boolean
           name: string
-          user_id?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           description?: string
           id?: string
+          is_default?: boolean
           is_public?: boolean
           name?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -669,6 +672,44 @@ export type Database = {
           },
         ]
       }
+      user_memberships: {
+        Row: {
+          ends_on: string
+          starts_on: string
+          stripe_reference: string | null
+          tier_id: string
+          user_id: string
+          verified_at: string
+          verified_by: string
+        }
+        Insert: {
+          ends_on: string
+          starts_on: string
+          stripe_reference?: string | null
+          tier_id: string
+          user_id: string
+          verified_at?: string
+          verified_by: string
+        }
+        Update: {
+          ends_on?: string
+          starts_on?: string
+          stripe_reference?: string | null
+          tier_id?: string
+          user_id?: string
+          verified_at?: string
+          verified_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_memberships_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "ai_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -841,6 +882,7 @@ export type Database = {
       }
       effective_user_id: { Args: never; Returns: string }
       end_user_view: { Args: never; Returns: undefined }
+      erase_account_data: { Args: { _user_id: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -848,7 +890,30 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_supporter_access: { Args: { _user_id: string }; Returns: boolean }
       is_exercise_image: { Args: { _path: string }; Returns: boolean }
+      public_exercise_catalogue: {
+        Args: never
+        Returns: {
+          category: string
+          code: string
+          equipment: string
+          id: string
+          image_urls: Json
+          instructions: string
+          name: string
+          reps_unit: string
+        }[]
+      }
+      set_manual_membership: {
+        Args: {
+          _ends_on: string
+          _starts_on: string
+          _stripe_reference: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       start_user_view: { Args: { _target_user_id: string }; Returns: string }
       user_view_active: { Args: never; Returns: boolean }
     }

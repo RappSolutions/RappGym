@@ -22,7 +22,7 @@ import { gymEquipmentQuery, exercisesAtLocation } from "@/lib/exercise-locations
 import { NEVER, exercisePreferencesQuery, ratingOf } from "@/lib/exercise-preferences";
 import { categoriesOf, categoryToken, exercisesQuery, gymsQuery, lastByCode, logQuery, todayISO, type Exercise } from "@/lib/gym";
 
-export const Route = createFileRoute("/_authenticated/exercises/")({
+export const Route = createFileRoute("/_authenticated/exercise-bank")({
   validateSearch: z.object({ cat: z.string().optional() }),
   head: () => ({
     meta: [

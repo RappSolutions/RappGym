@@ -11,9 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ExercisesRouteImport } from './routes/exercises'
+import { Route as FeaturesRouteImport } from './routes/features'
+import { Route as MembershipRouteImport } from './routes/membership'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as AuthenticatedAiRouteImport } from './routes/_authenticated/ai'
+import { Route as AuthenticatedExerciseBankRouteImport } from './routes/_authenticated/exercise-bank'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedLogRouteImport } from './routes/_authenticated/log'
 import { Route as AuthenticatedLoggRouteImport } from './routes/_authenticated/logg'
@@ -22,7 +27,6 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedStatisticsRouteImport } from './routes/_authenticated/statistics'
 import { Route as AuthenticatedStatistikRouteImport } from './routes/_authenticated/statistik'
 import { Route as AuthenticatedWorkoutRouteImport } from './routes/_authenticated/workout'
-import { Route as AuthenticatedExercisesIndexRouteImport } from './routes/_authenticated/exercises.index'
 import { Route as AuthenticatedExercisesCodeRouteImport } from './routes/_authenticated/exercises.$code'
 import { Route as AuthenticatedOvningarIndexRouteImport } from './routes/_authenticated/ovningar.index'
 import { Route as AuthenticatedOvningarCodeRouteImport } from './routes/_authenticated/ovningar.$code'
@@ -37,9 +41,29 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExercisesRoute = ExercisesRouteImport.update({
+  id: '/exercises',
+  path: '/exercises',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeaturesRoute = FeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MembershipRoute = MembershipRouteImport.update({
+  id: '/membership',
+  path: '/membership',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -52,6 +76,12 @@ const AuthenticatedAiRoute = AuthenticatedAiRouteImport.update({
   path: '/ai',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedExerciseBankRoute =
+  AuthenticatedExerciseBankRouteImport.update({
+    id: '/exercise-bank',
+    path: '/exercise-bank',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   id: '/home',
   path: '/home',
@@ -92,12 +122,6 @@ const AuthenticatedWorkoutRoute = AuthenticatedWorkoutRouteImport.update({
   path: '/workout',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedExercisesIndexRoute =
-  AuthenticatedExercisesIndexRouteImport.update({
-    id: '/exercises/',
-    path: '/exercises/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedExercisesCodeRoute =
   AuthenticatedExercisesCodeRouteImport.update({
     id: '/exercises/$code',
@@ -125,9 +149,14 @@ const LovableEmailTransactionalPreviewRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/exercises': typeof ExercisesRoute
+  '/features': typeof FeaturesRoute
+  '/membership': typeof MembershipRoute
   '/privacy': typeof PrivacyRoute
   '/ai': typeof AuthenticatedAiRoute
+  '/exercise-bank': typeof AuthenticatedExerciseBankRoute
   '/home': typeof AuthenticatedHomeRoute
   '/log': typeof AuthenticatedLogRoute
   '/logg': typeof AuthenticatedLoggRoute
@@ -138,15 +167,19 @@ export interface FileRoutesByFullPath {
   '/workout': typeof AuthenticatedWorkoutRoute
   '/exercises/$code': typeof AuthenticatedExercisesCodeRoute
   '/ovningar/$code': typeof AuthenticatedOvningarCodeRoute
-  '/exercises/': typeof AuthenticatedExercisesIndexRoute
   '/ovningar/': typeof AuthenticatedOvningarIndexRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/exercises': typeof ExercisesRoute
+  '/features': typeof FeaturesRoute
+  '/membership': typeof MembershipRoute
   '/privacy': typeof PrivacyRoute
   '/ai': typeof AuthenticatedAiRoute
+  '/exercise-bank': typeof AuthenticatedExerciseBankRoute
   '/home': typeof AuthenticatedHomeRoute
   '/log': typeof AuthenticatedLogRoute
   '/logg': typeof AuthenticatedLoggRoute
@@ -157,7 +190,6 @@ export interface FileRoutesByTo {
   '/workout': typeof AuthenticatedWorkoutRoute
   '/exercises/$code': typeof AuthenticatedExercisesCodeRoute
   '/ovningar/$code': typeof AuthenticatedOvningarCodeRoute
-  '/exercises': typeof AuthenticatedExercisesIndexRoute
   '/ovningar': typeof AuthenticatedOvningarIndexRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
@@ -165,9 +197,14 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/exercises': typeof ExercisesRoute
+  '/features': typeof FeaturesRoute
+  '/membership': typeof MembershipRoute
   '/privacy': typeof PrivacyRoute
   '/_authenticated/ai': typeof AuthenticatedAiRoute
+  '/_authenticated/exercise-bank': typeof AuthenticatedExerciseBankRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/log': typeof AuthenticatedLogRoute
   '/_authenticated/logg': typeof AuthenticatedLoggRoute
@@ -178,7 +215,6 @@ export interface FileRoutesById {
   '/_authenticated/workout': typeof AuthenticatedWorkoutRoute
   '/_authenticated/exercises/$code': typeof AuthenticatedExercisesCodeRoute
   '/_authenticated/ovningar/$code': typeof AuthenticatedOvningarCodeRoute
-  '/_authenticated/exercises/': typeof AuthenticatedExercisesIndexRoute
   '/_authenticated/ovningar/': typeof AuthenticatedOvningarIndexRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
@@ -186,9 +222,14 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/auth'
+    | '/exercises'
+    | '/features'
+    | '/membership'
     | '/privacy'
     | '/ai'
+    | '/exercise-bank'
     | '/home'
     | '/log'
     | '/logg'
@@ -199,15 +240,19 @@ export interface FileRouteTypes {
     | '/workout'
     | '/exercises/$code'
     | '/ovningar/$code'
-    | '/exercises/'
     | '/ovningar/'
     | '/lovable/email/transactional/preview'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/auth'
+    | '/exercises'
+    | '/features'
+    | '/membership'
     | '/privacy'
     | '/ai'
+    | '/exercise-bank'
     | '/home'
     | '/log'
     | '/logg'
@@ -218,16 +263,20 @@ export interface FileRouteTypes {
     | '/workout'
     | '/exercises/$code'
     | '/ovningar/$code'
-    | '/exercises'
     | '/ovningar'
     | '/lovable/email/transactional/preview'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/about'
     | '/auth'
+    | '/exercises'
+    | '/features'
+    | '/membership'
     | '/privacy'
     | '/_authenticated/ai'
+    | '/_authenticated/exercise-bank'
     | '/_authenticated/home'
     | '/_authenticated/log'
     | '/_authenticated/logg'
@@ -238,7 +287,6 @@ export interface FileRouteTypes {
     | '/_authenticated/workout'
     | '/_authenticated/exercises/$code'
     | '/_authenticated/ovningar/$code'
-    | '/_authenticated/exercises/'
     | '/_authenticated/ovningar/'
     | '/lovable/email/transactional/preview'
   fileRoutesById: FileRoutesById
@@ -246,7 +294,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
+  ExercisesRoute: typeof ExercisesRoute
+  FeaturesRoute: typeof FeaturesRoute
+  MembershipRoute: typeof MembershipRoute
   PrivacyRoute: typeof PrivacyRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
@@ -267,11 +319,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/exercises': {
+      id: '/exercises'
+      path: '/exercises'
+      fullPath: '/exercises'
+      preLoaderRoute: typeof ExercisesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/features': {
+      id: '/features'
+      path: '/features'
+      fullPath: '/features'
+      preLoaderRoute: typeof FeaturesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/membership': {
+      id: '/membership'
+      path: '/membership'
+      fullPath: '/membership'
+      preLoaderRoute: typeof MembershipRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -286,6 +366,13 @@ declare module '@tanstack/react-router' {
       path: '/ai'
       fullPath: '/ai'
       preLoaderRoute: typeof AuthenticatedAiRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/exercise-bank': {
+      id: '/_authenticated/exercise-bank'
+      path: '/exercise-bank'
+      fullPath: '/exercise-bank'
+      preLoaderRoute: typeof AuthenticatedExerciseBankRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/home': {
@@ -344,13 +431,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWorkoutRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/exercises/': {
-      id: '/_authenticated/exercises/'
-      path: '/exercises'
-      fullPath: '/exercises/'
-      preLoaderRoute: typeof AuthenticatedExercisesIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/exercises/$code': {
       id: '/_authenticated/exercises/$code'
       path: '/exercises/$code'
@@ -384,6 +464,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAiRoute: typeof AuthenticatedAiRoute
+  AuthenticatedExerciseBankRoute: typeof AuthenticatedExerciseBankRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedLogRoute: typeof AuthenticatedLogRoute
   AuthenticatedLoggRoute: typeof AuthenticatedLoggRoute
@@ -394,12 +475,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedWorkoutRoute: typeof AuthenticatedWorkoutRoute
   AuthenticatedExercisesCodeRoute: typeof AuthenticatedExercisesCodeRoute
   AuthenticatedOvningarCodeRoute: typeof AuthenticatedOvningarCodeRoute
-  AuthenticatedExercisesIndexRoute: typeof AuthenticatedExercisesIndexRoute
   AuthenticatedOvningarIndexRoute: typeof AuthenticatedOvningarIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAiRoute: AuthenticatedAiRoute,
+  AuthenticatedExerciseBankRoute: AuthenticatedExerciseBankRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedLogRoute: AuthenticatedLogRoute,
   AuthenticatedLoggRoute: AuthenticatedLoggRoute,
@@ -410,7 +491,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedWorkoutRoute: AuthenticatedWorkoutRoute,
   AuthenticatedExercisesCodeRoute: AuthenticatedExercisesCodeRoute,
   AuthenticatedOvningarCodeRoute: AuthenticatedOvningarCodeRoute,
-  AuthenticatedExercisesIndexRoute: AuthenticatedExercisesIndexRoute,
   AuthenticatedOvningarIndexRoute: AuthenticatedOvningarIndexRoute,
 }
 
@@ -420,7 +500,11 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
+  ExercisesRoute: ExercisesRoute,
+  FeaturesRoute: FeaturesRoute,
+  MembershipRoute: MembershipRoute,
   PrivacyRoute: PrivacyRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }

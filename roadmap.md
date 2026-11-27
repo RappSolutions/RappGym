@@ -4,7 +4,7 @@
 - [ ] Account deletion, medical disclaimer and detailed privacy disclosure.
 - [ ] Searchable user administration and manual paid-access verification.
 - [ ] Default Gymmet for new users, no filtering there, paid-location teaser.
-- [ ] Stripe automated payments: blocked until account choice and credentials/configuration.
+- [ ] Stripe automated payments using existing RappSol account, separate RappGym product: blocked until Stripe credentials/product configuration.
 
 - [x] Open the shared workout summary from historical workouts in both Log views; 12 targeted tests pass and build OK (Lean, no browser verification).
 - [x] Spontaneous workout UX: empty start opens exercise picker directly, phases stay hidden and default to main, next exercise is primary after the current round; 227 tests pass (Lean, no browser verification).

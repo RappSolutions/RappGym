@@ -330,6 +330,13 @@
       "when": 1795697903343,
       "tag": "0046_ref_translations",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1795794577906,
+      "tag": "0047_public_catalogue_memberships_account_erasure",
+      "breakpoints": true
     }
   ]
 }
