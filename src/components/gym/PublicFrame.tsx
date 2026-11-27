@@ -38,7 +38,7 @@ export function PublicFrame({ children, subtitle }: { children: ReactNode; subti
       <footer className="flex flex-wrap justify-between gap-3 border-t px-4 py-5 text-xs text-muted-foreground">
         <span>Rapp Solutions AB · Sweden</span>
         <a
-          href="https://jonasr.app"
+          href="https://jonasr.app/me/"
           target="_blank"
           rel="noopener noreferrer"
           className="underline"

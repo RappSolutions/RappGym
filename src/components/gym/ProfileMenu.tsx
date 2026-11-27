@@ -16,6 +16,8 @@ import {
   Mail,
   Lightbulb,
   ShieldCheck,
+  ChevronDown,
+  CircleUserRound,
 } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { toast } from "sonner";
@@ -31,7 +33,8 @@ import { gymsQuery } from "@/lib/gym";
 import { useSelectedGym } from "@/hooks/use-gym";
 
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAvatarUrl } from "@/lib/avatar";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -67,6 +70,7 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
     const fallback = gyms.find((g) => g.is_default) ?? gyms[0];
     if (fallback && !currentGym) setGym(fallback.id);
   }, [gyms, currentGym, setGym]);
+  const avatarUrl = useAvatarUrl(user);
   const [open, setOpen] = useState(false);
   const [gymOpen, setGymOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
@@ -154,7 +158,19 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
     }
   }
   return (
-    <>
+    <div className="flex min-w-0 items-center gap-2">
+      {gyms.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setGymOpen(true)}
+          aria-label={`${t("common.location")}: ${currentGym?.name ?? ""}`}
+          className="flex h-8 max-w-[9rem] items-center gap-1 rounded-full border border-brand-yellow/60 bg-brand-royal/70 px-2.5 text-xs font-medium text-brand-yellow hover:bg-brand-royal sm:max-w-[14rem]"
+        >
+          <MapPin className="size-3.5 shrink-0" />
+          <span className="truncate">{currentGym?.name ?? ""}</span>
+          <ChevronDown className="size-3.5 shrink-0" />
+        </button>
+      )}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -165,6 +181,7 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
             className="shrink-0 rounded-full text-brand-yellow hover:bg-brand-royal hover:text-brand-yellow"
           >
             <Avatar className="size-9 border-2 border-brand-yellow">
+              {!readOnly && avatarUrl && <AvatarImage src={avatarUrl} alt="" />}
               <AvatarFallback className="bg-brand-royal text-sm font-semibold text-brand-yellow">
                 {initials || <UserRound className="size-5" />}
               </AvatarFallback>
@@ -181,62 +198,51 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
             )}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {gyms.length > 0 && (
-            <>
-              <DropdownMenuItem className="min-h-12" onSelect={() => setGymOpen(true)}>
-                <MapPin />
-                <span className="min-w-0">
-                  <span className="block text-xs text-muted-foreground">
-                    {t("common.location")}
-                  </span>
-                  <span className="block truncate font-medium">{currentGym?.name ?? ""}</span>
-                </span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-            </>
-          )}
-          <DropdownMenuItem className="min-h-12" onSelect={() => void edit()}>
+          <DropdownMenuItem className="h-12" onSelect={() => void edit()}>
             <UserRound />
             {t("profileMenu.myTrainingProfile")}
           </DropdownMenuItem>
-          {
-            <DropdownMenuItem asChild className="min-h-12">
-              <Link to="/settings">
-                <Settings />
-                {t("profileMenu.settings")}
-              </Link>
-            </DropdownMenuItem>
-          }
-          <DropdownMenuItem
-            className="min-h-12"
-            disabled={readOnly}
-            onSelect={() => setContactOpen(true)}
-          >
-            <Mail />
-            {t("contact.menu")}
+          <DropdownMenuItem asChild className="h-12">
+            <Link to="/settings">
+              <Settings />
+              {t("profileMenu.settings")}
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem
-            className="min-h-12"
+            className="h-12"
+            disabled={readOnly}
+            onSelect={() => setAccountOpen(true)}
+          >
+            <CircleUserRound />
+            {t("account.manage")}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="h-12"
             disabled={readOnly}
             onSelect={() => setSuggestionOpen(true)}
           >
             <Lightbulb />
             {t("exerciseSuggestion.title")}
           </DropdownMenuItem>
-          <DropdownMenuItem className="min-h-12" onSelect={() => setConsentOpen(true)}>
+          <DropdownMenuItem
+            className="h-12"
+            disabled={readOnly}
+            onSelect={() => setContactOpen(true)}
+          >
+            <Mail />
+            {t("contact.menu")}
+          </DropdownMenuItem>
+          <DropdownMenuItem className="h-12" onSelect={() => setConsentOpen(true)}>
             <ShieldCheck />
             {t("consent.menu")}
           </DropdownMenuItem>
-          <DropdownMenuItem disabled={readOnly} onSelect={() => setAccountOpen(true)}>
-            <UserRound />
-            {t("account.manage")}
-          </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <div className="px-2 py-2">
+          <div className="flex min-h-12 items-center px-2">
             <LanguagePicker flagsOnly />
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="min-h-12" onSelect={() => void onSignOut()}>
+          <DropdownMenuItem className="h-12" onSelect={() => void onSignOut()}>
             <LogOut />
             {t("profileMenu.signOut")}
           </DropdownMenuItem>
@@ -245,7 +251,7 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
             href="https://rappsol.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-sm px-2 py-1.5 text-[11px] text-muted-foreground hover:bg-accent"
+            className="flex items-center justify-center gap-1.5 whitespace-nowrap min-h-12 rounded-sm px-2 text-[11px] text-muted-foreground hover:bg-accent"
           >
             <img
               src={rappSolutionsMark}
@@ -426,6 +432,6 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
           )}
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

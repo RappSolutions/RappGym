@@ -839,5 +839,14 @@
     "planMonth": "€4 / månad",
     "planYear": "€40 / år",
     "becomeSupporter": "Bli supporter – egna platser och fler AI-anrop"
+  },
+  "avatar": {
+    "picture": "Profilbild",
+    "upload": "Välj bild",
+    "remove": "Ta bort bild",
+    "removeConfirm": "Ta bort din uppladdade profilbild?",
+    "hint": "Utan egen bild visas bilden från ditt Google- eller Microsoft-konto, annars initialer.",
+    "saved": "Profilbild sparad",
+    "tooLarge": "Bilden får vara högst 2 MB"
   }
 }

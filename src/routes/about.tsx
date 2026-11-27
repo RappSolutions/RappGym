@@ -68,7 +68,7 @@ function About() {
         </p>
         <a
           className="mt-3 inline-block text-sm underline"
-          href="https://jonasr.app"
+          href="https://jonasr.app/me/"
           target="_blank"
           rel="noopener noreferrer"
         >

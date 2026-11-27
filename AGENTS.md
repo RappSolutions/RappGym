@@ -76,3 +76,5 @@ use the editor.
 
 - User-view bootstrap runs only inside the authenticated layout; public pages SSR their content without waiting for browser auth, while identity changes remount the Outlet.
 - Complimentary access reuses dated manual memberships with a nullable payment reference and separate note; the admin RPC enforces authority and inclusive expiry, without changing Stripe subscriptions.
+- Profile pictures: own upload in private `avatars` bucket at `<uid>/avatar` (owner-only RLS), flagged by versioned `custom_avatar` in auth metadata; fallback OAuth picture, then initials (src/lib/avatar.ts), so no profile column is needed.
+- Active location is a header chip next to the avatar (ProfileMenu), not a menu item, so the current location is always visible.

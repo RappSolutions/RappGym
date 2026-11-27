@@ -1,3 +1,4 @@
+import { AvatarSettings } from "@/components/gym/AvatarSettings";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -103,6 +104,7 @@ export function AccountControls({
           <DialogTitle>{t("account.manage")}</DialogTitle>
           <DialogDescription>{t("account.identityNote")}</DialogDescription>
         </DialogHeader>
+        <AvatarSettings userId={userId} />
         <dl className="text-sm">
           <dt className="font-medium">{t("account.supporter")}</dt>
           <dd>

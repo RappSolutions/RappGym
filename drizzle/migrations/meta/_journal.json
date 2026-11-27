@@ -358,6 +358,13 @@
       "when": 1795808981811,
       "tag": "0050_restrict_manual_membership_rpc_to_authenticated",
       "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1795811026556,
+      "tag": "0051_avatars_policies",
+      "breakpoints": true
     }
   ]
 }

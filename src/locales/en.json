@@ -839,5 +839,14 @@
     "planMonth": "€4 / month",
     "planYear": "€40 / year",
     "becomeSupporter": "Become a supporter – own locations and more AI requests"
+  },
+  "avatar": {
+    "picture": "Profile picture",
+    "upload": "Choose picture",
+    "remove": "Remove picture",
+    "removeConfirm": "Remove your uploaded profile picture?",
+    "hint": "Without your own picture, the one from your Google or Microsoft account is shown, otherwise initials.",
+    "saved": "Profile picture saved",
+    "tooLarge": "The picture must be at most 2 MB"
   }
 }
