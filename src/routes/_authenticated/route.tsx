@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { ActiveWorkout } from "@/components/gym/ActiveWorkout";
 import { UserViewProvider } from "@/lib/user-view";
 import { ConsentGate } from "@/components/gym/ConsentGate";
+import logo from "@/assets/RappGym_1024.png";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -59,10 +60,17 @@ function AppFrame() {
   }
   return (
     <div className="app-sheet mx-auto min-h-screen max-w-2xl pb-24 md:max-w-4xl">
-      <header className="app-masthead mb-6 flex items-center justify-between gap-3 px-4 py-5">
-        <Link to="/home" aria-label={t("nav.goToHome")} className="brand-wordmark min-w-0 truncate font-display text-2xl font-bold no-underline hover:opacity-90 md:text-3xl">
-          Rapp<span className="text-brand-yellow">Gym</span>
-          {page && <span className="ml-2 text-brand-yellow">– {page}</span>}
+      <header className="app-masthead mb-6 flex items-center justify-between gap-3 px-4 py-4 sm:px-6">
+        <Link
+          to="/home"
+          aria-label={t("nav.goToHome")}
+          className="brand-wordmark flex min-w-0 items-center gap-3 font-display font-bold no-underline hover:opacity-90"
+        >
+          <img src={logo} alt="" className="size-12 shrink-0 sm:size-14" />
+          <span className="min-w-0">
+            <span className="block truncate text-2xl sm:text-3xl">RappGym</span>
+            {page && <span className="block truncate text-sm font-normal sm:text-base">{page}</span>}
+          </span>
         </Link>
         <div className="flex shrink-0 items-center"><ProfileMenu user={user} onSignOut={signOut} /></div>
       </header>

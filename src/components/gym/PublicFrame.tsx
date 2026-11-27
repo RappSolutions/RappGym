@@ -5,12 +5,19 @@ import { Button } from "@/components/ui/button";
 export function PublicFrame({ children }: { children: ReactNode }) {
   return (
     <div lang="en" className="app-sheet mx-auto min-h-screen max-w-4xl">
-      <header className="app-masthead flex flex-wrap items-center justify-between gap-3 px-4 py-4">
-        <Link to="/about" className="brand-wordmark flex items-center gap-2 font-display text-2xl">
-          <img src={logo} alt="" className="size-10" />
-          RappGym
+      <header className="app-masthead flex items-center justify-between gap-3 px-4 py-4 sm:px-6">
+        <Link
+          to="/about"
+          className="brand-wordmark flex min-w-0 items-center gap-3 font-display text-2xl font-bold sm:text-3xl"
+        >
+          <img src={logo} alt="" className="size-12 shrink-0 sm:size-14" />
+          <span className="truncate">RappGym</span>
         </Link>
-        <Button asChild size="sm" variant="outline">
+        <Button
+          asChild
+          size="sm"
+          className="shrink-0 border border-primary-foreground/50 bg-brand-royal text-primary-foreground hover:bg-brand-blue hover:text-primary-foreground"
+        >
           <Link to="/">Open app</Link>
         </Button>
       </header>

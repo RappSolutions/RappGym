@@ -6,6 +6,7 @@ const { generate, viewState } = vi.hoisted(() => ({ generate: vi.fn(), viewState
 
 vi.mock("@/lib/training-insights.functions", () => ({ getTrainingInsights: vi.fn() }));
 vi.mock("@/lib/ai-quota.functions", () => ({ getMyAiQuota: vi.fn() }));
+vi.mock("@/lib/billing.functions", () => ({ getBillingStatus: vi.fn() }));
 vi.mock("@/lib/user-view", () => ({ useUserView: () => viewState }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: () => generate }));
 vi.mock("@tanstack/react-query", async (importOriginal) => ({

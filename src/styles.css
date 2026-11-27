@@ -245,13 +245,21 @@
   font-weight: 500;
 }
 
-/* Shared brand frame: blue surround, white content, yellow masthead. */
+/* Shared brand frame: blue surround, white content, banner masthead. */
 body { background: var(--page-surround); }
 .app-sheet { background: var(--background); }
-.app-masthead { position: relative; overflow: hidden; background: var(--brand-blue); color: var(--brand-yellow); border-bottom: 4px solid var(--brand-royal); }
-.app-masthead::after { content: ""; position: absolute; right: 4rem; top: -2rem; width: 1.5rem; height: 10rem; border-inline: 1px solid var(--background); transform: rotate(45deg); opacity: .7; pointer-events: none; }
+.app-masthead {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--brand-blue);
+  background-image: url("./assets/RappGymHeader.png");
+  background-position: right center;
+  background-size: cover;
+  color: var(--primary-foreground);
+  border-bottom: 4px solid var(--brand-royal);
+}
 .app-masthead > * { position: relative; z-index: 1; }
-.brand-wordmark { color: var(--brand-yellow); letter-spacing: 0; }
+.brand-wordmark { color: var(--primary-foreground); letter-spacing: 0; }
 .app-masthead select { background: var(--background); color: var(--foreground); }
 .app-navigation { max-width: 42rem; margin-inline: auto; border-top: 3px solid var(--brand-royal); }
 @media (min-width: 768px) { .app-navigation { max-width: 56rem; } }
