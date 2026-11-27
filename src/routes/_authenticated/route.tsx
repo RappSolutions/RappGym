@@ -24,7 +24,7 @@ type NavLabelKey = `nav.tabs.${"home" | "ai" | "exercises" | "workout" | "log" |
 const tabs = [
   { to: "/home", label: "nav.tabs.home" as NavLabelKey, icon: House },
   { to: "/ai", label: "nav.tabs.ai" as NavLabelKey, icon: Sparkles },
-  { to: "/exercises", label: "nav.tabs.exercises" as NavLabelKey, icon: Dumbbell },
+  { to: "/exercise-bank", label: "nav.tabs.exercises" as NavLabelKey, icon: Dumbbell },
   { to: "/workout", label: "nav.tabs.workout" as NavLabelKey, icon: CalendarDays },
   { to: "/log", label: "nav.tabs.log" as NavLabelKey, icon: ClipboardCheck },
 ] as const;

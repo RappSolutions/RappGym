@@ -1,5 +1,5 @@
 import { confirmDialog } from "@/components/gym/ConfirmHost";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Check, ChevronDown, ChevronRight, Dumbbell, MapPin, Pencil, Plus, Trash2, X , Globe, Lock } from "lucide-react";
@@ -10,10 +10,18 @@ import { useLanguage } from "@/lib/i18n";
 import { exerciseEquipmentQuery, exercisesQuery, gymsQuery, type Gym } from "@/lib/gym";
 import { equipmentAt, exercisesAtLocation, gymEquipmentQuery } from "@/lib/exercise-locations";
 import { useSelectedGym } from "@/hooks/use-gym";
+import { useIsAdmin } from "@/lib/roles";
+import { useQuery } from "@tanstack/react-query";
+import { useUserView } from "@/lib/user-view";
 import { LocationPhotoScan } from "@/components/gym/LocationPhotoScan";
 
 export function LocationsManager() {
-  const { t, localize, refName } = useLanguage();
+  const { isAdmin } = useIsAdmin();
+  const { readOnly } = useUserView();
+  const [owner,setOwner] = useState<string | null>(null);
+  useEffect(()=>{void supabase.auth.getUser().then(r=>setOwner(r.data.user?.id ?? null));},[]);
+  const { data: canCreate=false } = useQuery({queryKey:["supporter-access",owner],enabled:!!owner,queryFn:async()=>{if(!owner)return false;const r=await supabase.rpc("has_supporter_access",{_user_id:owner});if(r.error)throw r.error;return r.data;}});
+  const { t, refName } = useLanguage();
   const { data: exercises } = useSuspenseQuery(exercisesQuery);
   const { data: links } = useSuspenseQuery(gymEquipmentQuery);
   const { data: equipment } = useSuspenseQuery(exerciseEquipmentQuery);
@@ -65,8 +73,8 @@ export function LocationsManager() {
 
   async function add(e: React.FormEvent) {
     e.preventDefault();
-    if (!fresh.name.trim()) return;
-    const { data: created, error } = await supabase.from("gyms").insert({ name: fresh.name.trim(), description: fresh.description.trim() }).select("id").single();
+    if (!fresh.name.trim() || readOnly || !canCreate || !owner) return;
+    const { data: created, error } = await supabase.from("gyms").insert({ name: fresh.name.trim(), description: fresh.description.trim(), user_id: owner, is_public: false }).select("id").single();
     if (error) { toast.error(error.message); return; }
     if (equipment.length) {
       const { error: linkError } = await supabase.from("gym_equipment").insert(equipment.map((q) => ({ equipment_id: q.id, gym_id: created.id })));
@@ -103,7 +111,7 @@ export function LocationsManager() {
   return (
     <section className="space-y-3">
       <p className="text-sm text-muted-foreground">{t("locationsManager.whereYouTrainEveryLogged")}</p>
-      {gyms.map((g) => editing === g.id ? (
+      {gyms.filter(g=>!g.is_default && (isAdmin || g.user_id===owner)).map((g) => editing === g.id ? (
         <div key={g.id} className="grid gap-2 rounded-lg border p-2 sm:grid-cols-[1fr_1fr_auto]">
           <Input aria-label={t("common.name")} value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
           <Input aria-label={t("locationsManager.description")} value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
@@ -120,7 +128,7 @@ export function LocationsManager() {
             <div className="font-semibold">{g.name}</div>
             {g.description && <div className="text-sm text-muted-foreground">{g.description}</div>}
           </div>
-          <Button size="icon" variant="ghost" onClick={() => void togglePublic(g)} aria-pressed={g.is_public} title={g.is_public ? t("locationsManager.sharedWithAllUsers") : t("locationsManager.ownerAndAdminOnly")} aria-label={g.is_public ? t("locationsManager.sharedWithAllUsers") : t("locationsManager.ownerAndAdminOnly")}>{g.is_public ? <Globe className="text-primary" /> : <Lock className="text-muted-foreground" />}</Button>
+          {isAdmin && <Button size="icon" variant="ghost" onClick={() => void togglePublic(g)} aria-pressed={g.is_public} title={g.is_public ? t("locationsManager.sharedWithAllUsers") : t("locationsManager.ownerAndAdminOnly")} aria-label={g.is_public ? t("locationsManager.sharedWithAllUsers") : t("locationsManager.ownerAndAdminOnly")}>{g.is_public ? <Globe className="text-primary" /> : <Lock className="text-muted-foreground" />}</Button>}
           <Button size="icon" variant="ghost" onClick={() => { setEditing(g.id); setDraft({ name: g.name, description: g.description }); }} aria-label={t("common.edit")}><Pencil /></Button>
           <Button size="icon" variant="ghost" onClick={() => void remove(g)} aria-label={t("common.delete")}><Trash2 /></Button>
         </div>
@@ -151,11 +159,11 @@ export function LocationsManager() {
         })()}
         </div>
       ))}
-      <form onSubmit={add} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+      {canCreate && !readOnly ? <form onSubmit={add} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
         <Input value={fresh.name} onChange={(e) => setFresh({ ...fresh, name: e.target.value })} placeholder={t("locationsManager.newLocationEGSats")} />
         <Input value={fresh.description} onChange={(e) => setFresh({ ...fresh, description: e.target.value })} placeholder={t("locationsManager.descriptionOptional")} />
         <Button type="submit" variant="secondary"><Plus />{t("common.add")}</Button>
-      </form>
+      </form> : <p className="text-sm text-muted-foreground">{t("account.locationTeaser")}</p>}
     </section>
   );
 }

@@ -10,7 +10,11 @@ describe("App routing", () => {
   it.each([
     ["/home", "/_authenticated/home"],
     ["/workout", "/_authenticated/workout"],
-    ["/exercises", "/_authenticated/exercises/"],
+    ["/exercises", "/exercises"],
+    ["/exercise-bank", "/_authenticated/exercise-bank"],
+    ["/about", "/about"],
+    ["/features", "/features"],
+    ["/membership", "/membership"],
     ["/settings", "/_authenticated/settings"],
     ["/exercises/PU1", "/_authenticated/exercises/$code"],
     ["/log", "/_authenticated/log"],

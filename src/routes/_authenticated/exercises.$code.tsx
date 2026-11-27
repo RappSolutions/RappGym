@@ -52,7 +52,7 @@ function ExercisePage() {
   const [entry, setEntry] = useState<LogEntry | null>(null);
   const original = exercises.find((e) => e.code === code);
   const ex = original ? localize(original) : undefined;
-  if (!ex) return <p className="p-4">{t("exercisesDetail.exerciseNotFound")} <Link to="/exercises" className="underline">{t("exercisesDetail.back")}</Link></p>;
+  if (!ex) return <p className="p-4">{t("exercisesDetail.exerciseNotFound")} <Link to="/exercise-bank" className="underline">{t("exercisesDetail.back")}</Link></p>;
   const cats = categoriesOf(exercises);
   const token = categoryToken(ex.category, cats);
   const history = original ? exerciseHistory(log, original) : [];
@@ -66,12 +66,12 @@ function ExercisePage() {
       return;
     }
     invalidate();
-    navigate({ to: "/exercises" });
+    navigate({ to: "/exercise-bank" });
   }
 
   return (
     <main data-category={token} className="category-theme space-y-5 px-4">
-      <Link to="/exercises" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4" />{t("common.exercises")}</Link>
+      <Link to="/exercise-bank" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4" />{t("common.exercises")}</Link>
       <div>
         <div className="font-display text-lg font-bold uppercase text-category-ink">{ex.code} · {ex.category}</div>
         <div className="flex items-start justify-between gap-2"><h1 className="text-4xl font-extrabold uppercase leading-none">{ex.name}</h1><RatingPicker exerciseId={ex.id} /></div>

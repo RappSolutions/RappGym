@@ -30,7 +30,7 @@ function SettingsPage() {
   const { isAdmin, isLoading } = useIsAdmin();
   const { t } = useLanguage();
   if (isLoading) return null;
-  if (!isAdmin) return <main className="px-4"><p className="rounded-xl border bg-card p-4">{t("settings.settingsAreManagedByThe")}</p></main>;
+  if (!isAdmin) return <main className="space-y-3 px-4"><SettingsBlock title={t("settings.locations")}><LocationsManager /></SettingsBlock></main>;
   return (
     <main className="space-y-3 px-4">
       <SettingsBlock title={t("common.users")}><UsersManager /></SettingsBlock>

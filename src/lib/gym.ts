@@ -196,7 +196,12 @@ export type Gym = Tables<"gyms">;
 export const gymsQuery = queryOptions({
   queryKey: ["gyms"],
   queryFn: async () => {
-    const { data, error } = await supabase.from("gyms").select("*").order("created_at");
+    const { data: identity } = await supabase.auth.getUser();
+    const uid = identity.user?.id;
+    const { data: admin } = uid ? await supabase.rpc("has_role", { _user_id: uid, _role: "admin" }) : { data: false };
+    let query = supabase.from("gyms").select("*").order("created_at");
+    if (!admin && uid) query = query.or(`is_default.eq.true,user_id.eq.${uid}`);
+    const { data, error } = await query;
     if (error) throw error;
     return data;
   },

@@ -13,7 +13,7 @@ import { useLanguage, LanguagePicker } from "@/lib/i18n";
 import { emptyTrainingProfile, trainingProfileSchema, type TrainingProfile } from "@/lib/training-profile";
 import { gymsQuery } from "@/lib/gym";
 import { useSelectedGym } from "@/hooks/use-gym";
-import { useIsAdmin } from "@/lib/roles";
+
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator} from "@/components/ui/dropdown-menu";
@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ExerciseSuggestionDialog } from "@/components/gym/ExerciseSuggestionDialog";
 import { ContactDialog } from "@/components/gym/ContactDialog";
+import { AccountControls } from "@/components/gym/AccountControls";
 import { ConsentViewDialog } from "@/components/gym/ConsentGate";
 
 export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => Promise<void> }) {
@@ -32,12 +33,12 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
   const { data: gyms = [] } = useQuery(gymsQuery);
   const [gymId, setGym] = useSelectedGym();
   const currentGym = gyms.find((g) => g.id === gymId);
-  useEffect(() => { if (gyms.length > 0 && !currentGym) setGym(gyms[0]!.id); }, [gyms, currentGym, setGym]);
-  const { isAdmin } = useIsAdmin();
+  useEffect(() => { const fallback = gyms.find(g=>g.is_default) ?? gyms[0]; if (fallback && !currentGym) setGym(fallback.id); }, [gyms, currentGym, setGym]);
   const [open, setOpen] = useState(false);
   const [gymOpen, setGymOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [suggestionOpen, setSuggestionOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const [consentOpen, setConsentOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -82,11 +83,12 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
   }
   return <>
     <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label={t("profileMenu.myAccount")} title={t("profileMenu.myAccount")} className="shrink-0 rounded-full text-brand-yellow hover:bg-brand-royal hover:text-brand-yellow"><Avatar className="size-9 border-2 border-brand-yellow"><AvatarFallback className="bg-brand-royal text-sm font-semibold text-brand-yellow">{initials || <UserRound className="size-5" />}</AvatarFallback></Avatar></Button></DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 max-w-[calc(100vw-2rem)]"><DropdownMenuLabel><span className="block break-words">{name}</span>{email !== name && <span className="block break-words text-xs font-normal text-muted-foreground">{email}</span>}</DropdownMenuLabel><DropdownMenuSeparator />{gyms.length > 0 && <><DropdownMenuItem className="min-h-12" onSelect={() => setGymOpen(true)}><MapPin /><span className="min-w-0"><span className="block text-xs text-muted-foreground">{t("common.location")}</span><span className="block truncate font-medium">{currentGym?.name ?? ""}</span></span></DropdownMenuItem><DropdownMenuSeparator /></>}<DropdownMenuItem className="min-h-12" onSelect={() => void edit()}><UserRound />{t("profileMenu.myTrainingProfile")}</DropdownMenuItem>{isAdmin && <DropdownMenuItem asChild className="min-h-12"><Link to="/settings"><Settings />{t("profileMenu.settings")}</Link></DropdownMenuItem>}<DropdownMenuItem className="min-h-12" disabled={readOnly} onSelect={() => setContactOpen(true)}><Mail />{t("contact.menu")}</DropdownMenuItem><DropdownMenuItem className="min-h-12" disabled={readOnly} onSelect={() => setSuggestionOpen(true)}><Lightbulb />{t("exerciseSuggestion.title")}</DropdownMenuItem><DropdownMenuItem className="min-h-12" onSelect={() => setConsentOpen(true)}><ShieldCheck />{t("consent.menu")}</DropdownMenuItem><DropdownMenuSeparator /><div className="px-2 py-2"><LanguagePicker flagsOnly /></div><DropdownMenuSeparator /><DropdownMenuItem className="min-h-12" onSelect={() => void onSignOut()}><LogOut />{t("profileMenu.signOut")}</DropdownMenuItem><DropdownMenuSeparator /><a href="https://rappsol.com" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-sm px-2 py-1.5 text-[11px] text-muted-foreground hover:bg-accent"><img src={rappSolutionsMark} alt="Rapp Solutions AB" width={64} height={64} className="size-5 shrink-0 rounded-[5px] ring-1 ring-foreground/10" /><span>Provided by <span className="font-semibold text-foreground/80">Rapp Solutions AB</span></span></a></DropdownMenuContent>
+      <DropdownMenuContent align="end" className="w-64 max-w-[calc(100vw-2rem)]"><DropdownMenuLabel><span className="block break-words">{name}</span>{email !== name && <span className="block break-words text-xs font-normal text-muted-foreground">{email}</span>}</DropdownMenuLabel><DropdownMenuSeparator />{gyms.length > 0 && <><DropdownMenuItem className="min-h-12" onSelect={() => setGymOpen(true)}><MapPin /><span className="min-w-0"><span className="block text-xs text-muted-foreground">{t("common.location")}</span><span className="block truncate font-medium">{currentGym?.name ?? ""}</span></span></DropdownMenuItem><DropdownMenuSeparator /></>}<DropdownMenuItem className="min-h-12" onSelect={() => void edit()}><UserRound />{t("profileMenu.myTrainingProfile")}</DropdownMenuItem>{<DropdownMenuItem asChild className="min-h-12"><Link to="/settings"><Settings />{t("profileMenu.settings")}</Link></DropdownMenuItem>}<DropdownMenuItem className="min-h-12" disabled={readOnly} onSelect={() => setContactOpen(true)}><Mail />{t("contact.menu")}</DropdownMenuItem><DropdownMenuItem className="min-h-12" disabled={readOnly} onSelect={() => setSuggestionOpen(true)}><Lightbulb />{t("exerciseSuggestion.title")}</DropdownMenuItem><DropdownMenuItem className="min-h-12" onSelect={() => setConsentOpen(true)}><ShieldCheck />{t("consent.menu")}</DropdownMenuItem><DropdownMenuItem disabled={readOnly} onSelect={()=>setAccountOpen(true)}><UserRound />{t("account.manage")}</DropdownMenuItem><DropdownMenuSeparator /><div className="px-2 py-2"><LanguagePicker flagsOnly /></div><DropdownMenuSeparator /><DropdownMenuItem className="min-h-12" onSelect={() => void onSignOut()}><LogOut />{t("profileMenu.signOut")}</DropdownMenuItem><DropdownMenuSeparator /><a href="https://rappsol.com" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-sm px-2 py-1.5 text-[11px] text-muted-foreground hover:bg-accent"><img src={rappSolutionsMark} alt="Rapp Solutions AB" width={64} height={64} className="size-5 shrink-0 rounded-[5px] ring-1 ring-foreground/10" /><span>Provided by <span className="font-semibold text-foreground/80">Rapp Solutions AB</span></span></a></DropdownMenuContent>
     </DropdownMenu>
     <Drawer open={gymOpen} onOpenChange={setGymOpen}><DrawerContent><DrawerHeader><DrawerTitle>{t("common.location")}</DrawerTitle></DrawerHeader>
-      <div className="max-h-[60dvh] space-y-1 overflow-y-auto px-4 pb-6">{gyms.map((g) => <button key={g.id} type="button" onClick={() => { setGym(g.id); setGymOpen(false); }} className="flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-left hover:bg-muted" aria-pressed={g.id === gymId}><span className="min-w-0 flex-1"><span className="block truncate font-medium">{g.name}</span>{g.description && <span className="block truncate text-xs text-muted-foreground">{g.description}</span>}</span>{g.id === gymId && <Check className="size-5 shrink-0 text-primary" />}</button>)}</div>
+      <div className="max-h-[60dvh] space-y-1 overflow-y-auto px-4 pb-6">{gyms.map((g) => <button key={g.id} type="button" onClick={() => { setGym(g.id); setGymOpen(false); }} className="flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-left hover:bg-muted" aria-pressed={g.id === gymId}><span className="min-w-0 flex-1"><span className="block truncate font-medium">{g.name}</span>{g.description && <span className="block truncate text-xs text-muted-foreground">{g.description}</span>}</span>{g.id === gymId && <Check className="size-5 shrink-0 text-primary" />}</button>)}<p className="pt-3 text-xs text-muted-foreground">{t("account.locationTeaser")} <Link to="/membership" className="underline">{t("account.supporter")}</Link></p></div>
     </DrawerContent></Drawer>
+    <AccountControls userId={user.id} open={accountOpen} onOpenChange={setAccountOpen} onDeleted={onSignOut} />
     <ConsentViewDialog userId={view?.userId ?? user.id} open={consentOpen} onOpenChange={setConsentOpen} />
     <ExerciseSuggestionDialog open={suggestionOpen} onOpenChange={setSuggestionOpen} />
     <ContactDialog open={contactOpen} onOpenChange={setContactOpen} gymName={currentGym?.name ?? ""} />
