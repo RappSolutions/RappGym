@@ -74,3 +74,4 @@ use the editor.
 - The shared default location automatically gains each database equipment row; ordinary users list only that location and their own, and private-location writes require dated supporter access enforced by RLS.
 
 - User-view bootstrap runs only inside the authenticated layout; public pages SSR their content without waiting for browser auth, while identity changes remount the Outlet.
+- Complimentary access reuses dated manual memberships with a nullable payment reference and separate note; the admin RPC enforces authority and inclusive expiry, without changing Stripe subscriptions.

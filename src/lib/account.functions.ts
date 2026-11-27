@@ -21,6 +21,7 @@ export const verifyMembership = createServerFn({ method: "POST" })
       _starts_on: data.startsOn,
       _ends_on: data.endsOn,
       _stripe_reference: data.stripeReference,
+      _note: data.note,
     });
     if (error) throw new Error(error.message);
     return { ok: true };

@@ -16,7 +16,7 @@ export type AdminUser = {
   workouts: number;
   consentVersion: number;
   paidUntil: string | null;
-  membership: { startsOn: string; endsOn: string; reference: string | null } | null;
+  membership: { startsOn: string; endsOn: string; reference: string | null; note: string | null } | null;
 };
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
@@ -101,7 +101,7 @@ export const listUsers = createServerFn({ method: "POST" })
       membership: (() => {
         const m = memberships.data?.find((m) => m.user_id === u.id);
         return m
-          ? { startsOn: m.starts_on, endsOn: m.ends_on, reference: m.stripe_reference }
+          ? { startsOn: m.starts_on, endsOn: m.ends_on, reference: m.stripe_reference, note: m.note }
           : null;
       })(),
     }));

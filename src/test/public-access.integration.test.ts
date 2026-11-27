@@ -45,6 +45,16 @@ describe.skipIf(!url || !key)("live anonymous access boundaries", () => {
     });
     expect(r.error !== null).toBe(true);
   });
+  it("anonymous callers cannot grant complimentary supporter access", async () => {
+    const r = await client().rpc("set_manual_membership", {
+      _user_id: "123e4567-e89b-42d3-a456-426614174000",
+      _starts_on: "2026-11-27",
+      _ends_on: "2026-12-27",
+      _stripe_reference: "",
+      _note: "Test denied",
+    });
+    expect(r.error !== null).toBe(true);
+  });
   it("anonymous callers cannot erase an account", async () => {
     const r = await client().rpc("erase_account_data", {
       _user_id: "123e4567-e89b-42d3-a456-426614174000",

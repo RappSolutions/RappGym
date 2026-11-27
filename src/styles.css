@@ -259,12 +259,15 @@ body { background: var(--page-surround); }
   border-bottom: 4px solid var(--brand-royal);
 }
 .app-masthead > * { position: relative; z-index: 1; }
-.brand-wordmark { color: var(--primary-foreground); letter-spacing: 0; }
+.brand-wordmark { color: var(--brand-yellow); letter-spacing: 0; }
 .app-masthead select { background: var(--background); color: var(--foreground); }
 .app-navigation { max-width: 42rem; margin-inline: auto; border-top: 3px solid var(--brand-royal); }
 @media (min-width: 768px) { .app-navigation { max-width: 56rem; } }
 @media (min-width: 720px) { .app-sheet { margin-top: 2rem; padding-top: 1.5rem; } .app-masthead { margin-inline: 1rem; } }
-@media (max-width: 719px) { body { background: var(--background); } }
+@media (max-width: 719px) {
+  body { background: var(--background); }
+  .app-masthead { background-position: left center; }
+}
 
 /* Landing page: logo float, staggered rise, soft brand glow. */
 .landing-glow { position: absolute; inset: auto; top: 10%; width: 28rem; height: 28rem; border-radius: 9999px; background: radial-gradient(circle, color-mix(in oklch, var(--brand-yellow) 45%, transparent), transparent 65%); filter: blur(30px); animation: landing-pulse 6s ease-in-out infinite; pointer-events: none; }

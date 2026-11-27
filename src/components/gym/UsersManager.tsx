@@ -5,6 +5,8 @@ import { Ban, CheckCircle2, ShieldMinus, ShieldPlus, Trash2, Eye } from "lucide-
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { verifyMembership } from "@/lib/account.functions";
+import { membershipEndDate, membershipSchema } from "@/lib/account-policy";
+import { LogDatePicker } from "./LogDatePicker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -33,6 +35,7 @@ export function UsersManager() {
     startsOn: new Date().toISOString().slice(0, 10),
     endsOn: "",
     stripeReference: "",
+    note: "",
   });
   const [saving, setSaving] = useState(false);
   const list = useServerFn(listUsers);
@@ -92,7 +95,7 @@ export function UsersManager() {
     if (!memberUser) return;
     setSaving(true);
     try {
-      await verify({ data: { userId: memberUser, ...payment } });
+      await verify({ data: membershipSchema.parse({ userId: memberUser, ...payment }) });
       toast.success(t("account.membershipSaved"));
       setMemberUser(null);
       await qc.invalidateQueries();
@@ -165,7 +168,7 @@ export function UsersManager() {
               <p className="text-xs text-muted-foreground">
                 {t("account.counts", { sets: u.sets, workouts: u.workouts })} ·{" "}
                 {t("account.consentVersion", { version: u.consentVersion })} ·{" "}
-                {paid(u) ? `${t("account.supporter")} ${u.paidUntil}` : t("account.free")}
+                {paid(u) ? t("account.supporterUntil", { date: u.paidUntil }) : t("account.free")}
               </p>
               <details>
                 <summary className="cursor-pointer text-xs text-muted-foreground">
@@ -179,13 +182,14 @@ export function UsersManager() {
                 onClick={() => {
                   setMemberUser(u.id);
                   setPayment({
-                    startsOn: u.membership?.startsOn ?? today,
-                    endsOn: u.membership?.endsOn ?? "",
+                    startsOn: today,
+                    endsOn: u.membership && u.membership.endsOn >= today ? u.membership.endsOn : membershipEndDate(today, 1),
                     stripeReference: u.membership?.reference ?? "",
+                    note: u.membership?.note ?? "",
                   });
                 }}
               >
-                {t("account.verifyPayment")}
+                {t("account.grantSupporter")}
               </Button>
               {!self && (
                 <div className="flex flex-wrap gap-2">
@@ -275,8 +279,8 @@ export function UsersManager() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("account.verifyPayment")}</DialogTitle>
-            <DialogDescription>{t("account.paymentHelp")}</DialogDescription>
+            <DialogTitle>{t("account.grantSupporter")}</DialogTitle>
+            <DialogDescription>{t("account.manualSupporterHelp")}</DialogDescription>
           </DialogHeader>
           <p className="break-words text-sm font-medium">
             {users.find((u) => u.id === memberUser)?.email}
@@ -288,20 +292,37 @@ export function UsersManager() {
               void savePayment();
             }}
           >
-            {(["startsOn", "endsOn", "stripeReference"] as const).map((field) => (
+            <div className="space-y-2">
+              <Label>{t("account.endsOn")}</Label>
+              <LogDatePicker value={payment.endsOn} onChange={(endsOn) => setPayment({ ...payment, endsOn })} />
+              <div className="flex flex-wrap gap-2">
+                {([1, 3, 12] as const).map((months) => (
+                  <Button key={months} type="button" variant="outline" size="sm" onClick={() => setPayment({ ...payment, endsOn: membershipEndDate(today, months) })}>
+                    {t(`account.extend${months}`)}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="membership-note">{t("account.membershipNote")}</Label>
+              <Input id="membership-note" maxLength={255} value={payment.note} onChange={(e) => setPayment({ ...payment, note: e.target.value })} />
+            </div>
+            <details className="text-sm">
+              <summary className="cursor-pointer text-muted-foreground">{t("account.paymentReferenceOptional")}</summary>
+            {(["stripeReference"] as const).map((field) => (
               <div key={field} className="space-y-1">
                 <Label htmlFor={`payment-${field}`}>{t(`account.${field}`)}</Label>
                 <Input
                   id={`payment-${field}`}
-                  required
                   maxLength={255}
-                  placeholder={field === "stripeReference" ? "pi_…" : "YYYY-MM-DD"}
+                  placeholder="pi_…"
                   value={payment[field]}
                   onChange={(e) => setPayment({ ...payment, [field]: e.target.value })}
                 />
               </div>
             ))}
-            <Button type="submit" disabled={saving} className="w-full">
+            </details>
+            <Button type="submit" disabled={saving || !payment.endsOn || payment.endsOn < today} className="w-full">
               {t("account.saveMembership")}
             </Button>
           </form>

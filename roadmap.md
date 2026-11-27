@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Yellow shared masthead text and mobile banner positioning; admin complimentary supporter grants with inclusive ISO end date, calendar shortcuts and optional separate note (Lean; browser flow not verified).
 - [ ] Commercial launch checks: controller details/legal bases, processor/AI transfer and retention terms, subscription terms; owner decisions required (LAUNCH.md).
 - [ ] Verify real signed-in account deletion and membership/location flow end-to-end; Lean excludes browser verification, Stripe lifecycle tests need test configuration.
 - [ ] Before broad promotion, enforce atomic AI concurrency/spending reservations and external abuse/WAF limits; hosting configuration and budget decisions required.

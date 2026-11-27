@@ -738,6 +738,7 @@ export type Database = {
       user_memberships: {
         Row: {
           ends_on: string
+          note: string | null
           starts_on: string
           stripe_reference: string | null
           tier_id: string
@@ -747,6 +748,7 @@ export type Database = {
         }
         Insert: {
           ends_on: string
+          note?: string | null
           starts_on: string
           stripe_reference?: string | null
           tier_id: string
@@ -756,6 +758,7 @@ export type Database = {
         }
         Update: {
           ends_on?: string
+          note?: string | null
           starts_on?: string
           stripe_reference?: string | null
           tier_id?: string
@@ -972,15 +975,26 @@ export type Database = {
           reps_unit: string
         }[]
       }
-      set_manual_membership: {
-        Args: {
-          _ends_on: string
-          _starts_on: string
-          _stripe_reference: string
-          _user_id: string
-        }
-        Returns: undefined
-      }
+      set_manual_membership:
+        | {
+            Args: {
+              _ends_on: string
+              _starts_on: string
+              _stripe_reference?: string
+              _user_id: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              _ends_on: string
+              _note: string
+              _starts_on: string
+              _stripe_reference: string
+              _user_id: string
+            }
+            Returns: undefined
+          }
       start_user_view: { Args: { _target_user_id: string }; Returns: string }
       user_view_active: { Args: never; Returns: boolean }
     }
