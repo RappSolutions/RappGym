@@ -19,3 +19,5 @@
 - Stripe: one RappGym product with month/year EUR price IDs as code constants (billing-policy.ts); status reads sync from Stripe per customer (webhook optional), RAPPGYM_BILLING_ENABLED="false" is the kill switch.
 - Account deletion shares one privileged erasure helper after caller authorisation; it cancels only stored app subscriptions, erases private tables transactionally, then deletes Auth, preserving shared exercise definitions without creator IDs.
 - Profile pictures: private `avatars` bucket `<uid>/avatar` (owner RLS) flagged by versioned `custom_avatar` auth metadata; fallback OAuth picture, then initials, so no profile column.
+- Uploaded avatars are cropped client-side to a 1:1 256 px JPEG (pure geometry in avatar-crop.ts) before storage; a missing custom file falls back to the OAuth picture, so stale flags never blank the avatar.
+- The root auth listener remounts the app only when the user id changes; USER_UPDATED/same-user SIGNED_IN just invalidate the router, so metadata saves never close open dialogs.

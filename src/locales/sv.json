@@ -847,6 +847,10 @@
     "removeConfirm": "Ta bort din uppladdade profilbild?",
     "hint": "Utan egen bild visas bilden från ditt Google- eller Microsoft-konto, annars initialer.",
     "saved": "Profilbild sparad",
+    "cropTitle": "Beskär profilbild",
+    "zoom": "Zoom",
+    "cancel": "Avbryt",
+    "cropSave": "Spara",
     "tooLarge": "Bilden får vara högst 2 MB"
   }
 }

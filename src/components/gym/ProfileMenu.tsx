@@ -181,7 +181,7 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
             className="shrink-0 rounded-full text-brand-yellow hover:bg-brand-royal hover:text-brand-yellow"
           >
             <Avatar className="size-9 border-2 border-brand-yellow">
-              {!readOnly && avatarUrl && <AvatarImage src={avatarUrl} alt="" />}
+              {!readOnly && avatarUrl && <AvatarImage src={avatarUrl} alt="" referrerPolicy="no-referrer" />}
               <AvatarFallback className="bg-brand-royal text-sm font-semibold text-brand-yellow">
                 {initials || <UserRound className="size-5" />}
               </AvatarFallback>

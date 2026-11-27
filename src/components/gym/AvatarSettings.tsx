@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { confirmDialog } from "@/components/gym/ConfirmHost";
 import { useLanguage } from "@/lib/i18n";
+import { AvatarCropDialog } from "@/components/gym/AvatarCropDialog";
 import { removeAvatar, uploadAvatar, useAvatarUrl } from "@/lib/avatar";
 
 export function AvatarSettings({ userId }: { userId: string }) {
@@ -31,6 +32,7 @@ function Inner({
   const url = useAvatarUrl(user);
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<File | null>(null);
   const hasCustom = typeof user.user_metadata["custom_avatar"] === "number";
   async function run(fn: () => Promise<void>, ok?: string) {
     setBusy(true);
@@ -47,7 +49,7 @@ function Inner({
   return (
     <section className="flex items-center gap-3" aria-label={t("avatar.picture")}>
       <Avatar className="size-14 shrink-0">
-        {url && <AvatarImage src={url} alt="" />}
+        {url && <AvatarImage src={url} alt="" referrerPolicy="no-referrer" />}
         <AvatarFallback>?</AvatarFallback>
       </Avatar>
       <div className="min-w-0 flex-1 space-y-2">
@@ -64,7 +66,7 @@ function Inner({
               e.target.value = "";
               if (!f) return;
               if (f.size > 2 * 1024 * 1024) return void toast.error(t("avatar.tooLarge"));
-              void run(() => uploadAvatar(user.id, f), t("avatar.saved"));
+              setPending(f);
             }}
           />
           <Button size="sm" variant="outline" disabled={busy} onClick={() => input.current?.click()}>
@@ -87,6 +89,14 @@ function Inner({
           )}
         </div>
       </div>
+      <AvatarCropDialog
+        file={pending}
+        onCancel={() => setPending(null)}
+        onDone={(blob) => {
+          setPending(null);
+          void run(() => uploadAvatar(user.id, blob), t("avatar.saved"));
+        }}
+      />
     </section>
   );
 }

@@ -20,7 +20,7 @@ export function avatarSource(meta: Record<string, unknown>): { custom: number } 
 export function useAvatarUrl(user: User): string | undefined {
   const src = avatarSource(user.user_metadata ?? {});
   const custom = src && "custom" in src ? src.custom : 0;
-  const { data } = useQuery({
+  const { data, isError } = useQuery({
     queryKey: ["avatar", user.id, custom],
     enabled: custom > 0,
     staleTime: 50 * 60_000,
@@ -33,13 +33,17 @@ export function useAvatarUrl(user: User): string | undefined {
     },
   });
   if (!src) return undefined;
-  return "url" in src ? src.url : data;
+  if ("url" in src) return src.url;
+  if (data) return data;
+  const meta = user.user_metadata ?? {};
+  const fb = avatarSource({ ...meta, custom_avatar: null });
+  return isError && fb && "url" in fb ? fb.url : undefined;
 }
 
-export async function uploadAvatar(userId: string, file: File) {
+export async function uploadAvatar(userId: string, file: Blob) {
   const { error } = await supabase.storage
     .from(AVATAR_BUCKET)
-    .upload(avatarPath(userId), file, { upsert: true, contentType: file.type });
+    .upload(avatarPath(userId), file, { upsert: true, contentType: file.type || "image/jpeg" });
   if (error) throw error;
   const { error: e2 } = await supabase.auth.updateUser({ data: { custom_avatar: Date.now() } });
   if (e2) throw e2;

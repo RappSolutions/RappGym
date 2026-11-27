@@ -139,8 +139,18 @@ function RootComponent() {
   const router = useRouter();
   const [identityVersion, setIdentityVersion] = useState(0);
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event) => {
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+    let uid: string | null | undefined;
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      const next = session?.user.id ?? null;
+      const prev = uid;
+      uid = next;
+      if (event === "INITIAL_SESSION") return;
+      // Same identity (metadata update, token re-issue): refresh route context without remounting open dialogs.
+      if (event === "USER_UPDATED" || (event === "SIGNED_IN" && prev === next)) {
+        router.invalidate();
+        return;
+      }
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT") return;
       queryClient.clear();
       setIdentityVersion((v) => v + 1);
       router.invalidate();

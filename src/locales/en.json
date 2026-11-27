@@ -847,6 +847,10 @@
     "removeConfirm": "Remove your uploaded profile picture?",
     "hint": "Without your own picture, the one from your Google or Microsoft account is shown, otherwise initials.",
     "saved": "Profile picture saved",
+    "cropTitle": "Crop profile picture",
+    "zoom": "Zoom",
+    "cancel": "Cancel",
+    "cropSave": "Save",
     "tooLarge": "The picture must be at most 2 MB"
   }
 }
