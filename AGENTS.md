@@ -52,6 +52,7 @@ use the editor.
 - Derive progress charts client-side through the shared progress aggregation module; compare weights per exercise and sum repeat counts per date so unrelated exercises and text loads are never mixed into weight trends.
 
 - Keep app branding in shared global CSS tokens and the shared masthead, which links to Home from every page; all content routes inherit the same visual frame so changes stay consistent across pages.
+- Render masthead stripes in a bounded right-edge CSS layer to avoid cover-image cropping; resolve app subtitles from canonical routes and pass public subtitles to PublicFrame.
 - Category surfaces use shared data-category themes with separate fill, ink, on-fill and chart tokens; this keeps category accents consistent, text legible on bright fills and charts readable on white.
 - Sort rows within displayed workout dates by recording timestamp ascending without changing the newest-first shared log query, so latest-set prefills remain correct.
 - Derive the Home logo and favicon from the same logo artwork; use only the circular badge for the favicon so it stays legible at browser-tab sizes.

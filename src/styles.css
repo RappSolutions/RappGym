@@ -93,6 +93,8 @@
   /* Brand background: #0063FF (RGB 0 99 255). */
   --brand-blue: oklch(0.557876271 0.244214792 261.203800404);
   --brand-yellow: oklch(0.967983 0.211006 109.769);
+  --masthead-background: linear-gradient(to right, var(--brand-royal), var(--brand-blue) 35%);
+  --masthead-stripes: linear-gradient(135deg, transparent 38%, var(--primary-foreground) 38% 39%, transparent 39% 46%, var(--primary-foreground) 46% 48%, transparent 48% 51%, var(--primary-foreground) 51% 52%, transparent 52% 72%, var(--primary-foreground) 72% 75%, transparent 75%);
   --page-surround: var(--brand-royal);
   --effort-easy: oklch(0.88 0.13 150);
   --effort-controlled: oklch(0.86 0.19 125);
@@ -252,11 +254,18 @@ body { background: var(--page-surround); }
   position: relative;
   overflow: hidden;
   background-color: var(--brand-blue);
-  background-image: url("./assets/RappGymHeader.png");
-  background-position: right center;
-  background-size: cover;
+  background-image: var(--masthead-background);
   color: var(--primary-foreground);
   border-bottom: 4px solid var(--brand-royal);
+}
+.app-masthead::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 22%;
+  max-width: 180px;
+  background-image: var(--masthead-stripes);
+  pointer-events: none;
 }
 .app-masthead > * { position: relative; z-index: 1; }
 .brand-wordmark { color: var(--brand-yellow); letter-spacing: 0; }
@@ -266,7 +275,6 @@ body { background: var(--page-surround); }
 @media (min-width: 720px) { .app-sheet { margin-top: 2rem; padding-top: 1.5rem; } .app-masthead { margin-inline: 1rem; } }
 @media (max-width: 719px) {
   body { background: var(--background); }
-  .app-masthead { background-position: left center; }
 }
 
 /* Landing page: logo float, staggered rise, soft brand glow. */

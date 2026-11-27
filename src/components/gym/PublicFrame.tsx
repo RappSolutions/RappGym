@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import logo from "@/assets/RappGym_1024.png";
 import { Button } from "@/components/ui/button";
-export function PublicFrame({ children }: { children: ReactNode }) {
+export function PublicFrame({ children, subtitle }: { children: ReactNode; subtitle?: string }) {
   return (
     <div lang="en" className="app-sheet mx-auto min-h-screen max-w-4xl">
       <header className="app-masthead flex items-center justify-between gap-3 px-4 py-4 sm:px-6">
@@ -11,7 +11,10 @@ export function PublicFrame({ children }: { children: ReactNode }) {
           className="brand-wordmark flex min-w-0 items-center gap-3 font-display text-2xl font-bold sm:text-3xl"
         >
           <img src={logo} alt="" className="size-12 shrink-0 sm:size-14" />
-          <span className="truncate">RappGym</span>
+          <span className="min-w-0">
+            <span className="block truncate">RappGym</span>
+            {subtitle && <span className="block truncate text-sm font-normal sm:text-base">{subtitle}</span>}
+          </span>
         </Link>
         <Button
           asChild

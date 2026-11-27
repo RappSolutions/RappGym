@@ -33,7 +33,7 @@ function Catalogue() {
   );
   const categories = [...new Set(rows.map((r) => r.category))];
   return (
-    <PublicFrame>
+    <PublicFrame subtitle="Exercises">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-3xl font-bold">Exercise bank</h1>
         <Button asChild variant="outline" size="sm">

@@ -38,7 +38,7 @@ const NAV_STYLE: "chip" | "block" =
 const pageLabels: [RegExp, NavLabelKey][] = [
   [/^\/home/, "nav.tabs.home"],
   [/^\/workout/, "nav.tabs.workout"],
-  [/^\/exercises/, "nav.tabs.exercises"],
+  [/^\/(exercise-bank|exercises)(\/|$)/, "nav.tabs.exercises"],
   [/^\/log/, "nav.tabs.log"],
   [/^\/ai/, "nav.tabs.ai"],
   [/^\/settings/, "nav.tabs.settings"],
