@@ -26,7 +26,7 @@ function About() {
           RappGym
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-center text-lg">
-          Less typing. More training. A little less dignity when the Done button makes you laugh.
+          Less typing. More training. Instructions, illustrations, and the AI can plan workouts for you. 
         </p>
         <div className="mt-5 flex justify-center gap-3">
           <Button asChild>
