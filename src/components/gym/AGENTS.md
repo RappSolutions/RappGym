@@ -1,0 +1,1 @@
+- Active location is a header chip beside the avatar (ProfileMenu), not a menu item, so it is always visible.

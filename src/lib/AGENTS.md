@@ -18,3 +18,4 @@
 - Memberships are dated manual records; automated Stripe subscriptions have separate customer mappings and a tier FK, with server-derived access independent of receipt email, so payments never become roles or profile flags.
 - Stripe: one RappGym product with month/year EUR price IDs as code constants (billing-policy.ts); status reads sync from Stripe per customer (webhook optional), RAPPGYM_BILLING_ENABLED="false" is the kill switch.
 - Account deletion shares one privileged erasure helper after caller authorisation; it cancels only stored app subscriptions, erases private tables transactionally, then deletes Auth, preserving shared exercise definitions without creator IDs.
+- Profile pictures: private `avatars` bucket `<uid>/avatar` (owner RLS) flagged by versioned `custom_avatar` auth metadata; fallback OAuth picture, then initials, so no profile column.
