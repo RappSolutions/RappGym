@@ -2,37 +2,47 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertUserViewWritable } from "@/lib/user-view-guard";
-import { BILLING_APP, billingConfigured } from "@/lib/billing-policy";
+import { z } from "zod";
+import {
+  BILLING_APP,
+  billingConfigured,
+  SUPPORTER_PLANS,
+  SUPPORTER_PRODUCT_ID,
+  SUPPORTER_CURRENCY,
+} from "@/lib/billing-policy";
 export const getBillingStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const enabled = billingConfigured(
-      process.env["RAPPGYM_BILLING_ENABLED"],
-      process.env["STRIPE_SECRET_KEY"],
-      process.env["RAPPGYM_STRIPE_PRICE_ID"],
-      process.env["RAPPGYM_STRIPE_PRODUCT_ID"],
-      process.env["RAPPGYM_STRIPE_WEBHOOK_SECRET"],
-    );
+    const enabled = billingConfigured(process.env["RAPPGYM_BILLING_ENABLED"], process.env["STRIPE_SECRET_KEY"]);
+    if (enabled) {
+      const acc = await context.supabase
+        .from("billing_accounts")
+        .select("stripe_customer_id")
+        .eq("user_id", context.userId)
+        .maybeSingle();
+      if (acc.data) {
+        const { syncCustomer } = await import("@/lib/billing.server");
+        await syncCustomer(acc.data.stripe_customer_id).catch((e) =>
+          console.error("[billing] sync failed", e),
+        );
+      }
+    }
+    const supporter = await context.supabase.rpc("has_supporter_access", { _user_id: context.userId });
     const { data, error } = await context.supabase
       .from("billing_subscriptions")
       .select("status,period_end,cancel_at_period_end")
       .eq("user_id", context.userId)
       .order("period_end", { ascending: false });
     if (error) throw new Error("Billing unavailable");
-    return { enabled, subscriptions: data };
+    return { enabled, supporter: !!supporter.data, subscriptions: data };
   });
 export const startCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((d) => z.object({ plan: z.enum(["month", "year"]) }).parse(d))
+  .handler(async ({ context, data: input }) => {
     await assertUserViewWritable(context.supabase);
     if (
-      !billingConfigured(
-        process.env["RAPPGYM_BILLING_ENABLED"],
-        process.env["STRIPE_SECRET_KEY"],
-        process.env["RAPPGYM_STRIPE_PRICE_ID"],
-        process.env["RAPPGYM_STRIPE_PRODUCT_ID"],
-        process.env["RAPPGYM_STRIPE_WEBHOOK_SECRET"],
-      )
+      !billingConfigured(process.env["RAPPGYM_BILLING_ENABLED"], process.env["STRIPE_SECRET_KEY"])
     )
       throw new Error("Payments are not open yet");
     const { data: active, error: activeError } = await context.supabase.rpc(
@@ -43,15 +53,15 @@ export const startCheckout = createServerFn({ method: "POST" })
     if (active) throw new Error("Membership is already active");
     const { stripeClient } = await import("@/lib/billing.server");
     const stripe = stripeClient();
-    const priceId = process.env["RAPPGYM_STRIPE_PRICE_ID"];
-    if (!priceId) throw new Error("Payments unavailable");
+    const plan = SUPPORTER_PLANS[input.plan];
+    const priceId = plan.priceId;
     const price = await stripe.prices.retrieve(priceId);
     const product = typeof price.product === "string" ? price.product : price.product.id;
     if (
-      product !== process.env["RAPPGYM_STRIPE_PRODUCT_ID"] ||
+      product !== SUPPORTER_PRODUCT_ID ||
       !price.active ||
-      price.recurring?.interval !== "month" ||
-      price.currency !== "sek"
+      price.recurring?.interval !== plan.interval ||
+      price.currency !== SUPPORTER_CURRENCY
     )
       throw new Error("Invalid RappGym price");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -86,7 +96,7 @@ export const startCheckout = createServerFn({ method: "POST" })
         cancel_url: `${origin}/settings`,
         allow_promotion_codes: false,
       },
-      { idempotencyKey: `rappgym-checkout-${context.userId}-${Math.floor(Date.now() / 900000)}` },
+      { idempotencyKey: `rappgym-checkout-${context.userId}-${input.plan}-${Math.floor(Date.now() / 900000)}` },
     );
     if (!session.url) throw new Error("Checkout unavailable");
     return { url: session.url };

@@ -53,6 +53,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ExerciseSuggestionDialog } from "@/components/gym/ExerciseSuggestionDialog";
 import { ContactDialog } from "@/components/gym/ContactDialog";
 import { AccountControls } from "@/components/gym/AccountControls";
+import { OPEN_ACCOUNT_EVENT } from "@/components/gym/SupporterLink";
 import { ConsentViewDialog } from "@/components/gym/ConsentGate";
 
 export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => Promise<void> }) {
@@ -72,6 +73,11 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
   const [suggestionOpen, setSuggestionOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [consentOpen, setConsentOpen] = useState(false);
+  useEffect(() => {
+    const open = () => setAccountOpen(true);
+    window.addEventListener(OPEN_ACCOUNT_EVENT, open);
+    return () => window.removeEventListener(OPEN_ACCOUNT_EVENT, open);
+  }, []);
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [profile, setProfile] = useState<TrainingProfile>(emptyTrainingProfile);

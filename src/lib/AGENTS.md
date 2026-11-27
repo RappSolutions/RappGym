@@ -16,5 +16,5 @@
 - Workout completion summary is derived by pure src/lib/workout-summary.ts from completed log rows (PR = max kg above earlier history, first-time exercises excluded) and shown by ActiveWorkout after finishWorkout, so it never stores derived values.
 
 - Memberships are dated manual records; automated Stripe subscriptions have separate customer mappings and a tier FK, with server-derived access independent of receipt email, so payments never become roles or profile flags.
-- Stripe uses a separate product and app metadata; Checkout requires explicit enablement, and verified webhooks upsert current subscription state.
+- Stripe: one RappGym product with month/year EUR price IDs as code constants (billing-policy.ts); status reads sync from Stripe per customer (webhook optional), RAPPGYM_BILLING_ENABLED="false" is the kill switch.
 - Account deletion shares one privileged erasure helper after caller authorisation; it cancels only stored app subscriptions, erases private tables transactionally, then deletes Auth, preserving shared exercise definitions without creator IDs.

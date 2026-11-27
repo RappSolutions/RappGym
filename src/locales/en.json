@@ -826,6 +826,10 @@
     "counts": "{{sets}} sets · {{workouts}} workouts",
     "membershipSaved": "Membership saved",
     "managePayment": "Manage subscription",
-    "subscribe": "Open Stripe Checkout"
+    "subscribe": "Open Stripe Checkout",
+    "supporterPitch": "Supporter: your own locations with their equipment and 30 AI requests/month.",
+    "planMonth": "€4 / month",
+    "planYear": "€40 / year",
+    "becomeSupporter": "Become a supporter – own locations and more AI requests"
   }
 }

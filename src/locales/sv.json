@@ -826,6 +826,10 @@
     "counts": "{{sets}} set · {{workouts}} pass",
     "membershipSaved": "Medlemskap sparat",
     "managePayment": "Hantera prenumeration",
-    "subscribe": "Till Stripe Checkout"
+    "subscribe": "Till Stripe Checkout",
+    "supporterPitch": "Supporter: egna platser med egna redskap och 30 AI-anrop/månad.",
+    "planMonth": "€4 / månad",
+    "planYear": "€40 / år",
+    "becomeSupporter": "Bli supporter – egna platser och fler AI-anrop"
   }
 }

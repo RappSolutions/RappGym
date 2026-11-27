@@ -1,3 +1,4 @@
+import { SupporterLink } from "@/components/gym/SupporterLink";
 import { isWorkoutFinished, workoutSetProgress } from "@/lib/circuit";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -146,6 +147,7 @@ function HomePage() {
           </div>
         )}
       </section>
+      <SupporterLink className="-mt-1 justify-center w-full" />
       <div className="grid-cols-2 sm:grid-cols-3 md:grid-cols-6">
         <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-3">
           {kpis.map(([l, v]) => (

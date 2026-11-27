@@ -3,6 +3,7 @@ import { useEffect, useId, useState } from "react";
 import { useBlocker } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { SupporterLink } from "@/components/gym/SupporterLink";
 import { getMyAiQuota } from "@/lib/ai-quota.functions";
 import { quotaAllowed, quotaRemaining } from "@/lib/ai-quota";
 import { Link } from "@tanstack/react-router";
@@ -528,6 +529,7 @@ export function TrainingInsights(props: TrainingInsightsProps) {
                     : t("trainingInsights.thisMonthSQuotaIs", { used: quota.used, quota: quota.quota, periodEnd: quota.periodEnd })}
           </p>
         )}
+        {quota && !quota.isAdmin && <SupporterLink className="block" />}
         {busy && (
           <Button type="button" variant="outline" className="ml-2" onClick={cancel}>
             <Square className="size-4" />

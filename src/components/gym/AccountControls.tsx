@@ -64,10 +64,10 @@ export function AccountControls({
   const subscription = billing?.subscriptions.find(
     (s) => s.status === "active" && s.period_end > new Date().toISOString(),
   );
-  async function pay(kind: "checkout" | "portal") {
+  async function pay(kind: "month" | "year" | "portal") {
     setBusy(true);
     try {
-      const result = await (kind === "checkout" ? checkout() : portal());
+      const result = await (kind === "portal" ? portal() : checkout({ data: { plan: kind } }));
       window.location.assign(result.url);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : String(e));
@@ -115,15 +115,24 @@ export function AccountControls({
           <dt className="mt-3 font-medium">{t("account.accountId")}</dt>
           <dd className="break-all font-mono text-xs">{userId}</dd>
         </dl>
-        {billing?.enabled && (
-          <Button
-            variant="outline"
-            disabled={busy}
-            onClick={() => void pay(subscription ? "portal" : "checkout")}
-          >
-            {t(subscription ? "account.managePayment" : "account.subscribe")}
-          </Button>
-        )}
+        {billing?.enabled &&
+          (subscription ? (
+            <Button variant="outline" disabled={busy} onClick={() => void pay("portal")}>
+              {t("account.managePayment")}
+            </Button>
+          ) : !active ? (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">{t("account.supporterPitch")}</p>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" disabled={busy} onClick={() => void pay("month")}>
+                  {t("account.planMonth")}
+                </Button>
+                <Button variant="outline" disabled={busy} onClick={() => void pay("year")}>
+                  {t("account.planYear")}
+                </Button>
+              </div>
+            </div>
+          ) : null)}
         <section className="space-y-3 border-t pt-4">
           <h2 className="font-semibold text-destructive">{t("account.delete")}</h2>
           <p className="text-sm leading-relaxed text-muted-foreground">

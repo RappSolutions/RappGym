@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { BILLING_APP } from "./billing-policy";
+import { BILLING_APP, isSupporterPrice } from "./billing-policy";
 export function stripeClient() {
   const key = process.env["STRIPE_SECRET_KEY"];
   if (!key) throw new Error("Payments unavailable");
@@ -12,7 +12,7 @@ export async function syncSubscription(subscriptionId: string) {
   if (
     sub.metadata["app"] !== BILLING_APP ||
     !item ||
-    item.price.id !== process.env["RAPPGYM_STRIPE_PRICE_ID"]
+    !isSupporterPrice(item.price.id)
   )
     return;
   const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
@@ -37,4 +37,9 @@ export async function syncSubscription(subscriptionId: string) {
       updated_at: new Date().toISOString(),
     });
   if (r.error) throw new Error("Subscription could not be saved");
+}
+/** Pull current RappGym subscriptions for a customer from Stripe (no webhook needed). */
+export async function syncCustomer(customerId: string) {
+  const subs = await stripeClient().subscriptions.list({ customer: customerId, status: "all", limit: 20 });
+  for (const s of subs.data) if (s.metadata["app"] === BILLING_APP) await syncSubscription(s.id);
 }
