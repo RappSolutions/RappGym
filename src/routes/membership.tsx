@@ -35,11 +35,11 @@ function Membership() {
         </section>
       </div>
       <section className="border-t pt-6">
-        <h2 className="font-display text-xl font-bold">Payments are not open yet</h2>
+        <h2 className="font-display text-xl font-bold">Price: €4/month or €40/year</h2>
         <p className="mt-2 text-sm leading-relaxed">
-          The subscription price and Stripe checkout are being prepared. No payment is collected on
-          this page. Existing payments can be verified manually by RappGym; access is linked to your
-          app account, not the email on your receipt.
+          Sign in and choose "Become a supporter" on the Home screen or in your account menu. Payment
+          is handled by Stripe and can be cancelled at any time. Access is linked to your app account,
+          not the email on your receipt.
         </p>
         <p className="mt-3 text-sm">
           Questions?{" "}
