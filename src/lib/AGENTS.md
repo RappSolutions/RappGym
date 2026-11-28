@@ -21,3 +21,4 @@
 - Profile pictures: private `avatars` bucket `<uid>/avatar` (owner RLS) flagged by versioned `custom_avatar` auth metadata; fallback OAuth picture, then initials, so no profile column.
 - Uploaded avatars are cropped client-side to a 1:1 256 px JPEG (pure geometry in avatar-crop.ts) before storage; a missing custom file falls back to the OAuth picture, so stale flags never blank the avatar.
 - The root auth listener remounts the app only when the user id changes; USER_UPDATED/same-user SIGNED_IN just invalidate the router, so metadata saves never close open dialogs.
+- All loading phases (hydration, session check, route pending, user-view bootstrap) hold the single root StartupOverlay via useSplashHold/<StartupSplash/> (src/lib/startup-splash.ts) with a short handoff grace, so sign-in shows one continuous splash instead of remounting it per phase.

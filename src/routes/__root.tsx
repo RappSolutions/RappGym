@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -13,7 +14,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { ConfirmHost } from "@/components/gym/ConfirmHost";
 import { supabase } from "@/integrations/supabase/client";
 import { LanguageProvider } from "@/lib/i18n";
-import { StartupSplash } from "@/components/gym/StartupSplash";
+import { StartupOverlay } from "@/components/gym/StartupSplash";
+import { useSplashHold } from "@/lib/startup-splash";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -120,6 +122,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
+  // Hydration is a hold too: its release grace bridges to the first route's own hold.
+  useSplashHold(!hydrated);
   return (
     <html lang="sv">
       <head>
@@ -127,7 +131,7 @@ function RootShell({ children }: { children: ReactNode }) {
       </head>
       <body>
         {children}
-        {!hydrated && <StartupSplash />}
+        <StartupOverlay hydrated={hydrated} />
         <Scripts />
       </body>
     </html>
@@ -138,6 +142,13 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   const [identityVersion, setIdentityVersion] = useState(0);
+  // Until the first app page past sign-in has loaded, router transitions keep the shared splash up,
+  // so session check -> auth guard -> page load reads as one continuous startup.
+  const bootLoading = useRouterState({ select: (s) => s.isLoading || s.status === "pending" });
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [booted, setBooted] = useState(false);
+  useEffect(() => { if (!bootLoading && pathname !== "/") setBooted(true); }, [bootLoading, pathname]);
+  useSplashHold(!booted && bootLoading);
   useEffect(() => {
     let uid: string | null | undefined;
     const { data } = supabase.auth.onAuthStateChange((event, session) => {

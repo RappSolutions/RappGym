@@ -1,3 +1,4 @@
+import { StartupSplash } from "@/components/gym/StartupSplash";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Eye, LogOut } from "lucide-react";
@@ -73,7 +74,7 @@ export function UserViewProvider({ children }: { children: ReactNode }) {
   }
 
   if (failed) return <div className="mx-auto max-w-2xl space-y-3 bg-background p-4"><p role="alert">{t("userView.failed")}</p><Button variant="outline" disabled={busy} onClick={() => void exit()}><LogOut />{t("userView.exit")}</Button></div>;
-  if (!ready) return <p className="mx-auto max-w-2xl bg-background p-4 text-muted-foreground" role="status">{t("common.loading")}</p>;
+  if (!ready) return <StartupSplash />;
   return <UserViewContext.Provider value={view}>
     {view?.readOnly && <aside className="sticky top-0 z-50 mx-auto flex max-w-2xl flex-wrap items-center gap-2 border-b border-primary bg-brand-yellow px-4 py-2 text-foreground md:max-w-4xl" aria-label={t("userView.readOnly")}>
       <Eye className="size-4 shrink-0" />

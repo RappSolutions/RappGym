@@ -293,3 +293,8 @@ body { background: var(--page-surround); }
 @keyframes landing-spin-hop { 0% { transform: translateY(0) rotate(0); } 40% { transform: translateY(-40px) rotate(200deg); } 75% { transform: translateY(0) rotate(360deg) scaleY(.9); } 88% { transform: translateY(-8px) rotate(360deg); } 100% { transform: translateY(0) rotate(360deg); } }
 @keyframes landing-wait { 0%,100% { transform: scale(1); opacity: .75; } 50% { transform: scale(1.1); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .landing-logo-shell, .landing-logo, .landing-rise, .landing-glow { animation: none; } }
+
+/* Shared startup overlay: fades out once the last loading phase releases it. */
+.startup-splash { transition: opacity .3s ease, visibility 0s linear 0s; }
+.startup-splash.is-done { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .3s ease, visibility 0s linear .3s; }
+.startup-splash.is-done * { animation-play-state: paused; }
