@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Add 28 complementary EN/SV exercises with individual instructional illustrations; verify FK links, codes and images (Lean).
+- [x] Add 28 complementary EN/SV exercises with one two-view oblique instructional image each; all 28 FK links, unique codes, translations and anonymous signed image reads verified (Lean, no Playwright).
 - [x] Category/equipment grouping without search in spontaneous exercise selection and workout planning; 20 targeted tests pass (Lean, no browser verification).
 - [x] Confine shared masthead stripes to the right edge; restore exercise-bank subtitle and add public Exercises subtitle.
 - [x] Yellow shared masthead text and mobile banner positioning; admin complimentary supporter grants with inclusive ISO end date, calendar shortcuts and optional separate note (Lean; browser flow not verified).
