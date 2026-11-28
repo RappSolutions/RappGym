@@ -78,8 +78,3 @@ export function ConsentGate({ userId, children }: { userId: string; children: Re
   );
 }
 
-/** Manually opened, closable consent view (avatar menu). */
-export function ConsentViewDialog({ userId, open, onOpenChange }: { userId: string; open: boolean; onOpenChange: (open: boolean) => void }) {
-  const q = useQuery({ ...consentsQuery(userId), enabled: open });
-  return <ConsentDialog mode="view" open={open} rows={q.data ?? []} onOpenChange={onOpenChange} />;
-}

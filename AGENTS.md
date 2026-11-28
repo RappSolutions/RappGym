@@ -48,7 +48,7 @@ use the editor.
 - Store exercise illustrations and localized field values on each database exercise; never use a code-keyed exercise bank in application code, so edits and new exercises remain data-driven.
 - UI texts are i18next keys in src/locales/{lang}.json (sv source/fallback) typed from sv.json and read via useLanguage().t or i18n.getFixedT on the server; never inline sv/en pairs, so languages can be added without touching components.
 - Use the shared language context for Swedish/English UI and browser language persistence; preserve original user notes and exercise fields while storing translations separately.
-- Render flag-only language controls through the shared LanguagePicker with image assets, not emoji, because desktop platforms may display country letters instead of flags.
+- Language selection uses the LanguagePicker/LanguageMenuSub dropdown (flag image + native name per supportedLanguages), so new languages need no layout change.
 - Derive progress charts client-side through the shared progress aggregation module; compare weights per exercise and sum repeat counts per date so unrelated exercises and text loads are never mixed into weight trends.
 
 - Keep app branding in shared global CSS tokens and the shared masthead, which links to Home from every page; all content routes inherit the same visual frame so changes stay consistent across pages.
@@ -76,3 +76,4 @@ use the editor.
 
 - User-view bootstrap runs only inside the authenticated layout; public pages SSR their content without waiting for browser auth, while identity changes remount the Outlet.
 - Complimentary access reuses dated manual memberships with a nullable payment reference and separate note; the admin RPC enforces authority and inclusive expiry, without changing Stripe subscriptions.
+- Avatar menu: one merged account+profile dialog (consent status links /privacy) and one contact dialog opening suggestions; policy text only on /privacy.

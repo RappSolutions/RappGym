@@ -72,7 +72,7 @@ function Index() {
     <div aria-busy={waiting} className={`app-sheet mx-auto flex min-h-screen${waiting ? " cursor-wait" : ""} max-w-2xl flex-col pb-12 md:max-w-4xl`}>
       <header className="app-masthead flex items-center justify-between gap-3 px-4 py-5">
         <span className="brand-wordmark font-display text-2xl font-bold md:text-3xl">RappGym</span>
-        <LanguagePicker flagsOnly />
+        <LanguagePicker />
       </header>
       <main className="landing-hero relative flex flex-1 flex-col items-center justify-center overflow-hidden px-6 py-12 text-center">
         <div className="landing-glow" aria-hidden="true" />

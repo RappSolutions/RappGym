@@ -1,5 +1,8 @@
 import { AvatarSettings } from "@/components/gym/AvatarSettings";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
+import { consentsQuery } from "@/components/gym/ConsentGate";
+import { latestConsent } from "@/lib/consent";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Trash2, LoaderCircle } from "lucide-react";
@@ -23,8 +26,17 @@ export function AccountControls({
   open,
   onOpenChange,
   onDeleted,
+  consentUserId,
+  readOnly = false,
+  children,
 }: {
+  /** Admin inspection: show only children and consent, no actor-account actions. */
+  readOnly?: boolean;
   userId: string;
+  /** User whose consent is shown (view-as target in admin inspection). */
+  consentUserId?: string;
+  /** Training profile section rendered between header and avatar. */
+  children?: ReactNode;
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onDeleted: () => Promise<void>;
@@ -37,6 +49,8 @@ export function AccountControls({
   const qc = useQueryClient();
   const [confirmation, setConfirmation] = useState("");
   const [busy, setBusy] = useState(false);
+  const consents = useQuery({ ...consentsQuery(consentUserId ?? userId), enabled: open });
+  const consent = latestConsent(consents.data ?? []);
   const { data: membership } = useQuery({
     queryKey: ["my-membership", userId],
     enabled: open,
@@ -52,7 +66,7 @@ export function AccountControls({
   });
   const { data: billing } = useQuery({
     queryKey: ["billing-status", userId],
-    enabled: open,
+    enabled: open && !readOnly,
     queryFn: () => status(),
   });
   const active =
@@ -104,64 +118,80 @@ export function AccountControls({
           <DialogTitle>{t("account.manage")}</DialogTitle>
           <DialogDescription>{t("account.identityNote")}</DialogDescription>
         </DialogHeader>
-        <AvatarSettings userId={userId} />
-        <dl className="text-sm">
-          <dt className="font-medium">{t("account.supporter")}</dt>
-          <dd>
-            {subscription
-              ? `${t("account.activeUntil")} ${subscription.period_end.slice(0, 10)}`
-              : active
-                ? `${t("account.activeUntil")} ${membership.ends_on}`
-                : t("account.free")}
-          </dd>
-          <dt className="mt-3 font-medium">{t("account.accountId")}</dt>
-          <dd className="break-all font-mono text-xs">{userId}</dd>
-        </dl>
-        {billing?.enabled &&
-          (subscription ? (
-            <Button variant="outline" disabled={busy} onClick={() => void pay("portal")}>
-              {t("account.managePayment")}
-            </Button>
-          ) : !active ? (
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">{t("account.supporterPitch")}</p>
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" disabled={busy} onClick={() => void pay("month")}>
-                  {t("account.planMonth")}
+        {children}
+        {!readOnly && (
+          <>
+            <AvatarSettings userId={userId} />
+            <dl className="text-sm">
+              <dt className="font-medium">{t("account.supporter")}</dt>
+              <dd>
+                {subscription
+                  ? `${t("account.activeUntil")} ${subscription.period_end.slice(0, 10)}`
+                  : active
+                    ? `${t("account.activeUntil")} ${membership.ends_on}`
+                    : t("account.free")}
+              </dd>
+              <dt className="mt-3 font-medium">{t("account.accountId")}</dt>
+              <dd className="break-all font-mono text-xs">{userId}</dd>
+            </dl>
+            {billing?.enabled &&
+              (subscription ? (
+                <Button variant="outline" disabled={busy} onClick={() => void pay("portal")}>
+                  {t("account.managePayment")}
                 </Button>
-                <Button variant="outline" disabled={busy} onClick={() => void pay("year")}>
-                  {t("account.planYear")}
-                </Button>
-              </div>
-            </div>
-          ) : null)}
-        <section className="space-y-3 border-t pt-4">
-          <h2 className="font-semibold text-destructive">{t("account.delete")}</h2>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {t("account.deleteWarning")}
-          </p>
-          <Input
-            aria-label={t("account.confirmDelete")}
-            value={confirmation}
-            onChange={(e) => setConfirmation(e.target.value)}
-            placeholder="DELETE"
-            autoComplete="off"
-            disabled={busy}
-          />
-          <Button
-            variant="destructive"
-            disabled={confirmation !== "DELETE" || busy}
-            onClick={() => void erase()}
-            className="w-full"
-          >
-            {busy ? (
-              <LoaderCircle className="size-4 animate-spin" />
-            ) : (
-              <Trash2 className="size-4" />
-            )}
-            {t("account.delete")}
-          </Button>
-        </section>
+              ) : !active ? (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">{t("account.supporterPitch")}</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" disabled={busy} onClick={() => void pay("month")}>
+                      {t("account.planMonth")}
+                    </Button>
+                    <Button variant="outline" disabled={busy} onClick={() => void pay("year")}>
+                      {t("account.planYear")}
+                    </Button>
+                  </div>
+                </div>
+              ) : null)}
+            <section className="space-y-3 border-t pt-4">
+              <h2 className="font-semibold text-destructive">{t("account.delete")}</h2>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                {t("account.deleteWarning")}
+              </p>
+              <Input
+                aria-label={t("account.confirmDelete")}
+                value={confirmation}
+                onChange={(e) => setConfirmation(e.target.value)}
+                placeholder="DELETE"
+                autoComplete="off"
+                disabled={busy}
+              />
+              <Button
+                variant="destructive"
+                disabled={confirmation !== "DELETE" || busy}
+                onClick={() => void erase()}
+                className="w-full"
+              >
+                {busy ? (
+                  <LoaderCircle className="size-4 animate-spin" />
+                ) : (
+                  <Trash2 className="size-4" />
+                )}
+                {t("account.delete")}
+              </Button>
+            </section>
+          </>
+        )}
+        <p className="border-t pt-3 text-xs text-muted-foreground">
+          {consent
+            ? t("account.consentAccepted", {
+                version: consent.terms_version,
+                date: consent.consented_at.slice(0, 10),
+              })
+            : t("account.consentMissing")}{" "}
+          <Link to="/privacy" className="underline" onClick={() => onOpenChange(false)}>
+            {t("account.readPrivacy")}
+          </Link>
+        </p>
       </DialogContent>
     </Dialog>
   );

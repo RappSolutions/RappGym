@@ -415,7 +415,9 @@
     "signOut": "Sign out",
     "trainingExperience": "Training experience",
     "trainingPace": "Training pace",
-    "whenYouRequestAiAdvice": "When you request AI advice, these details are always sent to the AI service. AI provides training advice, not diagnosis or treatment. Deleting your profile does not remove earlier AI answers."
+    "whenYouRequestAiAdvice": "When you request AI advice, these details are always sent to the AI service. AI provides training advice, not diagnosis or treatment. Deleting your profile does not remove earlier AI answers.",
+    "meet": "Meet RappGym",
+    "trainingProfileSection": "Training profile"
   },
   "progressExercisePicker": {
     "all": "All",
@@ -657,7 +659,7 @@
     "lookupFailed": "Categories and equipment could not be loaded. You can still submit a suggestion."
   },
   "contact": {
-    "menu": "Contact RappGym",
+    "menu": "Contact and feedback",
     "title": "Contact RappGym",
     "description": "Your message goes to gym@rappsol.com.",
     "kind": "Type",
@@ -801,7 +803,7 @@
     "subtitle_other": "{{count}} exercises completed"
   },
   "account": {
-    "manage": "Account and membership",
+    "manage": "Account and profile",
     "identityNote": "Membership is linked to your account ID. The receipt email can differ. Google and Microsoft share your data only when linked to the same account ID.",
     "supporter": "Supporter",
     "activeUntil": "Active through",
@@ -838,7 +840,10 @@
     "supporterPitch": "Supporter: your own locations with their equipment and 30 AI requests/month.",
     "planMonth": "€4 / month",
     "planYear": "€40 / year",
-    "becomeSupporter": "Become a supporter – own locations and more AI requests"
+    "becomeSupporter": "Become a supporter – own locations and more AI requests",
+    "consentAccepted": "Terms v{{version}} accepted {{date}}.",
+    "consentMissing": "Terms not accepted.",
+    "readPrivacy": "Read terms and privacy policy"
   },
   "avatar": {
     "picture": "Profile picture",

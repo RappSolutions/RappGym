@@ -415,7 +415,9 @@
     "signOut": "Logga ut",
     "trainingExperience": "Träningsvana",
     "trainingPace": "Träningstempo",
-    "whenYouRequestAiAdvice": "När du ber om AI-råd skickas alltid dessa uppgifter med till AI-tjänsten. AI ger träningsråd, inte diagnos eller behandling. Radering av profilen tar inte bort tidigare AI-svar."
+    "whenYouRequestAiAdvice": "När du ber om AI-råd skickas alltid dessa uppgifter med till AI-tjänsten. AI ger träningsråd, inte diagnos eller behandling. Radering av profilen tar inte bort tidigare AI-svar.",
+    "meet": "Meet RappGym",
+    "trainingProfileSection": "Träningsprofil"
   },
   "progressExercisePicker": {
     "all": "Alla",
@@ -657,7 +659,7 @@
     "lookupFailed": "Kategorier och utrustning kunde inte laddas. Du kan ändå lämna ett förslag."
   },
   "contact": {
-    "menu": "Kontakta RappGym",
+    "menu": "Kontakta och feedback",
     "title": "Kontakta RappGym",
     "description": "Meddelandet går till gym@rappsol.com.",
     "kind": "Typ",
@@ -801,7 +803,7 @@
     "subtitle_other": "{{count}} övningar genomförda"
   },
   "account": {
-    "manage": "Konto och medlemskap",
+    "manage": "Konto och profil",
     "identityNote": "Medlemskap kopplas till ditt konto-ID. Kvittots e-post kan vara en annan. Google och Microsoft ger samma data endast när de hör till samma konto-ID.",
     "supporter": "Supporter",
     "activeUntil": "Aktivt till och med",
@@ -838,7 +840,10 @@
     "supporterPitch": "Supporter: egna platser med egna redskap och 30 AI-anrop/månad.",
     "planMonth": "€4 / månad",
     "planYear": "€40 / år",
-    "becomeSupporter": "Bli supporter – egna platser och fler AI-anrop"
+    "becomeSupporter": "Bli supporter – egna platser och fler AI-anrop",
+    "consentAccepted": "Villkor v{{version}} godkända {{date}}.",
+    "consentMissing": "Villkor ej godkända.",
+    "readPrivacy": "Läs villkor och integritetspolicy"
   },
   "avatar": {
     "picture": "Profilbild",

@@ -14,8 +14,7 @@ import {
   MapPin,
   Check,
   Mail,
-  Lightbulb,
-  ShieldCheck,
+  Info,
   ChevronDown,
   CircleUserRound,
 } from "lucide-react";
@@ -23,7 +22,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import rappSolutionsMark from "@/assets/RS_64.png";
-import { useLanguage, LanguagePicker } from "@/lib/i18n";
+import { useLanguage, LanguageMenuSub } from "@/lib/i18n";
 import {
   emptyTrainingProfile,
   trainingProfileSchema,
@@ -43,13 +42,6 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -57,7 +49,6 @@ import { ExerciseSuggestionDialog } from "@/components/gym/ExerciseSuggestionDia
 import { ContactDialog } from "@/components/gym/ContactDialog";
 import { AccountControls } from "@/components/gym/AccountControls";
 import { OPEN_ACCOUNT_EVENT } from "@/components/gym/SupporterLink";
-import { ConsentViewDialog } from "@/components/gym/ConsentGate";
 
 export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => Promise<void> }) {
   const { t } = useLanguage();
@@ -71,14 +62,12 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
     if (fallback && !currentGym) setGym(fallback.id);
   }, [gyms, currentGym, setGym]);
   const avatarUrl = useAvatarUrl(user);
-  const [open, setOpen] = useState(false);
   const [gymOpen, setGymOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [suggestionOpen, setSuggestionOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
-  const [consentOpen, setConsentOpen] = useState(false);
   useEffect(() => {
-    const open = () => setAccountOpen(true);
+    const open = () => void edit();
     window.addEventListener(OPEN_ACCOUNT_EVENT, open);
     return () => window.removeEventListener(OPEN_ACCOUNT_EVENT, open);
   }, []);
@@ -101,7 +90,7 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
     .join("")
     .toUpperCase();
   async function edit() {
-    setOpen(true);
+    setAccountOpen(true);
     setBusy(true);
     setLoaded(false);
     try {
@@ -133,7 +122,6 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
         .upsert({ ...parsed.data, user_id: user.id, updated_at: new Date().toISOString() });
       if (error) throw error;
       toast.success(t("profileMenu.profileSaved"));
-      setOpen(false);
       await qc.invalidateQueries({ queryKey: ["training-profile"] });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("profileMenu.couldNotSave"));
@@ -149,7 +137,6 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
       const { error } = await supabase.from("training_profiles").delete().eq("user_id", user.id);
       if (error) throw error;
       setProfile({ ...emptyTrainingProfile });
-      setOpen(false);
       toast.success(t("profileMenu.profileDataDeleted"));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("profileMenu.couldNotDelete"));
@@ -181,7 +168,9 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
             className="shrink-0 rounded-full text-brand-yellow hover:bg-brand-royal hover:text-brand-yellow"
           >
             <Avatar className="size-9 border-2 border-brand-yellow">
-              {!readOnly && avatarUrl && <AvatarImage src={avatarUrl} alt="" referrerPolicy="no-referrer" />}
+              {!readOnly && avatarUrl && (
+                <AvatarImage src={avatarUrl} alt="" referrerPolicy="no-referrer" />
+              )}
               <AvatarFallback className="bg-brand-royal text-sm font-semibold text-brand-yellow">
                 {initials || <UserRound className="size-5" />}
               </AvatarFallback>
@@ -199,8 +188,8 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem className="h-12" onSelect={() => void edit()}>
-            <UserRound />
-            {t("profileMenu.myTrainingProfile")}
+            <CircleUserRound />
+            {t("account.manage")}
           </DropdownMenuItem>
           <DropdownMenuItem asChild className="h-12">
             <Link to="/settings">
@@ -211,36 +200,19 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
           <DropdownMenuItem
             className="h-12"
             disabled={readOnly}
-            onSelect={() => setAccountOpen(true)}
-          >
-            <CircleUserRound />
-            {t("account.manage")}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className="h-12"
-            disabled={readOnly}
-            onSelect={() => setSuggestionOpen(true)}
-          >
-            <Lightbulb />
-            {t("exerciseSuggestion.title")}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="h-12"
-            disabled={readOnly}
             onSelect={() => setContactOpen(true)}
           >
             <Mail />
             {t("contact.menu")}
           </DropdownMenuItem>
-          <DropdownMenuItem className="h-12" onSelect={() => setConsentOpen(true)}>
-            <ShieldCheck />
-            {t("consent.menu")}
+          <DropdownMenuItem asChild className="h-12">
+            <Link to="/about">
+              <Info />
+              {t("profileMenu.meet")}
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <div className="flex min-h-12 items-center px-2">
-            <LanguagePicker flagsOnly />
-          </div>
+          <LanguageMenuSub />
           <DropdownMenuSeparator />
           <DropdownMenuItem className="h-12" onSelect={() => void onSignOut()}>
             <LogOut />
@@ -304,34 +276,28 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
           </div>
         </DrawerContent>
       </Drawer>
-      <AccountControls
-        userId={user.id}
-        open={accountOpen}
-        onOpenChange={setAccountOpen}
-        onDeleted={onSignOut}
-      />
-      <ConsentViewDialog
-        userId={view?.userId ?? user.id}
-        open={consentOpen}
-        onOpenChange={setConsentOpen}
-      />
       <ExerciseSuggestionDialog open={suggestionOpen} onOpenChange={setSuggestionOpen} />
       <ContactDialog
         open={contactOpen}
         onOpenChange={setContactOpen}
         gymName={currentGym?.name ?? ""}
+        onSuggestExercise={() => setSuggestionOpen(true)}
       />
-      <Dialog
-        open={open}
+      <AccountControls
+        userId={user.id}
+        consentUserId={view?.userId ?? user.id}
+        readOnly={readOnly}
+        open={accountOpen}
         onOpenChange={(value) => {
-          if (!busy) setOpen(value);
+          if (!busy) setAccountOpen(value);
         }}
+        onDeleted={onSignOut}
       >
-        <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] overflow-y-auto p-5">
-          <DialogHeader>
-            <DialogTitle className="text-2xl">{t("profileMenu.myTrainingProfile")}</DialogTitle>
-            <DialogDescription>{t("profileMenu.allDetailsAreOptionalAnd")}</DialogDescription>
-          </DialogHeader>
+        <section className="space-y-3 rounded-lg border p-3">
+          <h3 className="font-semibold">{t("profileMenu.trainingProfileSection")}</h3>
+          <p className="text-xs text-muted-foreground">
+            {t("profileMenu.allDetailsAreOptionalAnd")}
+          </p>
           {!loaded ? (
             <LoaderCircle className="size-6 animate-spin" />
           ) : (
@@ -430,8 +396,8 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
               </Button>
             </form>
           )}
-        </DialogContent>
-      </Dialog>
+        </section>
+      </AccountControls>
     </div>
   );
 }
