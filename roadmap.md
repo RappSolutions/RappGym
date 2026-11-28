@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Category/equipment grouping without search in spontaneous exercise selection and workout planning; 20 targeted tests pass (Lean, no browser verification).
 - [x] Confine shared masthead stripes to the right edge; restore exercise-bank subtitle and add public Exercises subtitle.
 - [x] Yellow shared masthead text and mobile banner positioning; admin complimentary supporter grants with inclusive ISO end date, calendar shortcuts and optional separate note (Lean; browser flow not verified).
 - [ ] Commercial launch checks: controller details/legal bases, processor/AI transfer and retention terms, subscription terms; owner decisions required (LAUNCH.md).

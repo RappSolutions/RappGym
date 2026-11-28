@@ -8,29 +8,34 @@ import { PhaseSelect } from "@/components/gym/PhaseSelect";
 import { ExerciseImages } from "@/components/gym/ExerciseImages";
 import { InstructionText } from "@/components/gym/InstructionText";
 import { AdminExerciseEdit } from "@/components/gym/AdminExerciseEdit";
+import { ExerciseGroupingSelect } from "@/components/gym/ExerciseGroupingSelect";
+import { groupExerciseChoices, type ExerciseGrouping } from "@/lib/exercise-selection";
 
 /** Inline, category-collapsed exercise browser: clicking a row shows details, only "+" adds it to the chosen phase. */
 export function ExercisePickList({ exercises, onPick, disabled, spontaneous = false, title }: { exercises: Exercise[]; onPick: (ex: Exercise, phase: Phase) => void; disabled?: boolean; spontaneous?: boolean; title?: string }) {
-  const { localize, t } = useLanguage();
+  const { localize, t, language } = useLanguage();
+  const [groupBy, setGroupBy] = useState<ExerciseGrouping>("category");
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [shown, setShown] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>("main");
   const cats = categoriesOf(exercises);
+  const groups = groupExerciseChoices(exercises, groupBy, (ex, by) => by === "category" ? localize(ex).category : localize(ex).equipment || t("common.noEquipment"), language);
   return (
     <div className="ml-3 space-y-1 rounded-md border border-dashed bg-muted/40 p-2">
       <div className="flex items-center gap-1.5 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground"><Plus className="size-3.5" /><span className="flex-1">{title ?? t("common.addExercise")}</span>{!spontaneous && <PhaseSelect value={phase} onChange={setPhase} />}</div>
-      {cats.map((cat) => {
-        const list = exercises.filter((e) => e.category === cat);
-        const isOpen = open.has(cat);
+      <ExerciseGroupingSelect value={groupBy} onChange={setGroupBy} />
+      {groups.map((group) => {
+        const list = group.exercises;
+        const isOpen = open.has(group.id);
         return (
-          <div key={cat} data-category={categoryToken(cat, cats)} className="category-theme overflow-hidden rounded-md border bg-background border-l-4 border-l-category-fill">
-            <button type="button" aria-expanded={isOpen} className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-bold text-category-ink" onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(cat)) n.delete(cat); else n.add(cat); return n; })}>
+          <div key={group.id} data-category={groupBy === "category" ? categoryToken(list[0]?.category ?? "", cats) : undefined} className={`overflow-hidden rounded-md border bg-background ${groupBy === "category" ? "category-theme border-l-4 border-l-category-fill" : ""}`}>
+            <Button type="button" variant="ghost" aria-expanded={isOpen} className={`flex min-h-10 h-auto w-full justify-start gap-2 px-3 text-left text-sm font-bold ${groupBy === "category" ? "text-category-ink" : ""}`} onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(group.id)) n.delete(group.id); else n.add(group.id); return n; })}>
               {isOpen ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
-              <span className="flex-1">{list[0] ? localize(list[0]).category : cat}</span>
+              <span className="min-w-0 flex-1 whitespace-normal">{group.label}</span>
               <span className="text-xs font-normal text-muted-foreground">{list.length}</span>
-            </button>
+            </Button>
             {isOpen && <div className="divide-y border-t">{list.map((ex) => { const l = localize(ex); const isShown = shown === ex.id; return (
-              <div key={ex.id}>
+              <div key={ex.id} data-category={categoryToken(ex.category, cats)} className={groupBy === "equipment" ? "category-theme border-l-4 border-l-category-fill" : undefined}>
                 <div className="flex items-center">
                   <button type="button" aria-expanded={isShown} onClick={() => setShown(isShown ? null : ex.id)} className="flex min-h-10 min-w-0 flex-1 items-center gap-3 px-3 py-1.5 text-left text-sm hover:bg-muted/50">
                     <span className="w-10 font-bold">{l.code}</span><span className="flex-1 truncate">{l.name}</span>

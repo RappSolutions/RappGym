@@ -11,6 +11,8 @@ import { useLanguage } from "@/lib/i18n";
 import { categoriesOf, categoryToken, todayISO, type Exercise, type LogEntry } from "@/lib/gym";
 import { useStartWorkout } from "@/components/gym/ActiveWorkout";
 import { insertPlannedExercises } from "@/lib/workout-edit";
+import { ExerciseGroupingSelect } from "@/components/gym/ExerciseGroupingSelect";
+import { groupExerciseChoices, type ExerciseGrouping } from "@/lib/exercise-selection";
 
 /** Builder for an own workout, stored like AI plans (suggested rows); can be planned for later or started right away. */
 export function WorkoutBuilder({
@@ -24,7 +26,8 @@ export function WorkoutBuilder({
   gymId: string;
   quickStart?: boolean;
 }) {
-  const { t, localize } = useLanguage();
+  const { t, localize, language } = useLanguage();
+  const [groupBy, setGroupBy] = useState<ExerciseGrouping>("category");
   const { readOnly } = useUserView();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -36,6 +39,7 @@ export function WorkoutBuilder({
   const [openCats, setOpenCats] = useState<Set<string>>(new Set());
   const startWorkout = useStartWorkout();
   const cats = categoriesOf(exercises);
+  const groups = groupExerciseChoices(exercises, groupBy, (ex, by) => by === "category" ? localize(ex).category : localize(ex).equipment || t("common.noEquipment"), language);
 
   async function save(start: boolean) {
     if (readOnly || !picked.length || busy) return;
@@ -113,45 +117,47 @@ export function WorkoutBuilder({
             </p>
           )}
           <div className="space-y-2">
-            {cats.map((cat) => {
-              const list = exercises.filter((e) => e.category === cat);
+            <ExerciseGroupingSelect value={groupBy} onChange={setGroupBy} />
+            {groups.map((group) => {
+              const list = group.exercises;
               const count = list.filter((e) => picked.includes(e.code)).length;
-              const isOpen = openCats.has(cat);
+              const isOpen = openCats.has(group.id);
               return (
                 <div
-                  key={cat}
-                  data-category={categoryToken(cat, cats)}
-                  className="category-theme overflow-hidden rounded-lg border border-l-4 border-l-category-fill"
+                  key={group.id}
+                  data-category={groupBy === "category" ? categoryToken(list[0]?.category ?? "", cats) : undefined}
+                  className={`overflow-hidden rounded-lg border ${groupBy === "category" ? "category-theme border-l-4 border-l-category-fill" : ""}`}
                 >
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
                     aria-expanded={isOpen}
-                    className="flex min-h-11 w-full items-center gap-2 px-3 text-left font-bold text-category-ink"
+                    className={`flex min-h-11 h-auto w-full justify-start gap-2 px-3 text-left font-bold ${groupBy === "category" ? "text-category-ink" : ""}`}
                     onClick={() =>
                       setOpenCats((s) => {
                         const n = new Set(s);
-                        if (n.has(cat)) n.delete(cat);
-                        else n.add(cat);
+                        if (n.has(group.id)) n.delete(group.id);
+                        else n.add(group.id);
                         return n;
                       })
                     }
                   >
                     {isOpen ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
-                    <span className="flex-1">{cat}</span>
+                    <span className="min-w-0 flex-1 whitespace-normal">{group.label}</span>
                     {count > 0 && (
                       <span className="text-sm text-primary">
                         {count} {t("workoutBuilder.picked")}
                       </span>
                     )}
                     <span className="text-xs font-normal text-muted-foreground">{list.length}</span>
-                  </button>
+                  </Button>
                   {isOpen && (
                     <div className="divide-y border-t">
                       {list.map((ex) => {
                         const l = localize(ex);
                         const n = picked.indexOf(ex.code);
                         return (
-                          <label key={ex.id} className="flex min-h-11 cursor-pointer items-center gap-3 px-3 py-2">
+                          <label key={ex.id} data-category={categoryToken(ex.category, cats)} className={`flex min-h-11 cursor-pointer items-center gap-3 px-3 py-2 ${groupBy === "equipment" ? "category-theme border-l-4 border-l-category-fill" : ""}`}>
                             <input
                               type="checkbox"
                               className="size-4"

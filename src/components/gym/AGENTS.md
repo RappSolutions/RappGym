@@ -1,1 +1,2 @@
 - Active location is a header chip beside the avatar (ProfileMenu), not a menu item, so it is always visible.
+- WorkoutBuilder and ExercisePickList share a category/equipment selector and pure FK-based grouping of supplied location-filtered exercises; default to collapsed categories without search, so selection does not duplicate filtering or database reads.
