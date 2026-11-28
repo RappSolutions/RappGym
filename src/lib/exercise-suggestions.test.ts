@@ -22,7 +22,7 @@ describe("exercise suggestions", () => {
     expect(exerciseSuggestionSchema.safeParse({ ...suggestion, source_url: "ftp://example.org/exercise" }).success).toBe(false);
   });
   it("sends exercise suggestions to gym@rappsol.com with the account as Reply-To", () => {
-    const mail = supportEmailPayload({ id: "suggestion", kind: "exercise-suggestion", message: suggestion.instructions, senderEmail: "member@example.org", senderName: "Member", diagnostics: { userId: "owner" } });
+    const mail = supportEmailPayload({ id: "suggestion", kind: "exercise-suggestion", message: suggestion.instructions, senderEmail: "member@example.org", senderName: "Member", userId: "owner" });
     expect(mail.Recipients.To).toEqual(["gym@rappsol.com"]);
     expect(mail.Content.ReplyTo).toBe("member@example.org");
     expect(mail.Content.Subject).toBe("[RappGym exercise-suggestion] Member");

@@ -4,7 +4,7 @@ import { sendSupportEmail, supportEmailPayload, type SupportEmail } from "./supp
 const message: SupportEmail = {
   id: "support-test", kind: "feedback", message: "Feedback <not html>",
   senderEmail: "member@example.org", senderName: "Member",
-  diagnostics: { userId: "owner", completedSets: 12 },
+  userId: "owner",
 };
 
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
@@ -22,8 +22,8 @@ describe("support mail", () => {
     const part = supportEmailPayload(message).Content.Body[0];
     expect(part?.ContentType).toBe("PlainText");
     expect(part?.Content).toContain("Feedback <not html>");
-    expect(part?.Content).toContain("completedSets: 12");
-    expect(part?.Content).toContain("Message ID: support-test");
+    expect(part?.Content).toContain("Account ID: owner");
+    expect(part?.Content).not.toContain("Message ID");
   });
   it("rejects header injection in the reply address", () => {
     expect(() => supportEmailPayload({ ...message, senderEmail: "member@example.org\r\nBcc: other@example.org" })).toThrow();

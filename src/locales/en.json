@@ -652,7 +652,7 @@
     "unspecified": "Not specified / other",
     "instructions": "Description and instructions",
     "link": "Video or description link (optional)",
-    "accountNote": "Your name, email and account information are included for gym@rappsol.com.",
+    "accountNote": "Your name, email and account ID are included.",
     "send": "Send suggestion",
     "sent": "Thanks! Your exercise suggestion was saved and sent.",
     "savedNotSent": "Your suggestion was saved, but the email could not be sent. Please do not send it again.",
@@ -666,10 +666,11 @@
     "kinds": {
       "question": "Question",
       "feedback": "Feedback",
-      "bug": "Bug"
+      "bug": "Bug",
+      "exercise": "Suggest exercise"
     },
     "message": "Message",
-    "diagnosticsNote": "Your name, email, account id, logged set/workout counts, AI quota, current location and browser info are included.",
+    "diagnosticsNote": "Your name, email and account ID are included.",
     "send": "Send",
     "sent": "Thanks! Your message was sent.",
     "savedNotSent": "Your message was saved, but the email could not be sent. Please do not send it again.",

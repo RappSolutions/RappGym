@@ -6,7 +6,7 @@ export interface SupportEmail {
   message: string;
   senderEmail: string;
   senderName: string;
-  diagnostics: Record<string, unknown>;
+  userId: string;
 }
 
 /** Plain text deliberately keeps user content out of HTML and header syntax. */
@@ -22,7 +22,7 @@ export function supportEmailPayload(message: SupportEmail) {
       Body: [{
         ContentType: "PlainText",
         Charset: "utf-8",
-        Content: `${message.message}\n\n--- RappGym ---\nMessage ID: ${message.id}\nName: ${name}\nEmail: ${email}\n${Object.entries(message.diagnostics).map(([key, value]) => `${key}: ${String(value)}`).join("\n")}`,
+        Content: `${message.message}\n\n--- RappGym ---\nName: ${name}\nEmail: ${email}\nAccount ID: ${message.userId}`,
       }],
     },
   };

@@ -15,11 +15,12 @@ import { sendExerciseSuggestion } from "@/lib/exercise-suggestions.functions";
 import { useExerciseTitle } from "@/hooks/use-exercise-title";
 import { exerciseNameUrl, withExerciseDescription } from "@/lib/exercise-title";
 
-export function ExerciseSuggestionDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+export function ExerciseSuggestionForm({ open, onDone, onBusyChange }: { open: boolean; onDone: () => void; onBusyChange?: (busy: boolean) => void }) {
   const { t, refName } = useLanguage();
   const { readOnly } = useUserView();
   const [form, setForm] = useState({ ...emptyExerciseSuggestion });
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusyState] = useState(false);
+  const setBusy = (v: boolean) => { setBusyState(v); onBusyChange?.(v); };
   const titleLookup = useExerciseTitle(open, "suggestion");
   function lookupName(value: string) {
     const url = exerciseNameUrl(value);
@@ -39,14 +40,11 @@ export function ExerciseSuggestionDialog({ open, onOpenChange }: { open: boolean
       const result = await send({ data: parsed.data });
       if (result.delivered) toast.success(t("exerciseSuggestion.sent"));
       else toast.warning(t("exerciseSuggestion.savedNotSent"));
-      setForm({ ...emptyExerciseSuggestion }); onOpenChange(false);
+      setForm({ ...emptyExerciseSuggestion }); onDone();
     } catch { toast.error(t("contact.failed")); }
     finally { setBusy(false); }
   }
-  return <Dialog open={open} onOpenChange={(value) => { if (!busy) onOpenChange(value); }}>
-    <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] overflow-y-auto p-5">
-      <DialogHeader><DialogTitle>{t("exerciseSuggestion.title")}</DialogTitle><DialogDescription>{t("exerciseSuggestion.description")}</DialogDescription></DialogHeader>
-      <form className="space-y-3" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
+  return <form className="space-y-3" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
         <div className="space-y-1"><Label htmlFor="suggestion-name">{t("exerciseForm.nameOrUrl")}</Label><div className="relative"><Input id="suggestion-name" className="pr-9" required maxLength={2000} value={form.name} aria-busy={titleLookup.loading} disabled={busy || readOnly} onChange={(event) => { titleLookup.cancel(); setForm({ ...form, name: event.target.value }); }} onPaste={(event) => { const value = event.clipboardData.getData("text").trim(); if (exerciseNameUrl(value)) { event.preventDefault(); setForm((cur) => ({ ...cur, name: value })); lookupName(value); } }} onBlur={() => { if (!titleLookup.loading) lookupName(form.name); }} />{titleLookup.loading && <LoaderCircle aria-label={t("exerciseForm.fetchingTitle")} className="pointer-events-none absolute right-3 top-3 size-4 animate-spin text-muted-foreground" />}</div></div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">{(["category_id", "equipment_id"] as const).map((field) => <div key={field} className="space-y-1">
           <Label htmlFor={`suggestion-${field}`}>{t(field === "category_id" ? "exerciseSuggestion.category" : "exerciseSuggestion.equipment")}</Label>
@@ -58,8 +56,17 @@ export function ExerciseSuggestionDialog({ open, onOpenChange }: { open: boolean
         <div className="space-y-1"><Label htmlFor="suggestion-instructions">{t("exerciseSuggestion.instructions")}</Label><Textarea id="suggestion-instructions" required rows={5} maxLength={4000} value={form.instructions} disabled={busy || readOnly} onChange={(event) => setForm({ ...form, instructions: event.target.value })} /></div>
         <div className="space-y-1"><Label htmlFor="suggestion-url">{t("exerciseSuggestion.link")}</Label><Input id="suggestion-url" type="url" maxLength={2000} value={form.source_url} disabled={busy || readOnly} onChange={(event) => setForm({ ...form, source_url: event.target.value })} /></div>
         <p className="text-xs text-muted-foreground">{t("exerciseSuggestion.accountNote")}</p>
-        <div className="flex justify-end"><Button type="submit" variant="secondary" disabled={busy || readOnly || !valid || titleLookup.loading || !!exerciseNameUrl(form.name)}>{busy ? <LoaderCircle className="animate-spin" /> : <Send />}{t("exerciseSuggestion.send")}</Button></div>
-      </form>
+        <div className="flex justify-end"><Button type="submit" disabled={busy || readOnly || !valid || titleLookup.loading || !!exerciseNameUrl(form.name)}>{busy ? <LoaderCircle className="animate-spin" /> : <Send />}{t("exerciseSuggestion.send")}</Button></div>
+      </form>;
+}
+
+export function ExerciseSuggestionDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  const { t } = useLanguage();
+  const [busy, setBusy] = useState(false);
+  return <Dialog open={open} onOpenChange={(value) => { if (!busy) onOpenChange(value); }}>
+    <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] overflow-y-auto p-5">
+      <DialogHeader><DialogTitle>{t("exerciseSuggestion.title")}</DialogTitle><DialogDescription>{t("exerciseSuggestion.description")}</DialogDescription></DialogHeader>
+      <ExerciseSuggestionForm open={open} onDone={() => onOpenChange(false)} onBusyChange={setBusy} />
     </DialogContent>
   </Dialog>;
 }

@@ -45,7 +45,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ExerciseSuggestionDialog } from "@/components/gym/ExerciseSuggestionDialog";
 import { ContactDialog } from "@/components/gym/ContactDialog";
 import { AccountControls } from "@/components/gym/AccountControls";
 import { OPEN_ACCOUNT_EVENT } from "@/components/gym/SupporterLink";
@@ -64,7 +63,6 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
   const avatarUrl = useAvatarUrl(user);
   const [gymOpen, setGymOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
-  const [suggestionOpen, setSuggestionOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   useEffect(() => {
     const open = () => void edit();
@@ -276,12 +274,9 @@ export function ProfileMenu({ user, onSignOut }: { user: User; onSignOut: () => 
           </div>
         </DrawerContent>
       </Drawer>
-      <ExerciseSuggestionDialog open={suggestionOpen} onOpenChange={setSuggestionOpen} />
       <ContactDialog
         open={contactOpen}
         onOpenChange={setContactOpen}
-        gymName={currentGym?.name ?? ""}
-        onSuggestExercise={() => setSuggestionOpen(true)}
       />
       <AccountControls
         userId={user.id}

@@ -652,7 +652,7 @@
     "unspecified": "Ej angivet / annat",
     "instructions": "Beskrivning och instruktioner",
     "link": "Länk till video eller beskrivning (valfri)",
-    "accountNote": "Ditt namn, e-post och kontoinfo följer med till gym@rappsol.com.",
+    "accountNote": "Ditt namn, e-post och konto-id skickas med.",
     "send": "Skicka förslag",
     "sent": "Tack! Övningsförslaget är sparat och skickat.",
     "savedNotSent": "Förslaget är sparat, men mejlet kunde inte skickas. Skicka inte igen.",
@@ -666,10 +666,11 @@
     "kinds": {
       "question": "Fråga",
       "feedback": "Feedback",
-      "bug": "Bugg"
+      "bug": "Bugg",
+      "exercise": "Föreslå övning"
     },
     "message": "Meddelande",
-    "diagnosticsNote": "Ditt namn, e-post, konto-id, antal loggade set/pass, AI-kvot, aktuell plats och webbläsarinfo skickas med.",
+    "diagnosticsNote": "Ditt namn, e-post och konto-id skickas med.",
     "send": "Skicka",
     "sent": "Tack! Meddelandet är skickat.",
     "savedNotSent": "Meddelandet är sparat, men mejlet kunde inte skickas. Skicka inte igen.",

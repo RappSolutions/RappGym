@@ -113,7 +113,7 @@ export function AccountControls({
         }
       }}
     >
-      <DialogContent className="max-h-[90dvh] overflow-y-auto">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto" onOpenAutoFocus={(event) => event.preventDefault()}>
         <DialogHeader>
           <DialogTitle>{t("account.manage")}</DialogTitle>
           <DialogDescription>{t("account.identityNote")}</DialogDescription>
