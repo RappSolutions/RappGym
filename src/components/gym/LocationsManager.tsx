@@ -14,7 +14,14 @@ import {
   X,
   Globe,
   Lock,
+  MoreHorizontal,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -182,7 +189,8 @@ export function LocationsManager() {
         {t("locationsManager.whereYouTrainEveryLogged")}
       </p>
       {gyms
-        .filter((g) => !g.is_default && (isAdmin || g.user_id === owner))
+        .filter((g) => (g.is_default && isAdmin) || (!g.is_default && (isAdmin || g.user_id === owner)))
+        .sort((a, b) => Number(b.is_default) - Number(a.is_default))
         .map((g) =>
           editing === g.id ? (
             <div
@@ -218,54 +226,48 @@ export function LocationsManager() {
               <div className="flex items-center gap-3 p-3">
                 <MapPin className="h-5 w-5 shrink-0 text-primary" />
                 <div className="min-w-0 flex-1">
-                  <div className="font-semibold">{g.name}</div>
+                  <div className="flex min-w-0 items-center gap-2 font-semibold">
+                    <span className="truncate">{g.name}</span>
+                    {g.is_default && (
+                      <span className="shrink-0 rounded border px-1.5 text-xs font-normal text-muted-foreground">
+                        {t("aiUsageManager.default")}
+                      </span>
+                    )}
+                  </div>
                   {g.description && (
                     <div className="text-sm text-muted-foreground">{g.description}</div>
                   )}
                 </div>
-                {isAdmin && (
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => void togglePublic(g)}
-                    aria-pressed={g.is_public}
-                    title={
-                      g.is_public
-                        ? t("locationsManager.sharedWithAllUsers")
-                        : t("locationsManager.ownerAndAdminOnly")
-                    }
-                    aria-label={
-                      g.is_public
-                        ? t("locationsManager.sharedWithAllUsers")
-                        : t("locationsManager.ownerAndAdminOnly")
-                    }
-                  >
-                    {g.is_public ? (
-                      <Globe className="text-primary" />
-                    ) : (
-                      <Lock className="text-muted-foreground" />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="icon" variant="ghost" className="shrink-0" aria-label={t("common.edit")}>
+                      <MoreHorizontal />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onSelect={() => {
+                        setEditing(g.id);
+                        setDraft({ name: g.name, description: g.description });
+                      }}
+                    >
+                      <Pencil /> {t("common.edit")}
+                    </DropdownMenuItem>
+                    {isAdmin && !g.is_default && (
+                      <DropdownMenuItem onSelect={() => void togglePublic(g)}>
+                        {g.is_public ? <Globe /> : <Lock />}
+                        {g.is_public
+                          ? t("locationsManager.sharedWithAllUsers")
+                          : t("locationsManager.ownerAndAdminOnly")}
+                      </DropdownMenuItem>
                     )}
-                  </Button>
-                )}
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => {
-                    setEditing(g.id);
-                    setDraft({ name: g.name, description: g.description });
-                  }}
-                  aria-label={t("common.edit")}
-                >
-                  <Pencil />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => void remove(g)}
-                  aria-label={t("common.delete")}
-                >
-                  <Trash2 />
-                </Button>
+                    {!g.is_default && (
+                      <DropdownMenuItem onSelect={() => void remove(g)}>
+                        <Trash2 /> {t("common.delete")}
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
               {(() => {
                 const here = equipmentAt(links, g.id);
