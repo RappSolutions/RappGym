@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Rebuild admin user overview as a dense sortable desktop table and compact mobile cards, with direct read-only Inspect action, consolidated actions and current-month AI counts (Lean).
 - [x] Add 28 complementary EN/SV exercises with one two-view oblique instructional image each; all 28 FK links, unique codes, translations and anonymous signed image reads verified (Lean, no Playwright).
 - [x] Category/equipment grouping without search in spontaneous exercise selection and workout planning; 20 targeted tests pass (Lean, no browser verification).
 - [x] Confine shared masthead stripes to the right edge; restore exercise-bank subtitle and add public Exercises subtitle.

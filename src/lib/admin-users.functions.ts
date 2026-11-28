@@ -14,6 +14,7 @@ export type AdminUser = {
   isAdmin: boolean;
   sets: number;
   workouts: number;
+  aiRequestsThisMonth: number;
   consentVersion: number;
   paidUntil: string | null;
   membership: { startsOn: string; endsOn: string; reference: string | null; note: string | null } | null;
@@ -63,6 +64,18 @@ export const listUsers = createServerFn({ method: "POST" })
       }
       if (r.data.length < 1000) break;
     }
+    const aiCounts = new Map<string, number>();
+    const monthStart = `${new Date().toISOString().slice(0, 7)}-01T00:00:00.000Z`;
+    for (let from = 0; ; from += 1000) {
+      const r = await supabaseAdmin
+        .from("training_ai_history")
+        .select("user_id")
+        .gte("generated_at", monthStart)
+        .range(from, from + 999);
+      if (r.error) throw new Error(r.error.message);
+      for (const row of r.data) aiCounts.set(row.user_id, (aiCounts.get(row.user_id) ?? 0) + 1);
+      if (r.data.length < 1000) break;
+    }
     const { data: roles } = await supabaseAdmin
       .from("user_roles")
       .select("user_id, role")
@@ -79,6 +92,7 @@ export const listUsers = createServerFn({ method: "POST" })
       isAdmin: admins.has(u.id),
       sets: counts.get(u.id)?.sets ?? 0,
       workouts: counts.get(u.id)?.workouts.size ?? 0,
+      aiRequestsThisMonth: aiCounts.get(u.id) ?? 0,
       consentVersion: Math.max(
         0,
         ...(consents.data ?? []).filter((c) => c.user_id === u.id).map((c) => c.terms_version),
