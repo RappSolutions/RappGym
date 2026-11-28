@@ -196,12 +196,6 @@ export function UsersManager() {
     const disabled = saving || viewBusy !== null || actionBusy !== null;
     return (
       <div className="flex shrink-0 items-center justify-end gap-1">
-        {!self && !u.isAdmin && (
-          <Button size="sm" variant="outline" disabled={disabled} aria-label={`${t("userView.viewAs")} ${who}`} onClick={() => void inspect(u.id)}>
-            <Eye className="size-4" />
-            {t("userView.viewAs")}
-          </Button>
-        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size="icon" variant="ghost" className="size-8" disabled={disabled} aria-label={t("usersManager.moreActions", { who })}>
@@ -215,6 +209,11 @@ export function UsersManager() {
               <code className="block break-all text-[10px] font-normal text-muted-foreground">{u.id}</code>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            {!self && !u.isAdmin && (
+              <DropdownMenuItem onSelect={() => void inspect(u.id)}>
+                <Eye />{t("userView.viewAs")}
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onSelect={() => openMembership(u)}>
               <HeartHandshake />{t("account.grantSupporter")}
             </DropdownMenuItem>
@@ -333,9 +332,12 @@ export function UsersManager() {
           const secondary = [u.name ? u.email : "", u.provider].filter(Boolean).join(" · ");
           return (
             <li key={u.id} className={`space-y-2 py-3 ${u.disabled ? "text-muted-foreground" : ""}`}>
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-1.5 font-medium"><span className="break-words">{who}</span>{badges(u)}</div>
-                <div className="break-words text-xs text-muted-foreground">{secondary}</div>
+              <div className="flex items-start gap-2">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-1.5 font-medium"><span className="break-words">{who}</span>{badges(u)}</div>
+                  <div className="break-words text-xs text-muted-foreground">{secondary}</div>
+                </div>
+                {actions(u)}
               </div>
               <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
                 <div><dt className="inline text-muted-foreground">{t("usersManager.lastSignIn")}: </dt><dd className="inline">{dateOnly(u.lastSignIn)}</dd></div>
@@ -344,7 +346,6 @@ export function UsersManager() {
                 <div><dt className="inline text-muted-foreground">{t("usersManager.aiThisMonth")}: </dt><dd className="inline tabular-nums">{u.aiRequestsThisMonth}</dd></div>
                 <div className="col-span-2"><dt className="inline text-muted-foreground">{t("usersManager.membership")}: </dt><dd className="inline">{paid(u) ? t("account.supporterUntil", { date: u.paidUntil }) : t("account.free")} · {t("account.consentVersion", { version: u.consentVersion })}</dd></div>
               </dl>
-              {actions(u)}
             </li>
           );
         })}
